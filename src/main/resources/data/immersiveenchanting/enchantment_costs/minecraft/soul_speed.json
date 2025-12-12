@@ -1,0 +1,16 @@
+{
+  "levels": {
+    "1": {
+      "item": "minecraft:mangrove_roots",
+      "amount": 1
+    },
+    "2": {
+      "item": "minecraft:crimson_roots",
+      "amount": 1
+    },
+    "3": {
+      "item": "minecraft:soul_soil",
+      "amount": 1
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "block.immersiveenchanting.creative_bookshelf": "Creative Bookshelf",
+  "item.immersiveenchanting.ancient_book": "Ancient Book",
+  "lore.immersiveenchanting.ancient_book": "Knowledge of",
+  "itemGroup.immersiveenchanting.enchanting": "Enchanting",
+
+  "immersiveenchanting.config.enable_mending": "Enable Mending",
+  "immersiveenchanting.configuration.general": "Settings",
+
+  "gui.immersiveenchanting.cost": "Cost: ",
+  "gui.immersiveenchanting.equipped": "Equipped.",
+  "gui.immersiveenchanting.locked_enchantment": "???",
+  "gui.immersiveenchanting.locked_enchantment_hint": "Unknown"
+}
