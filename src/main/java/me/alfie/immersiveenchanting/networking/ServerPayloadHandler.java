@@ -69,7 +69,8 @@ public class ServerPayloadHandler {
         ItemStack requiredLapisCost = EnchantmentCostRegistry.getServerRegistry().getLapisCost();
         ItemStack lapisSlotStack = enchantingTableMenu.getSlot(EnchantingTableMenu.SLOTS.LAPIS.ordinal()).getItem();
 
-        boolean hasEnoughCost = (requiredLapisCost.isEmpty() ||
+        boolean hasEnoughCost = player.hasInfiniteMaterials() ||
+                (requiredLapisCost.isEmpty() ||
                 (lapisSlotStack.is(requiredLapisCost.getItem()) && lapisSlotStack.getCount() >= requiredLapisCost.getCount()))
                 && (requiredItemCostStack.isEmpty() ||
                 (costSlotItemStack.is(requiredItemCostStack.getItem()) &&
@@ -77,10 +78,12 @@ public class ServerPayloadHandler {
 
 
         if (hasEnoughCost) {
-            enchantingTableMenu.getSlot(EnchantingTableMenu.SLOTS.LAPIS.ordinal()).getItem()
-                    .shrink(requiredLapisCost.getCount()); //Use enchantmnet cost registry
-            if(!requiredItemCostStack.isEmpty()) {
-                costSlotItemStack.shrink(requiredItemCostStack.getCount()); //Use enchantment cost if not air
+            if (!player.hasInfiniteMaterials()) {
+                enchantingTableMenu.getSlot(EnchantingTableMenu.SLOTS.LAPIS.ordinal()).getItem()
+                        .shrink(requiredLapisCost.getCount()); //Use enchantmnet cost registry
+                if (!requiredItemCostStack.isEmpty()) {
+                    costSlotItemStack.shrink(requiredItemCostStack.getCount()); //Use enchantment cost if not air
+                }
             }
 
             //Enchant item server side
