@@ -1,0 +1,11 @@
+# Gradle
+build/
+.gradle/
+
+# Idea
+.idea/
+
+# Run
+run/
+run-data/
+log.txt

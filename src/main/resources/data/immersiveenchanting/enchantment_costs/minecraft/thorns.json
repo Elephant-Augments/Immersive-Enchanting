@@ -1,0 +1,16 @@
+{
+  "levels": {
+    "1": {
+      "item": "minecraft:sweet_berries",
+      "amount": 1
+    },
+    "2": {
+      "item": "minecraft:cactus",
+      "amount": 1
+    },
+    "3": {
+      "item": "minecraft:amethyst_shard",
+      "amount": 1
+    }
+  }
+}

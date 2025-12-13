@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "immersiveenchanting:block/creative_bookshelf_top",
+    "side": "immersiveenchanting:block/creative_bookshelf_side"
+  }
+}

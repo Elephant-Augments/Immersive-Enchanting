@@ -1,0 +1,12 @@
+{
+  "levels": {
+    "1": {
+      "item": "minecraft:piston",
+      "amount": 1
+    },
+    "2": {
+      "item": "minecraft:wind_charge",
+      "amount": 1
+    }
+  }
+}

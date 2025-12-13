@@ -1,0 +1,16 @@
+{
+  "levels": {
+    "1": {
+      "item": "minecraft:cake",
+      "amount": 1
+    },
+    "2": {
+      "item": "minecraft:slime_ball",
+      "amount": 1
+    },
+    "3": {
+      "item": "minecraft:pufferfish_bucket",
+      "amount": 1
+    }
+  }
+}
