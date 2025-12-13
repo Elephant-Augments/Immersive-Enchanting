@@ -2,10 +2,14 @@ package me.alfie.immersiveenchanting.networking.packets;
 
 import io.netty.buffer.ByteBuf;
 import me.alfie.immersiveenchanting.networking.ClientPayloadHandler;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.DirectionalPayloadHandler;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
@@ -13,11 +17,11 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import java.util.ArrayList;
 import java.util.List;
 
-public record UnlockedEnchantmentsPacket(List<String> enchantments) implements CustomPacketPayload {
+public record UnlockedEnchantmentsPacket(List<ResourceKey<Enchantment>> enchantments) implements CustomPacketPayload {
     public static final Type<UnlockedEnchantmentsPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath("immersiveenchanting", "unlockedenchantmentpacket"));
 
-    public static final StreamCodec<ByteBuf, UnlockedEnchantmentsPacket> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.collection(ArrayList::new, ByteBufCodecs.STRING_UTF8),
+    public static final StreamCodec<RegistryFriendlyByteBuf, UnlockedEnchantmentsPacket> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.collection(ArrayList::new, ResourceKey.streamCodec(Registries.ENCHANTMENT)),
             UnlockedEnchantmentsPacket::enchantments,
             UnlockedEnchantmentsPacket::new
     );

@@ -1,7 +1,8 @@
 package me.alfie.immersiveenchanting.datapack;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,27 +30,27 @@ public class EnchantmentCostRegistry {
     }
 
     // Maps the enchantment ResourceLocation (e.g., minecraft:efficiency) to its cost data
-    private final Map<ResourceLocation, EnchantmentCost> COST_REGISTRY = new HashMap<>();
+    private final Map<ResourceKey<Enchantment>, EnchantmentCost> COST_REGISTRY = new HashMap<>();
     private ItemStack lapisCost;
     public static final EnchantmentCost EMPTY = new EnchantmentCost();
 
     /**
      * Helper method to get enchantment cost from COST_REGISTRY from its resource location.
-     * @param enchantmentNamespace
+     * @param enchantment
      * @return
      */
-    public EnchantmentCost getEnchantmentCost(ResourceLocation enchantmentNamespace) {
-        return this.COST_REGISTRY.getOrDefault(enchantmentNamespace, EMPTY);
+    public EnchantmentCost getEnchantmentCost(ResourceKey<Enchantment> enchantment) {
+        return this.COST_REGISTRY.getOrDefault(enchantment, EMPTY);
     }
 
     /**
      * Helper method to get a specific level cost for an enchantment using its resource location.
-     * @param enchantmentId
+     * @param enchantment
      * @param level
      * @return
      */
-    public LevelCost getLevelCost(ResourceLocation enchantmentId, int level) {
-        EnchantmentCost data = this.COST_REGISTRY.get(enchantmentId);
+    public LevelCost getLevelCost(ResourceKey<Enchantment> enchantment, int level) {
+        EnchantmentCost data = this.COST_REGISTRY.get(enchantment);
         if (data == null) return null;
         return data.getLevel(level);
     }
@@ -76,7 +77,7 @@ public class EnchantmentCostRegistry {
      * Returns the cost registry map <ResourceLocation, EnchantmentCost>
      * @return
      */
-    public Map<ResourceLocation, EnchantmentCost> getCostRegistry() {
+    public Map<ResourceKey<Enchantment>, EnchantmentCost> getCostRegistry() {
         return this.COST_REGISTRY;
     }
 

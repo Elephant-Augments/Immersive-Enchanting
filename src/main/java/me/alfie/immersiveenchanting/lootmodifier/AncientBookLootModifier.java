@@ -86,9 +86,9 @@ public class AncientBookLootModifier extends LootModifier {
 
                             //BUG-FIX! Cannot access getClientRegistry() here, as this method runs server-side.
                             //Use getServerRegistry()
-                            if(EnchantmentCostRegistry.getServerRegistry().getCostRegistry().containsKey(enchantment.key().location())) {
+                            if(EnchantmentCostRegistry.getServerRegistry().getCostRegistry().containsKey(enchantment.key())) {
                                 if(EnchantmentCostRegistry.getServerRegistry().getCostRegistry()
-                                        .get(enchantment.key().location())
+                                        .get(enchantment.key())
                                         .getLevel(-1).item().equals(LevelCost.DO_NOT_INCLUDE)) {
                                     return false;
                                 }

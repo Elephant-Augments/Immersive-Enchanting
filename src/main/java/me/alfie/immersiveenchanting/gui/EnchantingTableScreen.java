@@ -11,6 +11,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.EnchantmentTags;
@@ -281,8 +282,8 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
                     guiGraphics.pose().translate(0, 0, 400);
 
                     if (renderCostStack == null) {
-                        renderCostStack = EnchantmentCostRegistry.getClientRegistry().getEnchantmentCost(
-                                ImmersiveEnchanting.getEnchantmentHolderRL(node.getEnchantmentHolder()))
+                        renderCostStack = EnchantmentCostRegistry.getClientRegistry()
+                                .getEnchantmentCost(node.getEnchantmentHolder().getKey())
                                 .getLevel(node.getEnchantmentLevel())
                                 .asItemStack();
                     }
@@ -382,13 +383,12 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
                 continue;
             }
 
-            String enchantmentResourceId = enchantmentHolder.getRegisteredName();
-            ResourceLocation enchantmentResourceLocation = ResourceLocation.tryParse(enchantmentResourceId);
+            ResourceKey<Enchantment> enchantmentKey = enchantmentHolder.getKey();
 
             //If enchantment has DO_NOT_INCLUDE tag. (Empty json)
-            if(EnchantmentCostRegistry.getClientRegistry().getCostRegistry().containsKey(enchantmentResourceLocation)) {
+            if(EnchantmentCostRegistry.getClientRegistry().getCostRegistry().containsKey(enchantmentKey)) {
                 if(EnchantmentCostRegistry.getClientRegistry().getCostRegistry()
-                        .get(enchantmentResourceLocation)
+                        .get(enchantmentKey)
                         .getLevel(-1).item().equals(LevelCost.DO_NOT_INCLUDE)) {
                     continue;
                 }
@@ -585,7 +585,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
             //Server uses RESOURCE_KEY_MAP.get() to find the corresponding ResourceKey
             //Server enchants tool, client side cannot do it.
             PacketDistributor.sendToServer(new EnchantItemPacket(
-                    node.getEnchantmentHolder().getRegisteredName(),
+                    node.getEnchantmentHolder().getKey(),
                     node.getEnchantmentLevel())
             );
         }
