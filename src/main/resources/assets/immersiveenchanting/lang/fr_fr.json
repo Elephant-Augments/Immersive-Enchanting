@@ -2,6 +2,7 @@
   "block.immersiveenchanting.creative_bookshelf": "Bibliothèque créatif",
   "item.immersiveenchanting.ancient_book": "Livre ancien",
   "lore.immersiveenchanting.ancient_book": "Connaissance de",
+  "lore.immersiveenchanting.added_by": "Ajouté par",
   "itemGroup.immersiveenchanting.enchanting": "Enchanter",
 
   "gui.immersiveenchanting.cost": "Coût: ",
