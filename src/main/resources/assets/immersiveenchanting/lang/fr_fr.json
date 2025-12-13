@@ -5,6 +5,7 @@
   "itemGroup.immersiveenchanting.enchanting": "Enchanter",
 
   "gui.immersiveenchanting.cost": "Coût: ",
+  "gui.immersiveenchanting.cost_free": "Gratuit.",
   "gui.immersiveenchanting.equipped": "Équipé.",
   "gui.immersiveenchanting.locked_enchantment": "???",
   "gui.immersiveenchanting.locked_enchantment_hint": "Inconnu"
