@@ -10,14 +10,17 @@ import me.alfie.immersiveenchanting.networking.packets.EnchantItemPacket;
 import me.alfie.immersiveenchanting.networking.packets.GetBookshelfContentsPacket;
 import me.alfie.immersiveenchanting.networking.packets.UnlockedEnchantmentsPacket;
 import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.stats.Stats;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
@@ -53,32 +56,35 @@ public class ServerPayloadHandler {
         RegistryAccess registryAccess = player.level().registryAccess();
         Optional<Holder.Reference<Enchantment>> enchantmentHolder = ImmersiveEnchanting.getEnchantmentHolder(
                 registryAccess,
-                packet.enchantmentResourceId
+                packet.enchantment
         );
 
         Holder<Enchantment> enchantment = enchantmentHolder.orElseThrow(() ->
-                new IllegalStateException("Enchantment not found: " + packet.enchantmentResourceId)
+                new IllegalStateException("Enchantment not found: " + packet.enchantment)
         );
 
         //Check enchantment cost
         ItemStack costSlotItemStack = enchantingTableMenu.getSlot(EnchantingTableMenu.SLOTS.COST.ordinal()).getItem();
-        ItemStack requiredItemCostStack = EnchantmentCostRegistry.getServerRegistry().getEnchantmentCost(ResourceLocation.parse(packet.enchantmentResourceId)).getLevel(packet.enchantmentLevel).asItemStack();
+        ItemStack requiredItemCostStack = EnchantmentCostRegistry.getServerRegistry().getEnchantmentCost(packet.enchantment).getLevel(packet.enchantmentLevel).asItemStack();
 
         ItemStack requiredLapisCost = EnchantmentCostRegistry.getServerRegistry().getLapisCost();
         ItemStack lapisSlotStack = enchantingTableMenu.getSlot(EnchantingTableMenu.SLOTS.LAPIS.ordinal()).getItem();
 
-        boolean hasEnoughCost = (requiredLapisCost.isEmpty() ||
-                (lapisSlotStack.is(requiredLapisCost.getItem()) && lapisSlotStack.getCount() >= requiredLapisCost.getCount()))
-                && (requiredItemCostStack.isEmpty() ||
-                (costSlotItemStack.is(requiredItemCostStack.getItem()) &&
-                        costSlotItemStack.getCount() >= requiredItemCostStack.getCount()));
+        boolean hasEnoughCost = player.isCreative() ||
+                (requiredLapisCost.isEmpty() ||
+                        (lapisSlotStack.is(requiredLapisCost.getItem()) && lapisSlotStack.getCount() >= requiredLapisCost.getCount()))
+                        && (requiredItemCostStack.isEmpty() ||
+                        (costSlotItemStack.is(requiredItemCostStack.getItem()) &&
+                                costSlotItemStack.getCount() >= requiredItemCostStack.getCount()));
 
 
         if (hasEnoughCost) {
-            enchantingTableMenu.getSlot(EnchantingTableMenu.SLOTS.LAPIS.ordinal()).getItem()
-                    .shrink(requiredLapisCost.getCount()); //Use enchantmnet cost registry
-            if(!requiredItemCostStack.isEmpty()) {
-                costSlotItemStack.shrink(requiredItemCostStack.getCount()); //Use enchantment cost if not air
+            if (!player.isCreative()) {
+                enchantingTableMenu.getSlot(EnchantingTableMenu.SLOTS.LAPIS.ordinal()).getItem()
+                        .shrink(requiredLapisCost.getCount()); //Use enchantmnet cost registry
+                if (!requiredItemCostStack.isEmpty()) {
+                    costSlotItemStack.shrink(requiredItemCostStack.getCount()); //Use enchantment cost if not air
+                }
             }
 
             //Enchant item server side
@@ -89,9 +95,14 @@ public class ServerPayloadHandler {
             enchantments.put(enchantment.get(), packet.enchantmentLevel); //Add new one
             EnchantmentHelper.setEnchantments(enchantments, itemToEnchant);
 
-            tryGrantEnchantItemAdvancement(context);
+            player.awardStat(Stats.ENCHANT_ITEM);
+            if (player instanceof ServerPlayer serverPlayer) {
+                // Number is levels spent - using 1 to as a compatible default value
+                // (Adjust if optional enchantment cost extensions in the future may include xp cost)
+                CriteriaTriggers.ENCHANTED_ITEM.trigger(serverPlayer, itemToEnchant, 1);
+            }
 
-            if (packet.enchantmentLevel == EnchantmentCostRegistry.getServerRegistry().getEnchantmentCost(ResourceLocation.parse(packet.enchantmentResourceId)).getHighestLevel()) {
+            if (packet.enchantmentLevel == EnchantmentCostRegistry.getServerRegistry().getEnchantmentCost(packet.enchantment).getHighestLevel()) {
                 //Sound FX for highest tier.
                 level.playSound(null, player.blockPosition(), SoundEvents.BEACON_POWER_SELECT,
                         SoundSource.BLOCKS, 1.0F, 1.0F);
@@ -118,9 +129,9 @@ public class ServerPayloadHandler {
      * @return
      */
     @Nullable
-    public static String getAncientBookResourceId(ItemStack book) {
+    public static ResourceKey<Enchantment> getAncientBookResourceKey(ItemStack book) {
         try {
-            return AncientBookNBT.getEnchantment(book).toString();
+            return AncientBookNBT.getEnchantment(book);
         } catch (Exception e) {
             return null;
         }
@@ -136,14 +147,18 @@ public class ServerPayloadHandler {
         List<BlockEntity> bookshelves = getChiseledBookshelvesNearby(tablePos, level);
 
         //Store resource locations as strings - i.e "minecraft:respiration"
-        List<String> unlockedEnchantmentResourceIds = new ArrayList<>();
+        List<ResourceKey<Enchantment>> unlockedEnchantments = new ArrayList<>();
         for (BlockEntity bookshelf : bookshelves) {
             List<ItemStack> books = getChiseledBookshelfContents(bookshelf);
 
             //Get books in bookshelf
             for (ItemStack book : books) {
                 if (book.getItem() == ModItems.ANCIENT_BOOK.get()) {
-                    unlockedEnchantmentResourceIds.add(getAncientBookResourceId(book));
+                    ResourceKey<Enchantment> key = getAncientBookResourceKey(book);
+
+                    if (key != null) {
+                        unlockedEnchantments.add(key);
+                    }
                 }
             }
         }
@@ -151,7 +166,7 @@ public class ServerPayloadHandler {
         //Unlock all enchantments if creative bookshelf is near
         if(isCreativeBookshelfNearby(tablePos, level)) {
             //Clear unlockedEnchantments from the bookshelf search
-            unlockedEnchantmentResourceIds.clear();
+            unlockedEnchantments.clear();
 
             //Add all enchantments that exist
             RegistryAccess registryAccess = level.registryAccess();
@@ -159,14 +174,14 @@ public class ServerPayloadHandler {
             List<Holder.Reference<Enchantment>> allEnchantments = enchantmentRegistry.asLookup().listElements().toList();
 
             // Convert each Holder to its ResourceLocation string
-            unlockedEnchantmentResourceIds = allEnchantments.stream()
-                    .map(holder -> holder.key().location().toString()) // returns "namespace:name"
+            unlockedEnchantments = allEnchantments.stream()
+                    .map(Holder.Reference::key)
                     .toList();
         }
 
         ModPacketHandler.INSTANCE.send(
                 PacketDistributor.PLAYER.with(() -> serverPlayer),
-                new UnlockedEnchantmentsPacket(unlockedEnchantmentResourceIds)
+                new UnlockedEnchantmentsPacket(unlockedEnchantments)
         );
     }
 
@@ -238,20 +253,6 @@ public class ServerPayloadHandler {
             }
         }
         return false;
-    }
-
-    /**
-     * Try to grant the enchant item advancement.
-     */
-    private static void tryGrantEnchantItemAdvancement(NetworkEvent.Context context) {
-        Advancement advancement = context.getSender().getServer().getAdvancements().getAdvancement(
-                ResourceLocation.fromNamespaceAndPath(
-                        "minecraft", "story/enchant_item"
-                ));
-
-        context.getSender().getServer().getPlayerList()
-                .getPlayerAdvancements((ServerPlayer) context.getSender())
-                .award(advancement, "enchanted_item");
     }
 }
 

@@ -8,6 +8,7 @@ import me.alfie.immersiveenchanting.networking.packets.UnlockedEnchantmentsPacke
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.Holder;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -49,12 +50,12 @@ public class ClientPayloadHandler {
      * @param context
      */
     public static void onUnlockedEnchantments(final UnlockedEnchantmentsPacket packet, final NetworkEvent.Context context) {
-        Set<String> unlockedEnchantmentResourceIds = new HashSet<>(packet.enchantments);
+        Set<ResourceKey<Enchantment>> unlockedEnchantmentResourceIds = new HashSet<>(packet.enchantments);
         LocalPlayer player = Minecraft.getInstance().player;
 
         Set<Holder<Enchantment>> unlockedEnchantments = new HashSet<>();
-        for (String resourceId : unlockedEnchantmentResourceIds) {
-            ImmersiveEnchanting.getEnchantmentHolder(player.level().registryAccess(), resourceId)
+        for (ResourceKey<Enchantment> enchantmentKey : unlockedEnchantmentResourceIds) {
+            ImmersiveEnchanting.getEnchantmentHolder(player.level().registryAccess(), enchantmentKey)
                     .ifPresent(unlockedEnchantments::add);
         }
 

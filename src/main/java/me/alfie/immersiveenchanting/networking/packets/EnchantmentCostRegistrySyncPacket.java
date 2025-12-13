@@ -7,9 +7,12 @@ import me.alfie.immersiveenchanting.datapack.LevelCost;
 import me.alfie.immersiveenchanting.networking.ClientPayloadHandler;
 import me.alfie.immersiveenchanting.networking.ModPacketHandler;
 import me.alfie.immersiveenchanting.networking.SerializedEnchantmentCostRegistry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.PacketDistributor;
 
@@ -43,19 +46,19 @@ public class EnchantmentCostRegistrySyncPacket {
     }
 
     public static void encode(EnchantmentCostRegistrySyncPacket packet, FriendlyByteBuf buf) {
-        buf.writeCollection(packet.enchantmentNamespaces, (b, str) -> b.writeUtf(str));
-        buf.writeCollection(packet.levels, (b, str) -> b.writeUtf(str));
-        buf.writeCollection(packet.itemIds, (b, str) -> b.writeUtf(str));
-        buf.writeCollection(packet.amounts, (b, integer) -> b.writeInt(integer));
+        buf.writeCollection(packet.enchantmentNamespaces, FriendlyByteBuf::writeUtf);
+        buf.writeCollection(packet.levels, FriendlyByteBuf::writeUtf);
+        buf.writeCollection(packet.itemIds, FriendlyByteBuf::writeUtf);
+        buf.writeCollection(packet.amounts, FriendlyByteBuf::writeInt);
         buf.writeUtf(packet.lapisCostItemId);
         buf.writeInt(packet.lapisCostAmount);
     }
 
     public static EnchantmentCostRegistrySyncPacket decode(FriendlyByteBuf buf) {
-        List<String> enchantmentNamespaces = buf.readList(b -> b.readUtf());
-        List<String> levels = buf.readList(b -> b.readUtf());
-        List<String> itemIds = buf.readList(b -> b.readUtf());
-        List<Integer> amounts = buf.readList(b -> b.readInt());
+        List<String> enchantmentNamespaces = buf.readList(FriendlyByteBuf::readUtf);
+        List<String> levels = buf.readList(FriendlyByteBuf::readUtf);
+        List<String> itemIds = buf.readList(FriendlyByteBuf::readUtf);
+        List<Integer> amounts = buf.readList(FriendlyByteBuf::readInt);
         String lapisCostItemId = buf.readUtf();
         int lapisCostAmount = buf.readInt();
         return new EnchantmentCostRegistrySyncPacket(
@@ -94,8 +97,8 @@ public class EnchantmentCostRegistrySyncPacket {
         List<Integer> amounts = new ArrayList<>();
 
         //For each entry in the EnchantmentCostRegistry
-        for(Map.Entry<ResourceLocation, EnchantmentCost> registryEntry : costRegistry.getCostRegistry().entrySet()) {
-            ResourceLocation enchantmentResourceLocation = registryEntry.getKey();
+        for(Map.Entry<ResourceKey<Enchantment>, EnchantmentCost> registryEntry : costRegistry.getCostRegistry().entrySet()) {
+            ResourceKey<Enchantment> enchantmentKey = registryEntry.getKey();
             EnchantmentCost cost = registryEntry.getValue();
 
             //For each entry in the EnchantmentCost
@@ -106,7 +109,7 @@ public class EnchantmentCostRegistrySyncPacket {
                 int amount = levelCost.amount();
 
                 //Add data to form parallel lists
-                enchantmentNamespaces.add(enchantmentResourceLocation.toString());
+                enchantmentNamespaces.add(enchantmentKey.location().toString());
                 levels.add(level);
                 itemNamespaces.add(itemNamespace);
                 amounts.add(amount);
@@ -138,7 +141,9 @@ public class EnchantmentCostRegistrySyncPacket {
             LevelCost levelCost = new LevelCost(item, amount);
             //Build EnchantmentCost
             //Only create a new enchantment cost instance if it doesn't exist yet
-            EnchantmentCost enchantmentCost = enchantmentCostRegistry.getCostRegistry().computeIfAbsent(enchantmentResourceLocation, k -> new EnchantmentCost());
+
+            EnchantmentCost enchantmentCost = enchantmentCostRegistry.getCostRegistry()
+                    .computeIfAbsent(ResourceKey.create(Registries.ENCHANTMENT, enchantmentResourceLocation), k -> new EnchantmentCost());
             enchantmentCost.levels.put(level, levelCost);
         }
 

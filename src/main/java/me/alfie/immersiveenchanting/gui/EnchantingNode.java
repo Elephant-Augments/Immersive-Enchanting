@@ -33,11 +33,7 @@ public class EnchantingNode {
         this.isBranchUnlocked = isBranchUnlocked;
         this.enchantmentLevel = enchantmentLevel;
         this.enchantmentHolder = enchantmentHolder;
-
-        ResourceLocation enchantmentRL = ImmersiveEnchanting.getEnchantmentHolderRL(enchantmentHolder);
-
-        ResourceKey<Enchantment> key = ResourceKey.create(Registries.ENCHANTMENT, enchantmentRL);
-        this.enchantment = key;
+        this.enchantment = enchantmentHolder.unwrapKey().get();
 
         if (isBranchUnlocked) {
             this.node_type = node_type;

@@ -83,7 +83,7 @@ public class AncientBookLootModifier extends LootModifier {
                             //If enchantment has DO_NOT_INCLUDE tag. (Empty json)
                             if(EnchantmentCostRegistry.getServerRegistry().getCostRegistry().containsKey(enchantment.key().location())) {
                                 if(EnchantmentCostRegistry.getServerRegistry().getCostRegistry()
-                                        .get(enchantment.key().location())
+                                        .get(enchantment.key())
                                         .getLevel(-1).item().equals(LevelCost.DO_NOT_INCLUDE)) {
                                     return false;
                                 }

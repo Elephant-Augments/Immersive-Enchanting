@@ -39,7 +39,7 @@ public class AncientBook extends Item {
         super.appendHoverText(stack, level, tooltipComponents, tooltipFlag);
 
         //Get data component for this item stack.
-        ResourceLocation enchantmentRL = AncientBookNBT.getEnchantment(stack);
+        ResourceLocation enchantmentRL = AncientBookNBT.getEnchantment(stack).location();
         if (enchantmentRL != null) {
             //Get the enchantment from the registry.
             RegistryAccess registryAccess;

@@ -6,9 +6,12 @@ import com.google.gson.JsonObject;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.networking.packets.EnchantmentCostRegistrySyncPacket;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -75,7 +78,8 @@ public class EnchantmentCostDatapackHandler extends SimpleJsonResourceReloadList
             }
 
             // Put enchantment cost into registry
-            EnchantmentCostRegistry.getServerRegistry().getCostRegistry().put(enchantmentResourceLocation, enchantmentCost);
+            EnchantmentCostRegistry.getServerRegistry().getCostRegistry()
+                    .put(ResourceKey.create(Registries.ENCHANTMENT, enchantmentResourceLocation), enchantmentCost);
 
             recipeCount++;
         }
