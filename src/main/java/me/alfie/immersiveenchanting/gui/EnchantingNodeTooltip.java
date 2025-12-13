@@ -128,7 +128,7 @@ public class EnchantingNodeTooltip {
         if(!node.isObtained() && costStack != null) {
             graphics.drawString(font, label, costBoxX + padding, costBoxLabelY + padding / 2, 0x55FF55);
             if (costStack.is(Items.AIR) || costStack.isEmpty()) {
-                graphics.drawString(font, "Free", costBoxX + costBoxLabelX + padding, costBoxLabelY + padding / 2, 0x55FF55); // optional green color
+                graphics.drawString(font, Component.translatable("gui.immersiveenchanting.cost_free"), costBoxX + costBoxLabelX + padding, costBoxLabelY + padding / 2, 0x55FF55); // optional green color
             } else {
                 graphics.renderItem(costStack, costBoxX + costBoxLabelX + padding, costBoxLabelY);
                 graphics.renderItemDecorations(font, costStack, costBoxX + costBoxLabelX + padding, costBoxLabelY);
