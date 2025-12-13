@@ -7,14 +7,5 @@ assignees: ''
 
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
-
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
-
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
-
-**Additional context**
-Add any other context or screenshots about the feature request here.
+**Tell us what you'd like to see added**
+Please ensure your suggestion is in-line with the design goals of this mod. For example, XP costs will not be added, as this goes against one of the core principles of the mod.
