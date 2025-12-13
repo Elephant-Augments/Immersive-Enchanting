@@ -69,12 +69,10 @@ public class AncientBook extends Item {
 
             if (modInfo != null) {
                 String modName = modInfo.getDisplayName();
-                Component addedBy = Component.literal("Added by " + modName)
-                        .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
+                Component addedBy = Component.translatable("lore.immersiveenchanting.added_by").append(" " + modName).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
                 tooltipComponents.add(addedBy);
             } else {
-                Component addedBy = Component.literal("Added by " + modNamespace)
-                        .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
+                Component addedBy = Component.translatable("lore.immersiveenchanting.added_by").append(" " + modNamespace).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
                 tooltipComponents.add(addedBy);
             }
         }
