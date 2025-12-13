@@ -6,6 +6,7 @@ import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
 import me.alfie.immersiveenchanting.networking.packets.EnchantmentCostRegistrySyncPacket;
 import me.alfie.immersiveenchanting.networking.packets.UnlockedEnchantmentsPacket;
 import net.minecraft.core.Holder;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
@@ -48,11 +49,11 @@ public class ClientPayloadHandler {
      * @param context
      */
     public static void onUnlockedEnchantments(final UnlockedEnchantmentsPacket packet, final IPayloadContext context) {
-        Set<String> unlockedEnchantmentResourceIds = new HashSet<>(packet.enchantments());
+        Set<ResourceKey<Enchantment>> unlockedEnchantmentResourceIds = new HashSet<>(packet.enchantments());
 
         Set<Holder<Enchantment>> unlockedEnchantments = new HashSet<>();
-        for (String resourceId : unlockedEnchantmentResourceIds) {
-            ImmersiveEnchanting.getEnchantmentHolder(context.player().registryAccess(), resourceId)
+        for (ResourceKey<Enchantment> enchantmentKey : unlockedEnchantmentResourceIds) {
+            ImmersiveEnchanting.getEnchantmentHolder(context.player().registryAccess(), enchantmentKey)
                     .ifPresent(unlockedEnchantments::add);
         }
 

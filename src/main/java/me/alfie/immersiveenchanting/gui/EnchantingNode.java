@@ -1,10 +1,8 @@
 package me.alfie.immersiveenchanting.gui;
 
-import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.enums.EnchantingNodeType;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.Holder;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -33,11 +31,7 @@ public class EnchantingNode {
         this.isBranchUnlocked = isBranchUnlocked;
         this.enchantmentLevel = enchantmentLevel;
         this.enchantmentHolder = enchantmentHolder;
-
-        ResourceLocation enchantmentRL = ImmersiveEnchanting.getEnchantmentHolderRL(enchantmentHolder);
-
-        ResourceKey<Enchantment> key = ResourceKey.create(Registries.ENCHANTMENT, enchantmentRL);
-        this.enchantment = key;
+        this.enchantment = enchantmentHolder.getKey();
 
         if (isBranchUnlocked) {
             this.node_type = node_type;

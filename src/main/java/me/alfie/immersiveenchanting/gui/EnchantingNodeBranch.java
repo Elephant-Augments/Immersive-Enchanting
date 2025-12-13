@@ -10,6 +10,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -54,7 +55,9 @@ public class EnchantingNodeBranch {
         //Using default texture for now
         ResourceLocation icon_texture = ResourceLocation.fromNamespaceAndPath("immersiveenchanting", "textures/item/ancient_book.png");
 
-        ResourceLocation enchantmentRL = ImmersiveEnchanting.getEnchantmentHolderRL(enchantmentHolder);
+        ResourceKey<Enchantment> enchantmentKey = enchantmentHolder.getKey();
+        //noinspection DataFlowIssue -> Holder.Reference, meaning key is present
+        ResourceLocation enchantmentRL = enchantmentKey.location();
 
         //Try to get an icon
         if (EnchantmentMetadataRegistry.getIcons().containsKey(enchantmentRL)) {
@@ -64,12 +67,12 @@ public class EnchantingNodeBranch {
 
         //Get the max level, if 10 levels are in the config, then player can get level 10 enchantments.
         int maxEnchantmentLevel;
-        if(EnchantmentCostRegistry.getClientRegistry().getCostRegistry().containsKey(enchantmentRL)) {
-            maxEnchantmentLevel = EnchantmentCostRegistry.getClientRegistry().getEnchantmentCost(enchantmentRL).getHighestLevel();
+        if(EnchantmentCostRegistry.getClientRegistry().getCostRegistry().containsKey(enchantmentKey)) {
+            maxEnchantmentLevel = EnchantmentCostRegistry.getClientRegistry().getEnchantmentCost(enchantmentKey).getHighestLevel();
         } else {
             //Fallback if there is no enchantment cost set up, use the default max level from the enchantment
             Registry<Enchantment> enchantmentRegistry = ImmersiveEnchanting.getEnchantmentRegistry(player.registryAccess());
-            maxEnchantmentLevel = enchantmentRegistry.get(enchantmentRL).getMaxLevel();
+            maxEnchantmentLevel = enchantmentRegistry.get(enchantmentKey).getMaxLevel();
         }
 
         //Reveal ladder up to (equippedLevel + 1).

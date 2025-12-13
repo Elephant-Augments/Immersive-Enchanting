@@ -1,17 +1,19 @@
 package me.alfie.immersiveenchanting.networking.packets;
 
 import io.netty.buffer.ByteBuf;
-import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCost;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.datapack.LevelCost;
 import me.alfie.immersiveenchanting.networking.ClientPayloadHandler;
 import me.alfie.immersiveenchanting.networking.SerializedEnchantmentCostRegistry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.DirectionalPayloadHandler;
@@ -71,8 +73,8 @@ public record EnchantmentCostRegistrySyncPacket(
         List<Integer> amounts = new ArrayList<>();
 
         //For each entry in the EnchantmentCostRegistry
-        for(Map.Entry<ResourceLocation, EnchantmentCost> registryEntry : costRegistry.getCostRegistry().entrySet()) {
-            ResourceLocation enchantmentResourceLocation = registryEntry.getKey();
+        for(Map.Entry<ResourceKey<Enchantment>, EnchantmentCost> registryEntry : costRegistry.getCostRegistry().entrySet()) {
+            ResourceKey<Enchantment> enchantmentKey = registryEntry.getKey();
             EnchantmentCost cost = registryEntry.getValue();
 
             //For each entry in the EnchantmentCost
@@ -83,7 +85,7 @@ public record EnchantmentCostRegistrySyncPacket(
                 int amount = levelCost.amount();
 
                 //Add data to form parallel lists
-                enchantmentNamespaces.add(enchantmentResourceLocation.toString());
+                enchantmentNamespaces.add(enchantmentKey.location().toString());
                 levels.add(level);
                 itemNamespaces.add(itemNamespace);
                 amounts.add(amount);
@@ -115,7 +117,8 @@ public record EnchantmentCostRegistrySyncPacket(
             LevelCost levelCost = new LevelCost(item, amount);
             //Build EnchantmentCost
             //Only create a new enchantment cost instance if it doesn't exist yet
-            EnchantmentCost enchantmentCost = enchantmentCostRegistry.getCostRegistry().computeIfAbsent(enchantmentResourceLocation, k -> new EnchantmentCost());
+            EnchantmentCost enchantmentCost = enchantmentCostRegistry.getCostRegistry()
+                    .computeIfAbsent(ResourceKey.create(Registries.ENCHANTMENT, enchantmentResourceLocation),k -> new EnchantmentCost());
             enchantmentCost.levels.put(level, levelCost);
         }
 
