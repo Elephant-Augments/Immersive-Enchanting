@@ -1,0 +1,11 @@
+{
+  "block.immersiveenchanting.creative_bookshelf": "Bibliothèque créatif",
+  "item.immersiveenchanting.ancient_book": "Livre ancien",
+  "lore.immersiveenchanting.ancient_book": "Connaissance de",
+  "itemGroup.immersiveenchanting.enchanting": "Enchanter",
+
+  "gui.immersiveenchanting.cost": "Coût: ",
+  "gui.immersiveenchanting.equipped": "Équipé.",
+  "gui.immersiveenchanting.locked_enchantment": "???",
+  "gui.immersiveenchanting.locked_enchantment_hint": "Inconnu"
+}
