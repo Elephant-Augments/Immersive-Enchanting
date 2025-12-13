@@ -19,6 +19,6 @@ public record LevelCost(String item, int amount) {
             return ItemStack.EMPTY;
         }
 
-        return new ItemStack(item, this.amount);
+        return new ItemStack(item, this.amount());
     }
 }

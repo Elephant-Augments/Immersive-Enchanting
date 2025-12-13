@@ -124,7 +124,7 @@ public class EnchantingNodeTooltip {
                 graphics.drawString(font, "Free", costBoxX + costBoxLabelX + padding, costBoxLabelY + padding / 2, 0x55FF55); // optional green color
             } else {
                 graphics.renderItem(costStack, costBoxX + costBoxLabelX + padding, costBoxLabelY);
-                graphics.renderItemDecorations(font, costStack, 0, 0);
+                graphics.renderItemDecorations(font, costStack, costBoxX+costBoxLabelX+padding, costBoxLabelY);
             }
         } else if (costStack == null) {
             Component hint = Component.translatable("gui.immersiveenchanting.locked_enchantment_hint")
