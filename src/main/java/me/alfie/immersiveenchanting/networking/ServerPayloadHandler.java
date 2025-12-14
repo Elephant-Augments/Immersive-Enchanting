@@ -10,6 +10,7 @@ import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.networking.packets.EnchantItemPacket;
 import me.alfie.immersiveenchanting.networking.packets.GetBookshelfContentsPacket;
 import me.alfie.immersiveenchanting.networking.packets.UnlockedEnchantmentsPacket;
+import me.alfie.immersiveenchanting.networking.packets.UpdateToolSlotPacket;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -24,6 +25,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
@@ -250,6 +252,21 @@ public class ServerPayloadHandler {
             }
         }
         return false;
+    }
+
+    public static void onUpdateSlotPacket(UpdateToolSlotPacket updateToolSlotPacket, IPayloadContext context) {
+        int mode = updateToolSlotPacket.mode();
+
+        Slot toolSlot = context.player().containerMenu.getSlot(EnchantingTableMenu.SLOTS.TOOL.ordinal());
+        if(mode == UpdateToolSlotPacket.MODE.TAKE.ordinal()) {
+            ItemStack itemStack = toolSlot.getItem();
+            context.player().containerMenu.setCarried(itemStack.copyAndClear());
+            toolSlot.setChanged();
+        } else if (mode == UpdateToolSlotPacket.MODE.PLACE.ordinal()) {
+            ItemStack carriedStack = context.player().containerMenu.getCarried();
+            toolSlot.safeInsert(carriedStack);
+            toolSlot.setChanged();
+        }
     }
 }
 

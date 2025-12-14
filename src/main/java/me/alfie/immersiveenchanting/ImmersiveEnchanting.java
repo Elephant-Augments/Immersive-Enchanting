@@ -9,10 +9,7 @@ import me.alfie.immersiveenchanting.datapack.EnchantmentCostDatapackHandler;
 import me.alfie.immersiveenchanting.gui.ModMenus;
 import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.lootmodifier.ModLootModifiers;
-import me.alfie.immersiveenchanting.networking.packets.EnchantItemPacket;
-import me.alfie.immersiveenchanting.networking.packets.EnchantmentCostRegistrySyncPacket;
-import me.alfie.immersiveenchanting.networking.packets.GetBookshelfContentsPacket;
-import me.alfie.immersiveenchanting.networking.packets.UnlockedEnchantmentsPacket;
+import me.alfie.immersiveenchanting.networking.packets.*;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
@@ -55,6 +52,7 @@ public class ImmersiveEnchanting {
         modEventBus.addListener(GetBookshelfContentsPacket::register);
         modEventBus.addListener(UnlockedEnchantmentsPacket::register);
         modEventBus.addListener(EnchantmentCostRegistrySyncPacket::register);
+        modEventBus.addListener(UpdateToolSlotPacket::register);
     }
 
     /**

@@ -5,6 +5,7 @@ import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.datapack.LevelCost;
 import me.alfie.immersiveenchanting.networking.packets.EnchantItemPacket;
+import me.alfie.immersiveenchanting.networking.packets.UpdateToolSlotPacket;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -17,6 +18,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -80,6 +82,9 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
     private boolean isSlot0Empty = true;
 
     public final float PARALLAX = 0.5f;
+
+    private Vector2i virtualSlotPos;
+    private final int VIRTUAL_SLOT_DIMENSIONS = 16;
 
     public EnchantingTableScreen(EnchantingTableMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
@@ -212,7 +217,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
             guiGraphics.setColor(1f, 1f, 1f, 1f);
         }
 
-        //Add background book
+        //Add background book and virtual slot
         guiGraphics.blit(
                 ENCHANTING_TABLE_TOP_TEXTURE,
                 centerOnCanvas(32, 32).x  - (int)scrollX,
@@ -220,6 +225,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
                 0f, 0f, 32, 32,
                 32, 32
         );
+        virtualSlotPos = centerOnCanvas(VIRTUAL_SLOT_DIMENSIONS, VIRTUAL_SLOT_DIMENSIONS);
 
         if(this.menu.getSlot(0).getItem().isEmpty()) {
             guiGraphics.blit(
@@ -497,32 +503,53 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
     //Scrollable functionality
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == 0 && !isSlot0Empty) {
-            // 1. Check if any node was clicked
-            for (EnchantingNode node : this.rendered_nodes) {
-                if (node.isMouseOver(mouseX, mouseY, this)) {
-                    this.onNodeClicked(node);
-                    return true; // consume the click, don't drag
+        if (button == 0) {
+            ItemStack carriedStack = menu.getCarried();
+            if (!isSlot0Empty) {
+                // 1. Check if any node was clicked
+                for (EnchantingNode node : this.rendered_nodes) {
+                    if (node.isMouseOver(mouseX, mouseY, this)) {
+                        this.onNodeClicked(node);
+                        return true; // consume the click, don't drag
+                    }
+                }
+
+                // Check if the centre icon was clicked
+                if(isMouseOverVirtualSlot(mouseX, mouseY) && carriedStack.isEmpty()) {
+                    PacketDistributor.sendToServer(
+                            new UpdateToolSlotPacket(UpdateToolSlotPacket.MODE.TAKE.ordinal())
+                    );
+                    return true;
+                }
+
+                // 2. Start a drag if no node clicked
+                // Compute viewport bounds in screen coordinates
+                int viewportLeft   = this.leftPos + viewportStartX;
+                int viewportTop    = this.topPos  + viewportStartY;
+                int viewportRight  = viewportLeft + viewportWidth;
+                int viewportBottom = viewportTop + viewportHeight;
+
+                // Only start dragging if the mouse is inside the viewport
+                if (mouseX >= viewportLeft && mouseX < viewportRight &&
+                        mouseY >= viewportTop  && mouseY < viewportBottom) {
+                    dragging = true;
+                    dragStartMouseX = mouseX;
+                    dragStartMouseY = mouseY;
+                    dragStartScrollX = scrollX;
+                    dragStartScrollY = scrollY;
+                    return true; // consume the click
+                }
+
+            } else {
+                //Send packet to place carried item in slot.
+                if(isMouseOverVirtualSlot(mouseX, mouseY) && !carriedStack.isEmpty()) {
+                    PacketDistributor.sendToServer(
+                            new UpdateToolSlotPacket(UpdateToolSlotPacket.MODE.PLACE.ordinal())
+                    );
+                    return true;
                 }
             }
 
-            // 2. Start a drag if no node clicked
-            // Compute viewport bounds in screen coordinates
-            int viewportLeft   = this.leftPos + viewportStartX;
-            int viewportTop    = this.topPos  + viewportStartY;
-            int viewportRight  = viewportLeft + viewportWidth;
-            int viewportBottom = viewportTop + viewportHeight;
-
-            // Only start dragging if the mouse is inside the viewport
-            if (mouseX >= viewportLeft && mouseX < viewportRight &&
-                    mouseY >= viewportTop  && mouseY < viewportBottom) {
-                dragging = true;
-                dragStartMouseX = mouseX;
-                dragStartMouseY = mouseY;
-                dragStartScrollX = scrollX;
-                dragStartScrollY = scrollY;
-                return true; // consume the click
-            }
         }
         return super.mouseClicked(mouseX, mouseY, button);
     }
@@ -595,4 +622,36 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
     public void setRenderCostTo(ItemStack costStack) {
         this.renderCostStack = costStack;
     }
+
+    private boolean isMouseOverVirtualSlot(double mouseX, double mouseY) {
+        // Node's position on screen
+        int drawX = virtualSlotPos.x - (int) scrollX;
+        int drawY = virtualSlotPos.y - (int) scrollY;
+
+        // Node bounds
+        int boxLeft   = drawX;
+        int boxTop    = drawY;
+        int boxRight  = (int) (drawX + VIRTUAL_SLOT_DIMENSIONS);
+        int boxBottom = (int) (drawY + VIRTUAL_SLOT_DIMENSIONS);
+
+        // Viewport bounds
+        int viewportLeft   = canvasLeftPos;
+        int viewportTop    = canvasTopPos;
+        int viewportRight  = viewportLeft + viewportWidth;
+        int viewportBottom = viewportTop + viewportHeight;
+
+        // Clip node bounds to viewport
+        int visibleLeft   = Math.max(boxLeft, viewportLeft);
+        int visibleTop    = Math.max(boxTop, viewportTop);
+        int visibleRight  = Math.min(boxRight, viewportRight);
+        int visibleBottom = Math.min(boxBottom, viewportBottom);
+
+        // If the node is fully outside the viewport, return false
+        if (visibleLeft >= visibleRight || visibleTop >= visibleBottom) return false;
+
+        // Check if mouse is over the visible part
+        return mouseX >= visibleLeft && mouseX < visibleRight
+                && mouseY >= visibleTop && mouseY < visibleBottom;
+    }
 }
+
