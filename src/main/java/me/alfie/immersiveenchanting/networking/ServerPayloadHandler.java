@@ -2,7 +2,7 @@ package me.alfie.immersiveenchanting.networking;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.block.CreativeBookshelf;
-import me.alfie.immersiveenchanting.compat.Compat;
+import me.alfie.immersiveenchanting.compat.ModCompat;
 import me.alfie.immersiveenchanting.datacomponents.EnchantmentDataComponent;
 import me.alfie.immersiveenchanting.datacomponents.ModDataComponents;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
@@ -65,8 +65,9 @@ public class ServerPayloadHandler {
                 new IllegalStateException("Enchantment not found: " + packet.enchantment())
         );
 
-        // Check if any mod limits the number of enchantments / prevents enchantment
-        if (!Compat.canEnchant(itemToEnchant, enchantment)) {
+        // Currently only for Enchant Limiter.
+        // Currently, this check only exists on NeoForge 1.21.1 as Enchant Limiter is not available on Forge 1.20.1.
+        if (!ModCompat.canEnchant(itemToEnchant, enchantment)) {
             level.playSound(null, player.blockPosition(), SoundEvents.VAULT_CLOSE_SHUTTER, SoundSource.BLOCKS, 1, 1);
             return;
         }

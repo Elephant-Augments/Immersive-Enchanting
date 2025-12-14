@@ -7,13 +7,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Separate class to make sure we're not loading any unnecessary classes when mixins are being initialized */
+/** Separate class to make sure we're not loading any unnecessary classes when mixins are being initialized<br>
+ *  Example usage:{@code ModCheck.Mod.MODNAME.isLoaded()}
+ * */
 public class ModCheck {
-    private static final Map<String, List<String>> ALIAS = Map.of();
-    private static final Map<String, Boolean> MODS = new HashMap<>();
+    private static final Map<String, List<String>> ALIAS = Map.of(); //For mods that have multiple modids across versions, defined here.
+    private static final Map<String, Boolean> MODS = new HashMap<>(); //Cache mods after checking isModLoaded()
 
-    public static boolean isModLoaded(final String mod) {
-        return MODS.computeIfAbsent(mod, key -> {
+    /**
+     * Check if a mod is loaded and cache it in ModCheck.MODS
+     * @param modid
+     * @return
+     */
+    private static boolean isModLoaded(final String modid) {
+        return MODS.computeIfAbsent(modid, key -> {
             if (check(key)) {
                 return true;
             }
@@ -28,6 +35,11 @@ public class ModCheck {
         });
     }
 
+    /**
+     * Query the mod loader to check if a mod of "modid" is present.
+     * @param modid
+     * @return
+     */
     private static boolean check(final String modid) {
         ModList modList = ModList.get();
 
@@ -38,6 +50,11 @@ public class ModCheck {
         return LoadingModList.get().getModFileById(modid) != null;
     }
 
+    /**
+     * Mods that ImmersiveEnchanting recognises and has compatibility with.<br>
+     * Mod must be defined in this enum to call {@code #isLoaded()}<br>
+     * Note: Ensure mod is added to dependencies in build.gradle
+     */
     public enum Mod {
         ENCHANT_LIMITER("enchant_limiter");
 
