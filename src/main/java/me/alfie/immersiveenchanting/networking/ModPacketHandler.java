@@ -1,10 +1,7 @@
 package me.alfie.immersiveenchanting.networking;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
-import me.alfie.immersiveenchanting.networking.packets.EnchantItemPacket;
-import me.alfie.immersiveenchanting.networking.packets.EnchantmentCostRegistrySyncPacket;
-import me.alfie.immersiveenchanting.networking.packets.GetBookshelfContentsPacket;
-import me.alfie.immersiveenchanting.networking.packets.UnlockedEnchantmentsPacket;
+import me.alfie.immersiveenchanting.networking.packets.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
@@ -57,6 +54,14 @@ public class ModPacketHandler {
                 EnchantmentCostRegistrySyncPacket::encode,
                 EnchantmentCostRegistrySyncPacket::decode,
                 EnchantmentCostRegistrySyncPacket::handle
+        );
+
+        INSTANCE.registerMessage(
+                id++,
+                UpdateToolSlotPacket.class,
+                UpdateToolSlotPacket::encode,
+                UpdateToolSlotPacket::decode,
+                UpdateToolSlotPacket::handle
         );
 
         //... register more packets.
