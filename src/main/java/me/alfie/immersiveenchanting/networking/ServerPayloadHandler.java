@@ -2,6 +2,7 @@ package me.alfie.immersiveenchanting.networking;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.block.CreativeBookshelf;
+import me.alfie.immersiveenchanting.compat.Compat;
 import me.alfie.immersiveenchanting.datacomponents.EnchantmentDataComponent;
 import me.alfie.immersiveenchanting.datacomponents.ModDataComponents;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
@@ -63,6 +64,12 @@ public class ServerPayloadHandler {
         Holder<Enchantment> enchantment = enchantmentHolder.orElseThrow(() ->
                 new IllegalStateException("Enchantment not found: " + packet.enchantment())
         );
+
+        // Check if any mod limits the number of enchantments / prevents enchantment
+        if (!Compat.canEnchant(itemToEnchant, enchantment)) {
+            level.playSound(null, player.blockPosition(), SoundEvents.VAULT_CLOSE_SHUTTER, SoundSource.BLOCKS, 1, 1);
+            return;
+        }
 
         //Check enchantment cost
         ItemStack costSlotItemStack = enchantingTableMenu.getSlot(EnchantingTableMenu.SLOTS.COST.ordinal()).getItem();
