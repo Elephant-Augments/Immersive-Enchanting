@@ -7,6 +7,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import org.joml.Vector2i;
 
 public class EnchantingNodeTooltip {
 
@@ -26,16 +27,46 @@ public class EnchantingNodeTooltip {
     private String enchantmentName;
     private ItemStack costStack;
     private EnchantingTableScreen screen;
-    private boolean isXFlip;
-    private boolean isYFlip;
+    //private boolean isXFlip;
+    //private boolean isYFlip;
 
-    private int tooltipWidth;
-    private int tooltipHeight;
+    private int titleBoxWidth;
+    private int titleBoxHeight;
+    private int descriptionBoxHeight;
 
-    private int startX;
-    private int startY;
+    private Vector2i titleBoxTopLeft = new Vector2i(0,0);
+    private Vector2i descriptionBoxTopLeft = new Vector2i(0,0);
 
-    private int costBoxHeight;
+    private enum RenderDirection {
+        RIGHT_DOWN(false, false), //default: left to right, title on top, cost on bottom
+        LEFT_DOWN(true, false), //right to left, title on top, cost on bottom
+        RIGHT_UP(false, true), //left to right, cost on top, title on bottom
+        LEFT_UP(true, true); //right to left, cost on top, title on bottom
+
+        private final boolean flippedX; //Is x flipped from default (not left to right)
+        private final boolean flippedY; //Is y flipped from default (not top to bottom)
+        RenderDirection(boolean flippedX, boolean flippedY) {
+            this.flippedX = flippedX;
+            this.flippedY = flippedY;
+        }
+
+        /**
+         * Is the render direction horizontally flipped (right to left instead of default left to right)?
+         * @return
+         */
+        public boolean isFlippedX() {
+            return flippedX;
+        }
+
+        /**
+         * Is the render direction vertically flipped (cost on top, title on bottom instead of default title on top, cost on bottom)?
+         * @return
+         */
+        public boolean isFlippedY() {
+            return flippedY;
+        }
+    }
+    RenderDirection renderDirection;
 
     public EnchantingNodeTooltip(Font font,
                                  EnchantingNode node,
@@ -50,90 +81,123 @@ public class EnchantingNodeTooltip {
 
         //Setup positions
         int textWidth = font.width(enchantmentName);
-        tooltipWidth = (int) (padding/2 + textWidth + EnchantingNode.width);
-        tooltipHeight = (int) Math.max(font.lineHeight, EnchantingNode.height);
+        titleBoxWidth = (int) (padding/2 + textWidth + EnchantingNode.width);
+        titleBoxHeight = (int) Math.max(font.lineHeight, EnchantingNode.height);
 
-        costBoxHeight = tooltipHeight-iconSize/2 + costIconSize + padding;;
+        descriptionBoxHeight = titleBoxHeight -iconSize/2 + costIconSize + padding;;
     }
 
 
     public void renderEnchantmentTooltip(GuiGraphics graphics) {
-        startX = node.getRenderedPosition(screen).x;
-        startY = node.getRenderedPosition(screen).y;
+        setRenderDirection();
 
-        isXFlip = false;
-        isYFlip = false;
-
-        //Normal rendering is right to left
-        if( node.getViewportPosition(screen).x + tooltipWidth > screen.viewportWidth) {
-            startX = node.getRenderedPosition(screen).x - tooltipWidth + iconSize - 2;
-            isXFlip = true;
-        }
-
-        //Normal rendering is top to bottom
-        if( node.getViewportPosition(screen).y + costBoxHeight + tooltipHeight/2 - padding/2 > screen.viewportHeight) {
-            isYFlip = true;
-        }
-
-        String label;
+        String costBoxLabel;
         ResourceLocation texture;
         if(node.isObtained()) {
             texture = BOX_OBTAINED_TEXTURE;
-            label = Component.translatable("gui.immersiveenchanting.equipped").getString();
+            costBoxLabel = Component.translatable("gui.immersiveenchanting.equipped").getString();
         } else {
             texture = BOX_UNOBTAINED_TEXTURE;
-            label = Component.translatable("gui.immersiveenchanting.cost").getString();
+            costBoxLabel = Component.translatable("gui.immersiveenchanting.cost").getString();
         }
 
-        drawEnchantmentNameBox(texture, graphics);
-        drawCostBox(label, graphics);
+        drawTitleBox(texture, graphics);
+        drawDescriptionBox(costBoxLabel, graphics);
     }
 
-    private void drawEnchantmentNameBox(ResourceLocation texture, GuiGraphics graphics) {
-        graphics.blitSprite(texture, startX + 1, startY, 0, tooltipWidth, tooltipHeight);
+    /**
+     * If tooltip will render out of bounds, this function will set the render direction accordingly.
+     * Automatically sets the correct positions for enchantmentNameBoxTopLeft and costBoxTopLeft.
+     */
+    private void setRenderDirection() {
+        boolean flipX = node.getViewportPosition(screen).x + titleBoxWidth > screen.viewportWidth;
+        boolean flipY = node.getViewportPosition(screen).y + descriptionBoxHeight + titleBoxHeight /2 - padding/2 > screen.viewportHeight;
+        if (flipX && flipY) renderDirection = RenderDirection.LEFT_UP;
+        else if (flipX) renderDirection = RenderDirection.LEFT_DOWN;
+        else if (flipY) renderDirection = RenderDirection.RIGHT_UP;
+        else renderDirection = RenderDirection.RIGHT_DOWN;
 
-        //Enchantment name x depends on side
-        int enchantmentLabelX = startX + padding/2;
-        if(!isXFlip) {
-            enchantmentLabelX += iconSize - padding/2;
-        }
-
-        //For y, the title/name boxes have to be flipped
-
-        graphics.drawString(font, enchantmentName, enchantmentLabelX, startY + padding -1, 0xFFFFFF);
-    }
-
-    private void drawCostBox(String label, GuiGraphics graphics) {
-        int costBoxX = startX + 1;
-        int costBoxY = startY + tooltipHeight/2;
-
-        if(isYFlip) {
-            costBoxY = startY - tooltipHeight-padding/2;
-        }
-
-
-        final int costBoxLabelY = costBoxY+tooltipHeight/2;
-
-        graphics.blitSprite(TITLE_BOX_TEXTURE, costBoxX, costBoxY, 0, tooltipWidth, costBoxHeight);
-
-
-        int costBoxLabelX = font.width(label);
-        if(!node.isObtained() && costStack != null) {
-            graphics.drawString(font, label, costBoxX + padding, costBoxLabelY + padding / 2, 0x55FF55);
-            if (costStack.is(Items.AIR) || costStack.isEmpty()) {
-                graphics.drawString(font, Component.translatable("gui.immersiveenchanting.cost_free"), costBoxX + costBoxLabelX + padding, costBoxLabelY + padding / 2, 0x55FF55); // optional green color
-            } else {
-                graphics.renderItem(costStack, costBoxX + costBoxLabelX + padding, costBoxLabelY);
-                graphics.renderItemDecorations(font, costStack, costBoxX+costBoxLabelX+padding, costBoxLabelY);
+        int baseX = node.getRenderedPosition(screen).x;
+        int baseY = node.getRenderedPosition(screen).y;
+        switch(renderDirection) {
+            case RIGHT_DOWN -> {
+                titleBoxTopLeft = new Vector2i(baseX, baseY);
+                descriptionBoxTopLeft = new Vector2i(titleBoxTopLeft.x + 1, titleBoxTopLeft.y + titleBoxHeight /2);
             }
-        } else if (costStack == null) {
+
+            case LEFT_DOWN -> {
+                titleBoxTopLeft = new Vector2i(baseX - titleBoxWidth +iconSize-2, baseY);
+                descriptionBoxTopLeft = new Vector2i(titleBoxTopLeft.x + 1, titleBoxTopLeft.y + titleBoxHeight /2);
+            }
+
+            case RIGHT_UP -> {
+                titleBoxTopLeft = new Vector2i(baseX, baseY);
+                descriptionBoxTopLeft = new Vector2i(titleBoxTopLeft.x + 1, titleBoxTopLeft.y - titleBoxHeight -padding/2);
+            }
+
+            case LEFT_UP -> {
+                titleBoxTopLeft = new Vector2i(baseX - titleBoxWidth +iconSize-2, baseY);
+                descriptionBoxTopLeft = new Vector2i(titleBoxTopLeft.x + 1, titleBoxTopLeft.y - titleBoxHeight -padding/2);
+            }
+        }
+    }
+
+    private void drawTitleBox(ResourceLocation texture, GuiGraphics graphics) {
+        //The enchantment name box always stays at the same y position, only flips horizontally.
+        graphics.blitSprite(texture, titleBoxTopLeft.x + 1, titleBoxTopLeft.y, 0, titleBoxWidth, titleBoxHeight);
+
+        final int enchantmentLabelX = titleBoxTopLeft.x + padding/2
+                + (renderDirection.isFlippedX() ? 0 : iconSize - padding/2); //Add offset if renderDirection is left to right (makes room for the node)
+
+        //Draw contents
+        graphics.drawString(font, enchantmentName, enchantmentLabelX, titleBoxTopLeft.y + padding -1, 0xFFFFFF);
+    }
+
+    private void drawDescriptionBox(String costBoxLabel, GuiGraphics graphics) {
+        graphics.blitSprite(TITLE_BOX_TEXTURE, descriptionBoxTopLeft.x, descriptionBoxTopLeft.y, 0, titleBoxWidth, descriptionBoxHeight);
+
+        final int costBoxLabelX = font.width(costBoxLabel);
+        final int costBoxLabelY = descriptionBoxTopLeft.y+ titleBoxHeight /2;
+
+        //Draw contents
+        if(costStack != null) { //Is there a costStack to render?
+            if(!node.isObtained()) {
+                graphics.drawString(font,
+                        costBoxLabel,
+                        descriptionBoxTopLeft.x + padding,
+                        costBoxLabelY + padding / 2,
+                        ChatFormatting.GREEN.getColor());
+
+                if (costStack.is(Items.AIR) || costStack.isEmpty()) {
+                    graphics.drawString(font,
+                            Component.translatable("gui.immersiveenchanting.cost_free"),
+                            descriptionBoxTopLeft.x + costBoxLabelX + padding,
+                            costBoxLabelY + padding / 2,
+                            ChatFormatting.GREEN.getColor()); // optional green color
+                } else {
+                    graphics.renderItem(
+                            costStack,
+                            descriptionBoxTopLeft.x + costBoxLabelX + padding,
+                            costBoxLabelY);
+                    graphics.renderItemDecorations(font,
+                            costStack,
+                            descriptionBoxTopLeft.x+costBoxLabelX+padding,
+                            costBoxLabelY);
+                }
+            } else {
+                graphics.drawString(font,
+                        costBoxLabel,
+                        descriptionBoxTopLeft.x + padding,
+                        costBoxLabelY + padding / 2,
+                        ChatFormatting.GREEN.getColor());
+            }
+
+        } else {
             Component hint = Component.translatable("gui.immersiveenchanting.locked_enchantment_hint")
                     .withStyle(ChatFormatting.GRAY, ChatFormatting.OBFUSCATED);
-            graphics.drawString(font, hint, costBoxX+padding/2, costBoxLabelY+padding/2, 0x55FF55);
+            graphics.drawString(font, hint, descriptionBoxTopLeft.x+padding/2, costBoxLabelY+padding/2, 0x55FF55);
         }
 
-        else if(node.isObtained()) {
-            graphics.drawString(font, label, costBoxX + padding, costBoxLabelY + padding / 2, 0x55FF55);
-        }
+
     }
 }
