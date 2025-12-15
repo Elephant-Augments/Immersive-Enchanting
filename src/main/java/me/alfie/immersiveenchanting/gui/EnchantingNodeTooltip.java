@@ -27,8 +27,6 @@ public class EnchantingNodeTooltip {
     private String enchantmentName;
     private ItemStack costStack;
     private EnchantingTableScreen screen;
-    //private boolean isXFlip;
-    //private boolean isYFlip;
 
     private int titleBoxWidth;
     private int titleBoxHeight;
@@ -91,18 +89,9 @@ public class EnchantingNodeTooltip {
     public void renderEnchantmentTooltip(GuiGraphics graphics) {
         setRenderDirection();
 
-        String costBoxLabel;
-        ResourceLocation texture;
-        if(node.isObtained()) {
-            texture = BOX_OBTAINED_TEXTURE;
-            costBoxLabel = Component.translatable("gui.immersiveenchanting.equipped").getString();
-        } else {
-            texture = BOX_UNOBTAINED_TEXTURE;
-            costBoxLabel = Component.translatable("gui.immersiveenchanting.cost").getString();
-        }
 
-        drawTitleBox(texture, graphics);
-        drawDescriptionBox(costBoxLabel, graphics);
+        drawTitleBox(enchantmentName, graphics);
+        drawDescriptionBox(graphics);
     }
 
     /**
@@ -142,32 +131,46 @@ public class EnchantingNodeTooltip {
         }
     }
 
-    private void drawTitleBox(ResourceLocation texture, GuiGraphics graphics) {
+    private void drawTitleBox(String titleText,
+                              GuiGraphics graphics) {
         //The enchantment name box always stays at the same y position, only flips horizontally.
-        graphics.blitSprite(texture, titleBoxTopLeft.x + 1, titleBoxTopLeft.y, 0, titleBoxWidth, titleBoxHeight);
+        ResourceLocation nineSlicedTexture = node.isObtained() ?
+                BOX_OBTAINED_TEXTURE
+                : BOX_UNOBTAINED_TEXTURE;
 
-        final int enchantmentLabelX = titleBoxTopLeft.x + padding/2
+        graphics.blitSprite(nineSlicedTexture, titleBoxTopLeft.x + 1, titleBoxTopLeft.y, 0, titleBoxWidth, titleBoxHeight);
+
+        final int titleTextX = titleBoxTopLeft.x + padding/2
                 + (renderDirection.isFlippedX() ? 0 : iconSize - padding/2); //Add offset if renderDirection is left to right (makes room for the node)
 
         //Draw contents
-        graphics.drawString(font, enchantmentName, enchantmentLabelX, titleBoxTopLeft.y + padding -1, 0xFFFFFF);
+        graphics.drawString(font,
+                titleText,
+                titleTextX,
+                titleBoxTopLeft.y + padding -1,
+                ChatFormatting.WHITE.getColor());
     }
 
-    private void drawDescriptionBox(String costBoxLabel, GuiGraphics graphics) {
+
+    private void drawDescriptionBox(GuiGraphics graphics) {
         graphics.blitSprite(TITLE_BOX_TEXTURE, descriptionBoxTopLeft.x, descriptionBoxTopLeft.y, 0, titleBoxWidth, descriptionBoxHeight);
 
-        final int costBoxLabelX = font.width(costBoxLabel);
+        String hintLabel = node.isObtained() ?
+                Component.translatable("gui.immersiveenchanting.equipped").getString()
+                : Component.translatable("gui.immersiveenchanting.cost").getString();
+
+        final int costBoxLabelX = font.width(hintLabel);
         final int costBoxLabelY = descriptionBoxTopLeft.y+ titleBoxHeight /2;
 
         //Draw contents
         if(costStack != null) { //Is there a costStack to render?
-            if(!node.isObtained()) {
-                graphics.drawString(font,
-                        costBoxLabel,
-                        descriptionBoxTopLeft.x + padding,
-                        costBoxLabelY + padding / 2,
-                        ChatFormatting.GREEN.getColor());
+            graphics.drawString(font,
+                    hintLabel,
+                    descriptionBoxTopLeft.x + padding,
+                    costBoxLabelY + padding / 2,
+                    ChatFormatting.GREEN.getColor());
 
+            if(!node.isObtained()) {
                 if (costStack.is(Items.AIR) || costStack.isEmpty()) {
                     graphics.drawString(font,
                             Component.translatable("gui.immersiveenchanting.cost_free"),
@@ -184,12 +187,6 @@ public class EnchantingNodeTooltip {
                             descriptionBoxTopLeft.x+costBoxLabelX+padding,
                             costBoxLabelY);
                 }
-            } else {
-                graphics.drawString(font,
-                        costBoxLabel,
-                        descriptionBoxTopLeft.x + padding,
-                        costBoxLabelY + padding / 2,
-                        ChatFormatting.GREEN.getColor());
             }
 
         } else {

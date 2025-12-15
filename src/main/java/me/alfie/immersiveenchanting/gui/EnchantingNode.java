@@ -6,6 +6,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.enchantment.Enchantment;
+import org.joml.Vector2d;
 import org.joml.Vector2i;
 
 public class EnchantingNode {
@@ -110,35 +111,16 @@ public class EnchantingNode {
         return this.y;
     }
 
+    /**
+     * Helper function to check if this node is being moused over.
+     * @param mouseX
+     * @param mouseY
+     * @param screen
+     * @return
+     */
     public boolean isMouseOver(double mouseX, double mouseY, EnchantingTableScreen screen) {
-        // Node's position on screen
-        int drawX = this.x - (int) screen.scrollX;
-        int drawY = this.y - (int) screen.scrollY;
-
-        // Node bounds
-        int nodeLeft   = drawX;
-        int nodeTop    = drawY;
-        int nodeRight  = (int) (drawX + width*scale);
-        int nodeBottom = (int) (drawY + height*scale);
-
-        // Viewport bounds
-        int viewportLeft   = screen.canvasLeftPos;
-        int viewportTop    = screen.canvasTopPos;
-        int viewportRight  = viewportLeft + screen.viewportWidth;
-        int viewportBottom = viewportTop + screen.viewportHeight;
-
-        // Clip node bounds to viewport
-        int visibleLeft   = Math.max(nodeLeft, viewportLeft);
-        int visibleTop    = Math.max(nodeTop, viewportTop);
-        int visibleRight  = Math.min(nodeRight, viewportRight);
-        int visibleBottom = Math.min(nodeBottom, viewportBottom);
-
-        // If the node is fully outside the viewport, return false
-        if (visibleLeft >= visibleRight || visibleTop >= visibleBottom) return false;
-
-        // Check if mouse is over the visible part
-        return mouseX >= visibleLeft && mouseX < visibleRight
-                && mouseY >= visibleTop && mouseY < visibleBottom;
+        return screen.isMouseOverBoundingBox(new Vector2i(this.getX(), this.getY()),
+                width, height, mouseX, mouseY);
     }
 
 

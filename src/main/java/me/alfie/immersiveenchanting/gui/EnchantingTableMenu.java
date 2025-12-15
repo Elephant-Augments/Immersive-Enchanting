@@ -191,4 +191,21 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
         this.unlockedEnchantments = unlockedEnchantments;
     }
 
+    public boolean isToolSlotEmpty() {
+        return getToolSlotItem().isEmpty();
+    }
+
+    /**
+     * Helper to get item in slot using SLOTS enum.
+     * @param slot
+     * @return
+     */
+    private ItemStack getItemInSlot(SLOTS slot) {
+        return getSlot(slot.ordinal()).getItem();
+    }
+
+    public ItemStack getToolSlotItem() {
+        return getItemInSlot(SLOTS.TOOL);
+    }
+
 }
