@@ -1,17 +1,12 @@
 package me.alfie.immersiveenchanting.networking.packets;
 
-import io.netty.buffer.ByteBuf;
 import me.alfie.immersiveenchanting.networking.ClientPayloadHandler;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -19,7 +14,7 @@ public class UnlockedEnchantmentsPacket {
 
     public final List<ResourceKey<Enchantment>> enchantments;
 
-    public UnlockedEnchantmentsPacket( List<ResourceKey<Enchantment>> enchantments) {
+    public UnlockedEnchantmentsPacket(List<ResourceKey<Enchantment>> enchantments) {
         this.enchantments = enchantments;
     }
 

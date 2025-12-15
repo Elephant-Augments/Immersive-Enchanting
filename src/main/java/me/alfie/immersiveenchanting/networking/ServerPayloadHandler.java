@@ -10,14 +10,12 @@ import me.alfie.immersiveenchanting.networking.packets.EnchantItemPacket;
 import me.alfie.immersiveenchanting.networking.packets.GetBookshelfContentsPacket;
 import me.alfie.immersiveenchanting.networking.packets.UnlockedEnchantmentsPacket;
 import me.alfie.immersiveenchanting.networking.packets.UpdateToolSlotPacket;
-import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -44,6 +42,7 @@ public class ServerPayloadHandler {
 
     /**
      * Apply an enchantment to an item.
+     *
      * @param packet
      * @param context
      */
@@ -124,7 +123,7 @@ public class ServerPayloadHandler {
         int mode = packet.mode;
 
         Slot toolSlot = context.getSender().containerMenu.getSlot(EnchantingTableMenu.SLOTS.TOOL.ordinal());
-        if(mode == UpdateToolSlotPacket.MODE.TAKE.ordinal()) {
+        if (mode == UpdateToolSlotPacket.MODE.TAKE.ordinal()) {
             ItemStack itemStack = toolSlot.getItem();
             context.getSender().containerMenu.setCarried(itemStack.copyAndClear());
             toolSlot.setChanged();
@@ -137,25 +136,12 @@ public class ServerPayloadHandler {
 
     public static void onGetBookshelfContentsPacket(final GetBookshelfContentsPacket packet, final NetworkEvent.Context context) {
         BlockPos tablePos = new BlockPos(packet.blockPosX, packet.blockPosY, packet.blockPosZ);
-        checkBookshelvesAndUpdateClient(tablePos, context.getSender().level(), (ServerPlayer) context.getSender());
-    }
-
-    /**
-     * Get the enchantment resource id for an ancient book.
-     * @param book
-     * @return
-     */
-    @Nullable
-    public static ResourceKey<Enchantment> getAncientBookResourceKey(ItemStack book) {
-        try {
-            return AncientBookNBT.getEnchantment(book);
-        } catch (Exception e) {
-            return null;
-        }
+        checkBookshelvesAndUpdateClient(tablePos, context.getSender().level(), context.getSender());
     }
 
     /**
      * Check nearby bookshelves for ancient books and send UnlockedEnchantmentsPacket to client.
+     *
      * @param tablePos
      * @param level
      * @param serverPlayer
@@ -181,7 +167,7 @@ public class ServerPayloadHandler {
         }
 
         //Unlock all enchantments if creative bookshelf is near
-        if(isCreativeBookshelfNearby(tablePos, level)) {
+        if (isCreativeBookshelfNearby(tablePos, level)) {
             //Clear unlockedEnchantments from the bookshelf search
             unlockedEnchantments.clear();
 
@@ -203,25 +189,9 @@ public class ServerPayloadHandler {
     }
 
     /**
-     * Returns all the itemIds contained in a chiseled bookshelf.
-     * @param shelf
-     * @return
-     */
-    private static List<ItemStack> getChiseledBookshelfContents(BlockEntity shelf) {
-        List<ItemStack> contents = new ArrayList<>();
-        if (shelf instanceof ChiseledBookShelfBlockEntity) {
-            for (int i = 0; i < 6; i++) {
-                ItemStack stack = ((ChiseledBookShelfBlockEntity) shelf).getItem(i);
-                contents.add(stack);
-            }
-
-        }
-        return contents;
-    }
-
-    /**
      * Returns a list of all the bookshelves in a 5x5 radius of a coordinate.
      * Same positions as the vanilla enchanting table searches for.
+     *
      * @param pos
      * @param level
      * @return
@@ -249,7 +219,41 @@ public class ServerPayloadHandler {
     }
 
     /**
+     * Returns all the itemIds contained in a chiseled bookshelf.
+     *
+     * @param shelf
+     * @return
+     */
+    private static List<ItemStack> getChiseledBookshelfContents(BlockEntity shelf) {
+        List<ItemStack> contents = new ArrayList<>();
+        if (shelf instanceof ChiseledBookShelfBlockEntity) {
+            for (int i = 0; i < 6; i++) {
+                ItemStack stack = ((ChiseledBookShelfBlockEntity) shelf).getItem(i);
+                contents.add(stack);
+            }
+
+        }
+        return contents;
+    }
+
+    /**
+     * Get the enchantment resource id for an ancient book.
+     *
+     * @param book
+     * @return
+     */
+    @Nullable
+    public static ResourceKey<Enchantment> getAncientBookResourceKey(ItemStack book) {
+        try {
+            return AncientBookNBT.getEnchantment(book);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
      * Returns true if a creative bookshelf is within the 5x5 ring.
+     *
      * @param pos
      * @param level
      * @return

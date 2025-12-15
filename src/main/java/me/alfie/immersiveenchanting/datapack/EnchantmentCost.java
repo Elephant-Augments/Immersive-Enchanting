@@ -8,11 +8,10 @@ import java.util.Map;
  * For example, stores the cost of minecraft:efficiency from levels 1-5.
  */
 public class EnchantmentCost {
-    //String is the level number as a string - its a string because its from the json.
-    public Map<String, LevelCost> levels = new HashMap<>();
-
     //Empty LevelCost containing 0 air.
     private static final LevelCost EMPTY = new LevelCost("minecraft:air", 0);
+    //String is the level number as a string - its a string because its from the json.
+    public Map<String, LevelCost> levels = new HashMap<>();
 
     public EnchantmentCost() {
     }
@@ -20,6 +19,7 @@ public class EnchantmentCost {
 
     /**
      * Helper function to getLevel using an int rather than a string.
+     *
      * @param level
      * @return
      */

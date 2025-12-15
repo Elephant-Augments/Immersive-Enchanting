@@ -1,7 +1,6 @@
 package me.alfie.immersiveenchanting.datapack;
 
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 
@@ -11,32 +10,32 @@ import java.util.Map;
 //This class will be instancable, so there will be a server-side one and a client-side one.
 
 public class EnchantmentCostRegistry {
+    public static final EnchantmentCost EMPTY = new EnchantmentCost();
     private static EnchantmentCostRegistry serverEnchantmentCostRegistry; //Server-side access only
     private static EnchantmentCostRegistry clientEnchantmentCostRegistry; //Updated by server, safe to use on client
+    // Maps the enchantment ResourceLocation (e.g., minecraft:efficiency) to its cost data
+    private final Map<ResourceKey<Enchantment>, EnchantmentCost> COST_REGISTRY = new HashMap<>();
+    private ItemStack lapisCost;
 
     public static EnchantmentCostRegistry getClientRegistry() {
         return clientEnchantmentCostRegistry;
-    }
-
-    public static EnchantmentCostRegistry getServerRegistry() {
-        return serverEnchantmentCostRegistry;
     }
 
     public static void setClientRegistry(EnchantmentCostRegistry enchantmentCostRegistry) {
         clientEnchantmentCostRegistry = enchantmentCostRegistry;
     }
 
+    public static EnchantmentCostRegistry getServerRegistry() {
+        return serverEnchantmentCostRegistry;
+    }
+
     public static void setServerRegistry(EnchantmentCostRegistry enchantmentCostRegistry) {
         serverEnchantmentCostRegistry = enchantmentCostRegistry;
     }
 
-    // Maps the enchantment ResourceLocation (e.g., minecraft:efficiency) to its cost data
-    private final Map<ResourceKey<Enchantment>, EnchantmentCost> COST_REGISTRY = new HashMap<>();
-    private ItemStack lapisCost;
-    public static final EnchantmentCost EMPTY = new EnchantmentCost();
-
     /**
      * Helper method to get enchantment cost from COST_REGISTRY from its resource key.
+     *
      * @param enchantment
      * @return
      */
@@ -46,6 +45,7 @@ public class EnchantmentCostRegistry {
 
     /**
      * Helper method to get a specific level cost for an enchantment using its resource location.
+     *
      * @param enchantment
      * @param level
      * @return
@@ -65,6 +65,7 @@ public class EnchantmentCostRegistry {
 
     /**
      * Returns the integer of the highest level within the COST_REGISTRY.
+     *
      * @return
      */
     public int getHighestEnchantmentLevel() {
@@ -76,6 +77,7 @@ public class EnchantmentCostRegistry {
 
     /**
      * Returns the cost registry map <ResourceLocation, EnchantmentCost>
+     *
      * @return
      */
     public Map<ResourceKey<Enchantment>, EnchantmentCost> getCostRegistry() {

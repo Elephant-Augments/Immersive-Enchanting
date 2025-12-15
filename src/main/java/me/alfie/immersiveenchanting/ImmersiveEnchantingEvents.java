@@ -70,11 +70,12 @@ public class ImmersiveEnchantingEvents {
 
     /**
      * Request the client's enchantment cost registry to be updated on login.
+     *
      * @param event
      */
     @SubscribeEvent
     public void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
-        if(event.getEntity() instanceof ServerPlayer player) {
+        if (event.getEntity() instanceof ServerPlayer player) {
             EnchantmentCostRegistrySyncPacket.syncClientWithServer(player);
         }
     }
@@ -85,6 +86,7 @@ public class ImmersiveEnchantingEvents {
 
     /**
      * Fires server-side, adds in datapacks.
+     *
      * @param event
      */
     @SubscribeEvent
@@ -94,6 +96,7 @@ public class ImmersiveEnchantingEvents {
 
     /**
      * Set itemIds inside the creative tab.
+     *
      * @param event
      */
     public void buildCreativeTab(BuildCreativeModeTabContentsEvent event) {
@@ -141,6 +144,7 @@ public class ImmersiveEnchantingEvents {
     /**
      * Remove the enchanted books from villager trades.
      * Backport for 1.20.1
+     *
      * @param event
      */
     @SubscribeEvent
@@ -165,6 +169,7 @@ public class ImmersiveEnchantingEvents {
 
     /**
      * Replace enchanting table with new GUI.
+     *
      * @param event
      */
     @SubscribeEvent

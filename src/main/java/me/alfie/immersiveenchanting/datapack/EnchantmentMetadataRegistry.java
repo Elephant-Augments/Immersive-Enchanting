@@ -25,6 +25,7 @@ public class EnchantmentMetadataRegistry {
     /**
      * Load icons from client resources into ICONS map.
      * Uses resource pack.
+     *
      * @param resourceManager
      */
     public static void loadIcons(ResourceManager resourceManager) {

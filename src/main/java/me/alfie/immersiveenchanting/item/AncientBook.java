@@ -1,12 +1,11 @@
 package me.alfie.immersiveenchanting.item;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -27,11 +26,6 @@ public class AncientBook extends Item {
 
     public AncientBook(Properties properties) {
         super(properties.stacksTo(1).rarity(Rarity.UNCOMMON));
-    }
-
-    @Override
-    public boolean isFoil(ItemStack stack) {
-        return true;
     }
 
     @Override
@@ -77,6 +71,11 @@ public class AncientBook extends Item {
             }
         }
 
+    }
+
+    @Override
+    public boolean isFoil(ItemStack stack) {
+        return true;
     }
 }
 

@@ -11,7 +11,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -23,8 +22,8 @@ import java.util.Map;
 
 public class EnchantmentCostDatapackHandler extends SimpleJsonResourceReloadListener {
 
-    private final Gson gson;
     public static final String DIRECTORY = "enchantment_costs";
+    private final Gson gson;
     private MinecraftServer server;
 
     public EnchantmentCostDatapackHandler(Gson gson, String directory) {
@@ -34,6 +33,7 @@ public class EnchantmentCostDatapackHandler extends SimpleJsonResourceReloadList
 
     /**
      * Set the server, so that client registries can be resynced
+     *
      * @param server
      */
     public void setServer(MinecraftServer server) {
@@ -44,6 +44,7 @@ public class EnchantmentCostDatapackHandler extends SimpleJsonResourceReloadList
      * Fires server-side.
      * Reads data pack from directory into the server's enchantment cost registry.
      * Triggers on /reload.
+     *
      * @param object
      * @param resourceManager
      * @param profiler
@@ -51,7 +52,7 @@ public class EnchantmentCostDatapackHandler extends SimpleJsonResourceReloadList
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> object, ResourceManager resourceManager, ProfilerFiller profiler) {
         //Lazily initialise the server enchantment cost registry.
-        if(EnchantmentCostRegistry.getServerRegistry() == null) {
+        if (EnchantmentCostRegistry.getServerRegistry() == null) {
             EnchantmentCostRegistry.setServerRegistry(new EnchantmentCostRegistry());
         }
         EnchantmentCostRegistry.getServerRegistry().clear();
@@ -72,7 +73,7 @@ public class EnchantmentCostDatapackHandler extends SimpleJsonResourceReloadList
 
             //If empty json detected.
             //Add a dummy level cost with a DO NOT INCLUDE tag for the item field.
-            if(enchantmentCost.levels.isEmpty()) {
+            if (enchantmentCost.levels.isEmpty()) {
                 LevelCost levelCost = new LevelCost(LevelCost.DO_NOT_INCLUDE, 0);
                 enchantmentCost.levels.put("-1", levelCost);
             }
@@ -84,7 +85,6 @@ public class EnchantmentCostDatapackHandler extends SimpleJsonResourceReloadList
             recipeCount++;
         }
         ImmersiveEnchanting.LOGGER.info("Loaded " + recipeCount + " enchantment costs.");
-
 
 
         //Add lapis cost from data/immersiveenchanting/enchantment_costs/lapis_cost
@@ -111,8 +111,8 @@ public class EnchantmentCostDatapackHandler extends SimpleJsonResourceReloadList
         }
 
         //Attempt to send sync packet to all players on reload
-        if(server != null) {
-            for(ServerPlayer player : server.getPlayerList().getPlayers()) {
+        if (server != null) {
+            for (ServerPlayer player : server.getPlayerList().getPlayers()) {
                 EnchantmentCostRegistrySyncPacket.syncClientWithServer(player);
             }
             ImmersiveEnchanting.LOGGER.info("Synced server enchantment cost registry with all clients.");

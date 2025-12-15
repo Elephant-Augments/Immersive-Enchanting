@@ -8,15 +8,17 @@ import java.util.List;
 import java.util.Map;
 
 
-/** Separate class to make sure we're not loading any unnecessary classes when mixins are being initialized<br>
- *  Example usage:{@code ModCheck.Mod.MODNAME.isLoaded()}
- * */
+/**
+ * Separate class to make sure we're not loading any unnecessary classes when mixins are being initialized<br>
+ * Example usage:{@code ModCheck.Mod.MODNAME.isLoaded()}
+ */
 public class ModCheck {
     private static final Map<String, List<String>> ALIAS = Map.of();
     private static final Map<String, Boolean> MODS = new HashMap<>();
 
     /**
      * Check if a mod is loaded and cache it in ModCheck.MODS
+     *
      * @param modid
      * @return
      */
@@ -38,6 +40,7 @@ public class ModCheck {
 
     /**
      * Query the mod loader to check if a mod of "modid" is present.
+     *
      * @param modid
      * @return
      */

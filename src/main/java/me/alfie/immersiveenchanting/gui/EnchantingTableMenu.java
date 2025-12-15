@@ -19,9 +19,7 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.items.SlotItemHandler;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class EnchantingTableMenu extends AbstractContainerMenu {
@@ -32,11 +30,6 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
     private IItemHandler containerInventory;
     private Set<Holder<Enchantment>> unlockedEnchantments = new HashSet<>();
 
-    public enum SLOTS {
-        TOOL,
-        LAPIS, //By default, this is the lapis slot, but it can be configured to other itemIds.
-        COST
-    }
 
     //My constructor
     public EnchantingTableMenu(int containerId, Inventory inventory, IItemHandler containerInventory, Level level, BlockPos pos) {
@@ -50,6 +43,34 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
     //Game constructor
     public EnchantingTableMenu(int containerId, Inventory inventory, FriendlyByteBuf buf) {
         this(containerId, inventory, new ItemStackHandler(3), inventory.player.level(), buf.readBlockPos());
+    }
+
+    //Helper methods
+    public void setupSlots(Inventory playerInventory) {
+        //Tool slot
+        this.addSlot(new SlotItemHandler(this.containerInventory, 0, 233, 141));
+
+        //Lapis slot
+        this.addSlot(new SlotItemHandler(this.containerInventory,1, 233, 199));
+
+        //Cost slot
+        this.addSlot(new SlotItemHandler(this.containerInventory,2, 233, 170));
+
+        //Add player inventory slots
+        int startX = 17;
+        int startY = 140;
+
+        //Player inventory 3 rows of 9
+        for (int row = 0; row < 3; ++row) {
+            for (int col = 0; col < 9; ++col) {
+                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, startX + col * 18, startY + row * 18));
+            }
+        }
+
+        //Hotbar slots
+        for (int col = 0; col < 9; ++col) {
+            this.addSlot(new Slot(playerInventory, col, startX + col * 18, startY + 58));
+        }
     }
 
     @Override
@@ -110,43 +131,6 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
     }
 
     @Override
-    public boolean stillValid(Player player) {
-        return AbstractContainerMenu.stillValid(this.access, player, Blocks.ENCHANTING_TABLE);
-    }
-
-    //Helper methods
-    public void setupSlots(Inventory playerInventory) {
-        //Tool slot
-        this.addSlot(new SlotItemHandler(this.containerInventory, 0, 233, 141));
-
-        //Lapis slot
-        this.addSlot(new SlotItemHandler(this.containerInventory,1, 233, 199));
-
-        //Cost slot
-        this.addSlot(new SlotItemHandler(this.containerInventory,2, 233, 170));
-
-        //Add player inventory slots
-        int startX = 17;
-        int startY = 140;
-
-        //Player inventory 3 rows of 9
-        for (int row = 0; row < 3; ++row) {
-            for (int col = 0; col < 9; ++col) {
-                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, startX + col * 18, startY + row * 18));
-            }
-        }
-
-        //Hotbar slots
-        for (int col = 0; col < 9; ++col) {
-            this.addSlot(new Slot(playerInventory, col, startX + col * 18, startY + 58));
-        }
-
-
-
-
-    }
-
-    @Override
     public void removed(Player player) {
         super.removed(player);
 
@@ -165,6 +149,10 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
         }
     }
 
+    @Override
+    public boolean stillValid(Player player) {
+        return AbstractContainerMenu.stillValid(this.access, player, Blocks.ENCHANTING_TABLE);
+    }
 
     public Set<Holder<Enchantment>> getUnlockedEnchantments() {
         return unlockedEnchantments;
@@ -172,6 +160,30 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
 
     public void setUnlockedEnchantments(Set<Holder<Enchantment>> unlockedEnchantments) {
         this.unlockedEnchantments = unlockedEnchantments;
+    }
+
+    public boolean isToolSlotEmpty() {
+        return getToolSlotItem().isEmpty();
+    }
+
+    public ItemStack getToolSlotItem() {
+        return getItemInSlot(SLOTS.TOOL);
+    }
+
+    /**
+     * Helper to get item in slot using SLOTS enum.
+     *
+     * @param slot
+     * @return
+     */
+    private ItemStack getItemInSlot(SLOTS slot) {
+        return getSlot(slot.ordinal()).getItem();
+    }
+
+    public enum SLOTS {
+        TOOL,
+        LAPIS, //By default, this is the lapis slot, but it can be configured to other itemIds.
+        COST
     }
 
 }

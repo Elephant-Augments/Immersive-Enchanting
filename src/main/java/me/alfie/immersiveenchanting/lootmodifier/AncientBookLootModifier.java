@@ -1,7 +1,6 @@
 package me.alfie.immersiveenchanting.lootmodifier;
 
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
@@ -11,7 +10,6 @@ import me.alfie.immersiveenchanting.item.ModItems;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -59,6 +57,7 @@ public class AncientBookLootModifier extends LootModifier {
 
     /**
      * Apply loot modifier.
+     *
      * @param generatedLoot
      * @param context
      * @return
@@ -81,8 +80,8 @@ public class AncientBookLootModifier extends LootModifier {
 
                             // Remove disabled enchantments, such as mending
                             //If enchantment has DO_NOT_INCLUDE tag. (Empty json)
-                            if(EnchantmentCostRegistry.getServerRegistry().getCostRegistry().containsKey(enchantment.key().location())) {
-                                if(EnchantmentCostRegistry.getServerRegistry().getCostRegistry()
+                            if (EnchantmentCostRegistry.getServerRegistry().getCostRegistry().containsKey(enchantment.key().location())) {
+                                if (EnchantmentCostRegistry.getServerRegistry().getCostRegistry()
                                         .get(enchantment.key())
                                         .getLevel(-1).item().equals(LevelCost.DO_NOT_INCLUDE)) {
                                     return false;
@@ -90,10 +89,7 @@ public class AncientBookLootModifier extends LootModifier {
                             }
 
                             // Skip cursed enchantments
-                            if (enchantment.get().isCurse()) {
-                                return false;
-                            }
-                            return true; // include everything else
+                            return !enchantment.get().isCurse();// include everything else
                         })
                         .toList();
 

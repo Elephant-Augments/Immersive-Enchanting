@@ -4,6 +4,7 @@ import java.util.List;
 
 /**
  * Stores a flattened enchantment cost registry for transfer between client/server.
+ *
  * @param enchantmentNamespaces
  * @param levels
  * @param itemIds
@@ -15,4 +16,5 @@ public record SerializedEnchantmentCostRegistry(
         List<String> itemIds,
         List<Integer> amounts,
         String lapisCostItemId,
-        int lapisCostAmount) {}
+        int lapisCostAmount) {
+}

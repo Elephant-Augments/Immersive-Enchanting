@@ -25,6 +25,7 @@ public class ClientPayloadHandler {
 
     /**
      * Receive the enchantment cost registry from the server and store on the client.
+     *
      * @param packet
      * @param context
      */
@@ -46,6 +47,7 @@ public class ClientPayloadHandler {
 
     /**
      * Send which enchantments are unlocked to the client.
+     *
      * @param packet
      * @param context
      */

@@ -1,7 +1,6 @@
 package me.alfie.immersiveenchanting.lootmodifier;
 
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.world.item.ItemStack;
@@ -32,6 +31,7 @@ public class RemoveEnchantedBooksModifier extends LootModifier {
 
     /**
      * Apply loot modifier.
+     *
      * @param generatedLoot
      * @param context
      * @return

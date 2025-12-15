@@ -1,6 +1,5 @@
 package me.alfie.immersiveenchanting.networking.packets;
 
-import io.netty.buffer.ByteBuf;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCost;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.datapack.LevelCost;
@@ -79,51 +78,9 @@ public class EnchantmentCostRegistrySyncPacket {
         contextSupplier.get().setPacketHandled(true);
     }
 
-        /**
-         * Serialize the cost registry.
-         *
-         * Map<ResourceLocation, EnchantmentCost>
-         *     where EnchantmentCost contains:
-         *         Map<String, LevelCost> (String is a number representing the level)
-         *             where LevelCost is:
-         *                 item: String
-         *                 amount: int
-         * @param costRegistry
-         */
-    public static SerializedEnchantmentCostRegistry serialize(EnchantmentCostRegistry costRegistry) {
-        List<String> enchantmentNamespaces = new ArrayList<>();
-        List<String> levels = new ArrayList<>();
-        List<String> itemNamespaces = new ArrayList<>();
-        List<Integer> amounts = new ArrayList<>();
-
-        //For each entry in the EnchantmentCostRegistry
-        for(Map.Entry<ResourceKey<Enchantment>, EnchantmentCost> registryEntry : costRegistry.getCostRegistry().entrySet()) {
-            ResourceKey<Enchantment> enchantmentKey = registryEntry.getKey();
-            EnchantmentCost cost = registryEntry.getValue();
-
-            //For each entry in the EnchantmentCost
-            for(Map.Entry<String, LevelCost> costEntry : cost.levels.entrySet()) {
-                String level = costEntry.getKey();
-                LevelCost levelCost = costEntry.getValue();
-                String itemNamespace = levelCost.item();
-                int amount = levelCost.amount();
-
-                //Add data to form parallel lists
-                enchantmentNamespaces.add(enchantmentKey.location().toString());
-                levels.add(level);
-                itemNamespaces.add(itemNamespace);
-                amounts.add(amount);
-            }
-        }
-        return new SerializedEnchantmentCostRegistry(
-                enchantmentNamespaces, levels, itemNamespaces, amounts,
-                costRegistry.getLapisCost().getItem().toString(),
-                costRegistry.getLapisCost().getCount()
-        );
-    }
-
     /**
      * Deserialize a SerializedEnchantmentCostRegistry object, return an EnchantmentCostRegistry object.
+     *
      * @param serializedRegistry
      * @return
      */
@@ -152,10 +109,11 @@ public class EnchantmentCostRegistrySyncPacket {
 
     /**
      * Warning! Ensure this is only fired server-side!
+     *
      * @param player
      */
     public static void syncClientWithServer(ServerPlayer player) {
-        if(player.level().isClientSide) return; //Disallow client running
+        if (player.level().isClientSide) return; //Disallow client running
 
         //Request the server to send the serverEnchantmentCostRegistry
         //Serialize the registry
@@ -171,5 +129,49 @@ public class EnchantmentCostRegistrySyncPacket {
                         serializedRegistry.lapisCostItemId(),
                         serializedRegistry.lapisCostAmount()
                 ));
+    }
+
+    /**
+     * Serialize the cost registry.
+     * <p>
+     * Map<ResourceLocation, EnchantmentCost>
+     * where EnchantmentCost contains:
+     * Map<String, LevelCost> (String is a number representing the level)
+     * where LevelCost is:
+     * item: String
+     * amount: int
+     *
+     * @param costRegistry
+     */
+    public static SerializedEnchantmentCostRegistry serialize(EnchantmentCostRegistry costRegistry) {
+        List<String> enchantmentNamespaces = new ArrayList<>();
+        List<String> levels = new ArrayList<>();
+        List<String> itemNamespaces = new ArrayList<>();
+        List<Integer> amounts = new ArrayList<>();
+
+        //For each entry in the EnchantmentCostRegistry
+        for (Map.Entry<ResourceKey<Enchantment>, EnchantmentCost> registryEntry : costRegistry.getCostRegistry().entrySet()) {
+            ResourceKey<Enchantment> enchantmentKey = registryEntry.getKey();
+            EnchantmentCost cost = registryEntry.getValue();
+
+            //For each entry in the EnchantmentCost
+            for (Map.Entry<String, LevelCost> costEntry : cost.levels.entrySet()) {
+                String level = costEntry.getKey();
+                LevelCost levelCost = costEntry.getValue();
+                String itemNamespace = levelCost.item();
+                int amount = levelCost.amount();
+
+                //Add data to form parallel lists
+                enchantmentNamespaces.add(enchantmentKey.location().toString());
+                levels.add(level);
+                itemNamespaces.add(itemNamespace);
+                amounts.add(amount);
+            }
+        }
+        return new SerializedEnchantmentCostRegistry(
+                enchantmentNamespaces, levels, itemNamespaces, amounts,
+                costRegistry.getLapisCost().getItem().toString(),
+                costRegistry.getLapisCost().getCount()
+        );
     }
 }

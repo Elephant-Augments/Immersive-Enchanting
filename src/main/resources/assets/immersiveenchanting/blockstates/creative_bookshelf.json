@@ -1,5 +1,7 @@
 {
   "variants": {
-    "": { "model": "immersiveenchanting:block/creative_bookshelf" }
+    "": {
+      "model": "immersiveenchanting:block/creative_bookshelf"
+    }
   }
 }

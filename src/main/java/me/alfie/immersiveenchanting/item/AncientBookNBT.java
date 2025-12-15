@@ -2,7 +2,6 @@ package me.alfie.immersiveenchanting.item;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import net.minecraft.core.Holder;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
@@ -12,8 +11,10 @@ import net.minecraft.world.item.enchantment.Enchantment;
 
 public class AncientBookNBT {
     public static final String NBT_ID = ImmersiveEnchanting.MODID + ":ancient_book_enchantment_type";
+
     /**
      * Set NBT containing enchantment type as a string
+     *
      * @param bookStack
      * @param enchantmentHolder
      */

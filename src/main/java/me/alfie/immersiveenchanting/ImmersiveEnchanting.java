@@ -8,10 +8,6 @@ import me.alfie.immersiveenchanting.datapack.EnchantmentCostDatapackHandler;
 import me.alfie.immersiveenchanting.gui.ModMenus;
 import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.lootmodifier.ModLootModifiers;
-import me.alfie.immersiveenchanting.networking.packets.EnchantItemPacket;
-import me.alfie.immersiveenchanting.networking.packets.EnchantmentCostRegistrySyncPacket;
-import me.alfie.immersiveenchanting.networking.packets.GetBookshelfContentsPacket;
-import me.alfie.immersiveenchanting.networking.packets.UnlockedEnchantmentsPacket;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
@@ -51,8 +47,13 @@ public class ImmersiveEnchanting {
         ModBlocks.register(modEventBus);
     }
 
+    public static HolderLookup<Enchantment> getEnchantmentHolderLookup(RegistryAccess access) {
+        return getEnchantmentRegistry(access).asLookup();
+    }
+
     /**
      * Return the enchantment registry from a RegistryAccess.
+     *
      * @param access
      * @return
      */
@@ -60,12 +61,9 @@ public class ImmersiveEnchanting {
         return access.registryOrThrow(Registries.ENCHANTMENT);
     }
 
-    public static HolderLookup<Enchantment> getEnchantmentHolderLookup(RegistryAccess access) {
-        return getEnchantmentRegistry(access).asLookup();
-    }
-
     /**
      * Get an enchantment holder using a holder lookup.
+     *
      * @param lookup
      * @param enchantmentResourceId
      * @return
@@ -85,6 +83,7 @@ public class ImmersiveEnchanting {
 
     /**
      * Automatically get an enchantment holder using RegistryAccess.
+     *
      * @param access
      * @param enchantment
      * @return
