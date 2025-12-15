@@ -240,9 +240,12 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
                     && mouseX < enchantingNodeTooltip.getCostStackPos().x + 16
                     && mouseY >= enchantingNodeTooltip.getCostStackPos().y
                     && mouseY < enchantingNodeTooltip.getCostStackPos().y + 16) {
+                guiGraphics.pose().pushPose();
+                guiGraphics.pose().translate(0, 0, 500);
                 guiGraphics.renderTooltip(font,
                         enchantingNodeTooltip.getCostStack(),
                         mouseX, mouseY);
+                guiGraphics.pose().popPose();
             }
         }
 
