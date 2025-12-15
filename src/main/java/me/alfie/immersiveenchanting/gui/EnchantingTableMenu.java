@@ -1,6 +1,5 @@
 package me.alfie.immersiveenchanting.gui;
 
-import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.network.FriendlyByteBuf;
@@ -22,8 +21,8 @@ import java.util.Set;
 
 public class EnchantingTableMenu extends AbstractContainerMenu {
 
-    private BlockPos blockPos;
-    private ContainerLevelAccess access;
+    private final BlockPos blockPos;
+    private final ContainerLevelAccess access;
     private final Container container;
 
     private Set<String> unlockedEnchantmentResourceIds;
@@ -31,11 +30,11 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
     private Set<Holder<Enchantment>> unlockedEnchantments = new HashSet<>();
 
 
-
-    public enum SLOTS {
-        TOOL,
-        LAPIS, //By default, this is the lapis slot, but it can be configured to other itemIds.
-        COST
+    // --------------------
+    // Game constructor
+    // --------------------
+    public EnchantingTableMenu(int containerId, Inventory playerInventory, FriendlyByteBuf buf) {
+        this(containerId, playerInventory, playerInventory.player.level(), buf.readBlockPos());
     }
 
     // --------------------
@@ -49,11 +48,34 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
         setupSlots(playerInventory);
     }
 
-    // --------------------
-    // Game constructor
-    // --------------------
-    public EnchantingTableMenu(int containerId, Inventory playerInventory, FriendlyByteBuf buf) {
-        this(containerId, playerInventory, playerInventory.player.level(), buf.readBlockPos());
+    //Helper methods
+    public void setupSlots(Inventory playerInventory) {
+        //Tool slot
+        this.addSlot(new Slot(this.container, 0, 233, 141));
+
+        //Lapis slot
+        this.addSlot(new Slot(this.container, 1, 233, 199));
+
+        //Cost slot
+        this.addSlot(new Slot(this.container, 2, 233, 170));
+
+        //Add player inventory slots
+        int startX = 17;
+        int startY = 140;
+
+        //Player inventory 3 rows of 9
+        for (int row = 0; row < 3; ++row) {
+            for (int col = 0; col < 9; ++col) {
+                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, startX + col * 18, startY + row * 18));
+            }
+        }
+
+        //Hotbar slots
+        for (int col = 0; col < 9; ++col) {
+            this.addSlot(new Slot(playerInventory, col, startX + col * 18, startY + 58));
+        }
+
+
     }
 
     @Override
@@ -114,43 +136,6 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
     }
 
     @Override
-    public boolean stillValid(Player player) {
-        return AbstractContainerMenu.stillValid(this.access, player, Blocks.ENCHANTING_TABLE);
-    }
-
-    //Helper methods
-    public void setupSlots(Inventory playerInventory) {
-        //Tool slot
-        this.addSlot(new Slot(this.container, 0, 233, 141));
-
-        //Lapis slot
-        this.addSlot(new Slot(this.container, 1, 233, 199));
-
-        //Cost slot
-        this.addSlot(new Slot(this.container, 2, 233, 170));
-
-        //Add player inventory slots
-        int startX = 17;
-        int startY = 140;
-
-        //Player inventory 3 rows of 9
-        for (int row = 0; row < 3; ++row) {
-            for (int col = 0; col < 9; ++col) {
-                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, startX + col * 18, startY + row * 18));
-            }
-        }
-
-        //Hotbar slots
-        for (int col = 0; col < 9; ++col) {
-            this.addSlot(new Slot(playerInventory, col, startX + col * 18, startY + 58));
-        }
-
-
-
-
-    }
-
-    @Override
     public void removed(Player player) {
         super.removed(player);
 
@@ -165,13 +150,9 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
         }
     }
 
-    /**
-     * @deprecated Resource ids will no longer be used, use holders instead.
-     * @param unlockedEnchantmentResourceIds
-     */
-    @Deprecated(forRemoval = true)
-    public void setUnlockedEnchantmentResourceIds(Set<String> unlockedEnchantmentResourceIds) {
-        this.unlockedEnchantmentResourceIds = unlockedEnchantmentResourceIds;
+    @Override
+    public boolean stillValid(Player player) {
+        return AbstractContainerMenu.stillValid(this.access, player, Blocks.ENCHANTING_TABLE);
     }
 
     /**
@@ -182,6 +163,14 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
         return this.unlockedEnchantmentResourceIds;
     }
 
+    /**
+     * @param unlockedEnchantmentResourceIds
+     * @deprecated Resource ids will no longer be used, use holders instead.
+     */
+    @Deprecated(forRemoval = true)
+    public void setUnlockedEnchantmentResourceIds(Set<String> unlockedEnchantmentResourceIds) {
+        this.unlockedEnchantmentResourceIds = unlockedEnchantmentResourceIds;
+    }
 
     public Set<Holder<Enchantment>> getUnlockedEnchantments() {
         return unlockedEnchantments;
@@ -195,8 +184,13 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
         return getToolSlotItem().isEmpty();
     }
 
+    public ItemStack getToolSlotItem() {
+        return getItemInSlot(SLOTS.TOOL);
+    }
+
     /**
      * Helper to get item in slot using SLOTS enum.
+     *
      * @param slot
      * @return
      */
@@ -204,8 +198,10 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
         return getSlot(slot.ordinal()).getItem();
     }
 
-    public ItemStack getToolSlotItem() {
-        return getItemInSlot(SLOTS.TOOL);
+    public enum SLOTS {
+        TOOL,
+        LAPIS, //By default, this is the lapis slot, but it can be configured to other itemIds.
+        COST
     }
 
 }

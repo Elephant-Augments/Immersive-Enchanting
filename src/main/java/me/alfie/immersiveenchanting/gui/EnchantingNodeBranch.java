@@ -20,25 +20,22 @@ import java.util.*;
 
 public class EnchantingNodeBranch {
 
+    public static int node_step = 80;
     //Order of nodes in the list determines enchantment order/order of appearance etc.
     private final List<EnchantingNode> nodes = new ArrayList<>();
-
-    private EnchantingTableScreen screen;
-    private float branchAngle;
+    private final EnchantingTableScreen screen;
+    private final float branchAngle;
     private final Holder<Enchantment> enchantmentHolder;
-    private int equippedLevel;
-    private boolean isBranchUnlocked;
-    private Player player;
-
+    private final int equippedLevel;
+    private final boolean isBranchUnlocked;
+    private final Player player;
     private final List<Pixel> precomputedPixels = new ArrayList<>();
-    private boolean isTextureReady;
     ResourceLocation bakedTextureLocation;
     int texOriginX;
     int texOriginY;
     int texWidth;
     int texHeight;
-
-    public static int node_step = 80;
+    private boolean isTextureReady;
 
     public EnchantingNodeBranch(EnchantingTableScreen screen, float branchAngle,
                                 Holder<Enchantment> enchantmentHolder, int equippedLevel,
@@ -67,7 +64,7 @@ public class EnchantingNodeBranch {
 
         //Get the max level, if 10 levels are in the config, then player can get level 10 enchantments.
         int maxEnchantmentLevel;
-        if(EnchantmentCostRegistry.getClientRegistry().getCostRegistry().containsKey(enchantmentKey)) {
+        if (EnchantmentCostRegistry.getClientRegistry().getCostRegistry().containsKey(enchantmentKey)) {
             maxEnchantmentLevel = EnchantmentCostRegistry.getClientRegistry().getEnchantmentCost(enchantmentKey).getHighestLevel();
         } else {
             //Fallback if there is no enchantment cost set up, use the default max level from the enchantment
@@ -103,10 +100,6 @@ public class EnchantingNodeBranch {
     public void addNode(EnchantingNode node) {
         nodes.add(node);
         screen.rendered_nodes.add(node);
-    }
-
-    public List<EnchantingNode> getNodes() {
-        return nodes;
     }
 
     public static void calculateNodeAnglesAndStep(EnchantingTableScreen screen) {
@@ -149,7 +142,7 @@ public class EnchantingNodeBranch {
 
         if (currentDistance < minRequiredDistance) {
             // Need to increase node_step proportionally
-            node_step = (int)Math.ceil(minRequiredDistance / smallestAngle);
+            node_step = (int) Math.ceil(minRequiredDistance / smallestAngle);
         }
 
         // Clamp node_step
@@ -159,7 +152,7 @@ public class EnchantingNodeBranch {
         float scale = 1.0f;
         currentDistance = node_step * smallestAngle;
         if (currentDistance < minRequiredDistance) {
-            scale = (float)(currentDistance / minRequiredDistance);
+            scale = (float) (currentDistance / minRequiredDistance);
             scale = Math.max(scale, minScale);
         }
         scale = Math.min(scale, maxScale);
@@ -167,10 +160,25 @@ public class EnchantingNodeBranch {
         EnchantingNode.globalScale = scale;
     }
 
+    /**
+     * Generate a list of angles based on the total number of branches.
+     *
+     * @param totalBranches
+     * @return
+     */
+    public static ArrayList<Float> generateBranchAngles(int totalBranches) {
+        // No more than 16 branches
+        ArrayList<Float> angles = new ArrayList<>();
+        for (int i = 0; i < totalBranches; i++) {
+            float angle = (float) (i * 2 * Math.PI / totalBranches); // evenly spaced
+            angles.add(angle);
+        }
+        return angles;
+    }
 
-
-
-
+    public List<EnchantingNode> getNodes() {
+        return nodes;
+    }
 
     public void placeNodesAlongLine() {
         // Center point of the canvas
@@ -192,7 +200,6 @@ public class EnchantingNodeBranch {
         }
     }
 
-
     public void calculateNodeConnections() {
         //Loop through all nodes in this branch
         for (int i = 0; i < nodes.size(); i++) {
@@ -208,28 +215,29 @@ public class EnchantingNodeBranch {
         // Use node centers for cleaner lines
         int ax = screen.canvasLeftPos + screen.scrollableCanvasWidth / 2;
         int ay = screen.canvasTopPos + screen.scrollableCanvasHeight / 2;
-        int bx = (int) (node.getX() + EnchantingNode.width*node.getScale() / 2);
-        int by = (int) (node.getY() + EnchantingNode.height*node.getScale() / 2);
+        int bx = (int) (node.getX() + EnchantingNode.width * node.getScale() / 2);
+        int by = (int) (node.getY() + EnchantingNode.height * node.getScale() / 2);
         calculateConnection(ax, ay, bx, by);
     }
 
     //Connect two nodes together
     private void connectNodes(EnchantingNode node1, EnchantingNode node2) {
         // Use node centers for cleaner lines
-        int ax = (int) (node1.getX() + EnchantingNode.width*node1.getScale() / 2);
-        int ay = (int) (node1.getY() + EnchantingNode.height*node1.getScale() / 2);
-        int bx = (int) (node2.getX() + EnchantingNode.width*node2.getScale() / 2);
-        int by = (int) (node2.getY() + EnchantingNode.height*node2.getScale() / 2);
+        int ax = (int) (node1.getX() + EnchantingNode.width * node1.getScale() / 2);
+        int ay = (int) (node1.getY() + EnchantingNode.height * node1.getScale() / 2);
+        int bx = (int) (node2.getX() + EnchantingNode.width * node2.getScale() / 2);
+        int by = (int) (node2.getY() + EnchantingNode.height * node2.getScale() / 2);
         calculateConnection(ax, ay, bx, by);
     }
 
     // Stores a pixel as a 64-bit key, no allocations needed.
     private long key(int x, int y) {
-        return (((long)x) << 32) | (y & 0xFFFFFFFFL);
+        return (((long) x) << 32) | (y & 0xFFFFFFFFL);
     }
 
     /**
      * Calculate the connection, store in precomputedPixels and bake a texture.
+     *
      * @param x1
      * @param y1
      * @param x2
@@ -256,26 +264,32 @@ public class EnchantingNodeBranch {
             if (cx == x2 && cy == y2) break;
 
             int e2 = err * 2;
-            if (e2 > -dy) { err -= dy; cx += sx; }
-            if (e2 <  dx) { err += dx; cy += sy; }
+            if (e2 > -dy) {
+                err -= dy;
+                cx += sx;
+            }
+            if (e2 < dx) {
+                err += dx;
+                cy += sy;
+            }
         }
 
         // --- PASS 2: Add white pixels to precomputed list ---
         for (long p : whitePixels) {
-            int px = (int)(p >> 32);
-            int py = (int)(p & 0xFFFFFFFF);
+            int px = (int) (p >> 32);
+            int py = (int) (p & 0xFFFFFFFF);
             precomputedPixels.add(new Pixel(px, py, WHITE));
         }
 
         // --- PASS 3: Add black border pixels ---
         for (long p : whitePixels) {
-            int px = (int)(p >> 32);
-            int py = (int)(p & 0xFFFFFFFF);
+            int px = (int) (p >> 32);
+            int py = (int) (p & 0xFFFFFFFF);
 
-            calculateBorderPixel(px - 1, py,     whitePixels, BLACK);
-            calculateBorderPixel(px + 1, py,     whitePixels, BLACK);
-            calculateBorderPixel(px,     py - 1, whitePixels, BLACK);
-            calculateBorderPixel(px,     py + 1, whitePixels, BLACK);
+            calculateBorderPixel(px - 1, py, whitePixels, BLACK);
+            calculateBorderPixel(px + 1, py, whitePixels, BLACK);
+            calculateBorderPixel(px, py - 1, whitePixels, BLACK);
+            calculateBorderPixel(px, py + 1, whitePixels, BLACK);
 
             // Optional corners:
             calculateBorderPixel(px - 1, py - 1, whitePixels, BLACK);
@@ -289,6 +303,7 @@ public class EnchantingNodeBranch {
 
     /**
      * Add border pixels to precomputedPixels
+     *
      * @param x
      * @param y
      * @param white
@@ -318,7 +333,6 @@ public class EnchantingNodeBranch {
                 texHeight
         );
     }
-
 
     public boolean hasCalculatedConnections() {
         return !precomputedPixels.isEmpty();

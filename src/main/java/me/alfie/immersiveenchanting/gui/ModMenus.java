@@ -1,11 +1,9 @@
 package me.alfie.immersiveenchanting.gui;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -19,7 +17,7 @@ public class ModMenus {
             () -> new MenuType<>(
                     (containerId, playerInventory) ->
                             // At registration time, you don't have a block entity/position, so pass null
-                            new EnchantingTableMenu(containerId, playerInventory, (Level) null, (BlockPos) null),
+                            new EnchantingTableMenu(containerId, playerInventory, null, null),
                     FeatureFlags.DEFAULT_FLAGS
             )
     );
