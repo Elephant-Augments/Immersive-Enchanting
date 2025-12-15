@@ -79,7 +79,6 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
     private ItemStack lastStack = ItemStack.EMPTY; //Handling which tool in slot
     private Player player;
     private ItemStack renderCostStack; //The stack to render when hovering.
-    private boolean isSlot0Empty = true;
 
     public final float PARALLAX = 0.5f;
 
@@ -105,6 +104,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
     @Override //Init code when GUI is created.
     public void init() {
         super.init();
+
         initializeScreen();
         onToolSlotChanged(); //Updates if screen size is changed while screen open
     }
@@ -115,7 +115,6 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         //Prevent tearing
         branches.clear();
         rendered_nodes.clear();
-        //onSlot0Changed();
     }
 
     private void calculateViewportSize() {
@@ -141,7 +140,38 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
 
     @Override
     protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY) {
-        //For culling
+        //Fade the background and nodes darker if hovering
+        float targetBrightness = hoveringAnyNode ? 0.15f : 1f;
+        float fadeSpeed = 0.3f;
+        currentBackgroundBrightness += (targetBrightness - currentBackgroundBrightness) * fadeSpeed;
+        guiGraphics.setColor(currentBackgroundBrightness, currentBackgroundBrightness, currentBackgroundBrightness, 1f);
+
+        //Darken background if tool slot is empty
+        if(menu.isToolSlotEmpty()) {
+            guiGraphics.setColor(0.5F, 0.5F, 0.5F, 1f);
+        }
+
+        renderTiledBg(guiGraphics);
+        renderBranchConnections(guiGraphics);
+        renderCentralSprites(guiGraphics);
+        renderNodes(guiGraphics);
+        renderNodeTooltip(guiGraphics, mouseX, mouseY);
+        renderHoveredNode(guiGraphics);
+
+        // Disable scissor after drawing
+        RenderSystem.disableScissor();
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        guiGraphics.blit(ENCHANTING_TABLE_BACKGROUND_TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
+        RenderSystem.disableBlend();
+    }
+
+    /**
+     * Render a tiled background and set up viewport culling.
+     * @param guiGraphics
+     */
+    private void renderTiledBg(GuiGraphics guiGraphics) {
+        //Setup viewport culling
         int viewportLeft   = this.leftPos + viewportStartX;
         int viewportTop    = this.topPos + viewportStartY;
         int viewportRight  = viewportLeft + viewportWidth;
@@ -155,17 +185,6 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
                     (int) (viewportWidth * scale),
                     (int) (viewportHeight * scale)
             );
-        }
-
-        //Fade the background and nodes darker if hovering
-        float targetBrightness = hoveringAnyNode ? 0.15f : 1f;
-        float speed = 0.3f;
-        currentBackgroundBrightness += (targetBrightness - currentBackgroundBrightness) * speed;
-        guiGraphics.setColor(currentBackgroundBrightness, currentBackgroundBrightness, currentBackgroundBrightness, 1f);
-
-        //Darken background if slot 0 empty
-        if(isSlot0Empty) {
-            guiGraphics.setColor(0.5F, 0.5F, 0.5F, 1f);
         }
 
         //Draw a tiled background using TILE_TEXTURE as a background
@@ -194,10 +213,11 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
                 );
             }
         }
-        //Reset color after darkening
+        //Reset brightness
         guiGraphics.setColor(1f, 1f, 1f, 1f);
+    }
 
-        //Render connections behind nodes.
+    private void renderBranchConnections(GuiGraphics guiGraphics) {
         for (EnchantingNodeBranch branch : branches) {
             guiGraphics.setColor(currentBackgroundBrightness, currentBackgroundBrightness, currentBackgroundBrightness, 1f);
 
@@ -216,7 +236,13 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
             //Reset color after darkening
             guiGraphics.setColor(1f, 1f, 1f, 1f);
         }
+    }
 
+    /**
+     * Render the enchanting table, book, and item in the centre of the screen.
+     * @param guiGraphics
+     */
+    private void renderCentralSprites(GuiGraphics guiGraphics) {
         //Add background book and virtual slot
         guiGraphics.blit(
                 ENCHANTING_TABLE_TOP_TEXTURE,
@@ -250,8 +276,13 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         ItemStack stack = this.menu.getSlot(0).getItem(); //to get the ItemStack
         guiGraphics.renderItem(stack, centerOnCanvas(16, 16).x - (int)scrollX,
                 centerOnCanvas(16, 16).y - (int)scrollY);
+    }
 
-        //Render the unhovered nodes.
+    /**
+     * Render the unhovered nodes.
+     * @param guiGraphics
+     */
+    private void renderNodes(GuiGraphics guiGraphics ) {
         for(EnchantingNode node : rendered_nodes) {
             guiGraphics.setColor(currentBackgroundBrightness, currentBackgroundBrightness, currentBackgroundBrightness, 1f);
             node.render(guiGraphics, this);
@@ -259,10 +290,15 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
             //Reset color after darkening
             guiGraphics.setColor(1f, 1f, 1f, 1f);
         }
+    }
 
+    private void renderNodeTooltip(GuiGraphics guiGraphics,
+                                   int mouseX,
+                                   int mouseY) {
         hoveringAnyNode = false;
         EnchantingNode hoveredNode = null;
-        // Draw node tooltips
+
+        // Draw node tooltip
         for (EnchantingNode node : this.rendered_nodes) {
             if (node.isMouseOver(mouseX, mouseY, this)) {
                 hoveringAnyNode = true;
@@ -333,7 +369,10 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         if(hoveredNode != currentNodeHover) {
             currentNodeHover = null;
         }
+    }
 
+
+    private void renderHoveredNode(GuiGraphics guiGraphics) {
         //Render the hovered node.
         for(EnchantingNode node : rendered_nodes) {
             if(node == currentNodeHover) {
@@ -347,15 +386,8 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
                 node.setScale(EnchantingNode.globalScale);
             }
         }
-
-
-        // Disable scissor after drawing
-        RenderSystem.disableScissor();
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        guiGraphics.blit(ENCHANTING_TABLE_BACKGROUND_TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
-        RenderSystem.disableBlend();
     }
+
 
     public ArrayList<Float> generateBranchAngles(int totalBranches) {
         // No more than 16 branches
@@ -446,16 +478,11 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         branches.clear();
         rendered_nodes.clear();
 
-        ItemStack current_item = this.menu.getSlot(0).getItem();
-        if(current_item.isEmpty()) {
+        if(menu.isToolSlotEmpty()) {
             initializeScreen();
-            isSlot0Empty = true;
-        } else {
-            //calculateViewportSize();
-            isSlot0Empty = false;
         }
 
-        buildNodeBranches(current_item);
+        buildNodeBranches(menu.getToolSlotItem());
 
         //Update canvas size
         int largestBranchLevel = 1;
@@ -505,7 +532,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (button == 0) {
             ItemStack carriedStack = menu.getCarried();
-            if (!isSlot0Empty) {
+            if (!menu.isToolSlotEmpty()) {
                 // 1. Check if any node was clicked
                 for (EnchantingNode node : this.rendered_nodes) {
                     if (node.isMouseOver(mouseX, mouseY, this)) {
@@ -515,7 +542,8 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
                 }
 
                 // Check if the centre icon was clicked
-                if(isMouseOverVirtualSlot(mouseX, mouseY) && carriedStack.isEmpty()) {
+                if(isMouseOverBoundingBox(virtualSlotPos, VIRTUAL_SLOT_DIMENSIONS, VIRTUAL_SLOT_DIMENSIONS, mouseX, mouseY)
+                        && carriedStack.isEmpty()) {
                     PacketDistributor.sendToServer(
                             new UpdateToolSlotPacket(UpdateToolSlotPacket.MODE.TAKE.ordinal())
                     );
@@ -542,7 +570,9 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
 
             } else {
                 //Send packet to place carried item in slot.
-                if(isMouseOverVirtualSlot(mouseX, mouseY) && !carriedStack.isEmpty()) {
+                //Check if mouse if over the virtual slot
+                if(isMouseOverBoundingBox(virtualSlotPos, VIRTUAL_SLOT_DIMENSIONS, VIRTUAL_SLOT_DIMENSIONS, mouseX, mouseY)
+                        && !carriedStack.isEmpty()) {
                     PacketDistributor.sendToServer(
                             new UpdateToolSlotPacket(UpdateToolSlotPacket.MODE.PLACE.ordinal())
                     );
@@ -550,6 +580,12 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
                 }
             }
 
+        }
+
+        if (button == 1) {
+            if(hoveringAnyNode) {
+
+            }
         }
         return super.mouseClicked(mouseX, mouseY, button);
     }
@@ -619,20 +655,31 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
 
     }
 
-    public void setRenderCostTo(ItemStack costStack) {
-        this.renderCostStack = costStack;
-    }
-
-    private boolean isMouseOverVirtualSlot(double mouseX, double mouseY) {
+    /**
+     * Check if mouse is over a bounding box. Automatically clips the bounding box if out of viewport bounds.
+     * @param topLeftPos Top Left position of the bounding box to detect
+     * @param width Width of the bounding box to detect
+     * @param height Height of the bounding box to detect
+     * @param mouseX
+     * @param mouseY
+     * @return
+     */
+    public boolean isMouseOverBoundingBox(
+            Vector2i topLeftPos,
+            int width,
+            int height,
+            double mouseX,
+            double mouseY
+    ) {
         // Node's position on screen
-        int drawX = virtualSlotPos.x - (int) scrollX;
-        int drawY = virtualSlotPos.y - (int) scrollY;
+        int drawX = topLeftPos.x - (int) scrollX;
+        int drawY = topLeftPos.y - (int) scrollY;
 
         // Node bounds
         int boxLeft   = drawX;
         int boxTop    = drawY;
-        int boxRight  = (int) (drawX + VIRTUAL_SLOT_DIMENSIONS);
-        int boxBottom = (int) (drawY + VIRTUAL_SLOT_DIMENSIONS);
+        int boxRight  = drawX + width;
+        int boxBottom = drawY + height;
 
         // Viewport bounds
         int viewportLeft   = canvasLeftPos;
