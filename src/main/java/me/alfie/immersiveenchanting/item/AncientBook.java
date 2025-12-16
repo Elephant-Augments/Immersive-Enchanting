@@ -1,14 +1,19 @@
 package me.alfie.immersiveenchanting.item;
 
+import me.alfie.immersiveenchanting.ImmersiveEnchanting;
+import me.alfie.immersiveenchanting.compat.ModCheck;
+import me.alfie.immersiveenchanting.compat.ModCompat;
 import me.alfie.immersiveenchanting.datacomponents.EnchantmentDataComponent;
 import me.alfie.immersiveenchanting.datacomponents.ModDataComponents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -20,6 +25,7 @@ import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.moddiscovery.ModInfo;
 
 import java.util.List;
+import java.util.Optional;
 
 public class AncientBook extends Item {
 
@@ -46,12 +52,14 @@ public class AncientBook extends Item {
             //context.registries().lookupOrThrow(Registries.ENCHANTMENT);
             //List<Holder.Reference<Enchantment>> allEnchantments = lookup.listElements().toList();
             //Registry<Enchantment> enchantmentRegistry = access.registryOrThrow(Registries.ENCHANTMENT);
+            ResourceLocation enchantmentResourceLocation = ResourceLocation.parse(enchantmentDataComponent.enchantmentResourceLocation());
+            ResourceKey<Enchantment> enchantmentResourceKey = ResourceKey.create(Registries.ENCHANTMENT, enchantmentResourceLocation);
 
-            RegistryAccess registryAccess;
-            registryAccess = Minecraft.getInstance().level.registryAccess();
-            Registry<Enchantment> enchantmentRegistry = registryAccess.registryOrThrow(Registries.ENCHANTMENT);
+            RegistryAccess registryAccess = Minecraft.getInstance().level.registryAccess();
+            Registry<Enchantment> enchantmentRegistry = ImmersiveEnchanting.getEnchantmentRegistry(registryAccess);
+            Enchantment enchantment = enchantmentRegistry.get(enchantmentResourceKey);
 
-            Enchantment enchantment = enchantmentRegistry.get(ResourceLocation.parse(enchantmentDataComponent.enchantmentResourceLocation()));
+            Optional<Holder.Reference<Enchantment>> enchantmentHolder = ImmersiveEnchanting.getEnchantmentHolder(registryAccess, enchantmentResourceKey);
 
             //Translation key for lore text.
             MutableComponent loreText = Component.translatable("lore.immersiveenchanting.ancient_book");
@@ -67,7 +75,6 @@ public class AncientBook extends Item {
             tooltipComponents.add(fullTooltip);
 
             //Added by mod tooltip
-            ResourceLocation enchantmentResourceLocation = ResourceLocation.parse(enchantmentDataComponent.enchantmentResourceLocation());
             String modNamespace = enchantmentResourceLocation.getNamespace();
 
             ModInfo modInfo = (ModInfo) ModList.get().getModContainerById(modNamespace)
@@ -82,6 +89,17 @@ public class AncientBook extends Item {
                 Component addedBy = Component.translatable("lore.immersiveenchanting.added_by").append(" " + modNamespace).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
                 tooltipComponents.add(addedBy);
             }
+
+            //Adds enchantment description if mod is loaded.
+            if(ModCheck.Mod.ENCHANTMENT_DESCRIPTIONS.isLoaded()) {
+                MutableComponent enchDesc = ModCompat.getEnchantmentDescription(
+                        enchantmentHolder.orElseThrow(),
+                        enchantmentResourceLocation,
+                        1 //Ancient books don't have a level, so try level 1.
+                );
+                tooltipComponents.add(enchDesc.withStyle(ChatFormatting.DARK_GRAY));
+            }
+
         }
 
     }
