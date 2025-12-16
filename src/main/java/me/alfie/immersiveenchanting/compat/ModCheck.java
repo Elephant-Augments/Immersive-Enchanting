@@ -60,8 +60,7 @@ public class ModCheck {
      * Note: Ensure mod is added to dependencies in build.gradle
      */
     public enum Mod {
-        //Example: ENCHANT_LIMITER("enchant_limiter");
-        ; //No definitions yet for Forge 1.20.1
+        ENCHANTMENT_DESCRIPTIONS("enchdesc");
 
         private final String modid;
 

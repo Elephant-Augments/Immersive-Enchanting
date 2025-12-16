@@ -1,5 +1,8 @@
 package me.alfie.immersiveenchanting.item;
 
+import me.alfie.immersiveenchanting.ImmersiveEnchanting;
+import me.alfie.immersiveenchanting.compat.ModCheck;
+import me.alfie.immersiveenchanting.compat.ModCompat;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Registry;
@@ -7,6 +10,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -36,10 +40,11 @@ public class AncientBook extends Item {
         ResourceLocation enchantmentRL = AncientBookNBT.getEnchantment(stack).location();
         if (enchantmentRL != null) {
             //Get the enchantment from the registry.
-            RegistryAccess registryAccess;
-            registryAccess = Minecraft.getInstance().level.registryAccess();
-            Registry<Enchantment> enchantmentRegistry = registryAccess.registryOrThrow(Registries.ENCHANTMENT);
-            Enchantment enchantment = enchantmentRegistry.get(enchantmentRL);
+            ResourceKey<Enchantment> enchantmentResourceKey = ResourceKey.create(Registries.ENCHANTMENT, enchantmentRL);
+
+            RegistryAccess registryAccess = Minecraft.getInstance().level.registryAccess();
+            Registry<Enchantment> enchantmentRegistry = ImmersiveEnchanting.getEnchantmentRegistry(registryAccess);
+            Enchantment enchantment = enchantmentRegistry.get(enchantmentResourceKey);
 
             //Translation key for lore text.
             MutableComponent loreText = Component.translatable("lore.immersiveenchanting.ancient_book");
@@ -68,6 +73,12 @@ public class AncientBook extends Item {
             } else {
                 Component addedBy = Component.translatable("lore.immersiveenchanting.added_by").append(" " + modNamespace).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
                 tooltipComponents.add(addedBy);
+            }
+
+            //Adds enchantment description if mod is loaded.
+            if(ModCheck.Mod.ENCHANTMENT_DESCRIPTIONS.isLoaded()) {
+                MutableComponent enchDesc = ModCompat.getEnchantmentDescription(enchantment).copy();
+                tooltipComponents.add(enchDesc.withStyle(ChatFormatting.DARK_GRAY));
             }
         }
 
