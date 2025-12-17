@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class AncientBook extends Item {
-
+    public static final String TRANSLATION_KEY = "lore.immersiveenchanting.ancient_book";
 
     public AncientBook(Properties properties) {
         super(properties.stacksTo(1).rarity(Rarity.UNCOMMON));
@@ -62,7 +62,7 @@ public class AncientBook extends Item {
             Optional<Holder.Reference<Enchantment>> enchantmentHolder = ImmersiveEnchanting.getEnchantmentHolder(registryAccess, enchantmentResourceKey);
 
             //Translation key for lore text.
-            MutableComponent loreText = Component.translatable("lore.immersiveenchanting.ancient_book");
+            MutableComponent loreText = Component.translatable(TRANSLATION_KEY);
 
             //Enchantment name (styled)
             MutableComponent enchantName = (MutableComponent) enchantment.description();
