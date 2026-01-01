@@ -1,4 +1,4 @@
-package me.alfie.immersiveenchanting.datacomponents;
+package me.alfie.immersiveenchanting.item.legacy;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -9,8 +9,10 @@ import net.minecraft.world.item.ItemStack;
 
 /**
  * Holds the enchantment resource location as a string, for example "minecraft:respiration"
+ * @deprecated Use DataComponents.StoredEnchantment
  * @param enchantmentResourceLocation
  */
+@Deprecated
 public record EnchantmentDataComponent(String enchantmentResourceLocation) {
 
     static final Codec<EnchantmentDataComponent> BASIC_CODEC = RecordCodecBuilder.create(instance ->

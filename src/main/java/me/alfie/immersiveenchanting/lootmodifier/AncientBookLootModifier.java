@@ -4,11 +4,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import me.alfie.immersiveenchanting.ImmersiveEnchanting;
-import me.alfie.immersiveenchanting.datacomponents.EnchantmentDataComponent;
-import me.alfie.immersiveenchanting.datacomponents.ModDataComponents;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.datapack.LevelCost;
+import me.alfie.immersiveenchanting.item.AncientBook;
 import me.alfie.immersiveenchanting.item.ModItems;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
@@ -106,8 +104,8 @@ public class AncientBookLootModifier extends LootModifier {
                 // Pick a random enchantment type from the filtered list
                 if (!filteredEnchantments.isEmpty()) {
                     Holder.Reference<Enchantment> randomEnchantment = filteredEnchantments.get(context.getRandom().nextInt(filteredEnchantments.size()));
-                    lootItem.set(ModDataComponents.ENCHANTMENT.get(),
-                            new EnchantmentDataComponent(randomEnchantment.key().location().toString()));
+
+                    AncientBook.setStoredEnchantment(lootItem, randomEnchantment);
                 }
             }
             generatedLoot.add(lootItem);

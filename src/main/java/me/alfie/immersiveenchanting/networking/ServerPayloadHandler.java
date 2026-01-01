@@ -3,10 +3,9 @@ package me.alfie.immersiveenchanting.networking;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.block.CreativeBookshelf;
 import me.alfie.immersiveenchanting.compat.ModCompat;
-import me.alfie.immersiveenchanting.datacomponents.EnchantmentDataComponent;
-import me.alfie.immersiveenchanting.datacomponents.ModDataComponents;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
+import me.alfie.immersiveenchanting.item.AncientBook;
 import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.networking.packets.EnchantItemPacket;
 import me.alfie.immersiveenchanting.networking.packets.GetBookshelfContentsPacket;
@@ -17,6 +16,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -29,6 +29,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChiseledBookShelfBlockEntity;
@@ -137,15 +138,15 @@ public class ServerPayloadHandler {
      * @return
      */
     @Nullable
+    @Deprecated(forRemoval = true)
     public static ResourceKey<Enchantment> getAncientBookResourceKey(ItemStack book) {
-        if (book.has(ModDataComponents.ENCHANTMENT)) {
-            String resource = EnchantmentDataComponent.getEnchantmentData(book);
+        if (book.has(DataComponents.STORED_ENCHANTMENTS)) {
+            ItemEnchantments itemEnchantments = book.get(DataComponents.STORED_ENCHANTMENTS);
+            List<Holder<Enchantment>> enchantments = itemEnchantments.keySet().stream().toList();
+            Holder<Enchantment> enchantmentHolder = enchantments.getFirst();
 
-            if (resource != null) {
-                return ResourceKey.create(Registries.ENCHANTMENT, ResourceLocation.parse(resource));
-            }
+            return ResourceKey.create(Registries.ENCHANTMENT, ResourceLocation.parse(enchantmentHolder.getRegisteredName()));
         }
-
         return null;
     }
 
@@ -165,7 +166,7 @@ public class ServerPayloadHandler {
             //Get books in bookshelf
             for (ItemStack book : books) {
                 if (book.getItem() == ModItems.ANCIENT_BOOK.get()) {
-                    ResourceKey<Enchantment> key = getAncientBookResourceKey(book);
+                    ResourceKey<Enchantment> key = AncientBook.getStoredEnchantment(book, level);
 
                     if (key != null) {
                         unlockedEnchantments.add(key);

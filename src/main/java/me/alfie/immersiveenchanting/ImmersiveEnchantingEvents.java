@@ -2,11 +2,10 @@ package me.alfie.immersiveenchanting;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import me.alfie.immersiveenchanting.creativetab.ModCreativeTab;
-import me.alfie.immersiveenchanting.datacomponents.EnchantmentDataComponent;
-import me.alfie.immersiveenchanting.datacomponents.ModDataComponents;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.datapack.EnchantmentMetadataRegistry;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
+import me.alfie.immersiveenchanting.item.AncientBook;
 import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.networking.ServerPayloadHandler;
 import me.alfie.immersiveenchanting.networking.packets.EnchantmentCostRegistrySyncPacket;
@@ -15,7 +14,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.InteractionResult;
@@ -23,6 +24,8 @@ import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -33,6 +36,8 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerContainerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
@@ -104,7 +109,8 @@ public class ImmersiveEnchantingEvents {
                 ItemStack bookStack = new ItemStack(ModItems.ANCIENT_BOOK.get());
 
                 //Set book data
-                bookStack.set(ModDataComponents.ENCHANTMENT.get(), new EnchantmentDataComponent(id.toString()));
+                AncientBook.setStoredEnchantment(bookStack, holder);
+
                 event.accept(bookStack);
             });
 
@@ -167,6 +173,40 @@ public class ImmersiveEnchantingEvents {
                 ServerPayloadHandler.checkBookshelvesAndUpdateClient(pos, player.level(), serverPlayer);
             }
         }
+    }
+
+    /**
+     * Hide the default enchantment tooltip for ancient books. Custom tooltip is rendered in AncientBook class.
+     * @param event
+     */
+    @SubscribeEvent
+    public void hideAncientBookEnchantmentTooltip(ItemTooltipEvent event) {
+        if(event.getItemStack().is(ModItems.ANCIENT_BOOK.get())) {
+            event.getToolTip().removeIf(component -> component.getContents() instanceof TranslatableContents contents
+                    && contents.getKey().startsWith("enchantment."));
+        }
+
+    }
+
+    /**
+     * Migrate book data in containers.
+     * @param event
+     */
+    @SubscribeEvent
+    public void onContainerOpen(PlayerContainerEvent.Open event) {
+        AbstractContainerMenu menu = event.getContainer();
+        Level level = event.getEntity().level();
+        migrateBookInContainer(menu, level);
+    }
+
+    private void migrateBookInContainer(AbstractContainerMenu menu, Level level) {
+        for(Slot slot : menu.slots) {
+            ItemStack stack = slot.getItem();
+            if(stack.is(ModItems.ANCIENT_BOOK.get())) {
+                AncientBook.migrateDataComponent(stack, level);
+            }
+        }
+        menu.broadcastChanges();
     }
 
 }

@@ -1,6 +1,5 @@
 package me.alfie.immersiveenchanting.networking.packets;
 
-import io.netty.buffer.ByteBuf;
 import me.alfie.immersiveenchanting.networking.ServerPayloadHandler;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;

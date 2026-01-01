@@ -1,4 +1,4 @@
-package me.alfie.immersiveenchanting.datacomponents;
+package me.alfie.immersiveenchanting.item.legacy;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import net.minecraft.core.component.DataComponentType;
@@ -6,6 +6,7 @@ import net.minecraft.core.registries.Registries;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
+
 
 public class ModDataComponents {
     public static final DeferredRegister.DataComponents DATA_COMPONENT_TYPES =
