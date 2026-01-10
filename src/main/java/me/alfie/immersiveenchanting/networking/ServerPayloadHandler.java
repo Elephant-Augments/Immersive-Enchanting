@@ -4,7 +4,7 @@ import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.block.CreativeBookshelf;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
-import me.alfie.immersiveenchanting.item.AncientBookNBT;
+import me.alfie.immersiveenchanting.item.AncientBook;
 import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.networking.packets.EnchantItemPacket;
 import me.alfie.immersiveenchanting.networking.packets.GetBookshelfContentsPacket;
@@ -157,7 +157,7 @@ public class ServerPayloadHandler {
             //Get books in bookshelf
             for (ItemStack book : books) {
                 if (book.getItem() == ModItems.ANCIENT_BOOK.get()) {
-                    ResourceKey<Enchantment> key = getAncientBookResourceKey(book);
+                    ResourceKey<Enchantment> key = AncientBook.getEnchantment(book, level);
 
                     if (key != null) {
                         unlockedEnchantments.add(key);
@@ -234,21 +234,6 @@ public class ServerPayloadHandler {
 
         }
         return contents;
-    }
-
-    /**
-     * Get the enchantment resource id for an ancient book.
-     *
-     * @param book
-     * @return
-     */
-    @Nullable
-    public static ResourceKey<Enchantment> getAncientBookResourceKey(ItemStack book) {
-        try {
-            return AncientBookNBT.getEnchantment(book);
-        } catch (Exception e) {
-            return null;
-        }
     }
 
     /**

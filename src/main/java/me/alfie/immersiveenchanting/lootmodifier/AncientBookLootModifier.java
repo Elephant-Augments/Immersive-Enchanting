@@ -5,7 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.datapack.LevelCost;
-import me.alfie.immersiveenchanting.item.AncientBookNBT;
+import me.alfie.immersiveenchanting.item.AncientBook;
 import me.alfie.immersiveenchanting.item.ModItems;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
@@ -97,7 +97,7 @@ public class AncientBookLootModifier extends LootModifier {
                 // Pick a random enchantment type from the filtered list
                 if (!filteredEnchantments.isEmpty()) {
                     Holder<Enchantment> randomEnchantment = filteredEnchantments.get(context.getRandom().nextInt(filteredEnchantments.size()));
-                    AncientBookNBT.setEnchantment(lootItem, randomEnchantment);
+                    AncientBook.setStoredEnchantment(lootItem, randomEnchantment);
                 }
             }
             generatedLoot.add(lootItem);

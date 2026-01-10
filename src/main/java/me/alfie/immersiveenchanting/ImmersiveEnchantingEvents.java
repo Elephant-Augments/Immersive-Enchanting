@@ -7,7 +7,7 @@ import me.alfie.immersiveenchanting.datapack.EnchantmentMetadataRegistry;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.ModMenus;
-import me.alfie.immersiveenchanting.item.AncientBookNBT;
+import me.alfie.immersiveenchanting.item.AncientBook;
 import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.networking.ModPacketHandler;
 import me.alfie.immersiveenchanting.networking.ServerPayloadHandler;
@@ -18,6 +18,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -26,6 +27,8 @@ import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -34,6 +37,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
+import net.minecraftforge.event.entity.player.ItemTooltipEvent;
+import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
@@ -122,7 +127,7 @@ public class ImmersiveEnchantingEvents {
                 ItemStack bookStack = new ItemStack(ModItems.ANCIENT_BOOK.get());
 
                 //Set book data
-                AncientBookNBT.setEnchantment(bookStack, holder);
+                AncientBook.setStoredEnchantment(bookStack, holder);
                 event.accept(bookStack);
             });
 
@@ -196,6 +201,39 @@ public class ImmersiveEnchantingEvents {
                 ServerPayloadHandler.checkBookshelvesAndUpdateClient(pos, player.level(), serverPlayer);
             }
         }
+    }
+
+    /**
+     * Hide the default enchantment tooltip for ancient books. Custom tooltip is rendered in AncientBook class.
+     * @param event
+     */
+    @SubscribeEvent
+    public void hideAncientBookEnchantmentTooltip(ItemTooltipEvent event) {
+        if(event.getItemStack().is(ModItems.ANCIENT_BOOK.get())) {
+            event.getToolTip().removeIf(component -> component.getContents() instanceof TranslatableContents contents
+                    && contents.getKey().startsWith("enchantment."));
+        }
+    }
+
+    /**
+     * Migrate book NBT in containers.
+     * @param event
+     */
+    @SubscribeEvent
+    public void onContainerOpen(PlayerContainerEvent.Open event) {
+        AbstractContainerMenu menu = event.getContainer();
+        Level level = event.getEntity().level();
+        migrateBookInContainer(menu, level);
+    }
+
+    private void migrateBookInContainer(AbstractContainerMenu menu, Level level) {
+        for(Slot slot : menu.slots) {
+            ItemStack stack = slot.getItem();
+            if(stack.is(ModItems.ANCIENT_BOOK.get())) {
+                AncientBook.migrateNBT(stack, level);
+            }
+        }
+        menu.broadcastChanges();
     }
 
 }

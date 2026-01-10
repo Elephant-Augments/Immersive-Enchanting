@@ -60,7 +60,7 @@ public class ModCheck {
      * Note: Ensure mod is added to dependencies in build.gradle
      */
     public enum Mod {
-        ENCHANTMENT_DESCRIPTIONS("enchdesc");
+        ;
 
         private final String modid;
 
