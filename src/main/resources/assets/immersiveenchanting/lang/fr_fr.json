@@ -8,5 +8,9 @@
   "gui.immersiveenchanting.cost_free": "Gratuit.",
   "gui.immersiveenchanting.equipped": "Équipé.",
   "gui.immersiveenchanting.locked_enchantment": "???",
-  "gui.immersiveenchanting.locked_enchantment_hint": "Inconnu"
+  "gui.immersiveenchanting.locked_enchantment_hint": "Inconnu",
+
+  "immersiveenchanting.config.general": "Général",
+  "immersiveenchanting.config.disable_ancient_book_requirement": "Désactiver la nécessité des livres anciens",
+  "immersiveenchanting.config.bookshelf_search_height": "Hauter de recherche de la bibliothèque"
 }

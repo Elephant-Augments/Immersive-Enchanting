@@ -19,6 +19,7 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
 
@@ -45,6 +46,8 @@ public class ImmersiveEnchanting {
         ModLootModifiers.register(modEventBus);
         ModCreativeTab.register(modEventBus);
         ModBlocks.register(modEventBus);
+
+        context.registerConfig(ModConfig.Type.SERVER, ImmersiveEnchantingConfig.CONFIG_SPEC);
     }
 
     public static HolderLookup<Enchantment> getEnchantmentHolderLookup(RegistryAccess access) {
