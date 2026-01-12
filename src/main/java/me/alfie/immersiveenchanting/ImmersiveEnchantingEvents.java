@@ -60,6 +60,8 @@ public class ImmersiveEnchantingEvents {
         //Load client resources
         ResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
         EnchantmentMetadataRegistry.loadIcons(resourceManager);
+
+
     }
 
     /**

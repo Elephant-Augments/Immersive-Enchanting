@@ -3,6 +3,8 @@ package me.alfie.immersiveenchanting;
 import com.google.gson.Gson;
 import com.mojang.logging.LogUtils;
 import me.alfie.immersiveenchanting.block.ModBlocks;
+import me.alfie.immersiveenchanting.config.ClientConfig;
+import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.creativetab.ModCreativeTab;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostDatapackHandler;
 import me.alfie.immersiveenchanting.gui.ModMenus;
@@ -21,6 +23,7 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.NeoForge;
 import org.slf4j.Logger;
 
@@ -53,6 +56,9 @@ public class ImmersiveEnchanting {
         modEventBus.addListener(UnlockedEnchantmentsPacket::register);
         modEventBus.addListener(EnchantmentCostRegistrySyncPacket::register);
         modEventBus.addListener(UpdateToolSlotPacket::register);
+
+        modContainer.registerConfig(ModConfig.Type.CLIENT, ClientConfig.CONFIG_SPEC);
+        modContainer.registerConfig(ModConfig.Type.SERVER, ServerConfig.CONFIG_SPEC);
     }
 
     /**

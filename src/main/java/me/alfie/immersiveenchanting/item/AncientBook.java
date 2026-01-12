@@ -1,6 +1,7 @@
 package me.alfie.immersiveenchanting.item;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
+import me.alfie.immersiveenchanting.config.ClientConfig;
 import me.alfie.immersiveenchanting.item.legacy.EnchantmentDataComponent;
 import me.alfie.immersiveenchanting.item.legacy.ModDataComponents;
 import net.minecraft.ChatFormatting;
@@ -65,6 +66,7 @@ public class AncientBook extends EnchantedBookItem {
             ResourceLocation enchantmentResourceLocation = ResourceLocation.parse(enchantmentHolder.getRegisteredName());
             Registry<Enchantment> enchantmentRegistry = ImmersiveEnchanting.getEnchantmentRegistry(registryAccess);
             Enchantment enchantment = enchantmentRegistry.get(enchantmentResourceKey);
+            if (enchantment == null) return;
 
 
             MutableComponent loreText = Component.translatable("lore.immersiveenchanting.ancient_book");
@@ -76,18 +78,20 @@ public class AncientBook extends EnchantedBookItem {
             tooltipComponents.add(fullTooltip);
 
             //Added by mod tooltip
-            String modNamespace = enchantmentResourceLocation.getNamespace();
-            ModInfo modInfo = (ModInfo) ModList.get().getModContainerById(modNamespace)
-                    .map(ModContainer::getModInfo)
-                    .orElse(null);
+            if(ClientConfig.isShowAddedByTooltipEnabled()) {
+                String modNamespace = enchantmentResourceLocation.getNamespace();
+                ModInfo modInfo = (ModInfo) ModList.get().getModContainerById(modNamespace)
+                        .map(ModContainer::getModInfo)
+                        .orElse(null);
 
-            if (modInfo != null) {
-                String modName = modInfo.getDisplayName();
-                Component addedBy = Component.translatable("lore.immersiveenchanting.added_by").append(" " + modName).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
-                tooltipComponents.add(addedBy);
-            } else {
-                Component addedBy = Component.translatable("lore.immersiveenchanting.added_by").append(" " + modNamespace).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
-                tooltipComponents.add(addedBy);
+                if (modInfo != null) {
+                    String modName = modInfo.getDisplayName();
+                    Component addedBy = Component.translatable("lore.immersiveenchanting.added_by").append(" " + modName).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
+                    tooltipComponents.add(addedBy);
+                } else {
+                    Component addedBy = Component.translatable("lore.immersiveenchanting.added_by").append(" " + modNamespace).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
+                    tooltipComponents.add(addedBy);
+                }
             }
         }
 
@@ -124,7 +128,7 @@ public class AncientBook extends EnchantedBookItem {
      * @param stack
      */
     public static void migrateDataComponent(ItemStack stack, Level level) {
-        if(level.isClientSide()) return;
+        if(level == null || level.isClientSide()) return;
         if(stack.has(DataComponents.STORED_ENCHANTMENTS)) return;
 
         if (stack.has(ModDataComponents.ENCHANTMENT.get())) {
