@@ -29,17 +29,13 @@ public class ClientConfig {
         showAddedByTooltip = builder
                 .comment("Display which mod adds the enchantment on ancient books.")
                 .translation("immersiveenchanting.config.show_added_by_tooltip")
-                .define("showAddedByTooltip", true);
+                .define("showAddedByTooltip", false);
 
 
         builder.pop();
     }
 
-    /**
-     * Returns true if ancient books are required, false if the disabled option is true.
-     * @return
-     */
     public static boolean isShowAddedByTooltipEnabled() {
-        return !ClientConfig.CONFIG.showAddedByTooltip.get();
+        return ClientConfig.CONFIG.showAddedByTooltip.get();
     }
 }
