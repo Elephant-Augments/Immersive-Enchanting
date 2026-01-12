@@ -3,6 +3,7 @@ package me.alfie.immersiveenchanting.item;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.compat.ModCheck;
 import me.alfie.immersiveenchanting.compat.ModCompat;
+import me.alfie.immersiveenchanting.config.ClientConfig;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
@@ -70,20 +71,22 @@ public class AncientBook extends EnchantedBookItem {
             tooltipComponents.add(fullTooltip);
 
             //Added by mod tooltip
-            ResourceLocation enchantmentRL = enchantmentResourceKey.location();
-            String modNamespace = enchantmentRL.getNamespace();
+            if(ClientConfig.isShowAddedByTooltipEnabled()) {
+                ResourceLocation enchantmentRL = enchantmentResourceKey.location();
+                String modNamespace = enchantmentRL.getNamespace();
 
-            IModInfo modInfo = ModList.get().getModContainerById(modNamespace)
-                    .map(ModContainer::getModInfo)
-                    .orElse(null);
+                IModInfo modInfo = ModList.get().getModContainerById(modNamespace)
+                        .map(ModContainer::getModInfo)
+                        .orElse(null);
 
-            if (modInfo != null) {
-                String modName = modInfo.getDisplayName();
-                Component addedBy = Component.translatable("lore.immersiveenchanting.added_by").append(" " + modName).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
-                tooltipComponents.add(addedBy);
-            } else {
-                Component addedBy = Component.translatable("lore.immersiveenchanting.added_by").append(" " + modNamespace).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
-                tooltipComponents.add(addedBy);
+                if (modInfo != null) {
+                    String modName = modInfo.getDisplayName();
+                    Component addedBy = Component.translatable("lore.immersiveenchanting.added_by").append(" " + modName).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
+                    tooltipComponents.add(addedBy);
+                } else {
+                    Component addedBy = Component.translatable("lore.immersiveenchanting.added_by").append(" " + modNamespace).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
+                    tooltipComponents.add(addedBy);
+                }
             }
         }
 

@@ -1,7 +1,7 @@
 package me.alfie.immersiveenchanting.networking;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
-import me.alfie.immersiveenchanting.ImmersiveEnchantingConfig;
+import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.block.CreativeBookshelf;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
@@ -33,7 +33,6 @@ import net.minecraft.world.level.block.entity.ChiseledBookShelfBlockEntity;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.PacketDistributor;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -168,7 +167,7 @@ public class ServerPayloadHandler {
         }
 
         //Unlock all enchantments if creative bookshelf is near
-        if (isCreativeBookshelfNearby(tablePos, level) || !ImmersiveEnchantingConfig.areAncientBooksRequired()) {
+        if (isCreativeBookshelfNearby(tablePos, level) || !ServerConfig.areAncientBooksRequired()) {
             //Clear unlockedEnchantments from the bookshelf search
             unlockedEnchantments.clear();
 
@@ -200,7 +199,7 @@ public class ServerPayloadHandler {
     private static List<BlockEntity> getChiseledBookshelvesNearby(BlockPos pos, Level level) {
         List<BlockEntity> blockEntities = new ArrayList<>();
 
-        for (int dy = 0; dy <= ImmersiveEnchantingConfig.getBookshelfSearchHeight()-1; dy++) { // check table level and level above
+        for (int dy = 0; dy <= ServerConfig.getBookshelfSearchHeight()-1; dy++) { // check table level and level above
             for (int dx = -2; dx <= 2; dx++) {
                 for (int dz = -2; dz <= 2; dz++) {
                     // Skip inner 3x3 square; only outer ring

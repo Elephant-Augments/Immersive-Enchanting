@@ -1,11 +1,11 @@
-package me.alfie.immersiveenchanting;
+package me.alfie.immersiveenchanting.config;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 import org.apache.commons.lang3.tuple.Pair;
 
-public class ImmersiveEnchantingConfig {
+public class ServerConfig {
 
-    public static final ImmersiveEnchantingConfig CONFIG;
+    public static final ServerConfig CONFIG;
     public static final ForgeConfigSpec CONFIG_SPEC;
 
     // Store the config properties as public finals
@@ -15,15 +15,15 @@ public class ImmersiveEnchantingConfig {
 
 
     static {
-        Pair<ImmersiveEnchantingConfig, ForgeConfigSpec> pair =
-                new ForgeConfigSpec.Builder().configure(ImmersiveEnchantingConfig::new);
+        Pair<ServerConfig, ForgeConfigSpec> pair =
+                new ForgeConfigSpec.Builder().configure(ServerConfig::new);
 
         CONFIG = pair.getLeft();
         CONFIG_SPEC = pair.getRight();
     }
 
     // Constructor takes only the builder
-    public ImmersiveEnchantingConfig(ForgeConfigSpec.Builder builder) {
+    public ServerConfig(ForgeConfigSpec.Builder builder) {
         builder.push("general"); // optional grouping
 
         // Define the config value here
@@ -46,10 +46,10 @@ public class ImmersiveEnchantingConfig {
      * @return
      */
     public static boolean areAncientBooksRequired() {
-        return !ImmersiveEnchantingConfig.CONFIG.disableAncientBookRequirement.get();
+        return !ServerConfig.CONFIG.disableAncientBookRequirement.get();
     }
 
     public static int getBookshelfSearchHeight() {
-        return ImmersiveEnchantingConfig.CONFIG.bookshelfSearchHeight.get();
+        return ServerConfig.CONFIG.bookshelfSearchHeight.get();
     }
 }
