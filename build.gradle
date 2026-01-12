@@ -91,8 +91,6 @@ dependencies {
 
     /* --- Compatibility --- */
     //Set to implementation instead of compileOnly in Dev environment.
-    compileOnly fg.deobf("net.darkhax.bookshelf:Bookshelf-Forge-1.20.1:20.2.13")
-    compileOnly fg.deobf("curse.maven:enchantment-descriptions-250419:7336071")
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
