@@ -30,8 +30,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+
 //Now handled as an EnchantedBookItem .enchant() uses the STORED_ENCHANTMENTS data component.
 public class AncientBook extends EnchantedBookItem {
+
+    public static final String TRANSLATION_KEY = "lore.immersiveenchanting.ancient_book";
 
     public AncientBook(Properties properties) {
         super(properties.stacksTo(1).rarity(Rarity.UNCOMMON));
@@ -68,13 +71,16 @@ public class AncientBook extends EnchantedBookItem {
             Enchantment enchantment = enchantmentRegistry.get(enchantmentResourceKey);
             if (enchantment == null) return;
 
+            //Translation key for lore text.
+            MutableComponent loreText = Component.translatable(TRANSLATION_KEY);
 
-            MutableComponent loreText = Component.translatable("lore.immersiveenchanting.ancient_book");
-            MutableComponent enchantmentName = (MutableComponent) enchantment.description();
+            //Enchantment name (styled)
+            MutableComponent enchantName = (MutableComponent) enchantment.description();
+
             loreText.withStyle(ChatFormatting.GOLD);
 
             //Combine lore text + enchantment name
-            Component fullTooltip = loreText.append(" ").append(enchantmentName);
+            Component fullTooltip = loreText.append(" ").append(enchantName);
             tooltipComponents.add(fullTooltip);
 
             //Added by mod tooltip

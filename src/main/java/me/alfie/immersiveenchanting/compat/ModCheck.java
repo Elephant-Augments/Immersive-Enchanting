@@ -19,7 +19,7 @@ public class ModCheck {
      * @param modid
      * @return
      */
-    private static boolean isModLoaded(final String modid) {
+    public static boolean isModLoaded(final String modid) {
         return MODS.computeIfAbsent(modid, key -> {
             if (check(key)) {
                 return true;
