@@ -3,6 +3,7 @@ package me.alfie.immersiveenchanting;
 import com.google.gson.Gson;
 import com.mojang.logging.LogUtils;
 import me.alfie.immersiveenchanting.block.ModBlocks;
+import me.alfie.immersiveenchanting.config.ClientConfig;
 import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.creativetab.ModCreativeTab;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostDatapackHandler;
@@ -48,6 +49,7 @@ public class ImmersiveEnchanting {
         ModCreativeTab.register(modEventBus);
         ModBlocks.register(modEventBus);
 
+        context.registerConfig(ModConfig.Type.CLIENT, ClientConfig.CONFIG_SPEC);
         context.registerConfig(ModConfig.Type.SERVER, ServerConfig.CONFIG_SPEC);
     }
 
