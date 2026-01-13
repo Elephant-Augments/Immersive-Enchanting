@@ -12,10 +12,12 @@ import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.item.legacy.ModDataComponents;
 import me.alfie.immersiveenchanting.lootmodifier.ModLootModifiers;
 import me.alfie.immersiveenchanting.networking.packets.*;
+import me.alfie.immersiveenchanting.structure.ModStructureProcessors;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -49,6 +51,7 @@ public class ImmersiveEnchanting {
         ModDataComponents.register(modEventBus);
         ModCreativeTab.register(modEventBus);
         ModBlocks.register(modEventBus);
+        ModStructureProcessors.register(modEventBus);
 
         modEventBus.addListener(ModMenus::registerMenuScreens);
         modEventBus.addListener(EnchantItemPacket::register);
