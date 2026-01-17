@@ -124,6 +124,8 @@ public class AncientBook extends EnchantedBookItem {
         }
 
         List<Holder<Enchantment>> enchantments = itemEnchantments.keySet().stream().toList();
+        if (enchantments.isEmpty()) return null;
+
         Holder<Enchantment> enchantmentHolder = enchantments.getFirst();
         return enchantmentHolder.getKey();
     }
