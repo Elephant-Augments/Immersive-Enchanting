@@ -109,8 +109,12 @@ public class AncientBook extends EnchantedBookItem {
         migrateNBT(bookStack, level);
 
         ListTag listTag = getEnchantments(bookStack);
+        if (listTag.isEmpty()) return null;
+
         CompoundTag tag = (CompoundTag) listTag.get(0);
-        ResourceLocation enchantmentRL = ResourceLocation.parse(tag.getString("id"));
+        ResourceLocation enchantmentRL = ResourceLocation.tryParse(tag.getString("id"));
+        if(enchantmentRL == null) return null;
+
         return ResourceKey.create(Registries.ENCHANTMENT, enchantmentRL);
     }
 
