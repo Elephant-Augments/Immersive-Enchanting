@@ -1,13 +1,9 @@
 package me.alfie.immersiveenchanting.gui.tooltip;
 
-import me.alfie.immersiveenchanting.api.TooltipExtensions;
+import me.alfie.immersiveenchanting.api.TooltipDescriptionExtensions;
 import me.alfie.immersiveenchanting.gui.EnchantingNodeTooltip;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.NotNull;
 import org.joml.Vector2i;
 
 public class TooltipDescription extends NineSliceBox {
@@ -30,48 +26,7 @@ public class TooltipDescription extends NineSliceBox {
     public void buildLayout() {
         layout.clear();
 
-        //Draw label line (this takes up 2 lines due to the cost stack sprite)
-        layout.insertLine(0, new DescriptionLine() {
-            @Override
-            public void draw(GuiGraphics graphics, int lineX, int lineY) {
-                //Draw label
-                graphics.drawString(Minecraft.getInstance().font,
-                        getText(),
-                        lineX,
-                        lineY + 4, //Offset to centre text with cost stack
-                        0xFFFFFF);
-
-                //Draw cost stack if applicable
-                if (parentTooltip.node.isBranchUnlocked && !parentTooltip.node.isObtained()) {
-                    Vector2i costStackPos = new Vector2i(lineX + Minecraft.getInstance().font.width(getText()), lineY);
-                    parentTooltip.setCostStackPos(costStackPos.x, costStackPos.y);
-                    graphics.renderItem(
-                            parentTooltip.getCostStack(),
-                            costStackPos.x,
-                            costStackPos.y);
-                    graphics.renderItemDecorations(Minecraft.getInstance().font,
-                            parentTooltip.getCostStack(),
-                            costStackPos.x,
-                            costStackPos.y);
-                }
-            }
-
-            @Override
-            public @NotNull Component getText() {
-                Component label;
-                if (parentTooltip.node.isBranchUnlocked) {
-                    label = parentTooltip.node.isObtained() ?
-                            Component.translatable("gui.immersiveenchanting.equipped").withStyle(ChatFormatting.LIGHT_PURPLE) :
-                            Component.translatable("gui.immersiveenchanting.cost").withStyle(ChatFormatting.GREEN);
-                } else {
-                    label = Component.translatable("gui.immersiveenchanting.locked_enchantment_hint")
-                            .withStyle(ChatFormatting.OBFUSCATED, ChatFormatting.GRAY);
-                }
-                return label;
-            }
-        });
-
-        TooltipExtensions.apply(parentTooltip,layout);
+        TooltipDescriptionExtensions.apply(parentTooltip,layout);
     }
 
     @Override

@@ -18,10 +18,6 @@ public class EnchantingNodeTooltip {
             "immersiveenchanting", "box_unobtained");
     private static final ResourceLocation BOX_OBTAINED_TEXTURE = ResourceLocation.fromNamespaceAndPath(
             "immersiveenchanting", "box_obtained");
-
-
-
-
     private static final ResourceLocation DESCRIPTION_BOX_TEXTURE = ResourceLocation.fromNamespaceAndPath(
             "immersiveenchanting", "title_box");
 
@@ -36,7 +32,6 @@ public class EnchantingNodeTooltip {
     private Vector2i costStackPos = new Vector2i(0, 0);
     private int titleBoxWidth;
     private int titleBoxHeight;
-    private int descriptionBoxHeight;
     private Vector2i titleBoxTopLeft = new Vector2i(0, 0);
     private Vector2i descriptionBoxTopLeft = new Vector2i(0, 0);
 
@@ -73,11 +68,10 @@ public class EnchantingNodeTooltip {
             titleText = Component.translatable("gui.immersiveenchanting.locked_enchantment").withStyle(ChatFormatting.RED).getString();
         }
 
-        //Setup positions/dimensions
+
 
 
         titleBoxHeight = Math.max(font.lineHeight, EnchantingNode.height);
-        descriptionBoxHeight = titleBoxHeight - iconSize / 2 + costIconSize + padding;
 
         //Build description layout
         tooltipDescription.buildLayout();
