@@ -12,7 +12,7 @@ public class EnchantingNode {
     static final int width = 26; //Texture size
     static final int height = 26; //Texture size
     public static float globalScale = 1.0f;
-    final boolean isBranchUnlocked;
+    public final boolean isBranchUnlocked;
     private final EnchantingNodeType node_type;
     private final ResourceLocation icon_texture;
     private final int enchantmentLevel;
