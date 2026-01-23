@@ -9,7 +9,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import org.joml.Vector2i;
 
@@ -75,10 +74,7 @@ public class EnchantingNodeTooltip {
         }
 
         //Setup positions/dimensions
-        int textWidth = font.width(titleText);
-        final int MIN_WIDTH = 64;
-        titleBoxWidth = Math.max(padding / 2 + textWidth + EnchantingNode.width,
-                MIN_WIDTH);
+
 
         titleBoxHeight = Math.max(font.lineHeight, EnchantingNode.height);
         descriptionBoxHeight = titleBoxHeight - iconSize / 2 + costIconSize + padding;
@@ -86,9 +82,14 @@ public class EnchantingNodeTooltip {
         //Build description layout
         tooltipDescription.buildLayout();
 
+        //Calculate width: Use title width, but if description extends it, go further.
+        final int titleTextWidth = font.width(titleText) + EnchantingNode.width + padding/2;
+        final int descriptionTextWidth = font.width(tooltipDescription.layout.getLongestString()) + padding;
+        titleBoxWidth = Math.max(titleTextWidth, descriptionTextWidth);
+
         //Set sizes
         tooltipTitle.setBoxSize(titleBoxWidth, titleBoxHeight);
-        tooltipDescription.setBoxSize(tooltipTitle.getBoxWidth(), tooltipDescription.layout.getTotalHeight() + 20);
+        tooltipDescription.setBoxSize(tooltipTitle.getBoxWidth(), tooltipDescription.layout.getRenderedHeight() + 20);
         setRenderDirection(); //Must call after setting sizes, but before setting positions!
 
         //Set positions

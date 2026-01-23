@@ -1,6 +1,9 @@
 package me.alfie.immersiveenchanting.gui.tooltip;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,36 +11,41 @@ import java.util.List;
 public class DescriptionLayout {
     protected final List<DescriptionLine> lines = new ArrayList<>();
     protected final int lineSpace;
+    private final int MAX_LINE_LENGTH = 64;
 
     public DescriptionLayout(TooltipDescription tooltipDescription) {
         lineSpace = tooltipDescription.parentTooltip.getFont().lineHeight;
     }
 
     /**
-     * Get the height of all the lines put together.
+     * Get the height of all the lines put together + any spacing.
      * @return
      */
-    public int getTotalHeight() {
+    public int getRenderedHeight() {
         return (lines.size()+1) * lineSpace;
     }
 
-    /**
-     * Append a new line to the description box. Use a lambda of DescriptionLine i.e {@code (graphics, x, y) -> {}}
-     * @param line
-     */
-    public void appendNewLine(DescriptionLine line) {
-        lines.add(line);
-    }
-
     public void insertLine(int lineNumber, DescriptionLine line) {
+        while(lines.size() < lineNumber) {
+            //Add empty line
+            lines.add(new DescriptionLine() {
+                @Override
+                public void draw(GuiGraphics graphics, int lineX, int lineY) {
+
+                }
+
+                @Override
+                public @NotNull Component getText() {
+                    return Component.empty();
+                }
+            });
+        }
+
         lines.add(lineNumber, line);
     }
 
-    /**
-     * Empty line, forces the next append to the next line - empty line acts as an empty space in the layout.
-     */
-    public void appendEmptyLine() {
-        appendNewLine((graphics, lineX, lineY) -> {});
+    public void removeLine(int lineNumber) {
+        lines.remove(lineNumber);
     }
 
     /**
@@ -53,12 +61,29 @@ public class DescriptionLayout {
      * @param startX The start position to render lines at
      * @param startY The start position to render lines at
      */
-    public void draw(GuiGraphics graphics, int startX, int startY) {
+    protected void draw(GuiGraphics graphics, int startX, int startY) {
         int yOffset = 0;
 
         for (DescriptionLine line : lines) {
             line.draw(graphics, startX, startY + yOffset);
-            yOffset += lineSpace;
+
+            yOffset += lineSpace; //Move to next line
         }
+    }
+
+    /**
+     * Return the longest string contained in the layout.
+     * @return
+     */
+    public String getLongestString() {
+        Component longest = Component.empty();
+        for(DescriptionLine line : lines) {
+            Component lineText = line.getText();
+            lineText = (lineText == null) ? Component.empty() : lineText; //Defend against null
+            if(lineText.getString().length() > longest.getString().length()) {
+                longest = lineText;
+            }
+        }
+        return longest.getString();
     }
 }
