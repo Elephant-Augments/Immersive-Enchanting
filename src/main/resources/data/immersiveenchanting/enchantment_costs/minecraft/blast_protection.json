@@ -2,11 +2,11 @@
   "levels": {
     "1": {
       "item": "minecraft:copper_block",
-      "amount": 1
+      "amount": 8
     },
     "2": {
       "item": "minecraft:obsidian",
-      "amount": 1
+      "amount": 8
     },
     "3": {
       "item": "minecraft:anvil",
@@ -14,7 +14,7 @@
     },
     "4": {
       "item": "minecraft:end_stone_bricks",
-      "amount": 1
+      "amount": 8
     }
   }
 }

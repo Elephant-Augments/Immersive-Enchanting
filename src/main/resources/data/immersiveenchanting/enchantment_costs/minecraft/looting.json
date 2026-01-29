@@ -2,15 +2,15 @@
   "levels": {
     "1": {
       "item": "minecraft:diamond",
-      "amount": 1
+      "amount": 7
     },
     "2": {
       "item": "minecraft:phantom_membrane",
-      "amount": 1
+      "amount": 7
     },
     "3": {
       "item": "minecraft:ender_eye",
-      "amount": 1
+      "amount": 7
     }
   }
 }
