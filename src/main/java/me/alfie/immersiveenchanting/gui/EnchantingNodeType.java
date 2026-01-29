@@ -1,4 +1,4 @@
-package me.alfie.immersiveenchanting.enums;
+package me.alfie.immersiveenchanting.gui;
 
 import net.minecraft.resources.ResourceLocation;
 

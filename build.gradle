@@ -116,6 +116,7 @@ dependencies {
     /* --- Compatibility --- */
     compileOnly "curse.maven:enchant-limiter-1235635:7152638" // 1.0.8
     compileOnly "curse.maven:jade-324717:6853386" // 15.10.3
+    implementation "curse.maven:item-descriptions-1101501:7354790"
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.

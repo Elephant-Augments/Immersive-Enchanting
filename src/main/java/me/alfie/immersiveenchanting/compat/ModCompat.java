@@ -2,8 +2,6 @@ package me.alfie.immersiveenchanting.compat;
 
 import net.enchant_limiter.api.LimitHelper;
 import net.minecraft.core.Holder;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 

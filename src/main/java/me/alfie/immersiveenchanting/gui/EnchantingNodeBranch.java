@@ -4,7 +4,6 @@ import com.mojang.blaze3d.platform.NativeImage;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.datapack.EnchantmentMetadataRegistry;
-import me.alfie.immersiveenchanting.enums.EnchantingNodeType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.texture.DynamicTexture;

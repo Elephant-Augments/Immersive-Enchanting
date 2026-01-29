@@ -1,6 +1,5 @@
 package me.alfie.immersiveenchanting.gui.tooltip;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
