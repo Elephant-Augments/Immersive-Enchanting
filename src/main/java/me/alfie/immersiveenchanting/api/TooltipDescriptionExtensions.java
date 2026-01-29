@@ -93,7 +93,7 @@ public final class TooltipDescriptionExtensions {
                         if (parentTooltip.node.isBranchUnlocked) {
                             label = parentTooltip.node.isObtained() ?
                                     Component.translatable("gui.immersiveenchanting.equipped").withStyle(ChatFormatting.LIGHT_PURPLE) :
-                                    Component.translatable("gui.immersiveenchanting.cost").withStyle(ChatFormatting.DARK_AQUA);
+                                    Component.translatable("gui.immersiveenchanting.cost").withStyle(ChatFormatting.GRAY);
                         } else {
                             label = Component.translatable("gui.immersiveenchanting.locked_enchantment_hint")
                                     .withStyle(ChatFormatting.OBFUSCATED, ChatFormatting.GRAY);
