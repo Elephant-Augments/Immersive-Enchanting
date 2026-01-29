@@ -17,6 +17,7 @@ import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -248,6 +249,19 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
                 guiGraphics.pose().popPose();
             }
         }
+
+        //Render the item in the enchanting table when hovered
+        if(!menu.getToolSlotItem().is(Items.AIR)) {
+            if(isMouseOverBoundingBox(virtualSlotPos, VIRTUAL_SLOT_DIMENSIONS, VIRTUAL_SLOT_DIMENSIONS, mouseX, mouseY)) {
+                guiGraphics.pose().pushPose();
+                guiGraphics.pose().translate(0, 0, 500);
+                guiGraphics.renderTooltip(font,
+                        menu.getToolSlotItem(),
+                        mouseX, mouseY);
+                guiGraphics.pose().popPose();
+            }
+        }
+
 
 
         //Draw item tooltips
