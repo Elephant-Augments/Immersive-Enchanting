@@ -1,5 +1,6 @@
 package me.alfie.immersiveenchanting.gui.tooltip;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
@@ -13,8 +14,44 @@ public class DescriptionLayout {
     private final int MAX_LINE_LENGTH = 64;
 
     public DescriptionLayout(TooltipDescription tooltipDescription) {
-        lineSpace = tooltipDescription.parentTooltip.getFont().lineHeight;
+        lineSpace = Minecraft.getInstance().font.lineHeight;
     }
+
+    /**
+     * Split a string into chunks.
+     * @param text
+     * @return
+     */
+    public static List<String> chunkString(String text, int chunkSize) {
+        List<String> parts = new ArrayList<>();
+
+        String[] words = text.trim().split("\\s+");
+        StringBuilder current = new StringBuilder();
+
+        for (String word : words) {
+            // If adding this word would exceed the limit, flush the current chunk
+            if (current.length() > 0 &&
+                    current.length() + 1 + word.length() > chunkSize) {
+
+                parts.add(current.toString());
+                current.setLength(0);
+            }
+
+            // Append word (with space if needed)
+            if (current.length() > 0) {
+                current.append(' ');
+            }
+            current.append(word);
+        }
+
+        // Add remainder
+        if (current.length() > 0) {
+            parts.add(current.toString());
+        }
+
+        return parts;
+    }
+
 
     /**
      * Get the height of all the lines put together + any spacing.

@@ -10,6 +10,10 @@
   "gui.immersiveenchanting.equipped": "Equipped.",
   "gui.immersiveenchanting.locked_enchantment": "???",
   "gui.immersiveenchanting.locked_enchantment_hint": "Unknown",
+  "gui.immersiveenchanting.transmute_book": "Transmute",
+  "gui.immersiveenchanting.transmute_description": "Change the enchantment for this Ancient Book.",
+  "gui.immersiveenchanting.transmute_hint": "You must first add an Ancient Book of the same enchantment to the bookshelf.",
+
 
   "immersiveenchanting.configuration.general": "General",
   "immersiveenchanting.config.disable_ancient_book_requirement": "Disable Ancient Book Requirement",

@@ -1,7 +1,10 @@
 package me.alfie.immersiveenchanting.gui.tooltip;
 
 import me.alfie.immersiveenchanting.gui.EnchantingNodeTooltip;
+import me.alfie.immersiveenchanting.gui.Node;
+import me.alfie.immersiveenchanting.gui.NodeTooltip;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 
@@ -9,12 +12,16 @@ public class TooltipTitle extends NineSliceBox {
 
     private String titleText;
 
-    public TooltipTitle(EnchantingNodeTooltip parentTooltip, ResourceLocation spriteTexture) {
+    public TooltipTitle(NodeTooltip parentTooltip, ResourceLocation spriteTexture) {
         super(parentTooltip, spriteTexture);
     }
 
     public final void setTitleText(String titleText) {
         this.titleText = titleText;
+    }
+
+    public String getTitleText() {
+        return titleText;
     }
 
     @Override
@@ -30,7 +37,7 @@ public class TooltipTitle extends NineSliceBox {
         final int titleTextY = this.getY() + padding - 1;
 
         //Draw contents
-        graphics.drawString(this.parentTooltip.getFont(),
+        graphics.drawString(Minecraft.getInstance().font,
                 titleText,
                 titleTextX,
                 titleTextY,

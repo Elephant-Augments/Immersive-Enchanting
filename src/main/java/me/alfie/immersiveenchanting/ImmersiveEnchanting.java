@@ -42,6 +42,7 @@ public class ImmersiveEnchanting {
         ImmersiveEnchantingEvents events = new ImmersiveEnchantingEvents();
         modEventBus.addListener(events::onClientStart);
         modEventBus.addListener(events::buildCreativeTab);
+        modEventBus.addListener(events::onLoadComplete);
         NeoForge.EVENT_BUS.register(events);
 
         ModItems.register(modEventBus);
@@ -58,6 +59,7 @@ public class ImmersiveEnchanting {
         modEventBus.addListener(UnlockedEnchantmentsPacket::register);
         modEventBus.addListener(EnchantmentCostRegistrySyncPacket::register);
         modEventBus.addListener(UpdateToolSlotPacket::register);
+        modEventBus.addListener(TransmuteBookPacket::register);
 
         modContainer.registerConfig(ModConfig.Type.CLIENT, ClientConfig.CONFIG_SPEC);
         modContainer.registerConfig(ModConfig.Type.SERVER, ServerConfig.CONFIG_SPEC);

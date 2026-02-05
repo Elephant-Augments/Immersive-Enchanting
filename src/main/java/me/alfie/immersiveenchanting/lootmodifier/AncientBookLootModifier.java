@@ -80,11 +80,7 @@ public class AncientBookLootModifier extends LootModifier {
         return generatedLoot;
     }
 
-    /**
-     * Get a list of all the available types of enchantment (based on the data pack) and return a random element.
-     * @return
-     */
-    public static Holder<Enchantment> getRandomEnchantment(Level level, RandomSource randomSource) {
+    public static List<Holder.Reference<Enchantment>> getAllEnchantments(Level level) {
         // Get all available types
         RegistryAccess registryAccess = level.registryAccess();
         HolderLookup.RegistryLookup<Enchantment> lookup = registryAccess.lookupOrThrow(Registries.ENCHANTMENT);
@@ -115,6 +111,15 @@ public class AncientBookLootModifier extends LootModifier {
                     return true; // include everything else
                 })
                 .toList();
+        return filteredEnchantments;
+    }
+
+    /**
+     * Get a list of all the available types of enchantment (based on the data pack) and return a random element.
+     * @return
+     */
+    public static Holder<Enchantment> getRandomEnchantment(Level level, RandomSource randomSource) {
+        List<Holder.Reference<Enchantment>> filteredEnchantments = getAllEnchantments(level);
 
         // Pick a random enchantment type from the filtered list
         if (!filteredEnchantments.isEmpty()) {

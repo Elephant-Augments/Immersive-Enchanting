@@ -2,6 +2,7 @@ package me.alfie.immersiveenchanting.gui.tooltip;
 
 import me.alfie.immersiveenchanting.api.TooltipDescriptionExtensions;
 import me.alfie.immersiveenchanting.gui.EnchantingNodeTooltip;
+import me.alfie.immersiveenchanting.gui.NodeTooltip;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Vector2i;
@@ -15,7 +16,7 @@ public class TooltipDescription extends NineSliceBox {
 
     public final DescriptionLayout layout;
 
-    public TooltipDescription(EnchantingNodeTooltip parentTooltip, ResourceLocation spriteTexture) {
+    public TooltipDescription(NodeTooltip parentTooltip, ResourceLocation spriteTexture) {
         super(parentTooltip, spriteTexture);
         layout = new DescriptionLayout(this);
     }
@@ -26,7 +27,7 @@ public class TooltipDescription extends NineSliceBox {
     public void buildLayout() {
         layout.clear();
 
-        TooltipDescriptionExtensions.apply(parentTooltip,layout);
+        TooltipDescriptionExtensions.apply(parentTooltip, layout);
     }
 
     @Override

@@ -8,10 +8,8 @@ import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
 import me.alfie.immersiveenchanting.item.AncientBook;
 import me.alfie.immersiveenchanting.item.ModItems;
-import me.alfie.immersiveenchanting.networking.packets.EnchantItemPacket;
-import me.alfie.immersiveenchanting.networking.packets.GetBookshelfContentsPacket;
-import me.alfie.immersiveenchanting.networking.packets.UnlockedEnchantmentsPacket;
-import me.alfie.immersiveenchanting.networking.packets.UpdateToolSlotPacket;
+import me.alfie.immersiveenchanting.lootmodifier.AncientBookLootModifier;
+import me.alfie.immersiveenchanting.networking.packets.*;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -25,6 +23,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
@@ -38,11 +37,57 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class ServerPayloadHandler {
+
+    public static void onTransmuteBookPacket(final TransmuteBookPacket packet, final IPayloadContext context) {
+
+        Player player = context.player();
+        Level level = player.level();
+        AbstractContainerMenu menu = player.containerMenu;
+        if(menu instanceof EnchantingTableMenu enchantingTableMenu) {
+            ItemStack ancientBookStack = enchantingTableMenu.getToolSlotItem();
+            Set<Holder<Enchantment>> unlockedEnchantments = enchantingTableMenu.getUnlockedEnchantments();
+
+            List<Holder.Reference<Enchantment>> enchantments = new ArrayList<>(
+                    AncientBookLootModifier.getAllEnchantments(player.level()));
+            enchantments.removeIf(unlockedEnchantments::contains);
+            if(enchantments.isEmpty()) { //If all enchantments are unlocked already, pick any random enchantment.
+                enchantments = new ArrayList<>(
+                        AncientBookLootModifier.getAllEnchantments(player.level()));
+            }
+
+            Random random = new Random();
+            int randomIndex = random.nextInt(enchantments.size());
+            Holder<Enchantment> randomEnchantment = enchantments.get(randomIndex);
+
+
+            //If has 10 levels
+            if(player.experienceLevel >= 10) {
+                player.giveExperienceLevels(-10);
+                AncientBook.setStoredEnchantment(ancientBookStack, randomEnchantment);
+
+                level.playSound(null, player.blockPosition(), SoundEvents.BREWING_STAND_BREW,
+                        SoundSource.BLOCKS, 1.0F, 0.7F);
+                level.playSound(null, player.blockPosition(), SoundEvents.ENDER_CHEST_OPEN,
+                        SoundSource.BLOCKS, 0.5F, 1.0F);
+                level.playSound(null, player.blockPosition(), SoundEvents.FIREWORK_ROCKET_LARGE_BLAST,
+                        SoundSource.BLOCKS, 1.2F, 0.8F);
+            } else {
+                //If unable to enchant
+                level.playSound(null, player.blockPosition(), SoundEvents.VAULT_CLOSE_SHUTTER,
+                        SoundSource.BLOCKS, 1.0F, 1.0F);
+            }
+
+
+        }
+
+
+
+
+
+    }
 
     /**
      * Apply an enchantment to an item.
@@ -191,6 +236,16 @@ public class ServerPayloadHandler {
                     .toList();
         }
 
+        if(serverPlayer.containerMenu instanceof EnchantingTableMenu enchantingTableMenu) {
+            Set<Holder<Enchantment>> enchantmentSet = new HashSet<>();
+
+            for (ResourceKey<Enchantment> key : unlockedEnchantments) {
+                ImmersiveEnchanting.getEnchantmentHolder(serverPlayer.registryAccess(), key)
+                        .ifPresent(enchantmentSet::add);
+            }
+
+            enchantingTableMenu.setUnlockedEnchantments(enchantmentSet);
+        }
         PacketDistributor.sendToPlayer(serverPlayer, new UnlockedEnchantmentsPacket(unlockedEnchantments));
     }
 

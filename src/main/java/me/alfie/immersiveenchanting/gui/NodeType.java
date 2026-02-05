@@ -2,7 +2,7 @@ package me.alfie.immersiveenchanting.gui;
 
 import net.minecraft.resources.ResourceLocation;
 
-public enum EnchantingNodeType {
+public enum NodeType {
         BASIC(
                 ResourceLocation.fromNamespaceAndPath("immersiveenchanting", "textures/gui/sprites/basic_enchantment_unobtained.png"),
                 ResourceLocation.fromNamespaceAndPath("immersiveenchanting", "textures/gui/sprites/basic_enchantment_obtained.png")
@@ -23,7 +23,7 @@ public enum EnchantingNodeType {
     private final ResourceLocation unobtainedTexture;
     private final ResourceLocation obtainedTexture;
 
-    EnchantingNodeType(ResourceLocation offTexture, ResourceLocation onTexture) {
+    NodeType(ResourceLocation offTexture, ResourceLocation onTexture) {
         this.unobtainedTexture = offTexture;
         this.obtainedTexture = onTexture;
     }

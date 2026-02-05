@@ -1,15 +1,23 @@
 package me.alfie.immersiveenchanting;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import me.alfie.immersiveenchanting.api.DescriptionLayoutExtension;
+import me.alfie.immersiveenchanting.api.TooltipDescriptionExtensions;
+import me.alfie.immersiveenchanting.compat.ModCheck;
+import me.alfie.immersiveenchanting.compat.ModCompat;
 import me.alfie.immersiveenchanting.creativetab.ModCreativeTab;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.datapack.EnchantmentMetadataRegistry;
-import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
+import me.alfie.immersiveenchanting.gui.*;
+import me.alfie.immersiveenchanting.gui.tooltip.DescriptionLayout;
+import me.alfie.immersiveenchanting.gui.tooltip.DescriptionLine;
 import me.alfie.immersiveenchanting.item.AncientBook;
 import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.networking.ServerPayloadHandler;
 import me.alfie.immersiveenchanting.networking.packets.EnchantmentCostRegistrySyncPacket;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
@@ -33,6 +41,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
@@ -41,6 +50,8 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.village.VillagerTradesEvent;
+import org.jetbrains.annotations.NotNull;
+import org.joml.Vector2i;
 
 import java.util.HashSet;
 import java.util.List;
@@ -51,6 +62,146 @@ public class ImmersiveEnchantingEvents {
     @SubscribeEvent
     public void onServerStart(ServerStartedEvent event) {
         ImmersiveEnchanting.ENCHANTMENT_COST_DATAPACK_HANDLER.setServer(event.getServer());
+    }
+
+    public void onLoadComplete(FMLLoadCompleteEvent event) {
+        registerInternalTooltipDescriptions();
+    }
+
+    private void registerInternalTooltipDescriptions() {
+        //Using the API hooks internally here to add text/custom rendering into the description box.
+        //Draws the label: "Cost: " "Equipped" or "Unknown (obfuscated)" depending on the status of the EnchantingNode
+        //Also renders the item cost next to it.
+        TooltipDescriptionExtensions.register(new DescriptionLayoutExtension() {
+            @Override
+            public void extendLayout(DescriptionLayout description, NodeTooltip parentTooltip) {
+                //Only apply for EnchantingNodeTooltips
+                if(parentTooltip instanceof EnchantingNodeTooltip enchantingNodeTooltip) {
+                    if (enchantingNodeTooltip.node instanceof EnchantingNode enchantingNode) {
+
+                        description.insertLine(0, new DescriptionLine() {
+                            @Override
+                            public void draw(GuiGraphics graphics, int lineX, int lineY) {
+                                //Draw label
+                                graphics.drawString(Minecraft.getInstance().font,
+                                        getText(),
+                                        lineX,
+                                        lineY + 4, //Offset to centre text with cost stack
+                                        0xFFFFFF);
+
+                                //Draw cost stack or "Free" if no item cost defined.
+                                if (enchantingNode.isBranchUnlocked && !enchantingNode.isObtained()) {
+                                    ItemStack costStack = enchantingNodeTooltip.getCostStack();
+                                    if (costStack.is(Items.AIR) || costStack.isEmpty()) {
+                                        graphics.drawString(
+                                                Minecraft.getInstance().font,
+                                                Component.translatable("gui.immersiveenchanting.cost_free"),
+                                                lineX,
+                                                lineY,
+                                                ChatFormatting.DARK_AQUA.getColor()
+                                        );
+                                    } else {
+                                        Vector2i costStackPos = new Vector2i(lineX + Minecraft.getInstance().font.width(getText()), lineY);
+                                        enchantingNodeTooltip.setCostStackPos(costStackPos.x, costStackPos.y);
+                                        graphics.renderItem(
+                                                enchantingNodeTooltip.getCostStack(),
+                                                costStackPos.x,
+                                                costStackPos.y);
+                                        graphics.renderItemDecorations(Minecraft.getInstance().font,
+                                                enchantingNodeTooltip.getCostStack(),
+                                                costStackPos.x,
+                                                costStackPos.y);
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public @NotNull Component getText() {
+                                Component label;
+                                if (enchantingNode.isBranchUnlocked) {
+                                    label = enchantingNode.isObtained() ?
+                                            Component.translatable("gui.immersiveenchanting.equipped").withStyle(ChatFormatting.LIGHT_PURPLE) :
+                                            Component.translatable("gui.immersiveenchanting.cost").withStyle(ChatFormatting.GRAY);
+                                } else {
+                                    label = Component.translatable("gui.immersiveenchanting.locked_enchantment_hint")
+                                            .withStyle(ChatFormatting.OBFUSCATED, ChatFormatting.GRAY);
+                                }
+                                return label;
+                            }
+                        });
+
+                    }
+                }
+            }
+        });
+
+        TooltipDescriptionExtensions.register(new DescriptionLayoutExtension() {
+            @Override
+            public void extendLayout(DescriptionLayout description, NodeTooltip parentTooltip) {
+                if(parentTooltip instanceof TransmuteNodeTooltip transmuteNodeTooltip) {
+                    if(parentTooltip.node instanceof TransmuteNode transmuteNode) {
+
+                        //Description label
+                        String text = transmuteNode.canTransmute() ?
+                                Component.translatable("gui.immersiveenchanting.transmute_description").getString() :
+                                Component.translatable("gui.immersiveenchanting.transmute_hint").getString();
+
+                        List<String> textChunks = DescriptionLayout.chunkString(text, 32);
+                        int lineCount = 0;
+                        for (int i = 0; i < textChunks.size(); i++) {
+                            lineCount++;
+                            int finalI = i;
+                            description.insertLine(i, new DescriptionLine() {
+                                @Override
+                                public void draw(GuiGraphics graphics, int lineX, int lineY) {
+                                    //Draw label
+                                    graphics.drawString(Minecraft.getInstance().font,
+                                            getText(),
+                                            lineX,
+                                            lineY,
+                                            0xFFFFFF);
+                                }
+
+                                @Override
+                                public @NotNull Component getText() {
+                                    Component label = Component.literal(textChunks.get(finalI));
+                                    if(transmuteNode.canTransmute()) {
+                                        label = label.copy().withStyle(ChatFormatting.GREEN);
+                                    } else {
+                                        label = label.copy().withStyle(ChatFormatting.GRAY).withStyle(ChatFormatting.ITALIC);
+                                    }
+
+                                    return label;
+                                }
+                            });
+                        }
+
+                        //Cost label if unlocked
+                        if(transmuteNode.canTransmute()) {
+                            description.insertLine(lineCount, new DescriptionLine() {
+                                @Override
+                                public void draw(GuiGraphics graphics, int lineX, int lineY) {
+                                    graphics.drawString(Minecraft.getInstance().font,
+                                            getText(),
+                                            lineX,
+                                            lineY + 4, //Offset to centre text with cost stack
+                                            0xFFFFFF);
+
+                                    Vector2i spritePos = new Vector2i(lineX + Minecraft.getInstance().font.width(getText().getString()), lineY);
+                                    graphics.blit(EnchantingTableScreen.LEVEL_SPRITE, spritePos.x, spritePos.y, 0, 0, 16, 16, 16, 16);
+                                }
+
+                                @Override
+                                public @NotNull Component getText() {
+                                    return Component.translatable("gui.immersiveenchanting.cost").withStyle(ChatFormatting.GRAY);
+                                }
+                            });
+                        }
+
+                    }
+                }
+            }
+        });
     }
 
     public void onClientStart(FMLClientSetupEvent event) {

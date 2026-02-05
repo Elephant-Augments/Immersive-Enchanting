@@ -1,6 +1,7 @@
 package me.alfie.immersiveenchanting.gui.tooltip;
 
 import me.alfie.immersiveenchanting.gui.EnchantingNodeTooltip;
+import me.alfie.immersiveenchanting.gui.NodeTooltip;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 
@@ -15,9 +16,9 @@ public class NineSliceBox {
     private ResourceLocation spriteTexture;
     private int x;
     private int y;
-    public EnchantingNodeTooltip parentTooltip;
+    public NodeTooltip parentTooltip;
 
-    public NineSliceBox(EnchantingNodeTooltip parentTooltip, ResourceLocation spriteTexture) {
+    public NineSliceBox(NodeTooltip parentTooltip, ResourceLocation spriteTexture) {
         this.parentTooltip = parentTooltip;
         this.spriteTexture = spriteTexture;
     }

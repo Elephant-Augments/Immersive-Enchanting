@@ -4,11 +4,14 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.datapack.LevelCost;
+import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.networking.packets.EnchantItemPacket;
+import me.alfie.immersiveenchanting.networking.packets.TransmuteBookPacket;
 import me.alfie.immersiveenchanting.networking.packets.UpdateToolSlotPacket;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -23,10 +26,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.joml.Vector2i;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -42,12 +42,15 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
             "textures/gui/container/enchanting_table_top.png");
     public static final ResourceLocation BOOK_CLOSED_TEXTURE = ResourceLocation.fromNamespaceAndPath(ImmersiveEnchanting.MODID,
             "textures/gui/container/book_closed.png");
-    public final List<EnchantingNodeBranch> branches = new ArrayList<>();
+    public static final ResourceLocation LEVEL_SPRITE = ResourceLocation.fromNamespaceAndPath(ImmersiveEnchanting.MODID,
+            "textures/gui/sprites/level_10.png");
+
+    public final List<NodeBranch> branches = new ArrayList<>();
 
 
     protected final int VIEWPORT_WIDTH = 247; //Dimensions of viewport in the texture
     protected final int VIEWPORT_HEIGHT = 117; //Dimensions of viewport in the texture
-    final List<EnchantingNode> rendered_nodes = new ArrayList<>();
+    final List<Node> rendered_nodes = new ArrayList<>();
     private final int TILE_TEXTURE_SIZE = 16;
     private final Vector2i VIEWPORT_TOP_LEFT = new Vector2i(5, 5); //Position that viewport starts on the texture (top left)
     private final boolean croppingEnabled = true; //Whether to crop the canvas outside of viewport - false for debugging.
@@ -65,10 +68,10 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
     private double dragStartScrollX = 0;
     private double dragStartScrollY = 0;
     private float currentBackgroundBrightness = 1f;
-    private EnchantingNode hoveredNode;
-    private EnchantingNode lastHoveredNode;
+    private Node hoveredNode;
+    private Node lastHoveredNode;
     private boolean lockHover;
-    private EnchantingNodeTooltip enchantingNodeTooltip;
+    private NodeTooltip nodeTooltip;
     private ItemStack lastStack = ItemStack.EMPTY; //Handling which tool in slot
     private Vector2i virtualSlotPos;
 
@@ -119,19 +122,24 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
             initializeScreen();
         }
 
-        buildNodeBranches(menu.getToolSlotItem());
+        if(menu.getToolSlotItem().is(ModItems.ANCIENT_BOOK.get())) {
+            buildAncientBookBranch(menu.getToolSlotItem());
+        } else {
+            buildNodeBranches(menu.getToolSlotItem());
+        }
+
 
         //Update canvas size
         int largestBranchLevel = 1;
-        for (EnchantingNodeBranch branch : branches) {
+        for (NodeBranch branch : branches) {
             largestBranchLevel = Math.max(largestBranchLevel, branch.getNodes().size());
         }
 
-        EnchantingNodeBranch.calculateNodeAnglesAndStep(this);
+        NodeBranch.calculateNodeAnglesAndStep(this);
         //Place nodes after size change
-        for (EnchantingNodeBranch branch : branches) {
+        for (NodeBranch branch : branches) {
             branch.placeNodesAlongLine();
-            for (EnchantingNode node : branch.getNodes()) {
+            for (Node node : branch.getNodes()) {
                 node.setScale(EnchantingNode.globalScale);
             }
         }
@@ -144,7 +152,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         //Setting size dynamically requires recentering each time.
 
         //Each NODE_STEP = 80 pixels, as canvas is centred 80 pixels * 2 reaches the centre of the first node
-        int pixels = (EnchantingNodeBranch.node_step * 2) * EnchantmentCostRegistry.getClientRegistry().getHighestEnchantmentLevel();
+        int pixels = (NodeBranch.node_step * 2) * EnchantmentCostRegistry.getClientRegistry().getHighestEnchantmentLevel();
         int margin = TILE_TEXTURE_SIZE * 4; //Add 4 tile margin
         int rounded = ((pixels + TILE_TEXTURE_SIZE - 1) / TILE_TEXTURE_SIZE) * TILE_TEXTURE_SIZE;
 
@@ -208,7 +216,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         }
 
         // Step 2: Generate angles after filtering
-        List<Float> angles = EnchantingNodeBranch.generateBranchAngles(validEnchantments.size());
+        List<Float> angles = NodeBranch.generateBranchAngles(validEnchantments.size());
 
         int i = 0;
         for (Holder<Enchantment> enchantmentHolder : validEnchantments) {
@@ -231,12 +239,40 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         }
     }
 
+    /**
+     * Special method to build the upgrade node for ancient book enchantment re-roll.
+     */
+    public void buildAncientBookBranch(ItemStack currentItemStack) {
+        //If the enchantment is already unlocked (i.e, there is an identical book in the chiseled bookshelf)
+        //Reroll this ancient book to a new one (that isn't unlocked)
+
+        //All ancient books that are already present
+        Set<Holder<Enchantment>> unlockedEnchantments = menu.getUnlockedEnchantments();
+
+        //The enchantment for this ancient book
+        Set<Holder<Enchantment>> ancientBookEnchantments = currentItemStack.get(DataComponents.STORED_ENCHANTMENTS).keySet();
+
+        System.out.println(ancientBookEnchantments);
+        System.out.println(unlockedEnchantments);
+
+        //Check if the enchantment stored in this ancient book is also unlocked (in the bookshelf)
+        boolean canTransmute = false;
+        if(!Collections.disjoint(unlockedEnchantments, ancientBookEnchantments)) {
+            canTransmute = true;
+        }
+
+        branches.add(new TransmuteNodeBranch(
+                this,
+                0,
+                canTransmute));
+    }
+
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.render(guiGraphics, mouseX, mouseY, partialTick);
 
-        //Render the item stack in the node tooltip when hovered.
-        if (enchantingNodeTooltip != null) {
+        //Render the item stack for enchanting node tooltips when hovered.
+        if (nodeTooltip != null && nodeTooltip instanceof EnchantingNodeTooltip enchantingNodeTooltip) {
             if (mouseX >= enchantingNodeTooltip.getCostStackPos().x
                     && mouseX < enchantingNodeTooltip.getCostStackPos().x + 16
                     && mouseY >= enchantingNodeTooltip.getCostStackPos().y
@@ -300,7 +336,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         renderNodes(guiGraphics);
 
 
-        EnchantingNode nodeToRender;
+        Node nodeToRender;
         if (isLockHover()) {
             nodeToRender = lastHoveredNode;
         } else {
@@ -312,7 +348,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
             renderNodeTooltip(nodeToRender, guiGraphics);
             renderHoveredNode(nodeToRender, guiGraphics);
         } else {
-            enchantingNodeTooltip = null;
+            nodeTooltip = null;
         }
 
 
@@ -381,7 +417,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
     }
 
     private void renderBranchConnections(GuiGraphics guiGraphics) {
-        for (EnchantingNodeBranch branch : branches) {
+        for (NodeBranch branch : branches) {
             guiGraphics.setColor(currentBackgroundBrightness, currentBackgroundBrightness, currentBackgroundBrightness, 1f);
 
             //Don't darken the hovered node branch.
@@ -410,26 +446,26 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         //Add background book and virtual slot
         guiGraphics.blit(
                 ENCHANTING_TABLE_TOP_TEXTURE,
-                centerOnCanvas(32, 32).x - (int) scrollX,
-                centerOnCanvas(32, 32).y - (int) scrollY,
+                getCanvasCenterPos(32, 32).x - (int) scrollX,
+                getCanvasCenterPos(32, 32).y - (int) scrollY,
                 0f, 0f, 32, 32,
                 32, 32
         );
-        virtualSlotPos = centerOnCanvas(VIRTUAL_SLOT_DIMENSIONS, VIRTUAL_SLOT_DIMENSIONS);
+        virtualSlotPos = getCanvasCenterPos(VIRTUAL_SLOT_DIMENSIONS, VIRTUAL_SLOT_DIMENSIONS);
 
         if (this.menu.getSlot(0).getItem().isEmpty()) {
             guiGraphics.blit(
                     BOOK_CLOSED_TEXTURE,
-                    centerOnCanvas(32, 32).x - (int) scrollX,
-                    centerOnCanvas(32, 32).y - (int) scrollY,
+                    getCanvasCenterPos(32, 32).x - (int) scrollX,
+                    getCanvasCenterPos(32, 32).y - (int) scrollY,
                     0f, 0f, 32, 32,
                     32, 32
             );
         } else {
             guiGraphics.blit(
                     BOOK_OPEN_TEXTURE,
-                    centerOnCanvas(32, 32).x - (int) scrollX,
-                    centerOnCanvas(32, 32).y - (int) scrollY,
+                    getCanvasCenterPos(32, 32).x - (int) scrollX,
+                    getCanvasCenterPos(32, 32).y - (int) scrollY,
                     0f, 0f, 32, 32,
                     32, 32
             );
@@ -438,8 +474,8 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
 
         //Render the item in slot0 (tool slot)
         ItemStack stack = this.menu.getSlot(0).getItem(); //to get the ItemStack
-        guiGraphics.renderItem(stack, centerOnCanvas(16, 16).x - (int) scrollX,
-                centerOnCanvas(16, 16).y - (int) scrollY);
+        guiGraphics.renderItem(stack, getCanvasCenterPos(16, 16).x - (int) scrollX,
+                getCanvasCenterPos(16, 16).y - (int) scrollY);
     }
 
     /**
@@ -448,7 +484,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
      * @param guiGraphics
      */
     private void renderNodes(GuiGraphics guiGraphics) {
-        for (EnchantingNode node : rendered_nodes) {
+        for (Node node : rendered_nodes) {
             guiGraphics.setColor(currentBackgroundBrightness, currentBackgroundBrightness, currentBackgroundBrightness, 1f);
             node.render(guiGraphics, this);
 
@@ -463,9 +499,14 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         return lockHover;
     }
 
+    /**
+     * Set which node is currently being hovered over.
+     * @param mouseX
+     * @param mouseY
+     */
     private void setHoveredNode(double mouseX, double mouseY) {
-        for (EnchantingNode node : rendered_nodes) {
-            if (isMouseOverNode(node, mouseX, mouseY)) {
+        for (Node node : rendered_nodes) {
+            if (node.isMouseOver(this, mouseX, mouseY)) {
                 hoveredNode = node;
                 return;
             }
@@ -473,29 +514,41 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         hoveredNode = null;
     }
 
-    private EnchantingNode getHoveredNode() {
+    private Node getHoveredNode() {
         return hoveredNode;
     }
 
-    private void renderNodeTooltip(EnchantingNode node, GuiGraphics guiGraphics) {
-        if (!node.equals(lastHoveredNode) || enchantingNodeTooltip == null) {
-            enchantingNodeTooltip = new EnchantingNodeTooltip(
-                    this.font,
-                    node,
-                    EnchantmentCostRegistry.getClientRegistry()
-                            .getEnchantmentCost(node.getEnchantment())
-                            .getLevel(node.getEnchantmentLevel())
-                            .asItemStack(),
-                    this
-            );
+    private void renderNodeTooltip(Node node, GuiGraphics guiGraphics) {
+        //Create new node tooltip
+        if (!node.equals(lastHoveredNode) || nodeTooltip == null) {
+
+            if(node instanceof EnchantingNode enchantingNode) {
+                nodeTooltip = new EnchantingNodeTooltip(
+                        enchantingNode,
+                        EnchantmentCostRegistry.getClientRegistry()
+                                .getEnchantmentCost(enchantingNode.getEnchantment())
+                                .getLevel(enchantingNode.getEnchantmentLevel())
+                                .asItemStack(),
+                        this
+                );
+            }
+
+            else if (node instanceof TransmuteNode transmuteNode) {
+                nodeTooltip = new TransmuteNodeTooltip(
+                        transmuteNode,
+                        this
+                );
+            }
+
             player.playSound(SoundEvents.CHISELED_BOOKSHELF_PICKUP_ENCHANTED);
             lastHoveredNode = node;
         }
 
-        if (enchantingNodeTooltip != null) {
+        //Render it
+        if (nodeTooltip != null) {
             guiGraphics.pose().pushPose();
             guiGraphics.pose().translate(0, 0, 200);
-            enchantingNodeTooltip.renderEnchantmentTooltip(guiGraphics);
+            nodeTooltip.render(guiGraphics);
             guiGraphics.pose().popPose();
         }
 
@@ -503,10 +556,9 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
 
     /**
      * Render the node that is currently hovered over.
-     *
      * @param guiGraphics
      */
-    private void renderHoveredNode(EnchantingNode node, GuiGraphics guiGraphics) {
+    private void renderHoveredNode(Node node, GuiGraphics guiGraphics) {
         //Render the hovered node.
         guiGraphics.pose().pushPose();
         guiGraphics.pose().translate(0, 0, 500);
@@ -522,24 +574,13 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
      * @param textureHeight
      * @return
      */
-    public Vector2i centerOnCanvas(int textureWidth, int textureHeight) {
+    public Vector2i getCanvasCenterPos(int textureWidth, int textureHeight) {
         int x = canvasLeftPos + scrollableCanvasWidth / 2 - textureWidth / 2;
         int y = canvasTopPos + scrollableCanvasHeight / 2 - textureHeight / 2;
         return new Vector2i(x, y);
     }
 
-    /**
-     * Helper function to check if a node is being moused over.
-     *
-     * @param node
-     * @param mouseX
-     * @param mouseY
-     * @return
-     */
-    public boolean isMouseOverNode(EnchantingNode node, double mouseX, double mouseY) {
-        return isMouseOverBoundingBox(new Vector2i(node.getX(), node.getY()),
-                EnchantingNode.width, EnchantingNode.height, mouseX, mouseY);
-    }
+
 
     /**
      * Check if mouse is over a bounding box. Automatically clips the bounding box if out of viewport bounds.
@@ -600,7 +641,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
 
                 // 1. Check if hovered node was clicked
                 if (hoveredNode != null) {
-                    if (isMouseOverNode(hoveredNode, mouseX, mouseY)) {
+                    if (hoveredNode.isMouseOver(this, mouseX, mouseY)) {
                         this.onNodeClicked(hoveredNode);
                         return true;
                     }
@@ -718,23 +759,23 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
      *
      * @param node
      */
-    private void onNodeClicked(EnchantingNode node) {
-        if (!node.isObtained() && node.isBranchUnlocked) {
-            //Get item at slot
-            //player.level().playSound(player, player.blockPosition(),
-            //SoundEvents.BEACON_POWER_SELECT, SoundSource.MASTER,
-            //        1.0F, 1.0F);
+    private void onNodeClicked(Node node) {
 
-            ItemStack stack = this.menu.getSlot(0).getItem();
+        if(node instanceof EnchantingNode enchantingNode) {
+            if (!enchantingNode.isObtained() && enchantingNode.isBranchUnlocked) {
+                //Give server ResourceKey<Enchantment>.location().toString()
+                //Server uses RESOURCE_KEY_MAP.get() to find the corresponding ResourceKey
+                //Server enchants tool, client side cannot do it.
+                PacketDistributor.sendToServer(new EnchantItemPacket(
+                        enchantingNode.getEnchantmentHolder().getKey(),
+                        enchantingNode.getEnchantmentLevel())
+                );
+            }
+        } else if (node instanceof TransmuteNode transmuteNode) {
 
-            //Give server ResourceKey<Enchantment>.location().toString()
-            //Server uses RESOURCE_KEY_MAP.get() to find the corresponding ResourceKey
-            //Server enchants tool, client side cannot do it.
-            PacketDistributor.sendToServer(new EnchantItemPacket(
-                    node.getEnchantmentHolder().getKey(),
-                    node.getEnchantmentLevel())
-            );
+            PacketDistributor.sendToServer(new TransmuteBookPacket(0));
         }
+
 
     }
 }
