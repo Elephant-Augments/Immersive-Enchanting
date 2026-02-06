@@ -1,5 +1,8 @@
-package me.alfie.immersiveenchanting.gui;
+package me.alfie.immersiveenchanting.gui.transmute;
 
+import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
+import me.alfie.immersiveenchanting.gui.core.NodeBranch;
+import me.alfie.immersiveenchanting.gui.core.NodeType;
 import net.minecraft.resources.ResourceLocation;
 
 public class TransmuteNodeBranch extends NodeBranch {

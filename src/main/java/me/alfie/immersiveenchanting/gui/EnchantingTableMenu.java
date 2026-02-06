@@ -155,21 +155,8 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
         return AbstractContainerMenu.stillValid(this.access, player, Blocks.ENCHANTING_TABLE);
     }
 
-    /**
-     * @deprecated Resource ids will no longer be used, use holders instead.
-     */
-    @Deprecated(forRemoval = true)
-    public Set<String> getUnlockedEnchantmentResourceIds() {
-        return this.unlockedEnchantmentResourceIds;
-    }
-
-    /**
-     * @param unlockedEnchantmentResourceIds
-     * @deprecated Resource ids will no longer be used, use holders instead.
-     */
-    @Deprecated(forRemoval = true)
-    public void setUnlockedEnchantmentResourceIds(Set<String> unlockedEnchantmentResourceIds) {
-        this.unlockedEnchantmentResourceIds = unlockedEnchantmentResourceIds;
+    public BlockPos getBlockPos() {
+        return blockPos;
     }
 
     public Set<Holder<Enchantment>> getUnlockedEnchantments() {

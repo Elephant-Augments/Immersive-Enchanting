@@ -1,14 +1,9 @@
-package me.alfie.immersiveenchanting.gui;
+package me.alfie.immersiveenchanting.gui.enchanting;
 
-import me.alfie.immersiveenchanting.gui.tooltip.RenderDirection;
-import me.alfie.immersiveenchanting.gui.tooltip.TooltipDescription;
-import me.alfie.immersiveenchanting.gui.tooltip.TooltipTitle;
+import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
+import me.alfie.immersiveenchanting.gui.core.NodeTooltip;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import org.joml.Vector2i;

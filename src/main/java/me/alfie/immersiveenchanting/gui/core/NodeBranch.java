@@ -1,6 +1,8 @@
-package me.alfie.immersiveenchanting.gui;
+package me.alfie.immersiveenchanting.gui.core;
 
 import com.mojang.blaze3d.platform.NativeImage;
+import me.alfie.immersiveenchanting.gui.enchanting.EnchantingNode;
+import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.texture.DynamicTexture;
@@ -36,7 +38,7 @@ public class NodeBranch {
 
     public void addNode(Node node) {
         nodes.add(node);
-        screen.rendered_nodes.add(node);
+        screen.getRenderedNodes().add(node);
     }
 
     public static void calculateNodeAnglesAndStep(EnchantingTableScreen screen) {
@@ -120,8 +122,8 @@ public class NodeBranch {
     public void placeNodesAlongLine() {
         // Center point of the canvas
         Vector2i center = new Vector2i(
-                screen.canvasLeftPos + screen.scrollableCanvasWidth / 2,
-                screen.canvasTopPos + screen.scrollableCanvasHeight / 2
+                screen.getCanvasLeftPos() + screen.getScrollableCanvasWidth() / 2,
+                screen.getCanvasTopPos() + screen.getScrollableCanvasHeight() / 2
         );
 
         // Step vector based on angle
@@ -150,8 +152,8 @@ public class NodeBranch {
 
     private void connectNodeToCenter(Node node) {
         // Use node centers for cleaner lines
-        int ax = screen.canvasLeftPos + screen.scrollableCanvasWidth / 2;
-        int ay = screen.canvasTopPos + screen.scrollableCanvasHeight / 2;
+        int ax = screen.getCanvasLeftPos() + screen.getScrollableCanvasWidth() / 2;
+        int ay = screen.getCanvasTopPos() + screen.getScrollableCanvasHeight() / 2;
         int bx = (int) (node.getX() + Node.width * node.getScale() / 2);
         int by = (int) (node.getY() + Node.height * node.getScale() / 2);
         calculateConnection(ax, ay, bx, by);

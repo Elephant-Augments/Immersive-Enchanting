@@ -4,6 +4,15 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.datapack.LevelCost;
+import me.alfie.immersiveenchanting.gui.core.Node;
+import me.alfie.immersiveenchanting.gui.core.NodeBranch;
+import me.alfie.immersiveenchanting.gui.core.NodeTooltip;
+import me.alfie.immersiveenchanting.gui.enchanting.EnchantingNode;
+import me.alfie.immersiveenchanting.gui.enchanting.EnchantingNodeBranch;
+import me.alfie.immersiveenchanting.gui.enchanting.EnchantingNodeTooltip;
+import me.alfie.immersiveenchanting.gui.transmute.TransmuteNode;
+import me.alfie.immersiveenchanting.gui.transmute.TransmuteNodeBranch;
+import me.alfie.immersiveenchanting.gui.transmute.TransmuteNodeTooltip;
 import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.networking.packets.EnchantItemPacket;
 import me.alfie.immersiveenchanting.networking.packets.TransmuteBookPacket;
@@ -48,18 +57,50 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
     public final List<NodeBranch> branches = new ArrayList<>();
 
 
-    protected final int VIEWPORT_WIDTH = 247; //Dimensions of viewport in the texture
-    protected final int VIEWPORT_HEIGHT = 117; //Dimensions of viewport in the texture
+    public final int VIEWPORT_WIDTH = 247; //Dimensions of viewport in the texture
+    public final int VIEWPORT_HEIGHT = 117; //Dimensions of viewport in the texture
+
+    public List<Node> getRenderedNodes() {
+        return rendered_nodes;
+    }
+
     final List<Node> rendered_nodes = new ArrayList<>();
     private final int TILE_TEXTURE_SIZE = 16;
     private final Vector2i VIEWPORT_TOP_LEFT = new Vector2i(5, 5); //Position that viewport starts on the texture (top left)
     private final boolean croppingEnabled = true; //Whether to crop the canvas outside of viewport - false for debugging.
     private final Player player;
     private final int VIRTUAL_SLOT_DIMENSIONS = 16;
+
+    public int getScrollableCanvasWidth() {
+        return scrollableCanvasWidth;
+    }
+
+    public int getScrollableCanvasHeight() {
+        return scrollableCanvasHeight;
+    }
+
     int scrollableCanvasWidth = TILE_TEXTURE_SIZE * 64; //Must be divisible by tileSize (16), otherwise rendered tiles/edge constraints will leave gaps
     int scrollableCanvasHeight = TILE_TEXTURE_SIZE * 64; //Must be divisible by tileSize (16), otherwise rendered tiles/edge constraints will leave gaps
+
+    public int getCanvasLeftPos() {
+        return canvasLeftPos;
+    }
+
+    public int getCanvasTopPos() {
+        return canvasTopPos;
+    }
+
     int canvasLeftPos;
     int canvasTopPos;
+
+    public double getScrollX() {
+        return scrollX;
+    }
+
+    public double getScrollY() {
+        return scrollY;
+    }
+
     double scrollX = 0;
     double scrollY = 0;
     private boolean dragging = false;
@@ -773,10 +814,10 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
             }
         } else if (node instanceof TransmuteNode transmuteNode) {
 
-            PacketDistributor.sendToServer(new TransmuteBookPacket(0));
+            if(transmuteNode.canTransmute()) {
+                PacketDistributor.sendToServer(new TransmuteBookPacket(0));
+            }
         }
-
-
     }
 }
 

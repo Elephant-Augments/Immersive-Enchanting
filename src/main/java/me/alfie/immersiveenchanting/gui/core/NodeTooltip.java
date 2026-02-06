@@ -1,14 +1,13 @@
-package me.alfie.immersiveenchanting.gui;
+package me.alfie.immersiveenchanting.gui.core;
 
+import me.alfie.immersiveenchanting.gui.enchanting.EnchantingNode;
+import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.tooltip.RenderDirection;
 import me.alfie.immersiveenchanting.gui.tooltip.TooltipDescription;
 import me.alfie.immersiveenchanting.gui.tooltip.TooltipTitle;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.enchantment.Enchantment;
 import org.joml.Vector2i;
 
 public class NodeTooltip {
@@ -45,13 +44,13 @@ public class NodeTooltip {
     }
 
     public void render(GuiGraphics graphics) {
-        titleBoxHeight = Math.max(Minecraft.getInstance().font.lineHeight, EnchantingNode.height);
+        titleBoxHeight = Math.max(Minecraft.getInstance().font.lineHeight, Node.height);
 
         //Build description layout
         tooltipDescription.buildLayout();
 
         //Calculate width: Use title width, but if description extends it, go further.
-        final int titleTextWidth = Minecraft.getInstance().font.width(tooltipTitle.getTitleText()) + EnchantingNode.width + padding/2;
+        final int titleTextWidth = Minecraft.getInstance().font.width(tooltipTitle.getTitleText()) + Node.width + padding/2;
         final int descriptionTextWidth = Minecraft.getInstance().font.width(tooltipDescription.layout.getLongestString()) + padding;
         titleBoxWidth = Math.max(titleTextWidth, descriptionTextWidth);
 

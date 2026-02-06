@@ -1,5 +1,6 @@
-package me.alfie.immersiveenchanting.gui;
+package me.alfie.immersiveenchanting.gui.core;
 
+import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Vector2i;
@@ -28,7 +29,7 @@ public class Node {
     public void render(GuiGraphics guiGraphics, EnchantingTableScreen screen) {
         guiGraphics.pose().pushPose();
 
-        guiGraphics.pose().translate(this.x - (int) screen.scrollX, this.y - (int) screen.scrollY, 0);
+        guiGraphics.pose().translate(this.x - (int) screen.getScrollX(), this.y - (int) screen.getScrollY(), 0);
         guiGraphics.pose().scale(scale, scale, scale);
 
         guiGraphics.blit(
@@ -107,17 +108,17 @@ public class Node {
     }
 
     public Vector2i getRenderedPosition(EnchantingTableScreen screen) {
-        int renderedX = this.x - (int) screen.scrollX;
-        int renderedY = this.y - (int) screen.scrollY;
+        int renderedX = this.x - (int) screen.getScrollX();
+        int renderedY = this.y - (int) screen.getScrollY();
         return new Vector2i(renderedX, renderedY);
     }
 
     public Vector2i getViewportPosition(EnchantingTableScreen screen) {
-        int screenX = this.x - (int) screen.scrollX;
-        int screenY = this.y - (int) screen.scrollY;
+        int screenX = this.x - (int) screen.getScrollX();
+        int screenY = this.y - (int) screen.getScrollY();
 
-        int viewportX = screenX - screen.canvasLeftPos;
-        int viewportY = screenY - screen.canvasTopPos;
+        int viewportX = screenX - screen.getCanvasLeftPos();
+        int viewportY = screenY - screen.getCanvasTopPos();
 
         return new Vector2i(viewportX, viewportY);
     }

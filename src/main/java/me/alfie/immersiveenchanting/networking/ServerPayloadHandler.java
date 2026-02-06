@@ -16,14 +16,19 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.particles.ColorParticleOption;
+import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
@@ -33,8 +38,10 @@ import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChiseledBookShelfBlockEntity;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
+import org.joml.Vector3f;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -46,6 +53,7 @@ public class ServerPayloadHandler {
         Player player = context.player();
         Level level = player.level();
         AbstractContainerMenu menu = player.containerMenu;
+
         if(menu instanceof EnchantingTableMenu enchantingTableMenu) {
             ItemStack ancientBookStack = enchantingTableMenu.getToolSlotItem();
             Set<Holder<Enchantment>> unlockedEnchantments = enchantingTableMenu.getUnlockedEnchantments();
@@ -64,16 +72,56 @@ public class ServerPayloadHandler {
 
 
             //If has 10 levels
-            if(player.experienceLevel >= 10) {
+            if(player.experienceLevel >= 10 || player.isCreative()) {
                 player.giveExperienceLevels(-10);
                 AncientBook.setStoredEnchantment(ancientBookStack, randomEnchantment);
+                BlockPos tablePos = enchantingTableMenu.getBlockPos();
 
-                level.playSound(null, player.blockPosition(), SoundEvents.BREWING_STAND_BREW,
-                        SoundSource.BLOCKS, 1.0F, 0.7F);
-                level.playSound(null, player.blockPosition(), SoundEvents.ENDER_CHEST_OPEN,
-                        SoundSource.BLOCKS, 0.5F, 1.0F);
-                level.playSound(null, player.blockPosition(), SoundEvents.FIREWORK_ROCKET_LARGE_BLAST,
-                        SoundSource.BLOCKS, 1.2F, 0.8F);
+                //level.playSound(null, player.blockPosition(), SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 1.0F, 0.7F);
+                level.playSound(null, tablePos, SoundEvents.ENDER_CHEST_OPEN,
+                        SoundSource.BLOCKS, 0.4F, 1.0F);
+                level.playSound(null, tablePos, SoundEvents.FIREWORK_ROCKET_LARGE_BLAST,
+                        SoundSource.BLOCKS, 0.8F, 0.8F);
+                level.playSound(null, tablePos, SoundEvents.EVOKER_CAST_SPELL,
+                        SoundSource.BLOCKS, 0.8F, 1F);
+                level.playSound(null, tablePos, SoundEvents.EVOKER_PREPARE_SUMMON,
+                        SoundSource.BLOCKS, 0.1F, 1.2F);
+
+                ItemStack stack = enchantingTableMenu.getToolSlotItem().copyAndClear();
+
+
+                ItemEntity entity = new ItemEntity(
+                        level,
+                        tablePos.getX() + 0.5,
+                        tablePos.getY() + 1,
+                        tablePos.getZ() + 0.5,
+                        stack);
+                entity.setPickUpDelay(40);
+                entity.setDeltaMovement(Vec3.ZERO);
+
+                level.addFreshEntity(entity);
+
+                int particleCount = 70;
+                ((ServerLevel) level).sendParticles(
+                        ParticleTypes.ENCHANT,
+                        tablePos.getX() + 0.5,
+                        tablePos.getY() + 1,
+                        tablePos.getZ() + 0.5,
+                        particleCount,
+                        0.2, 0.2, 0.2,
+                        0.1);
+
+                ((ServerLevel) level).sendParticles(
+                        ParticleTypes.GLOW,
+                        tablePos.getX() + 0.5,
+                        tablePos.getY() + 1,
+                        tablePos.getZ() + 0.5,
+                        particleCount,
+                        0.2, 0.2, 0.2,
+                        0.1);
+
+
+                player.closeContainer();
             } else {
                 //If unable to enchant
                 level.playSound(null, player.blockPosition(), SoundEvents.VAULT_CLOSE_SHUTTER,

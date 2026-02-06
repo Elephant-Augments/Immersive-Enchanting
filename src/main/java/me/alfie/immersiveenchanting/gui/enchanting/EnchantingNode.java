@@ -1,5 +1,7 @@
-package me.alfie.immersiveenchanting.gui;
+package me.alfie.immersiveenchanting.gui.enchanting;
 
+import me.alfie.immersiveenchanting.gui.core.Node;
+import me.alfie.immersiveenchanting.gui.core.NodeType;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;

@@ -1,8 +1,7 @@
 package me.alfie.immersiveenchanting.gui.tooltip;
 
 import me.alfie.immersiveenchanting.api.TooltipDescriptionExtensions;
-import me.alfie.immersiveenchanting.gui.EnchantingNodeTooltip;
-import me.alfie.immersiveenchanting.gui.NodeTooltip;
+import me.alfie.immersiveenchanting.gui.core.NodeTooltip;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Vector2i;

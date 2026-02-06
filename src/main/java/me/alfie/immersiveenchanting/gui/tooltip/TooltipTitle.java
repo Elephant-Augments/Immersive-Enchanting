@@ -1,8 +1,6 @@
 package me.alfie.immersiveenchanting.gui.tooltip;
 
-import me.alfie.immersiveenchanting.gui.EnchantingNodeTooltip;
-import me.alfie.immersiveenchanting.gui.Node;
-import me.alfie.immersiveenchanting.gui.NodeTooltip;
+import me.alfie.immersiveenchanting.gui.core.NodeTooltip;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;

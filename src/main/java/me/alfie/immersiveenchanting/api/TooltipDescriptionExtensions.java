@@ -1,20 +1,8 @@
 package me.alfie.immersiveenchanting.api;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
-import me.alfie.immersiveenchanting.compat.ModCheck;
-import me.alfie.immersiveenchanting.compat.ModCompat;
-import me.alfie.immersiveenchanting.gui.EnchantingNodeTooltip;
-import me.alfie.immersiveenchanting.gui.NodeTooltip;
+import me.alfie.immersiveenchanting.gui.core.NodeTooltip;
 import me.alfie.immersiveenchanting.gui.tooltip.DescriptionLayout;
-import me.alfie.immersiveenchanting.gui.tooltip.DescriptionLine;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import org.jetbrains.annotations.NotNull;
-import org.joml.Vector2i;
 
 import java.util.ArrayList;
 import java.util.List;
