@@ -10,11 +10,15 @@ import me.alfie.immersiveenchanting.gui.core.NodeTooltip;
 import me.alfie.immersiveenchanting.gui.enchanting.EnchantingNode;
 import me.alfie.immersiveenchanting.gui.enchanting.EnchantingNodeBranch;
 import me.alfie.immersiveenchanting.gui.enchanting.EnchantingNodeTooltip;
+import me.alfie.immersiveenchanting.gui.replicate.ReplicateNode;
+import me.alfie.immersiveenchanting.gui.replicate.ReplicateNodeBranch;
+import me.alfie.immersiveenchanting.gui.replicate.ReplicateNodeTooltip;
 import me.alfie.immersiveenchanting.gui.transmute.TransmuteNode;
 import me.alfie.immersiveenchanting.gui.transmute.TransmuteNodeBranch;
 import me.alfie.immersiveenchanting.gui.transmute.TransmuteNodeTooltip;
 import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.networking.packets.EnchantItemPacket;
+import me.alfie.immersiveenchanting.networking.packets.ReplicateBookPacket;
 import me.alfie.immersiveenchanting.networking.packets.TransmuteBookPacket;
 import me.alfie.immersiveenchanting.networking.packets.UpdateToolSlotPacket;
 import net.minecraft.client.gui.GuiGraphics;
@@ -302,10 +306,16 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
             canTransmute = true;
         }
 
+        List<Float> angles = NodeBranch.generateBranchAngles(2);
+
         branches.add(new TransmuteNodeBranch(
                 this,
-                0,
+                angles.get(0),
                 canTransmute));
+
+        branches.add(new ReplicateNodeBranch(
+                this,
+                angles.get(1)));
     }
 
     @Override
@@ -581,6 +591,13 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
                 );
             }
 
+            else if (node instanceof ReplicateNode replicateNode) {
+                nodeTooltip = new ReplicateNodeTooltip(
+                        replicateNode,
+                        this
+                );
+            }
+
             player.playSound(SoundEvents.CHISELED_BOOKSHELF_PICKUP_ENCHANTED);
             lastHoveredNode = node;
         }
@@ -812,11 +829,16 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
                         enchantingNode.getEnchantmentLevel())
                 );
             }
-        } else if (node instanceof TransmuteNode transmuteNode) {
+        }
 
+        else if (node instanceof TransmuteNode transmuteNode) {
             if(transmuteNode.canTransmute()) {
                 PacketDistributor.sendToServer(new TransmuteBookPacket(0));
             }
+        }
+
+        else if (node instanceof ReplicateNode replicateNode) {
+            PacketDistributor.sendToServer(new ReplicateBookPacket(0));
         }
     }
 }

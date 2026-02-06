@@ -13,7 +13,9 @@
   "gui.immersiveenchanting.transmute_book": "Transmute",
   "gui.immersiveenchanting.transmute_description": "Change the enchantment for this Ancient Book.",
   "gui.immersiveenchanting.transmute_hint": "You must first add an Ancient Book of the same enchantment to the bookshelf.",
-
+  "gui.immersiveenchanting.transmuted_to": "Transmuted to %s",
+  "gui.immersiveenchanting.replicate_book": "Replicate",
+  "gui.immersiveenchanting.replicate_hint": "Make a copy of this Ancient Book.",
 
   "immersiveenchanting.configuration.general": "General",
   "immersiveenchanting.config.disable_ancient_book_requirement": "Disable Ancient Book Requirement",

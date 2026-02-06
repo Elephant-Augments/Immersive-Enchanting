@@ -1,5 +1,7 @@
 package me.alfie.immersiveenchanting.gui;
 
+import me.alfie.immersiveenchanting.item.AncientBook;
+import me.alfie.immersiveenchanting.item.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.network.FriendlyByteBuf;
@@ -111,7 +113,7 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
             // ---- PLAYER INVENTORY ----
             else {
                 // Try tool → slot 0
-                if (stackInSlot.getItem().isEnchantable(stackInSlot)) {
+                if (stackInSlot.getItem().isEnchantable(stackInSlot) || stackInSlot.is(ModItems.ANCIENT_BOOK.get())) {
                     if (!this.moveItemStackTo(stackInSlot, 0, 1, false)) return ItemStack.EMPTY;
                 }
                 // Try lapis → slot 1
@@ -173,6 +175,10 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
 
     public ItemStack getToolSlotItem() {
         return getItemInSlot(SLOTS.TOOL);
+    }
+
+    public ItemStack getCostSlotItem() {
+        return getItemInSlot(SLOTS.COST);
     }
 
     /**

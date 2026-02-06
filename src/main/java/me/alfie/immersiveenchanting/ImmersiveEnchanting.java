@@ -60,6 +60,7 @@ public class ImmersiveEnchanting {
         modEventBus.addListener(EnchantmentCostRegistrySyncPacket::register);
         modEventBus.addListener(UpdateToolSlotPacket::register);
         modEventBus.addListener(TransmuteBookPacket::register);
+        modEventBus.addListener(ReplicateBookPacket::register);
 
         modContainer.registerConfig(ModConfig.Type.CLIENT, ClientConfig.CONFIG_SPEC);
         modContainer.registerConfig(ModConfig.Type.SERVER, ServerConfig.CONFIG_SPEC);
