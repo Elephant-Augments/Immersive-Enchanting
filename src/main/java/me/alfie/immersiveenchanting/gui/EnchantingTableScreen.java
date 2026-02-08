@@ -2,6 +2,8 @@ package me.alfie.immersiveenchanting.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
+import me.alfie.immersiveenchanting.compat.ModCheck;
+import me.alfie.immersiveenchanting.compat.ModCompat;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.datapack.LevelCost;
 import me.alfie.immersiveenchanting.networking.packets.EnchantItemPacket;
@@ -21,6 +23,9 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.joml.Vector2i;
+import reliquary.data.ReliquaryEnchantmentProvider;
+import reliquary.init.ModItems;
+import reliquary.item.MagicbaneItem;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -217,6 +222,11 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
 
             //Get the level of this enchantment
             enchantmentLevel.set(currentItemStack.getItem().getEnchantmentLevel(currentItemStack, enchantmentHolder));
+
+
+            if(ModCheck.Mod.RELIQUARY.isLoaded()) {
+                ModCompat.reliquaryMagicbaneFix(currentItemStack, enchantmentHolder, enchantmentLevel);
+            }
 
             branches.add(new EnchantingNodeBranch(
                     this,

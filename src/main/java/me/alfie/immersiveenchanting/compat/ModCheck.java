@@ -56,7 +56,8 @@ public class ModCheck {
      * Note: Ensure mod is added to dependencies in build.gradle
      */
     public enum Mod {
-        ENCHANT_LIMITER("enchant_limiter");
+        ENCHANT_LIMITER("enchant_limiter"),
+        RELIQUARY("reliquary");
 
         private final String modid;
 
