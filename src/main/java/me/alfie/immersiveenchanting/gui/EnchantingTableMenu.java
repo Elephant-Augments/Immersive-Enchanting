@@ -53,7 +53,12 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
     //Helper methods
     public void setupSlots(Inventory playerInventory) {
         //Tool slot
-        this.addSlot(new Slot(this.container, 0, 233, 141));
+        this.addSlot(new Slot(this.container, 0, 233, 141) {
+            @Override
+            public int getMaxStackSize() {
+                return 1;
+            }
+        });
 
         //Lapis slot
         this.addSlot(new Slot(this.container, 1, 233, 199));

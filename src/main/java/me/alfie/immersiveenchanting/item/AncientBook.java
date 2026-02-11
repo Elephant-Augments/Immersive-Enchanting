@@ -2,8 +2,9 @@ package me.alfie.immersiveenchanting.item;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.config.ClientConfig;
-import me.alfie.immersiveenchanting.item.legacy.EnchantmentDataComponent;
-import me.alfie.immersiveenchanting.item.legacy.ModDataComponents;
+import me.alfie.immersiveenchanting.datacomponent.EnchantmentDataComponent;
+import me.alfie.immersiveenchanting.datacomponent.ModDataComponents;
+import me.alfie.immersiveenchanting.datacomponent.ReplicatedDataComponent;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
@@ -21,7 +22,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.Level;
 import net.neoforged.fml.ModContainer;
@@ -38,7 +38,7 @@ public class AncientBook extends EnchantedBookItem {
     public static final String TRANSLATION_KEY = "lore.immersiveenchanting.ancient_book";
 
     public AncientBook(Properties properties) {
-        super(properties.stacksTo(1).rarity(Rarity.UNCOMMON));
+        super(properties.stacksTo(16).rarity(Rarity.UNCOMMON));
     }
 
     @Override
@@ -84,6 +84,13 @@ public class AncientBook extends EnchantedBookItem {
             //Combine lore text + enchantment name
             Component fullTooltip = loreText.append(" ").append(enchantName);
             tooltipComponents.add(fullTooltip);
+
+            //Add replicated tooltip
+            if(ReplicatedDataComponent.isReplicated(stack)) {
+                Component replicatedHint = Component.translatable("lore.immersiveenchanting.replicated")
+                        .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
+                tooltipComponents.add(replicatedHint);
+            }
 
             //Added by mod tooltip
             if(ClientConfig.isShowAddedByTooltipEnabled()) {
@@ -139,15 +146,15 @@ public class AncientBook extends EnchantedBookItem {
         if(level == null || level.isClientSide()) return;
         if(stack.has(DataComponents.STORED_ENCHANTMENTS)) return;
 
-        if (stack.has(ModDataComponents.ENCHANTMENT.get())) {
-            EnchantmentDataComponent enchantmentDataComponent = stack.get(ModDataComponents.ENCHANTMENT.get());
+        if (stack.has(ModDataComponents.LEGACY_ENCHANTMENT.get())) {
+            EnchantmentDataComponent enchantmentDataComponent = stack.get(ModDataComponents.LEGACY_ENCHANTMENT.get());
             ResourceLocation resourceLocation = ResourceLocation.tryParse(enchantmentDataComponent.enchantmentResourceLocation());
             ResourceKey<Enchantment> enchantmentResourceKey = ResourceKey.create(Registries.ENCHANTMENT, resourceLocation);
 
             Optional<Holder.Reference<Enchantment>> enchantmentHolder = ImmersiveEnchanting.getEnchantmentHolder(level.registryAccess(), enchantmentResourceKey);
             enchantmentHolder.ifPresent(enchantmentReference -> setStoredEnchantment(stack, enchantmentReference));
 
-            stack.remove(ModDataComponents.ENCHANTMENT.get());
+            stack.remove(ModDataComponents.LEGACY_ENCHANTMENT.get());
         }
     }
 

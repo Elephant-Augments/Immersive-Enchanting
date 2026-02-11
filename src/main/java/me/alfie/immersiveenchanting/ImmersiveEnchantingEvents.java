@@ -153,6 +153,10 @@ public class ImmersiveEnchantingEvents {
                                 Component.translatable("gui.immersiveenchanting.transmute_description").getString() :
                                 Component.translatable("gui.immersiveenchanting.transmute_hint").getString();
 
+                        if(transmuteNode.isBookReplicated()) {
+                            text = Component.translatable("gui.immersiveenchanting.not_transmutable").getString();
+                        }
+
                         List<String> textChunks = DescriptionLayout.chunkString(text, 32);
                         int lineCount = 0;
                         for (int i = 0; i < textChunks.size(); i++) {

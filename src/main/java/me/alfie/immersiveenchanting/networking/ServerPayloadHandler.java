@@ -4,6 +4,8 @@ import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.block.CreativeBookshelf;
 import me.alfie.immersiveenchanting.compat.ModCompat;
 import me.alfie.immersiveenchanting.config.ServerConfig;
+import me.alfie.immersiveenchanting.datacomponent.ModDataComponents;
+import me.alfie.immersiveenchanting.datacomponent.ReplicatedDataComponent;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
 import me.alfie.immersiveenchanting.item.AncientBook;
@@ -17,8 +19,6 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.particles.ColorParticleOption;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -29,7 +29,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -44,7 +43,6 @@ import net.minecraft.world.level.block.entity.ChiseledBookShelfBlockEntity;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
-import org.joml.Vector3f;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -63,16 +61,21 @@ public class ServerPayloadHandler {
                 enchantingTableMenu.getCostSlotItem().shrink(1);
                 BlockPos tablePos = enchantingTableMenu.getBlockPos();
 
-                ItemStack stack = enchantingTableMenu.getToolSlotItem().copyAndClear();
+                ItemStack oldStack = enchantingTableMenu.getToolSlotItem().copyAndClear();
+                ItemStack newStack = oldStack.copy();
+
+                //Copied books cannot be transmuted
+                newStack.set(ModDataComponents.REPLICATED, new ReplicatedDataComponent(true));
 
                 //Create 2 entities
                 for (int i = 0; i < 2; i++) {
+                    ItemStack stackToSpawn = (i == 0) ? oldStack : newStack;
                     ItemEntity entity = new ItemEntity(
                             level,
                             tablePos.getX() + 0.5,
                             tablePos.getY() + 1,
                             tablePos.getZ() + 0.5,
-                            stack);
+                            stackToSpawn);
                     entity.setPickUpDelay(40);
                     entity.setDeltaMovement(Vec3.ZERO);
                     level.addFreshEntity(entity);
@@ -137,7 +140,8 @@ public class ServerPayloadHandler {
             Holder<Enchantment> randomEnchantment = enchantments.get(randomIndex);
 
             //If has 10 levels
-            if(player.experienceLevel >= 10 || player.isCreative()) {
+            boolean isBookReplicated = ReplicatedDataComponent.isReplicated(ancientBookStack);
+            if(player.experienceLevel >= 10 || player.isCreative() && !isBookReplicated) {
                 player.giveExperienceLevels(-10);
 
                 //Save old enchantment for text

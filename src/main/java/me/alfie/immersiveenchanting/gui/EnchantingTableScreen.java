@@ -2,6 +2,7 @@ package me.alfie.immersiveenchanting.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
+import me.alfie.immersiveenchanting.datacomponent.ReplicatedDataComponent;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.datapack.LevelCost;
 import me.alfie.immersiveenchanting.gui.core.Node;
@@ -306,12 +307,15 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
             canTransmute = true;
         }
 
+        boolean isBookReplicated = ReplicatedDataComponent.isReplicated(currentItemStack);
+
         List<Float> angles = NodeBranch.generateBranchAngles(2);
 
         branches.add(new TransmuteNodeBranch(
                 this,
                 angles.get(0),
-                canTransmute));
+                canTransmute,
+                isBookReplicated));
 
         branches.add(new ReplicateNodeBranch(
                 this,

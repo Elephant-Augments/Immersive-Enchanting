@@ -9,7 +9,7 @@ import me.alfie.immersiveenchanting.creativetab.ModCreativeTab;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostDatapackHandler;
 import me.alfie.immersiveenchanting.gui.ModMenus;
 import me.alfie.immersiveenchanting.item.ModItems;
-import me.alfie.immersiveenchanting.item.legacy.ModDataComponents;
+import me.alfie.immersiveenchanting.datacomponent.ModDataComponents;
 import me.alfie.immersiveenchanting.lootmodifier.ModLootModifiers;
 import me.alfie.immersiveenchanting.networking.packets.*;
 import me.alfie.immersiveenchanting.structure.ModStructureProcessors;
