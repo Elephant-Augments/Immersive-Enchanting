@@ -14,11 +14,11 @@
     },
     "4": {
       "item": "minecraft:blaze_rod",
-      "amount": 16
+      "amount": 8
     },
     "5": {
       "item": "minecraft:end_rod",
-      "amount": 16
+      "amount": 8
     }
   }
 }

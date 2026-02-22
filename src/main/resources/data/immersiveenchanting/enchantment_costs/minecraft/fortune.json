@@ -2,7 +2,7 @@
   "levels": {
     "1": {
       "item": "minecraft:golden_apple",
-      "amount": 8
+      "amount": 1
     },
     "2": {
       "item": "minecraft:emerald_block",

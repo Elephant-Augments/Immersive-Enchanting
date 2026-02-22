@@ -27,7 +27,7 @@
         { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/stronghold_corridor" },
         { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/bastion_bridge" },
         { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/bastion_other" },
-        
+
         { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/underwater_ruin_big" },
         { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/underwater_ruin_small" }
       ]
