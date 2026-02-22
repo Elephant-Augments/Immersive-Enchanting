@@ -41,9 +41,6 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.joml.Vector2i;
-import reliquary.data.ReliquaryEnchantmentProvider;
-import reliquary.init.ModItems;
-import reliquary.item.MagicbaneItem;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
