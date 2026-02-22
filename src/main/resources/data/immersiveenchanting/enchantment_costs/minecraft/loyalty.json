@@ -2,7 +2,7 @@
   "levels": {
     "1": {
       "item": "minecraft:lead",
-      "amount": 1
+      "amount": 4
     },
     "2": {
       "item": "minecraft:end_crystal",

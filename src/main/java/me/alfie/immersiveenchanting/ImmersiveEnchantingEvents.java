@@ -1,22 +1,35 @@
 package me.alfie.immersiveenchanting;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import me.alfie.immersiveenchanting.api.DescriptionLayoutExtension;
+import me.alfie.immersiveenchanting.api.TooltipDescriptionExtensions;
+import me.alfie.immersiveenchanting.api.internal.CostLayoutExtension;
+import me.alfie.immersiveenchanting.api.internal.ReplicateLayoutExtension;
+import me.alfie.immersiveenchanting.api.internal.TransmuteLayoutExtension;
 import me.alfie.immersiveenchanting.creativetab.ModCreativeTab;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.datapack.EnchantmentMetadataRegistry;
-import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
+import me.alfie.immersiveenchanting.gui.*;
+import me.alfie.immersiveenchanting.gui.core.NodeTooltip;
+import me.alfie.immersiveenchanting.gui.replicate.ReplicateNode;
+import me.alfie.immersiveenchanting.gui.replicate.ReplicateNodeTooltip;
+import me.alfie.immersiveenchanting.gui.tooltip.DescriptionLayout;
+import me.alfie.immersiveenchanting.gui.tooltip.DescriptionLine;
+import me.alfie.immersiveenchanting.gui.transmute.TransmuteNode;
+import me.alfie.immersiveenchanting.gui.transmute.TransmuteNodeTooltip;
 import me.alfie.immersiveenchanting.item.AncientBook;
 import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.networking.ServerPayloadHandler;
 import me.alfie.immersiveenchanting.networking.packets.EnchantmentCostRegistrySyncPacket;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.InteractionResult;
@@ -34,6 +47,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
@@ -42,6 +56,8 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.village.VillagerTradesEvent;
+import org.jetbrains.annotations.NotNull;
+import org.joml.Vector2i;
 
 import java.util.HashSet;
 import java.util.List;
@@ -54,14 +70,23 @@ public class ImmersiveEnchantingEvents {
         ImmersiveEnchanting.ENCHANTMENT_COST_DATAPACK_HANDLER.setServer(event.getServer());
     }
 
+    public void onLoadComplete(FMLLoadCompleteEvent event) {
+        registerInternalTooltipDescriptions();
+    }
+
+    private void registerInternalTooltipDescriptions() {
+        //Using the API hooks internally here to add text/custom rendering into the description box.
+        TooltipDescriptionExtensions.register(new CostLayoutExtension());
+        TooltipDescriptionExtensions.register(new TransmuteLayoutExtension());
+        TooltipDescriptionExtensions.register(new ReplicateLayoutExtension());
+    }
+
     public void onClientStart(FMLClientSetupEvent event) {
         EnchantmentCostRegistry.setClientRegistry(new EnchantmentCostRegistry());
 
         //Load client resources
         ResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
         EnchantmentMetadataRegistry.loadIcons(resourceManager);
-
-
     }
 
     /**

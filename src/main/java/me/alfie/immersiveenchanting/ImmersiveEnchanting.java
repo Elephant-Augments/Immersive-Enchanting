@@ -9,9 +9,10 @@ import me.alfie.immersiveenchanting.creativetab.ModCreativeTab;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostDatapackHandler;
 import me.alfie.immersiveenchanting.gui.ModMenus;
 import me.alfie.immersiveenchanting.item.ModItems;
-import me.alfie.immersiveenchanting.item.legacy.ModDataComponents;
+import me.alfie.immersiveenchanting.datacomponent.ModDataComponents;
 import me.alfie.immersiveenchanting.lootmodifier.ModLootModifiers;
 import me.alfie.immersiveenchanting.networking.packets.*;
+import me.alfie.immersiveenchanting.structure.ModStructureProcessors;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
@@ -41,6 +42,7 @@ public class ImmersiveEnchanting {
         ImmersiveEnchantingEvents events = new ImmersiveEnchantingEvents();
         modEventBus.addListener(events::onClientStart);
         modEventBus.addListener(events::buildCreativeTab);
+        modEventBus.addListener(events::onLoadComplete);
         NeoForge.EVENT_BUS.register(events);
 
         ModItems.register(modEventBus);
@@ -49,6 +51,7 @@ public class ImmersiveEnchanting {
         ModDataComponents.register(modEventBus);
         ModCreativeTab.register(modEventBus);
         ModBlocks.register(modEventBus);
+        ModStructureProcessors.register(modEventBus);
 
         modEventBus.addListener(ModMenus::registerMenuScreens);
         modEventBus.addListener(EnchantItemPacket::register);
@@ -56,6 +59,8 @@ public class ImmersiveEnchanting {
         modEventBus.addListener(UnlockedEnchantmentsPacket::register);
         modEventBus.addListener(EnchantmentCostRegistrySyncPacket::register);
         modEventBus.addListener(UpdateToolSlotPacket::register);
+        modEventBus.addListener(TransmuteBookPacket::register);
+        modEventBus.addListener(ReplicateBookPacket::register);
 
         modContainer.registerConfig(ModConfig.Type.CLIENT, ClientConfig.CONFIG_SPEC);
         modContainer.registerConfig(ModConfig.Type.SERVER, ServerConfig.CONFIG_SPEC);

@@ -1,5 +1,7 @@
 package me.alfie.immersiveenchanting.gui;
 
+import me.alfie.immersiveenchanting.item.AncientBook;
+import me.alfie.immersiveenchanting.item.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.network.FriendlyByteBuf;
@@ -51,7 +53,12 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
     //Helper methods
     public void setupSlots(Inventory playerInventory) {
         //Tool slot
-        this.addSlot(new Slot(this.container, 0, 233, 141));
+        this.addSlot(new Slot(this.container, 0, 233, 141) {
+            @Override
+            public int getMaxStackSize() {
+                return 1;
+            }
+        });
 
         //Lapis slot
         this.addSlot(new Slot(this.container, 1, 233, 199));
@@ -111,7 +118,7 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
             // ---- PLAYER INVENTORY ----
             else {
                 // Try tool → slot 0
-                if (stackInSlot.getItem().isEnchantable(stackInSlot)) {
+                if (stackInSlot.getItem().isEnchantable(stackInSlot) || stackInSlot.is(ModItems.ANCIENT_BOOK.get())) {
                     if (!this.moveItemStackTo(stackInSlot, 0, 1, false)) return ItemStack.EMPTY;
                 }
                 // Try lapis → slot 1
@@ -155,21 +162,8 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
         return AbstractContainerMenu.stillValid(this.access, player, Blocks.ENCHANTING_TABLE);
     }
 
-    /**
-     * @deprecated Resource ids will no longer be used, use holders instead.
-     */
-    @Deprecated(forRemoval = true)
-    public Set<String> getUnlockedEnchantmentResourceIds() {
-        return this.unlockedEnchantmentResourceIds;
-    }
-
-    /**
-     * @param unlockedEnchantmentResourceIds
-     * @deprecated Resource ids will no longer be used, use holders instead.
-     */
-    @Deprecated(forRemoval = true)
-    public void setUnlockedEnchantmentResourceIds(Set<String> unlockedEnchantmentResourceIds) {
-        this.unlockedEnchantmentResourceIds = unlockedEnchantmentResourceIds;
+    public BlockPos getBlockPos() {
+        return blockPos;
     }
 
     public Set<Holder<Enchantment>> getUnlockedEnchantments() {
@@ -186,6 +180,10 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
 
     public ItemStack getToolSlotItem() {
         return getItemInSlot(SLOTS.TOOL);
+    }
+
+    public ItemStack getCostSlotItem() {
+        return getItemInSlot(SLOTS.COST);
     }
 
     /**

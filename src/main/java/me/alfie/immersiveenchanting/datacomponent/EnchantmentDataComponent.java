@@ -1,4 +1,4 @@
-package me.alfie.immersiveenchanting.item.legacy;
+package me.alfie.immersiveenchanting.datacomponent;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -32,7 +32,7 @@ public record EnchantmentDataComponent(String enchantmentResourceLocation) {
      * @return
      */
     public static String getEnchantmentData(ItemStack stack) {
-        EnchantmentDataComponent dataComponent = stack.get(ModDataComponents.ENCHANTMENT.get());
+        EnchantmentDataComponent dataComponent = stack.get(ModDataComponents.LEGACY_ENCHANTMENT.get());
         if (dataComponent != null) {
             return dataComponent.enchantmentResourceLocation();
         }

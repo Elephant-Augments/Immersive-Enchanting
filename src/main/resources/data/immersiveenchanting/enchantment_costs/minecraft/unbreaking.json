@@ -2,15 +2,15 @@
   "levels": {
     "1": {
       "item": "minecraft:iron_block",
-      "amount": 1
+      "amount": 3
     },
     "2": {
       "item": "minecraft:armadillo_scute",
-      "amount": 1
+      "amount": 8
     },
     "3": {
       "item": "minecraft:crying_obsidian",
-      "amount": 1
+      "amount": 8
     }
   }
 }

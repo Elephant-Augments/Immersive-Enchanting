@@ -57,7 +57,8 @@ public class ModCheck {
      */
     public enum Mod {
         ENCHANT_LIMITER("enchant_limiter"),
-        RELIQUARY("reliquary");
+        RELIQUARY("reliquary"),
+        ENCHANTMENT_DESCRIPTIONS("enchdesc");
 
         private final String modid;
 

@@ -15,9 +15,11 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.EnchantmentTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.neoforged.neoforge.common.loot.IGlobalLootModifier;
@@ -27,6 +29,7 @@ import java.util.List;
 
 
 public class AncientBookLootModifier extends LootModifier {
+
 
     public static final MapCodec<AncientBookLootModifier> CODEC = RecordCodecBuilder.mapCodec(inst ->
             // LootModifier#codecStart adds the conditions field.
@@ -69,47 +72,60 @@ public class AncientBookLootModifier extends LootModifier {
             ItemStack lootItem = new ItemStack(item, count);
 
             if (lootItem.getItem() == ModItems.ANCIENT_BOOK.get()) {
-                // Get all available types
-                RegistryAccess registryAccess = context.getLevel().registryAccess();
-                HolderLookup.RegistryLookup<Enchantment> lookup = registryAccess.lookupOrThrow(Registries.ENCHANTMENT);
-                List<Holder.Reference<Enchantment>> allEnchantments = lookup.listElements().toList();
-
-                // Filter out MENDING if disabled
-                List<Holder.Reference<Enchantment>> filteredEnchantments = allEnchantments.stream()
-                        .filter(enchantment -> {
-                            ResourceLocation keyLocation = enchantment.key().location();
-
-                            // Remove disabled enchantments, such as mending
-                            //If enchantment has DO_NOT_INCLUDE tag. (Empty json)
-
-                            //BUG-FIX! Cannot access getClientRegistry() here, as this method runs server-side.
-                            //Use getServerRegistry()
-                            if(EnchantmentCostRegistry.getServerRegistry().getCostRegistry().containsKey(enchantment.key())) {
-                                if(EnchantmentCostRegistry.getServerRegistry().getCostRegistry()
-                                        .get(enchantment.key())
-                                        .getLevel(-1).item().equals(LevelCost.DO_NOT_INCLUDE)) {
-                                    return false;
-                                }
-                            }
-
-                            // Skip cursed enchantments
-                            if (enchantment.is(EnchantmentTags.CURSE)) {
-                                return false;
-                            }
-                            return true; // include everything else
-                        })
-                        .toList();
-
-
-                // Pick a random enchantment type from the filtered list
-                if (!filteredEnchantments.isEmpty()) {
-                    Holder.Reference<Enchantment> randomEnchantment = filteredEnchantments.get(context.getRandom().nextInt(filteredEnchantments.size()));
-
-                    AncientBook.setStoredEnchantment(lootItem, randomEnchantment);
-                }
+                Holder<Enchantment> randomEnchantment = getRandomEnchantment(context.getLevel(), context.getRandom());
+                AncientBook.setStoredEnchantment(lootItem, randomEnchantment);
             }
             generatedLoot.add(lootItem);
         }
         return generatedLoot;
+    }
+
+    public static List<Holder.Reference<Enchantment>> getAllEnchantments(Level level) {
+        // Get all available types
+        RegistryAccess registryAccess = level.registryAccess();
+        HolderLookup.RegistryLookup<Enchantment> lookup = registryAccess.lookupOrThrow(Registries.ENCHANTMENT);
+        List<Holder.Reference<Enchantment>> allEnchantments = lookup.listElements().toList();
+
+        // Filter out MENDING if disabled
+        List<Holder.Reference<Enchantment>> filteredEnchantments = allEnchantments.stream()
+                .filter(enchantment -> {
+                    ResourceLocation keyLocation = enchantment.key().location();
+
+                    // Remove disabled enchantments, such as mending
+                    //If enchantment has DO_NOT_INCLUDE tag. (Empty json)
+
+                    //BUG-FIX! Cannot access getClientRegistry() here, as this method runs server-side.
+                    //Use getServerRegistry()
+                    if (EnchantmentCostRegistry.getServerRegistry().getCostRegistry().containsKey(enchantment.key())) {
+                        if (EnchantmentCostRegistry.getServerRegistry().getCostRegistry()
+                                .get(enchantment.key())
+                                .getLevel(-1).item().equals(LevelCost.DO_NOT_INCLUDE)) {
+                            return false;
+                        }
+                    }
+
+                    // Skip cursed enchantments
+                    if (enchantment.is(EnchantmentTags.CURSE)) {
+                        return false;
+                    }
+                    return true; // include everything else
+                })
+                .toList();
+        return filteredEnchantments;
+    }
+
+    /**
+     * Get a list of all the available types of enchantment (based on the data pack) and return a random element.
+     * @return
+     */
+    public static Holder<Enchantment> getRandomEnchantment(Level level, RandomSource randomSource) {
+        List<Holder.Reference<Enchantment>> filteredEnchantments = getAllEnchantments(level);
+
+        // Pick a random enchantment type from the filtered list
+        if (!filteredEnchantments.isEmpty()) {
+            Holder.Reference<Enchantment> randomEnchantment = filteredEnchantments.get(randomSource.nextInt(filteredEnchantments.size()));
+            return randomEnchantment;
+        }
+        return null;
     }
 }

@@ -1,48 +1,224 @@
 package me.alfie.immersiveenchanting.networking;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
-import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.block.CreativeBookshelf;
 import me.alfie.immersiveenchanting.compat.ModCompat;
+import me.alfie.immersiveenchanting.config.ServerConfig;
+import me.alfie.immersiveenchanting.datacomponent.ModDataComponents;
+import me.alfie.immersiveenchanting.datacomponent.ReplicatedDataComponent;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
 import me.alfie.immersiveenchanting.item.AncientBook;
 import me.alfie.immersiveenchanting.item.ModItems;
-import me.alfie.immersiveenchanting.networking.packets.EnchantItemPacket;
-import me.alfie.immersiveenchanting.networking.packets.GetBookshelfContentsPacket;
-import me.alfie.immersiveenchanting.networking.packets.UnlockedEnchantmentsPacket;
-import me.alfie.immersiveenchanting.networking.packets.UpdateToolSlotPacket;
+import me.alfie.immersiveenchanting.lootmodifier.AncientBookLootModifier;
+import me.alfie.immersiveenchanting.networking.packets.*;
+import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChiseledBookShelfBlockEntity;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class ServerPayloadHandler {
+
+    public static void onReplicateBookPacket(final ReplicateBookPacket packet, final IPayloadContext context) {
+        Level level = context.player().level();
+        Player player = context.player();
+
+        if(context.player().containerMenu instanceof EnchantingTableMenu enchantingTableMenu) {
+            if(player.experienceLevel >= 10 && enchantingTableMenu.getCostSlotItem().is(Items.WRITABLE_BOOK)
+                    || player.isCreative()) {
+
+                player.giveExperienceLevels(-10);
+                enchantingTableMenu.getCostSlotItem().shrink(1);
+                BlockPos tablePos = enchantingTableMenu.getBlockPos();
+
+                ItemStack oldStack = enchantingTableMenu.getToolSlotItem().copyAndClear();
+                ItemStack newStack = oldStack.copy();
+
+                //Copied books cannot be transmuted
+                newStack.set(ModDataComponents.REPLICATED, new ReplicatedDataComponent(true));
+
+                //Create 2 entities
+                for (int i = 0; i < 2; i++) {
+                    ItemStack stackToSpawn = (i == 0) ? oldStack : newStack;
+                    ItemEntity entity = new ItemEntity(
+                            level,
+                            tablePos.getX() + 0.5,
+                            tablePos.getY() + 1,
+                            tablePos.getZ() + 0.5,
+                            stackToSpawn);
+                    entity.setPickUpDelay(40);
+                    entity.setDeltaMovement(Vec3.ZERO);
+                    level.addFreshEntity(entity);
+                }
+
+
+                //Play effects
+                level.playSound(null, tablePos, SoundEvents.ALLAY_ITEM_GIVEN,
+                        SoundSource.BLOCKS, 0.7F, 1.2F);
+                level.playSound(null, tablePos, SoundEvents.VILLAGER_WORK_CARTOGRAPHER,
+                        SoundSource.BLOCKS, 0.8F, 1.5F);
+                level.playSound(null, tablePos, SoundEvents.BOOK_PAGE_TURN,
+                        SoundSource.BLOCKS, 0.5F, 1.5F);
+                level.playSound(null, tablePos, SoundEvents.ILLUSIONER_MIRROR_MOVE,
+                        SoundSource.BLOCKS, 0.4F, 1.2F);
+
+
+                int particleCount = 30;
+                ((ServerLevel) level).sendParticles(
+                        ParticleTypes.END_ROD,
+                        tablePos.getX() + 0.5,
+                        tablePos.getY() + 1,
+                        tablePos.getZ() + 0.5,
+                        particleCount,
+                        0.1, 0.1, 0.1,
+                        0.1);
+
+                player.closeContainer();
+            } else {
+                //If unable to enchant
+                level.playSound(null, player.blockPosition(), SoundEvents.VAULT_CLOSE_SHUTTER,
+                        SoundSource.BLOCKS, 1.0F, 1.0F);
+            }
+        }
+    }
+
+    public static void onTransmuteBookPacket(final TransmuteBookPacket packet, final IPayloadContext context) {
+
+        Player player = context.player();
+        Level level = player.level();
+        AbstractContainerMenu menu = player.containerMenu;
+
+        if(menu instanceof EnchantingTableMenu enchantingTableMenu) {
+            ItemStack ancientBookStack = enchantingTableMenu.getToolSlotItem();
+            Set<Holder<Enchantment>> unlockedEnchantments = enchantingTableMenu.getUnlockedEnchantments();
+
+            //Get all enchantments
+            List<Holder.Reference<Enchantment>> enchantments = new ArrayList<>(
+                    AncientBookLootModifier.getAllEnchantments(player.level()));
+
+            //Remove all enchantments that are already in bookshelf
+            enchantments.removeIf(unlockedEnchantments::contains);
+
+            //If all enchantments are unlocked already, pick any random enchantment.
+            if(enchantments.isEmpty()) {
+                enchantments = new ArrayList<>(
+                        AncientBookLootModifier.getAllEnchantments(player.level()));
+            }
+
+            Random random = new Random();
+            int randomIndex = random.nextInt(enchantments.size());
+            Holder<Enchantment> randomEnchantment = enchantments.get(randomIndex);
+
+            //If has 10 levels
+            boolean isBookReplicated = ReplicatedDataComponent.isReplicated(ancientBookStack);
+            if(player.experienceLevel >= 10 || player.isCreative() && !isBookReplicated) {
+                player.giveExperienceLevels(-10);
+
+                //Save old enchantment for text
+                Registry<Enchantment> enchantmentRegistry = ImmersiveEnchanting.getEnchantmentRegistry(level.registryAccess());
+                Enchantment oldEnchantment = enchantmentRegistry.get(AncientBook.getStoredEnchantment(ancientBookStack, level));
+
+                AncientBook.setStoredEnchantment(ancientBookStack, randomEnchantment);
+                BlockPos tablePos = enchantingTableMenu.getBlockPos();
+
+                level.playSound(null, tablePos, SoundEvents.ENDER_CHEST_OPEN,
+                        SoundSource.BLOCKS, 0.4F, 1.0F);
+                level.playSound(null, tablePos, SoundEvents.FIREWORK_ROCKET_LARGE_BLAST,
+                        SoundSource.BLOCKS, 0.8F, 0.8F);
+                level.playSound(null, tablePos, SoundEvents.EVOKER_CAST_SPELL,
+                        SoundSource.BLOCKS, 0.8F, 1F);
+                level.playSound(null, tablePos, SoundEvents.EVOKER_PREPARE_SUMMON,
+                        SoundSource.BLOCKS, 0.1F, 1.2F);
+
+                ItemStack stack = enchantingTableMenu.getToolSlotItem().copyAndClear();
+
+                ItemEntity entity = new ItemEntity(
+                        level,
+                        tablePos.getX() + 0.5,
+                        tablePos.getY() + 1,
+                        tablePos.getZ() + 0.5,
+                        stack);
+                entity.setPickUpDelay(40);
+                entity.setDeltaMovement(Vec3.ZERO);
+
+                level.addFreshEntity(entity);
+
+                int particleCount = 70;
+                ((ServerLevel) level).sendParticles(
+                        ParticleTypes.ENCHANT,
+                        tablePos.getX() + 0.5,
+                        tablePos.getY() + 1,
+                        tablePos.getZ() + 0.5,
+                        particleCount,
+                        0.2, 0.2, 0.2,
+                        0.1);
+
+                ((ServerLevel) level).sendParticles(
+                        ParticleTypes.GLOW,
+                        tablePos.getX() + 0.5,
+                        tablePos.getY() + 1,
+                        tablePos.getZ() + 0.5,
+                        particleCount,
+                        0.2, 0.2, 0.2,
+                        0.1);
+
+
+                //Get the enchantment from the registry.
+                Enchantment newEnchantment = enchantmentRegistry.get(randomEnchantment.getKey());
+
+                Component enchantmentName = newEnchantment.description().copy().withStyle(ChatFormatting.GOLD);
+
+                Component text = Component.translatable(
+                        "gui.immersiveenchanting.transmuted_to",
+                                enchantmentName)
+                        .withStyle(ChatFormatting.GRAY);
+
+
+                player.displayClientMessage(
+                        text,
+                        true
+                );
+
+                player.closeContainer();
+            } else {
+                //If unable to enchant
+                level.playSound(null, player.blockPosition(), SoundEvents.VAULT_CLOSE_SHUTTER,
+                        SoundSource.BLOCKS, 1.0F, 1.0F);
+            }
+
+
+        }
+    }
 
     /**
      * Apply an enchantment to an item.
@@ -191,6 +367,16 @@ public class ServerPayloadHandler {
                     .toList();
         }
 
+        if(serverPlayer.containerMenu instanceof EnchantingTableMenu enchantingTableMenu) {
+            Set<Holder<Enchantment>> enchantmentSet = new HashSet<>();
+
+            for (ResourceKey<Enchantment> key : unlockedEnchantments) {
+                ImmersiveEnchanting.getEnchantmentHolder(serverPlayer.registryAccess(), key)
+                        .ifPresent(enchantmentSet::add);
+            }
+
+            enchantingTableMenu.setUnlockedEnchantments(enchantmentSet);
+        }
         PacketDistributor.sendToPlayer(serverPlayer, new UnlockedEnchantmentsPacket(unlockedEnchantments));
     }
 

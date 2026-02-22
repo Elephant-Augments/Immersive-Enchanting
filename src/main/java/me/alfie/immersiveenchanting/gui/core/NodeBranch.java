@@ -1,34 +1,28 @@
-package me.alfie.immersiveenchanting.gui;
+package me.alfie.immersiveenchanting.gui.core;
 
 import com.mojang.blaze3d.platform.NativeImage;
-import me.alfie.immersiveenchanting.ImmersiveEnchanting;
-import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
-import me.alfie.immersiveenchanting.datapack.EnchantmentMetadataRegistry;
-import me.alfie.immersiveenchanting.enums.EnchantingNodeType;
+import me.alfie.immersiveenchanting.gui.enchanting.EnchantingNode;
+import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.enchantment.Enchantment;
 import org.joml.Vector2i;
 
 import java.util.*;
 
-public class EnchantingNodeBranch {
+/**
+ * Generic class that
+ */
+public class NodeBranch {
 
     public static int node_step = 80;
-    //Order of nodes in the list determines enchantment order/order of appearance etc.
-    private final List<EnchantingNode> nodes = new ArrayList<>();
+    private final List<Node> nodes = new ArrayList<>(); //All nodes in this branch, order determines render order.
+    private final float branchAngle; //Angle of this branch
+
     private final EnchantingTableScreen screen;
-    private final float branchAngle;
-    private final Holder<Enchantment> enchantmentHolder;
-    private final int equippedLevel;
-    private final boolean isBranchUnlocked;
-    private final Player player;
+
+    //Texture baking
     private final List<Pixel> precomputedPixels = new ArrayList<>();
     ResourceLocation bakedTextureLocation;
     int texOriginX;
@@ -37,69 +31,14 @@ public class EnchantingNodeBranch {
     int texHeight;
     private boolean isTextureReady;
 
-    public EnchantingNodeBranch(EnchantingTableScreen screen, float branchAngle,
-                                Holder<Enchantment> enchantmentHolder, int equippedLevel,
-                                boolean isBranchUnlocked,
-                                Player player) {
+    public NodeBranch(EnchantingTableScreen screen, float branchAngle) {
         this.screen = screen;
         this.branchAngle = branchAngle;
-        this.enchantmentHolder = enchantmentHolder;
-        this.equippedLevel = equippedLevel; //0 if not enchantment not equipped.
-        this.isBranchUnlocked = isBranchUnlocked;
-        this.player = player;
-
-        //ResourceLocation icon_texture = enchantmentType.getIconTexture();
-        //Using default texture for now
-        ResourceLocation icon_texture = ResourceLocation.fromNamespaceAndPath("immersiveenchanting", "textures/item/ancient_book.png");
-
-        ResourceKey<Enchantment> enchantmentKey = enchantmentHolder.getKey();
-        //noinspection DataFlowIssue -> Holder.Reference, meaning key is present
-        ResourceLocation enchantmentRL = enchantmentKey.location();
-
-        //Try to get an icon
-        if (EnchantmentMetadataRegistry.getIcons().containsKey(enchantmentRL)) {
-            icon_texture = EnchantmentMetadataRegistry.getIconTexture(enchantmentRL);
-        }
-
-
-        //Get the max level, if 10 levels are in the config, then player can get level 10 enchantments.
-        int maxEnchantmentLevel;
-        if (EnchantmentCostRegistry.getClientRegistry().getCostRegistry().containsKey(enchantmentKey)) {
-            maxEnchantmentLevel = EnchantmentCostRegistry.getClientRegistry().getEnchantmentCost(enchantmentKey).getHighestLevel();
-        } else {
-            //Fallback if there is no enchantment cost set up, use the default max level from the enchantment
-            Registry<Enchantment> enchantmentRegistry = ImmersiveEnchanting.getEnchantmentRegistry(player.registryAccess());
-            maxEnchantmentLevel = enchantmentRegistry.get(enchantmentKey).getMaxLevel();
-        }
-
-        //Reveal ladder up to (equippedLevel + 1).
-        int maxVisibleLevel = Math.min(equippedLevel + 1, maxEnchantmentLevel);
-
-        for (int i = 1; i <= maxVisibleLevel; i++) {
-            // Use ELITE if this is the final enchant level, otherwise BASIC
-            EnchantingNodeType nodeType = (i == maxEnchantmentLevel)
-                    ? EnchantingNodeType.ELITE
-                    : EnchantingNodeType.BASIC;
-
-            EnchantingNode node = new EnchantingNode(
-                    nodeType,
-                    icon_texture,
-                    i,
-                    enchantmentHolder,
-                    this.isBranchUnlocked
-            );
-
-            if (i <= equippedLevel) {
-                node.setObtained(true);
-            }
-
-            addNode(node);
-        }
     }
 
-    public void addNode(EnchantingNode node) {
+    public void addNode(Node node) {
         nodes.add(node);
-        screen.rendered_nodes.add(node);
+        screen.getRenderedNodes().add(node);
     }
 
     public static void calculateNodeAnglesAndStep(EnchantingTableScreen screen) {
@@ -115,9 +54,9 @@ public class EnchantingNodeBranch {
         final int maxStep = 120;      // maximum allowed
         final float minScale = 0.25f; // never go below this
         final float maxScale = 1.0f;  // never go above this
-        final float nodeSize = Math.max(EnchantingNode.width, EnchantingNode.height);
+        final float nodeSize = Math.max(Node.width, Node.height);
 
-        List<EnchantingNodeBranch> branches = screen.branches;
+        List<NodeBranch> branches = screen.branches;
         int count = branches.size();
 
         // Sort branches by angle
@@ -176,15 +115,15 @@ public class EnchantingNodeBranch {
         return angles;
     }
 
-    public List<EnchantingNode> getNodes() {
+    public List<Node> getNodes() {
         return nodes;
     }
 
     public void placeNodesAlongLine() {
         // Center point of the canvas
         Vector2i center = new Vector2i(
-                screen.canvasLeftPos + screen.scrollableCanvasWidth / 2,
-                screen.canvasTopPos + screen.scrollableCanvasHeight / 2
+                screen.getCanvasLeftPos() + screen.getScrollableCanvasWidth() / 2,
+                screen.getCanvasTopPos() + screen.getScrollableCanvasHeight() / 2
         );
 
         // Step vector based on angle
@@ -195,8 +134,8 @@ public class EnchantingNodeBranch {
             int x = (int) Math.round(center.x + stepX * (i + 1)); // start at 48px
             int y = (int) Math.round(center.y + stepY * (i + 1));
 
-            nodes.get(i).setX(x - EnchantingNode.width / 2);
-            nodes.get(i).setY(y - EnchantingNode.height / 2);
+            nodes.get(i).setX(x - Node.width / 2);
+            nodes.get(i).setY(y - Node.height / 2);
         }
     }
 
@@ -211,22 +150,22 @@ public class EnchantingNodeBranch {
         }
     }
 
-    private void connectNodeToCenter(EnchantingNode node) {
+    private void connectNodeToCenter(Node node) {
         // Use node centers for cleaner lines
-        int ax = screen.canvasLeftPos + screen.scrollableCanvasWidth / 2;
-        int ay = screen.canvasTopPos + screen.scrollableCanvasHeight / 2;
-        int bx = (int) (node.getX() + EnchantingNode.width * node.getScale() / 2);
-        int by = (int) (node.getY() + EnchantingNode.height * node.getScale() / 2);
+        int ax = screen.getCanvasLeftPos() + screen.getScrollableCanvasWidth() / 2;
+        int ay = screen.getCanvasTopPos() + screen.getScrollableCanvasHeight() / 2;
+        int bx = (int) (node.getX() + Node.width * node.getScale() / 2);
+        int by = (int) (node.getY() + Node.height * node.getScale() / 2);
         calculateConnection(ax, ay, bx, by);
     }
 
     //Connect two nodes together
-    private void connectNodes(EnchantingNode node1, EnchantingNode node2) {
+    private void connectNodes(Node node1, Node node2) {
         // Use node centers for cleaner lines
-        int ax = (int) (node1.getX() + EnchantingNode.width * node1.getScale() / 2);
-        int ay = (int) (node1.getY() + EnchantingNode.height * node1.getScale() / 2);
-        int bx = (int) (node2.getX() + EnchantingNode.width * node2.getScale() / 2);
-        int by = (int) (node2.getY() + EnchantingNode.height * node2.getScale() / 2);
+        int ax = (int) (node1.getX() + Node.width * node1.getScale() / 2);
+        int ay = (int) (node1.getY() + Node.height * node1.getScale() / 2);
+        int bx = (int) (node2.getX() + Node.width * node2.getScale() / 2);
+        int by = (int) (node2.getY() + Node.height * node2.getScale() / 2);
         calculateConnection(ax, ay, bx, by);
     }
 
@@ -363,9 +302,8 @@ public class EnchantingNodeBranch {
 
         // Create dynamic texture
         DynamicTexture bakedTexture = new DynamicTexture(texWidth, texHeight, true);
-        String safeId = enchantmentHolder.getRegisteredName().replace(':', '_');
         bakedTextureLocation = Minecraft.getInstance().getTextureManager()
-                .register("immersive_enchanting_connection_" + safeId + "_" + hashCode(), bakedTexture);
+                .register("immersive_enchanting_connection_" + hashCode(), bakedTexture);
 
         NativeImage image = bakedTexture.getPixels();
 
@@ -382,9 +320,4 @@ public class EnchantingNodeBranch {
         bakedTexture.upload(); // upload to GPU
         isTextureReady = true;
     }
-
-
 }
-
-
-

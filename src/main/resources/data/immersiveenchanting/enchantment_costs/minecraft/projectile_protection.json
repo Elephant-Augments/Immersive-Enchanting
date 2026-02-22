@@ -2,7 +2,7 @@
   "levels": {
     "1": {
       "item": "minecraft:hay_block",
-      "amount": 1
+      "amount": 16
     },
     "2": {
       "item": "minecraft:shield",
@@ -10,11 +10,11 @@
     },
     "3": {
       "item": "minecraft:slime_block",
-      "amount": 1
+      "amount": 4
     },
     "4": {
       "item": "minecraft:obsidian",
-      "amount": 1
+      "amount": 4
     }
   }
 }
