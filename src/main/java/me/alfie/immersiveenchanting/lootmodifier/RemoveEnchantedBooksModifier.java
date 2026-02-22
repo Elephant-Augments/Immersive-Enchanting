@@ -10,7 +10,9 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.neoforged.neoforge.common.loot.IGlobalLootModifier;
 import net.neoforged.neoforge.common.loot.LootModifier;
 
-
+/**
+ * Remove enchanted books from loot tables.
+ */
 public class RemoveEnchantedBooksModifier extends LootModifier {
 
     public static final MapCodec<RemoveEnchantedBooksModifier> CODEC =
