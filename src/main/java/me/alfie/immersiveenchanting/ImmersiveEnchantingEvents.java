@@ -32,8 +32,12 @@ import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleMenuProvider;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.entity.player.Player;
@@ -44,12 +48,16 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.*;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
+import net.neoforged.neoforge.event.entity.item.ItemEvent;
+import net.neoforged.neoforge.event.entity.item.ItemExpireEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerContainerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
@@ -64,6 +72,43 @@ import java.util.List;
 import java.util.Set;
 
 public class ImmersiveEnchantingEvents {
+
+    @SubscribeEvent
+    public void onItemDamage(EntityLeaveLevelEvent event) {
+        if(event.getLevel().isClientSide()) return; //Server only
+        if(event.getEntity() instanceof ItemEntity itemEntity) {
+            if(itemEntity.getItem().is(ModItems.ANCIENT_BOOK.get())) {
+                if(itemEntity.isOnFire()) {
+                    //Is it in soul fire
+                    //Get block
+                    BlockPos pos = itemEntity.getOnPos();
+                    Block block = event.getLevel().getBlockState(pos).getBlock();
+                    if(block instanceof SoulFireBlock
+                            || block instanceof SoulSandBlock
+                            || block.equals(Blocks.SOUL_SOIL)) {
+                        ItemEntity musicDisc = new ItemEntity(
+                                event.getLevel(),
+                                pos.getX() + 0.5,
+                                pos.getY() + 0.5,
+                                pos.getZ() + 0.5,
+                                new ItemStack(ModItems.BIBLIOCLASM_MUSIC_DISC.get()));
+
+                        musicDisc.setDeltaMovement(0, 0.3, 0);
+                        musicDisc.setInvulnerable(true);
+
+                        event.getLevel().addFreshEntity(musicDisc);
+                        event.getLevel().playSound(null, pos, SoundEvents.SOUL_SAND_BREAK,
+                                SoundSource.BLOCKS, 0.4F, 1.2F);
+                        event.getLevel().playSound(null, pos, SoundEvents.SNOW_BREAK,
+                                SoundSource.BLOCKS, 0.4F, 1.2F);
+                        event.getLevel().playSound(null, pos, SoundEvents.GENERIC_BURN,
+                                SoundSource.BLOCKS, 0.1F, 0.5F);
+
+                    }
+                }
+            }
+        }
+    }
 
     @SubscribeEvent
     public void onServerStart(ServerStartedEvent event) {
@@ -120,6 +165,7 @@ public class ImmersiveEnchantingEvents {
             event.accept(new ItemStack(Items.CHISELED_BOOKSHELF));
             event.accept(new ItemStack(ModItems.CREATIVE_BOOKSHELF));
             event.accept(new ItemStack(Items.LAPIS_LAZULI));
+            event.accept(new ItemStack(ModItems.BIBLIOCLASM_MUSIC_DISC.get()));
 
             // Track which itemIds we've already added to avoid duplicates
             Set<Item> addedItems = new HashSet<>();

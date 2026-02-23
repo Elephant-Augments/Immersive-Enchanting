@@ -20,6 +20,12 @@ public class ModItems {
             new Item.Properties()
     );
 
+    public static final Supplier<Item> BIBLIOCLASM_MUSIC_DISC = ITEMS.registerItem(
+            "music_disc_biblioclasm",
+            BiblioclasmDisc::new,
+            new Item.Properties()
+    );
+
     public static final DeferredHolder<Item, BlockItem> CREATIVE_BOOKSHELF =
             ITEMS.register("creative_bookshelf",
                     () -> new BlockItem(ModBlocks.CREATIVE_BOOKSHELF.get(), new Item.Properties().rarity(Rarity.EPIC)));

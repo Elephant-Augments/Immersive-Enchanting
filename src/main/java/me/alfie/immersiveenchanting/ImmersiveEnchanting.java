@@ -12,6 +12,7 @@ import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.datacomponent.ModDataComponents;
 import me.alfie.immersiveenchanting.lootmodifier.ModLootModifiers;
 import me.alfie.immersiveenchanting.networking.packets.*;
+import me.alfie.immersiveenchanting.sound.ModSounds;
 import me.alfie.immersiveenchanting.structure.ModStructureProcessors;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
@@ -52,6 +53,7 @@ public class ImmersiveEnchanting {
         ModCreativeTab.register(modEventBus);
         ModBlocks.register(modEventBus);
         ModStructureProcessors.register(modEventBus);
+        ModSounds.register(modEventBus);
 
         modEventBus.addListener(ModMenus::registerMenuScreens);
         modEventBus.addListener(EnchantItemPacket::register);

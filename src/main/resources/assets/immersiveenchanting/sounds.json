@@ -1,0 +1,10 @@
+{
+  "biblioclasm": {
+    "sounds": [
+      {
+       "name": "immersiveenchanting:biblioclasm",
+        "stream": true
+      }
+    ]
+  }
+}
