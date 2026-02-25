@@ -119,14 +119,6 @@ public class EnchantmentCostRegistry {
         return this.COST_REGISTRY;
     }
 
-    public ItemStack getLapisCost() {
-        return lapisCost;
-    }
-
-    public void setLapisCost(ItemStack lapisCost) {
-        this.lapisCost = lapisCost;
-    }
-
     public List<String> getDisabledEnchantments() {
         List<String> disabledEnchantments = new ArrayList<>();
         for(Map.Entry<ResourceKey<Enchantment>, EnchantmentCost> entry : getCostRegistry().entrySet()) {

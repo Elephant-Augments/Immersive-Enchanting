@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.networking.packets.EnchantmentCostRegistrySyncPacket;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -13,12 +14,15 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class EnchantmentCostDatapackHandler extends SimpleJsonResourceReloadListener {
 
@@ -84,33 +88,6 @@ public class EnchantmentCostDatapackHandler extends SimpleJsonResourceReloadList
         ImmersiveEnchanting.LOGGER.info("Loaded " + fileCount + " enchantment costs.");
         //-----------------------///
 
-
-
-
-        //TODO: Lapis cost to use enchanting fuel tag instead
-        //Add lapis cost from data/immersiveenchanting/enchantment_costs/lapis_cost
-        //Look for "lapis_cost.json"
-        ResourceLocation lapisFileId = ResourceLocation.fromNamespaceAndPath("immersiveenchanting", "lapis_cost");
-        JsonElement lapisJson = object.get(lapisFileId);
-
-        EnchantmentCostRegistry.getServerRegistry().setLapisCost(new ItemStack(Items.AIR)); //Set to air by default
-        if (lapisJson != null && lapisJson.isJsonObject()) {
-            JsonObject lapisObj = lapisJson.getAsJsonObject();
-
-            if (lapisObj.has("item") && lapisObj.has("amount")) {
-                String itemString = lapisObj.get("item").getAsString(); // e.g., "minecraft:lapis_lazuli"
-                int amount = lapisObj.get("amount").getAsInt();
-
-                ResourceLocation itemRL = ResourceLocation.parse(itemString);
-                Item item = BuiltInRegistries.ITEM.get(itemRL);
-                if (item != Items.AIR) {
-                    ItemStack lapisStack = new ItemStack(item, amount);
-                    EnchantmentCostRegistry.getServerRegistry().setLapisCost(lapisStack);
-                    ImmersiveEnchanting.LOGGER.info("Loaded lapis cost: " + lapisStack);
-                }
-            }
-        }
-
         //Attempt to send sync packet to all players on reload
         int count = 0;
         if(server != null) {
@@ -120,5 +97,26 @@ public class EnchantmentCostDatapackHandler extends SimpleJsonResourceReloadList
             }
             ImmersiveEnchanting.LOGGER.info("Synced server enchantment cost registry with " + count + " client(s).");
         }
+    }
+
+    /**
+     * Use the neoforge tag #neoforge:enchanting_fuels.
+     * @return
+     */
+    public static List<Item> getValidEnchantingFuels() {
+        return getItemsInTag(getItemTag("neoforge:enchanting_fuels"));
+    }
+
+    public static List<Item> getItemsInTag(TagKey<Item> itemTag) {
+        return BuiltInRegistries.ITEM.getTag(itemTag)
+                .map(tagSet -> tagSet.stream()
+                        .map(Holder::value) // <-- convert Holder<Item> -> Item
+                        .collect(Collectors.toList()))
+                .orElse(List.of());
+    }
+
+    public static TagKey<Item> getItemTag(String resourceLocation) {
+        TagKey<Item> tag = TagKey.create(Registries.ITEM, ResourceLocation.parse(resourceLocation));
+        return tag;
     }
 }

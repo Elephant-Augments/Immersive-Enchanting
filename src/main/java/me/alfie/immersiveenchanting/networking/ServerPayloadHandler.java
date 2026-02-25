@@ -6,6 +6,8 @@ import me.alfie.immersiveenchanting.compat.ModCompat;
 import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.datacomponent.ModDataComponents;
 import me.alfie.immersiveenchanting.datacomponent.ReplicatedDataComponent;
+import me.alfie.immersiveenchanting.datapack.CostNode;
+import me.alfie.immersiveenchanting.datapack.EnchantmentCostDatapackHandler;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
 import me.alfie.immersiveenchanting.item.AncientBook;
@@ -253,31 +255,30 @@ public class ServerPayloadHandler {
 
         //Check enchantment cost
         ItemStack costSlotItemStack = enchantingTableMenu.getSlot(EnchantingTableMenu.SLOTS.COST.ordinal()).getItem();
+        List<ItemStack> insertedItems = new ArrayList<>();
+        insertedItems.add(costSlotItemStack);
+
+        int playerXp = player.experienceLevel;
 
         //TODO Use .isCostValid?
-        //ItemStack requiredItemCostStack = EnchantmentCostRegistry.getServerRegistry().getEnchantmentCost(packet.enchantment()).getLevel(packet.enchantmentLevel()).asItemStack();
-        //Set to dirt for now to fix compiler issues
-        ItemStack requiredItemCostStack = new ItemStack(Items.DIRT, 1);
+        CostNode costNode = EnchantmentCostRegistry.getServerRegistry().getEnchantmentCost(packet.enchantment()).getCostNodeForLevel(packet.enchantmentLevel());
+        boolean costSlotIsValid = EnchantmentCostRegistry.isCostValid(costNode, insertedItems, playerXp);
 
-
-        ItemStack requiredLapisCost = EnchantmentCostRegistry.getServerRegistry().getLapisCost();
-        ItemStack lapisSlotStack = enchantingTableMenu.getSlot(EnchantingTableMenu.SLOTS.LAPIS.ordinal()).getItem();
+        List<Item> validEnchantingFuels = EnchantmentCostDatapackHandler.getValidEnchantingFuels();
+        ItemStack enchantingFuel = enchantingTableMenu.getSlot(EnchantingTableMenu.SLOTS.LAPIS.ordinal()).getItem();
+        boolean enchantingFuelIsValid = validEnchantingFuels.contains(enchantingFuel.getItem());
 
         boolean hasEnoughCost = player.hasInfiniteMaterials() ||
-                (requiredLapisCost.isEmpty() ||
-                (lapisSlotStack.is(requiredLapisCost.getItem()) && lapisSlotStack.getCount() >= requiredLapisCost.getCount()))
-                && (requiredItemCostStack.isEmpty() ||
-                (costSlotItemStack.is(requiredItemCostStack.getItem()) &&
-                        costSlotItemStack.getCount() >= requiredItemCostStack.getCount()));
-
+                ( (validEnchantingFuels.isEmpty() || enchantingFuelIsValid)
+                        && costSlotIsValid);
 
         if (hasEnoughCost) {
             if (!player.hasInfiniteMaterials()) {
                 enchantingTableMenu.getSlot(EnchantingTableMenu.SLOTS.LAPIS.ordinal()).getItem()
-                        .shrink(requiredLapisCost.getCount()); //Use enchantmnet cost registry
-                if (!requiredItemCostStack.isEmpty()) {
-                    costSlotItemStack.shrink(requiredItemCostStack.getCount()); //Use enchantment cost if not air
-                }
+                        .shrink(1); //Todo use config
+
+                //TODO shrink by correct amount from cost
+                //costSlotItemStack.shrink(requiredItemCostStack.getCount()); //Use enchantment cost if not air
             }
 
             //Enchant item server side
