@@ -1,5 +1,6 @@
 package me.alfie.immersiveenchanting;
 
+import com.mojang.brigadier.CommandDispatcher;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import me.alfie.immersiveenchanting.api.DescriptionLayoutExtension;
 import me.alfie.immersiveenchanting.api.TooltipDescriptionExtensions;
@@ -24,6 +25,8 @@ import me.alfie.immersiveenchanting.networking.packets.EnchantmentCostRegistrySy
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
@@ -54,6 +57,7 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
 import net.neoforged.neoforge.event.entity.item.ItemEvent;
 import net.neoforged.neoforge.event.entity.item.ItemExpireEvent;
@@ -108,6 +112,23 @@ public class ImmersiveEnchantingEvents {
                 }
             }
         }
+    }
+
+    @SubscribeEvent
+    public void onRegisterCommands(RegisterCommandsEvent event) {
+        CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
+
+        dispatcher.register(
+                Commands.literal("immersiveenchanting")
+                        .then(Commands.literal("getDisabledEnchantments")
+                                    .executes(context -> {
+                            String disabled = String.join(", ",
+                                    EnchantmentCostRegistry.getServerRegistry().getDisabledEnchantments());
+                            context.getSource().sendSuccess(() -> Component.literal("Disabled enchantments: " + disabled).withStyle(ChatFormatting.RED), false);
+                            return 1;
+                        })
+                )
+        );
     }
 
     @SubscribeEvent

@@ -5,6 +5,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -124,5 +125,17 @@ public class EnchantmentCostRegistry {
 
     public void setLapisCost(ItemStack lapisCost) {
         this.lapisCost = lapisCost;
+    }
+
+    public List<String> getDisabledEnchantments() {
+        List<String> disabledEnchantments = new ArrayList<>();
+        for(Map.Entry<ResourceKey<Enchantment>, EnchantmentCost> entry : getCostRegistry().entrySet()) {
+            EnchantmentCost cost = entry.getValue();
+            if(!cost.enabled) {
+                String enchantmentName = entry.getKey().location().toString();
+                disabledEnchantments.add(enchantmentName);
+            }
+        }
+        return disabledEnchantments;
     }
 }
