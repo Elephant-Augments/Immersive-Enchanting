@@ -1,0 +1,16 @@
+{
+  "levels": {
+    "1": {
+      "item": "minecraft:sponge",
+      "amount": 2
+    },
+    "2": {
+      "item": "minecraft:prismarine_crystals",
+      "amount": 8
+    },
+    "3": {
+      "item": "minecraft:heart_of_the_sea",
+      "amount": 1
+    }
+  }
+}

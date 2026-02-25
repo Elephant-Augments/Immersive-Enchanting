@@ -1,0 +1,20 @@
+{
+  "levels": {
+    "1": {
+      "item": "minecraft:fire_coral_block",
+      "amount": 8
+    },
+    "2": {
+      "item": "minecraft:nether_brick",
+      "amount": 8
+    },
+    "3": {
+      "item": "minecraft:blaze_rod",
+      "amount": 4
+    },
+    "4": {
+      "item": "minecraft:torchflower",
+      "amount": 1
+    }
+  }
+}

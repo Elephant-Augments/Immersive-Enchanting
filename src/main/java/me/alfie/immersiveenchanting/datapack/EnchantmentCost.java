@@ -63,51 +63,6 @@ public class EnchantmentCost {
         return result;
     }
 
-    /**
-     * Check if a list of items is a valid cost.
-     * @param node
-     * @param items
-     * @param playerXp
-     * @return
-     */
-    public static boolean isCostValid(CostNode node, List<ItemStack> items, int playerXp) {
-        if(node instanceof CostLeaf leaf) {
-            boolean hasItem = false;
 
-            //Check item
-            ItemStack leafStack = leaf.asItemStack();
-            for(ItemStack stack : items) {
-                if(stack.is(leafStack.getItem())) {
-                    //Check amount
-                    if (stack.getCount() >= leafStack.getCount()) {
-                        hasItem = true;
-                        break;
-                    }
-                }
-            }
-
-            //Check XP
-            boolean hasXp = playerXp >= leaf.xpLevels();
-            return hasItem && hasXp;
-
-        } else if(node instanceof CostComposite composite) {
-            if(composite.type() == CompositeType.ANY_OF) {
-                //Any child is enough
-                for(CostNode child : composite.children()) {
-                    if(isCostValid(child, items, playerXp)) return true;
-                }
-                return false;
-            } else {
-                //All children must be valid
-                for(CostNode child : composite.children()) {
-                    if(!isCostValid(child, items, playerXp)) return false;
-                }
-                return true;
-            }
-        }
-
-        //Never reached
-        return false;
-    }
 
 }

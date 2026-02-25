@@ -96,6 +96,8 @@ public class AncientBookLootModifier extends LootModifier {
 
                     //BUG-FIX! Cannot access getClientRegistry() here, as this method runs server-side.
                     //Use getServerRegistry()
+                    //TODO use enabled.
+                    /*
                     if (EnchantmentCostRegistry.getServerRegistry().getCostRegistry().containsKey(enchantment.key())) {
                         if (EnchantmentCostRegistry.getServerRegistry().getCostRegistry()
                                 .get(enchantment.key())
@@ -103,6 +105,7 @@ public class AncientBookLootModifier extends LootModifier {
                             return false;
                         }
                     }
+                     */
 
                     // Skip cursed enchantments
                     if (enchantment.is(EnchantmentTags.CURSE)) {

@@ -1,0 +1,20 @@
+{
+  "levels": {
+    "1": {
+      "item": "minecraft:hay_block",
+      "amount": 16
+    },
+    "2": {
+      "item": "minecraft:shield",
+      "amount": 1
+    },
+    "3": {
+      "item": "minecraft:slime_block",
+      "amount": 4
+    },
+    "4": {
+      "item": "minecraft:obsidian",
+      "amount": 4
+    }
+  }
+}

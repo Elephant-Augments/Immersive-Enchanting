@@ -20,23 +20,18 @@ public class ClientPayloadHandler {
 
     /**
      * Receive the enchantment cost registry from the server and store on the client.
+     * Client only!
      * @param packet
      * @param context
      */
     public static void onEnchantmentCostRegistrySync(final EnchantmentCostRegistrySyncPacket packet, final IPayloadContext context) {
+        if(!context.player().level().isClientSide) return;
         ImmersiveEnchanting.LOGGER.info("EnchantmentCostRegistrySync packet received on client!");
 
         //Build a SerializedEnchantmentCostRegistry
         SerializedEnchantmentCostRegistry serializedRegistry = new SerializedEnchantmentCostRegistry(
-                packet.enchantmentNamespaces(),
-                packet.levels(),
-                packet.itemIds(),
-                packet.amounts(),
-                packet.lapisCostItemId(),
-                packet.lapisCostAmount()
-        );
-
-
+                packet.enchantmentIds(),
+                packet.jsonStrings());
 
         EnchantmentCostRegistry.setClientRegistry(
                 EnchantmentCostRegistrySyncPacket.deserialize(serializedRegistry)

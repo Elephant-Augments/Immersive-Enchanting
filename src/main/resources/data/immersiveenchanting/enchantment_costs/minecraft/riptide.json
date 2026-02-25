@@ -1,0 +1,16 @@
+{
+  "levels": {
+    "1": {
+      "item": "minecraft:water_bucket",
+      "amount": 1
+    },
+    "2": {
+      "item": "minecraft:slime_block",
+      "amount": 8
+    },
+    "3": {
+      "item": "minecraft:heart_of_the_sea",
+      "amount": 1
+    }
+  }
+}

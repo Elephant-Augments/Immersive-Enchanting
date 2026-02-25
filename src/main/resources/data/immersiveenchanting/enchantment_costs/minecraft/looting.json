@@ -1,0 +1,16 @@
+{
+  "levels": {
+    "1": {
+      "item": "minecraft:diamond",
+      "amount": 3
+    },
+    "2": {
+      "item": "minecraft:phantom_membrane",
+      "amount": 3
+    },
+    "3": {
+      "item": "minecraft:ender_eye",
+      "amount": 3
+    }
+  }
+}

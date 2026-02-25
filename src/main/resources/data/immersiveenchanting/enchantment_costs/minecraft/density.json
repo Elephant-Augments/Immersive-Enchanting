@@ -1,0 +1,24 @@
+{
+  "levels": {
+    "1": {
+      "item": "minecraft:anvil",
+      "amount": 1
+    },
+    "2": {
+      "item": "minecraft:obsidian",
+      "amount": 16
+    },
+    "3": {
+      "item": "minecraft:netherite_ingot",
+      "amount": 1
+    },
+    "4": {
+      "item": "minecraft:heavy_core",
+      "amount": 1
+    },
+    "5": {
+      "item": "minecraft:nether_star",
+      "amount": 1
+    }
+  }
+}

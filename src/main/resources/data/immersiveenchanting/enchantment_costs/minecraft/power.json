@@ -1,0 +1,24 @@
+{
+  "levels": {
+    "1": {
+      "item": "minecraft:spyglass",
+      "amount": 1
+    },
+    "2": {
+      "item": "minecraft:phantom_membrane",
+      "amount": 8
+    },
+    "3": {
+      "item": "minecraft:spectral_arrow",
+      "amount": 16
+    },
+    "4": {
+      "item": "minecraft:blaze_rod",
+      "amount": 8
+    },
+    "5": {
+      "item": "minecraft:end_rod",
+      "amount": 8
+    }
+  }
+}

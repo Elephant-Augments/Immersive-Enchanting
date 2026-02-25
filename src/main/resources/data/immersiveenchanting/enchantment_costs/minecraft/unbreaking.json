@@ -1,0 +1,16 @@
+{
+  "levels": {
+    "1": {
+      "item": "minecraft:iron_block",
+      "amount": 3
+    },
+    "2": {
+      "item": "minecraft:armadillo_scute",
+      "amount": 8
+    },
+    "3": {
+      "item": "minecraft:crying_obsidian",
+      "amount": 8
+    }
+  }
+}

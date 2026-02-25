@@ -1,0 +1,20 @@
+{
+  "levels": {
+    "1": {
+      "item": "minecraft:water_bucket",
+      "amount": 1
+    },
+    "2": {
+      "item": "minecraft:feather",
+      "amount": 16
+    },
+    "3": {
+      "item": "minecraft:hay_block",
+      "amount": 32
+    },
+    "4": {
+      "item": "minecraft:slime_block",
+      "amount": 8
+    }
+  }
+}

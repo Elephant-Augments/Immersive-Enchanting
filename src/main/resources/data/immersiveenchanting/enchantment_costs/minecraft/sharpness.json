@@ -1,0 +1,24 @@
+{
+  "levels": {
+    "1": {
+      "item": "minecraft:cactus",
+      "amount": 8
+    },
+    "2": {
+      "item": "minecraft:amethyst_shard",
+      "amount": 8
+    },
+    "3": {
+      "item": "minecraft:prismarine_shard",
+      "amount": 8
+    },
+    "4": {
+      "item": "minecraft:quartz",
+      "amount": 64
+    },
+    "5": {
+      "item": "minecraft:echo_shard",
+      "amount": 8
+    }
+  }
+}

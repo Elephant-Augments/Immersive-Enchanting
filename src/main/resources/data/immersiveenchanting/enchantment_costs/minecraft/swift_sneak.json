@@ -1,0 +1,16 @@
+{
+  "levels": {
+    "1": {
+      "item": "minecraft:rabbit_foot",
+      "amount": 1
+    },
+    "2": {
+      "item": "minecraft:sculk",
+      "amount": 8
+    },
+    "3": {
+      "item": "minecraft:popped_chorus_fruit",
+      "amount": 16
+    }
+  }
+}

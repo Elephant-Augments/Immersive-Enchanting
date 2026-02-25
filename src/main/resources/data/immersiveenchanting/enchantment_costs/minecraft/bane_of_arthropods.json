@@ -1,0 +1,24 @@
+{
+  "levels": {
+    "1": {
+      "item": "minecraft:string",
+      "amount": 8
+    },
+    "2": {
+      "item": "minecraft:spider_eye",
+      "amount": 8
+    },
+    "3": {
+      "item": "minecraft:fermented_spider_eye",
+      "amount": 8
+    },
+    "4": {
+      "item": "minecraft:honey_bottle",
+      "amount": 8
+    },
+    "5": {
+      "item": "minecraft:honey_block",
+      "amount": 8
+    }
+  }
+}

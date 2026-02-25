@@ -1,0 +1,16 @@
+{
+  "levels": {
+    "1": {
+      "item": "minecraft:cod_bucket",
+      "amount": 1
+    },
+    "2": {
+      "item": "minecraft:prismarine_crystals",
+      "amount": 16
+    },
+    "3": {
+      "item": "minecraft:tadpole_bucket",
+      "amount": 1
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "levels": {
+    "1": {
+      "item": "minecraft:firework_rocket",
+      "amount": 8
+    },
+    "2": {
+      "item": "minecraft:spectral_arrow",
+      "amount": 16
+    },
+    "3": {
+      "item": "minecraft:goat_horn",
+      "amount": 1
+    },
+    "4": {
+      "item": "minecraft:echo_shard",
+      "amount": 4
+    }
+  }
+}

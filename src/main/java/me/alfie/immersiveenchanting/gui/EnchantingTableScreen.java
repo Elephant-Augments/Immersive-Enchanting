@@ -241,12 +241,8 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
             ResourceKey<Enchantment> enchantmentKey = enchantmentHolder.getKey();
 
             //If enchantment has DO_NOT_INCLUDE tag. (Empty json)
+            //TODO Use enabled instead.
             if (EnchantmentCostRegistry.getClientRegistry().getCostRegistry().containsKey(enchantmentKey)) {
-                if (EnchantmentCostRegistry.getClientRegistry().getCostRegistry()
-                        .get(enchantmentKey)
-                        .getLevel(-1).item().equals(LevelCost.DO_NOT_INCLUDE)) {
-                    continue;
-                }
             }
 
             //If this enchantment isn't compatible with any enchantments already applied to the item, then skip.
@@ -585,6 +581,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         if (!node.equals(lastHoveredNode) || nodeTooltip == null) {
 
             if(node instanceof EnchantingNode enchantingNode) {
+                /*TODO Refactor tooltip to use a list of items, not just one
                 nodeTooltip = new EnchantingNodeTooltip(
                         enchantingNode,
                         EnchantmentCostRegistry.getClientRegistry()
@@ -593,6 +590,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
                                 .asItemStack(),
                         this
                 );
+                 */
             }
 
             else if (node instanceof TransmuteNode transmuteNode) {

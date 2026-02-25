@@ -33,6 +33,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -252,7 +253,12 @@ public class ServerPayloadHandler {
 
         //Check enchantment cost
         ItemStack costSlotItemStack = enchantingTableMenu.getSlot(EnchantingTableMenu.SLOTS.COST.ordinal()).getItem();
-        ItemStack requiredItemCostStack = EnchantmentCostRegistry.getServerRegistry().getEnchantmentCost(packet.enchantment()).getLevel(packet.enchantmentLevel()).asItemStack();
+
+        //TODO Use .isCostValid?
+        //ItemStack requiredItemCostStack = EnchantmentCostRegistry.getServerRegistry().getEnchantmentCost(packet.enchantment()).getLevel(packet.enchantmentLevel()).asItemStack();
+        //Set to dirt for now to fix compiler issues
+        ItemStack requiredItemCostStack = new ItemStack(Items.DIRT, 1);
+
 
         ItemStack requiredLapisCost = EnchantmentCostRegistry.getServerRegistry().getLapisCost();
         ItemStack lapisSlotStack = enchantingTableMenu.getSlot(EnchantingTableMenu.SLOTS.LAPIS.ordinal()).getItem();

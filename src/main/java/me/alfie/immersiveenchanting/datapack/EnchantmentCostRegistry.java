@@ -1,12 +1,12 @@
 package me.alfie.immersiveenchanting.datapack;
 
-import me.alfie.immersiveenchanting.datapack.legacy.LegacyEnchantmentCost;
 import me.alfie.immersiveenchanting.datapack.legacy.LevelCost;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 //This class will be instancable, so there will be a server-side one and a client-side one.
@@ -31,32 +31,65 @@ public class EnchantmentCostRegistry {
         serverEnchantmentCostRegistry = enchantmentCostRegistry;
     }
 
-    // Maps the enchantment ResourceLocation (e.g., minecraft:efficiency) to its cost data
-    private final Map<ResourceKey<Enchantment>, LegacyEnchantmentCost> COST_REGISTRY = new HashMap<>();
+    //Maps the enchantment ResourceLocation (e.g., minecraft:efficiency) to its cost data
+    private final Map<ResourceKey<Enchantment>, EnchantmentCost> COST_REGISTRY = new HashMap<>();
     private ItemStack lapisCost;
-
-
-    public static final LegacyEnchantmentCost EMPTY = new LegacyEnchantmentCost();
+    public static final EnchantmentCost EMPTY = new EnchantmentCost(new HashMap<>());
 
     /**
      * Helper method to get enchantment cost from COST_REGISTRY from its resource location.
      * @param enchantment
      * @return
      */
-    public LegacyEnchantmentCost getEnchantmentCost(ResourceKey<Enchantment> enchantment) {
+    public EnchantmentCost getEnchantmentCost(ResourceKey<Enchantment> enchantment) {
         return this.COST_REGISTRY.getOrDefault(enchantment, EMPTY);
     }
 
     /**
-     * Helper method to get a specific level cost for an enchantment using its resource location.
-     * @param enchantment
-     * @param level
+     * Check if a list of items is a valid cost.
+     * @param node
+     * @param items
+     * @param playerXp
      * @return
      */
-    public LevelCost getLevelCost(ResourceKey<Enchantment> enchantment, int level) {
-        LegacyEnchantmentCost data = this.COST_REGISTRY.get(enchantment);
-        if (data == null) return null;
-        return data.getLevel(level);
+    public static boolean isCostValid(CostNode node, List<ItemStack> items, int playerXp) {
+        if(node instanceof CostLeaf leaf) {
+            boolean hasItem = false;
+
+            //Check item
+            ItemStack leafStack = leaf.asItemStack();
+            for(ItemStack stack : items) {
+                if(stack.is(leafStack.getItem())) {
+                    //Check amount
+                    if (stack.getCount() >= leafStack.getCount()) {
+                        hasItem = true;
+                        break;
+                    }
+                }
+            }
+
+            //Check XP
+            boolean hasXp = playerXp >= leaf.xpLevels();
+            return hasItem && hasXp;
+
+        } else if(node instanceof CostComposite composite) {
+            if(composite.type() == CompositeType.ANY_OF) {
+                //Any child is enough
+                for(CostNode child : composite.children()) {
+                    if(isCostValid(child, items, playerXp)) return true;
+                }
+                return false;
+            } else {
+                //All children must be valid
+                for(CostNode child : composite.children()) {
+                    if(!isCostValid(child, items, playerXp)) return false;
+                }
+                return true;
+            }
+        }
+
+        //Never reached
+        return false;
     }
 
     /**
@@ -72,7 +105,7 @@ public class EnchantmentCostRegistry {
      */
     public int getHighestEnchantmentLevel() {
         return this.COST_REGISTRY.values().stream()
-                .mapToInt(LegacyEnchantmentCost::getHighestLevel)
+                .mapToInt(EnchantmentCost::getHighestLevel)
                 .max()
                 .orElse(0); // return 0 if there are no enchantments
     }
@@ -81,7 +114,7 @@ public class EnchantmentCostRegistry {
      * Returns the cost registry map <ResourceLocation, LegacyEnchantmentCost>
      * @return
      */
-    public Map<ResourceKey<Enchantment>, LegacyEnchantmentCost> getCostRegistry() {
+    public Map<ResourceKey<Enchantment>, EnchantmentCost> getCostRegistry() {
         return this.COST_REGISTRY;
     }
 

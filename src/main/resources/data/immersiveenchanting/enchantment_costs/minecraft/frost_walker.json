@@ -1,0 +1,12 @@
+{
+  "levels": {
+    "1": {
+      "item": "minecraft:powder_snow_bucket",
+      "amount": 1
+    },
+    "2": {
+      "item": "minecraft:blue_ice",
+      "amount": 16
+    }
+  }
+}

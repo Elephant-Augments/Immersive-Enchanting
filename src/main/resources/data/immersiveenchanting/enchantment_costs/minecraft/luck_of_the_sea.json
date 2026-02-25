@@ -1,0 +1,16 @@
+{
+  "levels": {
+    "1": {
+      "item": "minecraft:sea_pickle",
+      "amount": 1
+    },
+    "2": {
+      "item": "minecraft:sea_lantern",
+      "amount": 1
+    },
+    "3": {
+      "item": "minecraft:heart_of_the_sea",
+      "amount": 1
+    }
+  }
+}
