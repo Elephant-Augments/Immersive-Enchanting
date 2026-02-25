@@ -19,8 +19,6 @@ public class DatapackParser {
      * @return
      */
     public static EnchantmentCost parseJson(JsonElement file) {
-        ImmersiveEnchanting.LOGGER.info("Parsing JSON file...");
-
         JsonObject root = file.getAsJsonObject();
 
         //Check file has "levels"

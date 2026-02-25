@@ -91,21 +91,17 @@ public class AncientBookLootModifier extends LootModifier {
                 .filter(enchantment -> {
                     ResourceLocation keyLocation = enchantment.key().location();
 
-                    // Remove disabled enchantments, such as mending
+                    //Remove disabled enchantments, such as mending
                     //If enchantment has DO_NOT_INCLUDE tag. (Empty json)
 
-                    //BUG-FIX! Cannot access getClientRegistry() here, as this method runs server-side.
-                    //Use getServerRegistry()
-                    //TODO use enabled.
-                    /*
+                    //This method runs server-side - Use getServerRegistry()
+                    //If enchantment is disabled
                     if (EnchantmentCostRegistry.getServerRegistry().getCostRegistry().containsKey(enchantment.key())) {
-                        if (EnchantmentCostRegistry.getServerRegistry().getCostRegistry()
-                                .get(enchantment.key())
-                                .getLevel(-1).item().equals(LevelCost.DO_NOT_INCLUDE)) {
+                        if (!EnchantmentCostRegistry.getServerRegistry().getCostRegistry().get(enchantment.key()).enabled) {
                             return false;
                         }
                     }
-                     */
+
 
                     // Skip cursed enchantments
                     if (enchantment.is(EnchantmentTags.CURSE)) {

@@ -5,6 +5,7 @@ import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.compat.ModCheck;
 import me.alfie.immersiveenchanting.compat.ModCompat;
 import me.alfie.immersiveenchanting.datacomponent.ReplicatedDataComponent;
+import me.alfie.immersiveenchanting.datapack.EnchantmentCost;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.datapack.legacy.LevelCost;
 import me.alfie.immersiveenchanting.gui.core.Node;
@@ -240,9 +241,9 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
 
             ResourceKey<Enchantment> enchantmentKey = enchantmentHolder.getKey();
 
-            //If enchantment has DO_NOT_INCLUDE tag. (Empty json)
-            //TODO Use enabled instead.
+            //Skip disabled enchantments, they won't appear in the table
             if (EnchantmentCostRegistry.getClientRegistry().getCostRegistry().containsKey(enchantmentKey)) {
+                if(!EnchantmentCostRegistry.getClientRegistry().getCostRegistry().get(enchantmentKey).enabled) continue;
             }
 
             //If this enchantment isn't compatible with any enchantments already applied to the item, then skip.
@@ -338,7 +339,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
                 guiGraphics.pose().pushPose();
                 guiGraphics.pose().translate(0, 0, 500);
                 guiGraphics.renderTooltip(font,
-                        enchantingNodeTooltip.getCostStack(),
+                        enchantingNodeTooltip.getCurrentRenderedCost().asItemStack(),
                         mouseX, mouseY);
                 guiGraphics.pose().popPose();
             }
@@ -581,16 +582,17 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         if (!node.equals(lastHoveredNode) || nodeTooltip == null) {
 
             if(node instanceof EnchantingNode enchantingNode) {
-                /*TODO Refactor tooltip to use a list of items, not just one
                 nodeTooltip = new EnchantingNodeTooltip(
                         enchantingNode,
-                        EnchantmentCostRegistry.getClientRegistry()
-                                .getEnchantmentCost(enchantingNode.getEnchantment())
-                                .getLevel(enchantingNode.getEnchantmentLevel())
-                                .asItemStack(),
+
+                        EnchantmentCost.getRenderableAnyOfCosts(
+                                EnchantmentCostRegistry.getClientRegistry()
+                                        .getEnchantmentCost(enchantingNode.getEnchantment())
+                                        .getCostNodeForLevel(enchantingNode.getEnchantmentLevel())
+                        ),
+
                         this
                 );
-                 */
             }
 
             else if (node instanceof TransmuteNode transmuteNode) {

@@ -1,5 +1,6 @@
 package me.alfie.immersiveenchanting.gui.enchanting;
 
+import me.alfie.immersiveenchanting.datapack.CostLeaf;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.core.NodeTooltip;
 import net.minecraft.ChatFormatting;
@@ -8,17 +9,20 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import org.joml.Vector2i;
 
+import java.util.List;
+
 public class EnchantingNodeTooltip extends NodeTooltip {
 
     private final int costIconSize = 16;
-    private final ItemStack costStack;
+    private final List<CostLeaf> validCosts;
+    private CostLeaf currentRenderedCost;
     private Vector2i costStackPos = new Vector2i(0, 0);
 
     public EnchantingNodeTooltip(EnchantingNode node,
-                                 ItemStack costStack,
+                                 List<CostLeaf> validCosts,
                                  EnchantingTableScreen screen) {
         super(node, screen);
-        this.costStack = costStack;
+        this.validCosts = validCosts;
 
         //Decide title text
         String titleText;
@@ -34,8 +38,8 @@ public class EnchantingNodeTooltip extends NodeTooltip {
         tooltipTitle.setTitleText(titleText);
     }
 
-    public ItemStack getCostStack() {
-        return costStack;
+    public List<CostLeaf> getValidCosts() {
+        return this.validCosts;
     }
 
     public void setCostStackPos(int x, int y) {
@@ -46,7 +50,33 @@ public class EnchantingNodeTooltip extends NodeTooltip {
         return costStackPos;
     }
 
+    private ItemStack getCostStack(int index) {
+        return validCosts.get(index).asItemStack();
+    }
 
+    /**
+     * Returns the currently active element from a list, cycling through it
+     * based on system time and a given interval in milliseconds.
+     *
+     * @param <T> the type of elements
+     * @param list the list of elements to cycle through
+     * @param intervalMillis how long each element is shown before moving to the next
+     * @return the current element
+     */
+    public static <T> T getCycledElement(List<T> list, long intervalMillis) {
+        if (list == null || list.isEmpty()) return null;
 
+        long currentTime = System.currentTimeMillis();
+        int index = (int)((currentTime / intervalMillis) % list.size());
 
+        return list.get(index);
+    }
+
+    public void setCurrentRenderedCost(CostLeaf currentRenderedCost) {
+        this.currentRenderedCost = currentRenderedCost;
+    }
+
+    public CostLeaf getCurrentRenderedCost() {
+        return currentRenderedCost;
+    }
 }

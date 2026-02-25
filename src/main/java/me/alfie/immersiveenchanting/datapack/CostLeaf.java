@@ -16,9 +16,7 @@ public record CostLeaf(String item, String nbt, int amount, int xpLevels) implem
     }
 
     public ItemStack asItemStack() {
-        //Parse item id
-        ResourceLocation resourceLocation = ResourceLocation.tryParse(this.item);
-        Item item = BuiltInRegistries.ITEM.get(resourceLocation);
+        Item item = asItem();
 
         //Todo add nbt support
         ItemStack itemStack = new ItemStack(item, this.amount);

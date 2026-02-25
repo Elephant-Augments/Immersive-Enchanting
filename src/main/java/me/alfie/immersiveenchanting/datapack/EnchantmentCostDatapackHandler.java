@@ -58,6 +58,7 @@ public class EnchantmentCostDatapackHandler extends SimpleJsonResourceReloadList
         //TODO
         //--- NEW FILE FORMAT ---///
         int fileCount = 0;
+        ImmersiveEnchanting.LOGGER.info("Parsing datapack files...");
         for(Map.Entry<ResourceLocation, JsonElement> entry : object.entrySet()) {
             ResourceLocation fileId = entry.getKey();   // e.g., immersiveenchanting:minecraft/efficiency
             JsonElement json = entry.getValue();
