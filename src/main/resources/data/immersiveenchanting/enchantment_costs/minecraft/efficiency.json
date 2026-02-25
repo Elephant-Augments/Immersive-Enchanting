@@ -1,24 +1,56 @@
 {
   "levels": {
     "1": {
-      "item": "minecraft:cake",
-      "amount": 1
+      "any_of": [
+        {
+          "item": "minecraft:cake",
+          "amount": 1
+        }
+      ]
     },
     "2": {
-      "item": "minecraft:redstone_block",
-      "amount": 8
+      "all_of": [
+        {
+          "item": "minecraft:diamond",
+          "amount": 3
+        },
+        {
+          "item": "minecraft:obsidian",
+          "amount": 20
+        },
+        {
+          "any_of": [
+            {
+              "item": "minecraft:emerald",
+              "amount": 1
+            }
+          ]
+        }
+      ]
     },
     "3": {
-      "item": "minecraft:glistering_melon_slice",
-      "amount": 16
+      "any_of": [
+        {
+          "item": "minecraft:glistering_melon_slice",
+          "amount": 16
+        }
+      ]
     },
     "4": {
-      "item": "minecraft:rabbit_foot",
-      "amount": 1
+      "any_of": [
+        {
+          "item": "minecraft:rabbit_foot",
+          "amount": 1
+        }
+      ]
     },
     "5": {
-      "item": "minecraft:dragon_breath",
-      "amount": 8
+      "any_of": [
+        {
+          "item": "minecraft:dragon_breath",
+          "amount": 8
+        }
+      ]
     }
   }
 }

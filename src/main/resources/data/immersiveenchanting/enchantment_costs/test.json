@@ -1,0 +1,36 @@
+{
+  "levels": {
+    "1": {
+      "all_of": [
+        {
+          "item": "#minecraft:planks",
+          "amount": 1
+        },
+        {
+          "item": "minecraft:stone",
+          "amount": 1
+        }
+      ]
+    },
+    "2": {
+      "any_of": [
+        {
+          "item": "minecraft:diamond",
+          "amount": 3
+        },
+        {
+          "item": "minecraft:obsidian",
+          "amount": 20
+        },
+        {
+          "any_of": [
+            {
+              "item": "minecraft:emerald",
+              "amount": 1
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

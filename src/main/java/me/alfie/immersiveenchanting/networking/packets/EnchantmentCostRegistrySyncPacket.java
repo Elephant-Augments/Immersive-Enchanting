@@ -1,9 +1,9 @@
 package me.alfie.immersiveenchanting.networking.packets;
 
 import io.netty.buffer.ByteBuf;
-import me.alfie.immersiveenchanting.datapack.EnchantmentCost;
+import me.alfie.immersiveenchanting.datapack.legacy.LegacyEnchantmentCost;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
-import me.alfie.immersiveenchanting.datapack.LevelCost;
+import me.alfie.immersiveenchanting.datapack.legacy.LevelCost;
 import me.alfie.immersiveenchanting.networking.ClientPayloadHandler;
 import me.alfie.immersiveenchanting.networking.SerializedEnchantmentCostRegistry;
 import net.minecraft.core.registries.Registries;
@@ -58,8 +58,8 @@ public record EnchantmentCostRegistrySyncPacket(
     /**
      * Serialize the cost registry.
      *
-     * Map<ResourceLocation, EnchantmentCost>
-     *     where EnchantmentCost contains:
+     * Map<ResourceLocation, LegacyEnchantmentCost>
+     *     where LegacyEnchantmentCost contains:
      *         Map<String, LevelCost> (String is a number representing the level)
      *             where LevelCost is:
      *                 item: String
@@ -73,11 +73,11 @@ public record EnchantmentCostRegistrySyncPacket(
         List<Integer> amounts = new ArrayList<>();
 
         //For each entry in the EnchantmentCostRegistry
-        for(Map.Entry<ResourceKey<Enchantment>, EnchantmentCost> registryEntry : costRegistry.getCostRegistry().entrySet()) {
+        for(Map.Entry<ResourceKey<Enchantment>, LegacyEnchantmentCost> registryEntry : costRegistry.getCostRegistry().entrySet()) {
             ResourceKey<Enchantment> enchantmentKey = registryEntry.getKey();
-            EnchantmentCost cost = registryEntry.getValue();
+            LegacyEnchantmentCost cost = registryEntry.getValue();
 
-            //For each entry in the EnchantmentCost
+            //For each entry in the LegacyEnchantmentCost
             for(Map.Entry<String, LevelCost> costEntry : cost.levels.entrySet()) {
                 String level = costEntry.getKey();
                 LevelCost levelCost = costEntry.getValue();
@@ -115,11 +115,11 @@ public record EnchantmentCostRegistrySyncPacket(
 
             //Build LevelCost
             LevelCost levelCost = new LevelCost(item, amount);
-            //Build EnchantmentCost
+            //Build LegacyEnchantmentCost
             //Only create a new enchantment cost instance if it doesn't exist yet
-            EnchantmentCost enchantmentCost = enchantmentCostRegistry.getCostRegistry()
-                    .computeIfAbsent(ResourceKey.create(Registries.ENCHANTMENT, enchantmentResourceLocation),k -> new EnchantmentCost());
-            enchantmentCost.levels.put(level, levelCost);
+            LegacyEnchantmentCost legacyEnchantmentCost = enchantmentCostRegistry.getCostRegistry()
+                    .computeIfAbsent(ResourceKey.create(Registries.ENCHANTMENT, enchantmentResourceLocation),k -> new LegacyEnchantmentCost());
+            legacyEnchantmentCost.levels.put(level, levelCost);
         }
 
         return enchantmentCostRegistry;
