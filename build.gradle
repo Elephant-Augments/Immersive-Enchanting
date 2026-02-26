@@ -91,6 +91,8 @@ dependencies {
 
     /* --- Compatibility --- */
     //Set to implementation instead of compileOnly in Dev environment.
+    //implementation fg.deobf("curse.maven:domestication-innovation-591149:4911955")
+    //implementation fg.deobf("curse.maven:citadel-331936:7476570")
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.

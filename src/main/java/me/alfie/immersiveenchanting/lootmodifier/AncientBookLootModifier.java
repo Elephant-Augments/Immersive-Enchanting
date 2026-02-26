@@ -80,7 +80,7 @@ public class AncientBookLootModifier extends LootModifier {
 
                             // Remove disabled enchantments, such as mending
                             //If enchantment has DO_NOT_INCLUDE tag. (Empty json)
-                            if (EnchantmentCostRegistry.getServerRegistry().getCostRegistry().containsKey(enchantment.key().location())) {
+                            if (EnchantmentCostRegistry.getServerRegistry().getCostRegistry().containsKey(enchantment.key())) {
                                 if (EnchantmentCostRegistry.getServerRegistry().getCostRegistry()
                                         .get(enchantment.key())
                                         .getLevel(-1).item().equals(LevelCost.DO_NOT_INCLUDE)) {
@@ -92,7 +92,6 @@ public class AncientBookLootModifier extends LootModifier {
                             return !enchantment.get().isCurse();// include everything else
                         })
                         .toList();
-
 
                 // Pick a random enchantment type from the filtered list
                 if (!filteredEnchantments.isEmpty()) {
