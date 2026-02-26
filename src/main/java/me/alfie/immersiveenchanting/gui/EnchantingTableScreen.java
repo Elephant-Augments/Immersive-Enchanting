@@ -7,7 +7,6 @@ import me.alfie.immersiveenchanting.compat.ModCompat;
 import me.alfie.immersiveenchanting.datacomponent.ReplicatedDataComponent;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCost;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
-import me.alfie.immersiveenchanting.datapack.legacy.LevelCost;
 import me.alfie.immersiveenchanting.gui.core.Node;
 import me.alfie.immersiveenchanting.gui.core.NodeBranch;
 import me.alfie.immersiveenchanting.gui.core.NodeTooltip;

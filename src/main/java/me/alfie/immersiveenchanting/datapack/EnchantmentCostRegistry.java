@@ -1,6 +1,5 @@
 package me.alfie.immersiveenchanting.datapack;
 
-import me.alfie.immersiveenchanting.datapack.legacy.LevelCost;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;

@@ -1,8 +1,8 @@
 package me.alfie.immersiveenchanting.gui.core;
 
 import com.mojang.blaze3d.platform.NativeImage;
-import me.alfie.immersiveenchanting.gui.enchanting.EnchantingNode;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
+import me.alfie.immersiveenchanting.gui.enchanting.EnchantingNode;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.texture.DynamicTexture;

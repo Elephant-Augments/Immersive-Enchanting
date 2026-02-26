@@ -1,6 +1,5 @@
 package me.alfie.immersiveenchanting.gui;
 
-import me.alfie.immersiveenchanting.item.AncientBook;
 import me.alfie.immersiveenchanting.item.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;

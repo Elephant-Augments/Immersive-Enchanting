@@ -1,7 +1,6 @@
 package me.alfie.immersiveenchanting.api.internal;
 
 import me.alfie.immersiveenchanting.api.DescriptionLayoutExtension;
-import me.alfie.immersiveenchanting.datapack.CostLeaf;
 import me.alfie.immersiveenchanting.gui.core.NodeTooltip;
 import me.alfie.immersiveenchanting.gui.enchanting.EnchantingNode;
 import me.alfie.immersiveenchanting.gui.enchanting.EnchantingNodeTooltip;
@@ -15,8 +14,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector2i;
-
-import java.util.List;
 
 public class CostLayoutExtension implements DescriptionLayoutExtension {
 

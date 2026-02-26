@@ -3,20 +3,16 @@ package me.alfie.immersiveenchanting.compat;
 import net.enchant_limiter.api.LimitHelper;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.Holder;
-import net.minecraft.network.chat.*;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import reliquary.data.ReliquaryEnchantmentProvider;
 
-import java.util.concurrent.atomic.AtomicInteger;
-import org.checkerframework.checker.units.qual.C;
-
 import javax.annotation.Nullable;
-import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Compatibility helpers for other mods.<br>

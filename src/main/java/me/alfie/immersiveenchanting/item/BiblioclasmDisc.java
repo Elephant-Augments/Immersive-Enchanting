@@ -2,7 +2,6 @@ package me.alfie.immersiveenchanting.item;
 
 import me.alfie.immersiveenchanting.sound.ModSounds;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.JukeboxPlayable;
 import net.minecraft.world.item.Rarity;
 
 public class BiblioclasmDisc extends Item {

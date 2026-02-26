@@ -1,12 +1,6 @@
 package me.alfie.immersiveenchanting.datapack;
 
-import me.alfie.immersiveenchanting.datapack.legacy.LevelCost;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 

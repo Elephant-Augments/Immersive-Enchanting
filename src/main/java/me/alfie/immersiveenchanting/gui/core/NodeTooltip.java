@@ -1,6 +1,5 @@
 package me.alfie.immersiveenchanting.gui.core;
 
-import me.alfie.immersiveenchanting.gui.enchanting.EnchantingNode;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.tooltip.RenderDirection;
 import me.alfie.immersiveenchanting.gui.tooltip.TooltipDescription;
