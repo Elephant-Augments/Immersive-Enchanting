@@ -184,6 +184,7 @@ public class ImmersiveEnchantingEvents {
             event.accept(new ItemStack(ModItems.CREATIVE_BOOKSHELF));
             event.accept(new ItemStack(Items.LAPIS_LAZULI));
             event.accept(new ItemStack(ModItems.BIBLIOCLASM_MUSIC_DISC.get()));
+            event.accept(new ItemStack(ModItems.ARCANE_MEMORIES_MUSIC_DISC.get()));
 
             // Track which itemIds we've already added to avoid duplicates
             Set<Item> addedItems = new HashSet<>();

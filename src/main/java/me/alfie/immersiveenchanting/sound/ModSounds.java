@@ -20,8 +20,15 @@ public class ModSounds {
             () -> SoundEvent.createVariableRangeEvent(
                     ResourceLocation.fromNamespaceAndPath(ImmersiveEnchanting.MODID, "biblioclasm")));
 
+    public static final Supplier<SoundEvent> ARCANE_MEMORIES = SOUND_EVENTS.register("arcane_memories",
+            () -> SoundEvent.createVariableRangeEvent(
+                    ResourceLocation.fromNamespaceAndPath(ImmersiveEnchanting.MODID, "arcane_memories")));
+
     public static final ResourceKey<JukeboxSong> BIBLIOCLASM_KEY = ResourceKey.create(Registries.JUKEBOX_SONG,
             ResourceLocation.fromNamespaceAndPath(ImmersiveEnchanting.MODID, "biblioclasm"));
+
+    public static final ResourceKey<JukeboxSong> ARCANE_MEMORIES_KEY = ResourceKey.create(Registries.JUKEBOX_SONG,
+            ResourceLocation.fromNamespaceAndPath(ImmersiveEnchanting.MODID, "arcane_memories"));
 
     public static void register(IEventBus eventBus) {
         SOUND_EVENTS.register(eventBus);

@@ -26,6 +26,12 @@ public class ModItems {
             new Item.Properties()
     );
 
+    public static final Supplier<Item> ARCANE_MEMORIES_MUSIC_DISC = ITEMS.registerItem(
+            "music_disc_arcane_memories",
+            ArcaneMemoriesDisc::new,
+            new Item.Properties()
+    );
+
     public static final DeferredHolder<Item, BlockItem> CREATIVE_BOOKSHELF =
             ITEMS.register("creative_bookshelf",
                     () -> new BlockItem(ModBlocks.CREATIVE_BOOKSHELF.get(), new Item.Properties().rarity(Rarity.EPIC)));

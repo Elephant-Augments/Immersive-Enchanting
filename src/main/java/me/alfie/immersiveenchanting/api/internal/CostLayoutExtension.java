@@ -25,6 +25,8 @@ public class CostLayoutExtension implements DescriptionLayoutExtension {
 
                 enchantingNodeTooltip.setCurrentRenderedCost(
                         EnchantingNodeTooltip.getCycledElement(enchantingNodeTooltip.getValidCosts(), 1000));
+                ItemStack stackToRender = enchantingNodeTooltip.getCurrentRenderedCost().asItemStack();
+
 
                 description.insertLine(0, new DescriptionLine() {
                     @Override
@@ -38,7 +40,7 @@ public class CostLayoutExtension implements DescriptionLayoutExtension {
 
                         //Draw cost stack or "Free" if no item cost defined.
                         if (enchantingNode.isBranchUnlocked && !enchantingNode.isObtained()) {
-                            ItemStack costStack = enchantingNodeTooltip.getCurrentRenderedCost().asItemStack();
+                            ItemStack costStack = stackToRender;
                             if (costStack.is(Items.AIR) || costStack.isEmpty()) {
                                 graphics.drawString(
                                         Minecraft.getInstance().font,
@@ -51,11 +53,11 @@ public class CostLayoutExtension implements DescriptionLayoutExtension {
                                 Vector2i costStackPos = new Vector2i(lineX + Minecraft.getInstance().font.width(getText()), lineY);
                                 enchantingNodeTooltip.setCostStackPos(costStackPos.x, costStackPos.y);
                                 graphics.renderItem(
-                                        enchantingNodeTooltip.getCurrentRenderedCost().asItemStack(),
+                                        stackToRender,
                                         costStackPos.x,
                                         costStackPos.y);
                                 graphics.renderItemDecorations(Minecraft.getInstance().font,
-                                        enchantingNodeTooltip.getCurrentRenderedCost().asItemStack(),
+                                        stackToRender,
                                         costStackPos.x,
                                         costStackPos.y);
                             }
