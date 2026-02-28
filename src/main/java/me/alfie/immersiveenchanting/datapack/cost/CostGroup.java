@@ -1,4 +1,4 @@
-package me.alfie.immersiveenchanting.datapack;
+package me.alfie.immersiveenchanting.datapack.cost;
 
 import javax.annotation.Nullable;
 import java.util.List;

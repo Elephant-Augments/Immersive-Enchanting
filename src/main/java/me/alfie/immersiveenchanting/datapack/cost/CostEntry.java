@@ -1,4 +1,4 @@
-package me.alfie.immersiveenchanting.datapack;
+package me.alfie.immersiveenchanting.datapack.cost;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;

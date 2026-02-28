@@ -1,4 +1,4 @@
-package me.alfie.immersiveenchanting.datapack;
+package me.alfie.immersiveenchanting.datapack.parser;
 
 public enum JsonProperty {
     LEVELS("levels"),

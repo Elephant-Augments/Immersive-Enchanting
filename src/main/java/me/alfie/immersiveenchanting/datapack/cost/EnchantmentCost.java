@@ -1,4 +1,4 @@
-package me.alfie.immersiveenchanting.datapack;
+package me.alfie.immersiveenchanting.datapack.cost;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +31,7 @@ public class EnchantmentCost {
         return costs;
     }
 
-    protected EnchantmentCost resolveTags() {
+    public EnchantmentCost resolveTags() {
         Map<String, CostDefinition> resolvedLevels = levels.entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,

@@ -1,6 +1,6 @@
 package me.alfie.immersiveenchanting.gui.enchanting;
 
-import me.alfie.immersiveenchanting.datapack.CostEntry;
+import me.alfie.immersiveenchanting.datapack.cost.CostEntry;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.core.NodeTooltip;
 import net.minecraft.ChatFormatting;

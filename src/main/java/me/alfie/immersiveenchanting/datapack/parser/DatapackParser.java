@@ -1,9 +1,14 @@
-package me.alfie.immersiveenchanting.datapack;
+package me.alfie.immersiveenchanting.datapack.parser;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
+import me.alfie.immersiveenchanting.datapack.cost.EnchantmentCost;
+import me.alfie.immersiveenchanting.datapack.cost.CostDefinition;
+import me.alfie.immersiveenchanting.datapack.cost.CostEntry;
+import me.alfie.immersiveenchanting.datapack.cost.CostGroup;
+import me.alfie.immersiveenchanting.datapack.cost.GroupType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
