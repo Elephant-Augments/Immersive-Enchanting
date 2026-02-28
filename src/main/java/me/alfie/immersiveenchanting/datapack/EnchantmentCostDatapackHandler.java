@@ -16,7 +16,9 @@ import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.enchantment.Enchantment;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -94,6 +96,11 @@ public class EnchantmentCostDatapackHandler extends SimpleJsonResourceReloadList
             }
             ImmersiveEnchanting.LOGGER.info("Synced server enchantment cost registry with " + count + " client(s).");
         }
+    }
+
+    public void fillTagComposites() {
+        Map<ResourceKey<Enchantment>, EnchantmentCost> costRegistry = EnchantmentCostRegistry.getServerRegistry().getCostRegistry();
+        costRegistry.replaceAll((key, cost) -> cost.resolveTags());
     }
 
     /**

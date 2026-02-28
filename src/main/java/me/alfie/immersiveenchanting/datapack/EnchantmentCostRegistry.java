@@ -33,7 +33,6 @@ public class EnchantmentCostRegistry {
 
     //Maps the enchantment ResourceLocation (e.g., minecraft:efficiency) to its cost data
     private final Map<ResourceKey<Enchantment>, EnchantmentCost> COST_REGISTRY = new HashMap<>();
-    private ItemStack lapisCost;
     public static final EnchantmentCost EMPTY = new EnchantmentCost(new HashMap<>());
 
     /**
@@ -52,8 +51,8 @@ public class EnchantmentCostRegistry {
      * @param playerXp
      * @return
      */
-    public static boolean isCostValid(CostNode node, List<ItemStack> items, int playerXp) {
-        if(node instanceof CostLeaf leaf) {
+    public static boolean isCostValid(CostDefinition node, List<ItemStack> items, int playerXp) {
+        if(node instanceof CostEntry leaf) {
             boolean hasItem = false;
 
             //Check item
@@ -72,16 +71,16 @@ public class EnchantmentCostRegistry {
             boolean hasXp = playerXp >= leaf.xpLevels();
             return hasItem && hasXp;
 
-        } else if(node instanceof CostComposite composite) {
-            if(composite.type() == CompositeType.ANY_OF) {
+        } else if(node instanceof CostGroup composite) {
+            if(composite.type() == GroupType.ANY_OF) {
                 //Any child is enough
-                for(CostNode child : composite.children()) {
+                for(CostDefinition child : composite.children()) {
                     if(isCostValid(child, items, playerXp)) return true;
                 }
                 return false;
             } else {
                 //All children must be valid
-                for(CostNode child : composite.children()) {
+                for(CostDefinition child : composite.children()) {
                     if(!isCostValid(child, items, playerXp)) return false;
                 }
                 return true;

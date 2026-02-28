@@ -3,22 +3,42 @@ package me.alfie.immersiveenchanting.datapack;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class EnchantmentCost {
     //String is the level number as a string - its a string because its from the json.
-    public Map<String, CostNode> levels;
+    public Map<String, CostDefinition> levels;
     public final boolean enabled;
 
-    public EnchantmentCost(Map<String, CostNode> levelCosts) {
+    public EnchantmentCost(Map<String, CostDefinition> levelCosts) {
         this.enabled = true;
 
         this.levels = levelCosts;
     }
 
-    public EnchantmentCost(Map<String, CostNode> levelCosts, boolean enabled) {
+    public EnchantmentCost(Map<String, CostDefinition> levelCosts, boolean enabled) {
         this.enabled = enabled;
 
         this.levels = levelCosts;
+    }
+
+    public List<CostDefinition> getAllLevels() {
+        List<CostDefinition> costs = new ArrayList<>();
+        int highestLevel = getHighestLevel();
+        for (int i = 0; i < highestLevel; i++) {
+            costs.add(levels.get(String.valueOf(i)));
+        }
+        return costs;
+    }
+
+    protected EnchantmentCost resolveTags() {
+        Map<String, CostDefinition> resolvedLevels = levels.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        e -> e.getValue().resolveTags() // replaces tagged CostEntry with CostGroup
+                ));
+
+        return new EnchantmentCost(resolvedLevels, enabled);
     }
 
     /**
@@ -26,7 +46,7 @@ public class EnchantmentCost {
      * @param level
      * @return
      */
-    public CostNode getCostNodeForLevel(int level) {
+    public CostDefinition getCostNodeForLevel(int level) {
         return levels.get(String.valueOf(level));
     }
 
@@ -39,14 +59,14 @@ public class EnchantmentCost {
                 .orElse(0);                  // default if empty
     }
 
-    public static List<CostLeaf> getRenderableAnyOfCosts(CostNode node) {
-        List<CostLeaf> result = new ArrayList<>();
+    public static List<CostEntry> getRenderableAnyOfCosts(CostDefinition node) {
+        List<CostEntry> result = new ArrayList<>();
 
-        if(node instanceof CostLeaf leaf) {
+        if(node instanceof CostEntry leaf) {
             result.add(leaf);
-        } else if (node instanceof CostComposite composite) {
-            if(composite.type() == CompositeType.ANY_OF) {
-                for(CostNode child : composite.children()) {
+        } else if (node instanceof CostGroup composite) {
+            if(composite.type() == GroupType.ANY_OF) {
+                for(CostDefinition child : composite.children()) {
                     result.addAll(getRenderableAnyOfCosts(child));
                 }
             } else {

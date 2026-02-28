@@ -1,6 +1,6 @@
 package me.alfie.immersiveenchanting.gui.enchanting;
 
-import me.alfie.immersiveenchanting.datapack.CostLeaf;
+import me.alfie.immersiveenchanting.datapack.CostEntry;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.core.NodeTooltip;
 import net.minecraft.ChatFormatting;
@@ -14,12 +14,12 @@ import java.util.List;
 public class EnchantingNodeTooltip extends NodeTooltip {
 
     private final int costIconSize = 16;
-    private final List<CostLeaf> validCosts;
-    private CostLeaf currentRenderedCost;
+    private final List<CostEntry> validCosts;
+    private CostEntry currentRenderedCost;
     private Vector2i costStackPos = new Vector2i(0, 0);
 
     public EnchantingNodeTooltip(EnchantingNode node,
-                                 List<CostLeaf> validCosts,
+                                 List<CostEntry> validCosts,
                                  EnchantingTableScreen screen) {
         super(node, screen);
         this.validCosts = validCosts;
@@ -38,7 +38,7 @@ public class EnchantingNodeTooltip extends NodeTooltip {
         tooltipTitle.setTitleText(titleText);
     }
 
-    public List<CostLeaf> getValidCosts() {
+    public List<CostEntry> getValidCosts() {
         return this.validCosts;
     }
 
@@ -72,11 +72,11 @@ public class EnchantingNodeTooltip extends NodeTooltip {
         return list.get(index);
     }
 
-    public void setCurrentRenderedCost(CostLeaf currentRenderedCost) {
+    public void setCurrentRenderedCost(CostEntry currentRenderedCost) {
         this.currentRenderedCost = currentRenderedCost;
     }
 
-    public CostLeaf getCurrentRenderedCost() {
+    public CostEntry getCurrentRenderedCost() {
         return currentRenderedCost;
     }
 }

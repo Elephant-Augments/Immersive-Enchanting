@@ -34,11 +34,11 @@ public class DatapackParser {
 
         //Search through each level key.
         JsonObject levels = root.getAsJsonObject(JsonProperty.LEVELS.getKey());
-        Map<String, CostNode> levelCosts = new HashMap<>();
+        Map<String, CostDefinition> levelCosts = new HashMap<>();
         for(Map.Entry<String, JsonElement> entry : levels.entrySet()) {
             String levelKey = getLevelKey(entry);
             JsonObject levelNode = entry.getValue().getAsJsonObject();
-            CostNode costNode = parseCostNode(levelNode);
+            CostDefinition costNode = parseCostNode(levelNode);
 
             levelCosts.put(levelKey, costNode);
         }
@@ -51,26 +51,26 @@ public class DatapackParser {
      * @param node
      * @return
      */
-    public static CostNode parseCostNode(JsonObject node) {
+    public static CostDefinition parseCostNode(JsonObject node) {
         if(node.has(JsonProperty.ITEM.getKey()) || node.has(JsonProperty.AMOUNT.getKey()) || node.has(JsonProperty.XP_LEVELS.getKey())) {
-            return parseCostLeaf(node);
+            return parseCostEntry(node);
         }
 
         else if (node.has(JsonProperty.ANY_OF.getKey())) {
             JsonArray anyOfArray = node.getAsJsonArray(JsonProperty.ANY_OF.getKey());
-            List<CostNode> children = new ArrayList<>();
+            List<CostDefinition> children = new ArrayList<>();
             for(JsonElement element : anyOfArray) {
                 children.add(parseCostNode(element.getAsJsonObject())); //Recursive!
             }
-            return new CostComposite(children, CompositeType.ANY_OF);
+            return new CostGroup(children, GroupType.ANY_OF);
         } else if (node.has(JsonProperty.ALL_OF.getKey())) {
             JsonArray allOfArray = node.getAsJsonArray((JsonProperty.ALL_OF.getKey()));
-            List<CostNode> children = new ArrayList<>();
+            List<CostDefinition> children = new ArrayList<>();
             for(JsonElement element : allOfArray) {
                 children.add(parseCostNode(element.getAsJsonObject())); //Recursive!
             }
             ImmersiveEnchanting.LOGGER.warn("'all_of' is accepted in enchantment cost files but not currently supported!");
-            return new CostComposite(children, CompositeType.ALL_OF);
+            return new CostGroup(children, GroupType.ALL_OF);
         }
 
         else {
@@ -78,7 +78,7 @@ public class DatapackParser {
         }
     }
 
-    public static CostLeaf parseCostLeaf(JsonObject costElement) {
+    public static CostEntry parseCostEntry(JsonObject costElement) {
         //Must contain "item"
         if(!costElement.has(JsonProperty.ITEM.getKey())) {
             throw new EnchantmentCostParseException("Cost is missing 'item'");
@@ -103,7 +103,7 @@ public class DatapackParser {
             xpLevels = costElement.get(JsonProperty.XP_LEVELS.getKey()).getAsInt();
         }
 
-        return new CostLeaf(item, nbt, amount, xpLevels);
+        return new CostEntry(item, nbt, amount, xpLevels);
     }
 
 
@@ -138,9 +138,9 @@ public class DatapackParser {
         //Levels object
         JsonObject levelsObject = new JsonObject();
 
-        for(Map.Entry<String, CostNode> entry : cost.levels.entrySet()) {
+        for(Map.Entry<String, CostDefinition> entry : cost.levels.entrySet()) {
             String level = entry.getKey();
-            CostNode node = entry.getValue();
+            CostDefinition node = entry.getValue();
 
             levelsObject.add(level, serializeNode(node));
         }
@@ -149,10 +149,10 @@ public class DatapackParser {
         return root;
     }
 
-    private static JsonObject serializeNode(CostNode node) {
+    private static JsonObject serializeNode(CostDefinition node) {
         JsonObject object = new JsonObject();
 
-        if(node instanceof CostLeaf leaf) {
+        if(node instanceof CostEntry leaf) {
             object.addProperty(JsonProperty.ITEM.getKey(), leaf.item());
 
             if(!leaf.nbt().isEmpty()) {
@@ -164,14 +164,14 @@ public class DatapackParser {
             if(leaf.xpLevels() > 0) {
                 object.addProperty(JsonProperty.XP_LEVELS.getKey(), leaf.xpLevels());
             }
-        } else if (node instanceof CostComposite composite) {
+        } else if (node instanceof CostGroup composite) {
             JsonArray childrenArray = new JsonArray();
 
-            for(CostNode child : composite.children()) {
+            for(CostDefinition child : composite.children()) {
                 childrenArray.add(serializeNode(child));
             }
 
-            if(composite.type() == CompositeType.ANY_OF) {
+            if(composite.type() == GroupType.ANY_OF) {
                 object.add(JsonProperty.ANY_OF.getKey(), childrenArray);
             } else {
                 object.add(JsonProperty.ALL_OF.getKey(), childrenArray);

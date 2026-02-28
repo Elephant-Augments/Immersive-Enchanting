@@ -51,6 +51,7 @@ import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.TagsUpdatedEvent;
 import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerContainerEvent;
@@ -161,6 +162,12 @@ public class ImmersiveEnchantingEvents {
     @SubscribeEvent
     public void reloadListener(AddReloadListenerEvent event) {
         event.addListener(ImmersiveEnchanting.ENCHANTMENT_COST_DATAPACK_HANDLER);
+    }
+
+    @SubscribeEvent
+    public void tagsUpdated(TagsUpdatedEvent event) {
+        ImmersiveEnchanting.ENCHANTMENT_COST_DATAPACK_HANDLER.fillTagComposites();
+        ImmersiveEnchanting.LOGGER.info("Tags updated!");
     }
 
     /**

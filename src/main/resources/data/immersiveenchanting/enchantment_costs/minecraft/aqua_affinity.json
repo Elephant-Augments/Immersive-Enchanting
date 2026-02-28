@@ -3,9 +3,18 @@
 
   "levels": {
     "1": {
-      "item": "#minecraft:planks",
-      "amount": 1,
-      "xp_levels": 5
+      "any_of": [
+        {
+          "item": "#minecraft:planks",
+          "amount": 1,
+          "xp_levels": 5
+        },
+        {
+          "item": "#c:gems",
+          "amount": 1,
+          "xp_levels": 5
+        }
+      ]
     }
   }
 }

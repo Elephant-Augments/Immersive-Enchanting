@@ -6,7 +6,7 @@ import me.alfie.immersiveenchanting.compat.ModCompat;
 import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.datacomponent.ModDataComponents;
 import me.alfie.immersiveenchanting.datacomponent.ReplicatedDataComponent;
-import me.alfie.immersiveenchanting.datapack.CostNode;
+import me.alfie.immersiveenchanting.datapack.CostDefinition;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostDatapackHandler;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
@@ -261,7 +261,7 @@ public class ServerPayloadHandler {
         int playerXp = player.experienceLevel;
 
         //TODO Use .isCostValid?
-        CostNode costNode = EnchantmentCostRegistry.getServerRegistry().getEnchantmentCost(packet.enchantment()).getCostNodeForLevel(packet.enchantmentLevel());
+        CostDefinition costNode = EnchantmentCostRegistry.getServerRegistry().getEnchantmentCost(packet.enchantment()).getCostNodeForLevel(packet.enchantmentLevel());
         boolean costSlotIsValid = EnchantmentCostRegistry.isCostValid(costNode, insertedItems, playerXp);
 
         List<Item> validEnchantingFuels = EnchantmentCostDatapackHandler.getValidEnchantingFuels();
