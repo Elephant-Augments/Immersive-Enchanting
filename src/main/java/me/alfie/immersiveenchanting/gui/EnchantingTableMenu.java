@@ -12,10 +12,10 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.neoforged.neoforge.common.Tags;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -29,7 +29,6 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
     private Set<String> unlockedEnchantmentResourceIds;
 
     private Set<Holder<Enchantment>> unlockedEnchantments = new HashSet<>();
-
 
     // --------------------
     // Game constructor
@@ -59,7 +58,7 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
             }
         });
 
-        //Lapis slot
+        //Enchanting fuel slot
         this.addSlot(new Slot(this.container, 1, 233, 199));
 
         //Cost slot
@@ -100,9 +99,9 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
                     return ItemStack.EMPTY;
                 }
             }
-            // ---- LAPIS SLOT ----
-            else if (index == SLOTS.LAPIS.ordinal()) {
-                // Move lapis back to player inventory
+            // ---- ENCHANTING FUEL SLOT ----
+            else if (index == SLOTS.ENCHANTING_FUEL.ordinal()) {
+                // Move enchanting fuel back to player inventory
                 if (!this.moveItemStackTo(stackInSlot, 3, 39, true)) {
                     return ItemStack.EMPTY;
                 }
@@ -120,8 +119,8 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
                 if (stackInSlot.getItem().isEnchantable(stackInSlot) || stackInSlot.is(ModItems.ANCIENT_BOOK.get())) {
                     if (!this.moveItemStackTo(stackInSlot, 0, 1, false)) return ItemStack.EMPTY;
                 }
-                // Try lapis → slot 1
-                else if (stackInSlot.is(Items.LAPIS_LAZULI)) {
+                // Try enchanting fuel → slot 1 (Uses #neoforge:enchanting_fuels tag)
+                else if (stackInSlot.is(Tags.Items.ENCHANTING_FUELS)) {
                     if (!this.moveItemStackTo(stackInSlot, 1, 2, false)) return ItemStack.EMPTY;
                 }
                 // Everything else → cost slot (slot 2)
@@ -185,6 +184,10 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
         return getItemInSlot(SLOTS.COST);
     }
 
+    public ItemStack getEnchantingFuelSlotItem() {
+        return getItemInSlot(SLOTS.ENCHANTING_FUEL);
+    }
+
     /**
      * Helper to get item in slot using SLOTS enum.
      *
@@ -197,7 +200,7 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
 
     public enum SLOTS {
         TOOL,
-        LAPIS, //By default, this is the lapis slot, but it can be configured to other itemIds.
+        ENCHANTING_FUEL, //Any item in the #neoforge:enchanting_fuels tag.
         COST
     }
 

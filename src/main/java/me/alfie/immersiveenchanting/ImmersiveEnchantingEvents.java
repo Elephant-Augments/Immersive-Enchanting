@@ -6,6 +6,10 @@ import me.alfie.immersiveenchanting.api.TooltipDescriptionExtensions;
 import me.alfie.immersiveenchanting.api.internal.CostLayoutExtension;
 import me.alfie.immersiveenchanting.api.internal.ReplicateLayoutExtension;
 import me.alfie.immersiveenchanting.api.internal.TransmuteLayoutExtension;
+import me.alfie.immersiveenchanting.commands.DisabledEnchantmentsCommand;
+import me.alfie.immersiveenchanting.commands.EnabledEnchantmentsCommand;
+import me.alfie.immersiveenchanting.commands.GiveRandomBookCommand;
+import me.alfie.immersiveenchanting.commands.ImmersiveEnchantingCommand;
 import me.alfie.immersiveenchanting.creativetab.ModCreativeTab;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.datapack.EnchantmentMetadataRegistry;
@@ -107,17 +111,15 @@ public class ImmersiveEnchantingEvents {
     public void onRegisterCommands(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
 
-        dispatcher.register(
-                Commands.literal("immersiveenchanting")
-                        .then(Commands.literal("getDisabledEnchantments")
-                                    .executes(context -> {
-                            String disabled = String.join(", ",
-                                    EnchantmentCostRegistry.getServerRegistry().getDisabledEnchantments());
-                            context.getSource().sendSuccess(() -> Component.literal("Disabled enchantments: " + disabled).withStyle(ChatFormatting.RED), false);
-                            return 1;
-                        })
-                )
+        List<ImmersiveEnchantingCommand> commands = List.of(
+                DisabledEnchantmentsCommand.COMMAND,
+                EnabledEnchantmentsCommand.COMMAND,
+                GiveRandomBookCommand.COMMAND
         );
+
+        for(ImmersiveEnchantingCommand command : commands) {
+            command.register(dispatcher);
+        }
     }
 
     @SubscribeEvent

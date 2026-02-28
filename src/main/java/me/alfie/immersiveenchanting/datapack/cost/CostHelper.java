@@ -6,11 +6,13 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
+import net.neoforged.neoforge.common.Tags;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class CostHelper {
+
     public static List<Item> getItemsInItemTag(TagKey<Item> itemTag) {
         return BuiltInRegistries.ITEM.getTag(itemTag)
                 .map(tagSet -> tagSet.stream()

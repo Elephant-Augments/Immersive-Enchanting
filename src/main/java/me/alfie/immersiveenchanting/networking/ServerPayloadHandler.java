@@ -265,7 +265,7 @@ public class ServerPayloadHandler {
         boolean costSlotIsValid = EnchantmentCostRegistry.isCostValid(costNode, insertedItems, playerXp);
 
         List<Item> validEnchantingFuels = EnchantmentCostDatapackHandler.getValidEnchantingFuels();
-        ItemStack enchantingFuel = enchantingTableMenu.getSlot(EnchantingTableMenu.SLOTS.LAPIS.ordinal()).getItem();
+        ItemStack enchantingFuel = enchantingTableMenu.getSlot(EnchantingTableMenu.SLOTS.ENCHANTING_FUEL.ordinal()).getItem();
         boolean enchantingFuelIsValid = validEnchantingFuels.contains(enchantingFuel.getItem());
 
         boolean hasEnoughCost = player.hasInfiniteMaterials() ||
@@ -274,7 +274,7 @@ public class ServerPayloadHandler {
 
         if (hasEnoughCost) {
             if (!player.hasInfiniteMaterials()) {
-                enchantingTableMenu.getSlot(EnchantingTableMenu.SLOTS.LAPIS.ordinal()).getItem()
+                enchantingTableMenu.getSlot(EnchantingTableMenu.SLOTS.ENCHANTING_FUEL.ordinal()).getItem()
                         .shrink(1); //Todo use config
 
                 //TODO shrink by correct amount from cost

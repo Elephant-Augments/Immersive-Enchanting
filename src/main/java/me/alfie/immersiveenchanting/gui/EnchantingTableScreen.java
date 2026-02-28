@@ -345,7 +345,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         }
 
         //Render the item in the enchanting table when hovered
-        if(!menu.getToolSlotItem().is(Items.AIR)) {
+        if(!menu.getToolSlotItem().is(Items.AIR) && !isLockHover()) {
             if(isMouseOverBoundingBox(virtualSlotPos, VIRTUAL_SLOT_DIMENSIONS, VIRTUAL_SLOT_DIMENSIONS, mouseX, mouseY)) {
                 guiGraphics.pose().pushPose();
                 guiGraphics.pose().translate(0, 0, 500);
@@ -718,7 +718,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
 
                 // Check if the centre icon was clicked
                 if (isMouseOverBoundingBox(virtualSlotPos, VIRTUAL_SLOT_DIMENSIONS, VIRTUAL_SLOT_DIMENSIONS, mouseX, mouseY)
-                        && carriedStack.isEmpty()) {
+                        && carriedStack.isEmpty() && !isLockHover()) {
                     PacketDistributor.sendToServer(
                             new UpdateToolSlotPacket(UpdateToolSlotPacket.MODE.TAKE.ordinal())
                     );

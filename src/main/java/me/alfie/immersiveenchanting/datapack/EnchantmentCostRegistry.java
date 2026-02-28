@@ -118,6 +118,10 @@ public class EnchantmentCostRegistry {
         return this.COST_REGISTRY;
     }
 
+    /**
+     * Returns a list of all enchantment IDs that are disabled.
+     * @return
+     */
     public List<String> getDisabledEnchantments() {
         List<String> disabledEnchantments = new ArrayList<>();
         for(Map.Entry<ResourceKey<Enchantment>, EnchantmentCost> entry : getCostRegistry().entrySet()) {
@@ -128,5 +132,21 @@ public class EnchantmentCostRegistry {
             }
         }
         return disabledEnchantments;
+    }
+
+    /**
+     * Returns a list of all enchantment IDs that are enabled.
+     * @return
+     */
+    public List<String> getEnabledEnchantments() {
+        List<String> enabledEnchantments = new ArrayList<>();
+        for(Map.Entry<ResourceKey<Enchantment>, EnchantmentCost> entry : getCostRegistry().entrySet()) {
+            EnchantmentCost cost = entry.getValue();
+            if(cost.enabled) {
+                String enchantmentName = entry.getKey().location().toString();
+                enabledEnchantments.add(enchantmentName);
+            }
+        }
+        return enabledEnchantments;
     }
 }
