@@ -24,6 +24,7 @@
   "gui.immersiveenchanting.replicate_book": "Replicate",
   "gui.immersiveenchanting.replicate_hint": "Make a copy of this Ancient Book.",
   "gui.immersiveenchanting.accepts_any_tag": "Accepts any: %d",
+  "gui.immersiveenchanting.hold_to_remove": "Hold to remove",
 
   "immersiveenchanting.configuration.general": "General",
   "immersiveenchanting.configuration.gameplay": "Gameplay",
@@ -33,5 +34,6 @@
   "immersiveenchanting.config.bookshelf_search_z": "Bookshelf Search Z Radius",
   "immersiveenchanting.config.show_added_by_tooltip": "Show Added By Tooltip",
   "immersiveenchanting.config.allow_transmute": "Allow Ancient Book Transmuting",
-  "immersiveenchanting.config.allow_replicate": "Allow Ancient Book Replicating"
+  "immersiveenchanting.config.allow_replicate": "Allow Ancient Book Replicating",
+  "immersiveenchanting.config.allow_enchantment_removal": "Allow Enchantment Removal"
 }

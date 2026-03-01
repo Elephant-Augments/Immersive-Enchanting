@@ -39,6 +39,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -49,8 +50,60 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ServerPayloadHandler {
+
+    public static void onRemoveEnchantment(final RemoveEnchantmentPacket packet, final IPayloadContext context) {
+        Player player = context.player();
+        if (player == null) return;
+        Level level = player.level();
+
+        AbstractContainerMenu enchantingTableMenu = player.containerMenu;
+        ItemStack itemToEnchant = enchantingTableMenu.getSlot(EnchantingTableMenu.SLOTS.TOOL.ordinal()).getItem();
+
+        RegistryAccess registryAccess = player.registryAccess();
+        Optional<Holder.Reference<Enchantment>> enchantmentHolder = ImmersiveEnchanting.getEnchantmentHolder(
+                registryAccess,
+                packet.enchantment()
+        );
+
+        Holder<Enchantment> enchantment = enchantmentHolder.orElseThrow(() ->
+                new IllegalStateException("Enchantment not found: " + packet.enchantment())
+        );
+
+
+        // Get mutable enchantments from the item
+        ItemEnchantments.Mutable mutable = new ItemEnchantments.Mutable(itemToEnchant.getTagEnchantments());
+        int levelToRemove = packet.enchantmentLevel();
+
+        int currentLevel = mutable.getLevel(enchantment);
+
+        if (currentLevel > 0) {
+            // Compute next level down
+            int newLevel = currentLevel;
+
+            if (currentLevel >= levelToRemove) {
+                // Remove the specified level
+                newLevel = levelToRemove - 1; // next level down
+            }
+
+            // Update the mutable map
+            if (newLevel > 0) {
+                mutable.set(enchantment, newLevel); // set new level
+            } else {
+                // Remove entirely if we drop below 1
+                mutable.removeIf(e -> e.equals(enchantment));
+            }
+        }
+
+        ItemEnchantments newEnchantments = mutable.toImmutable();
+        EnchantmentHelper.setEnchantments(itemToEnchant, newEnchantments);
+
+        System.out.println("remove");
+        level.playSound(null, player.blockPosition(), SoundEvents.GLASS_BREAK,
+                SoundSource.BLOCKS, 1.0F, 0.8F);
+    }
 
     public static void onReplicateBookPacket(final ReplicateBookPacket packet, final IPayloadContext context) {
         Level level = context.player().level();

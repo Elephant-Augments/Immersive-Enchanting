@@ -1,6 +1,7 @@
 package me.alfie.immersiveenchanting.api.internal;
 
 import me.alfie.immersiveenchanting.api.DescriptionLayoutExtension;
+import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.datapack.cost.CostDefinition;
 import me.alfie.immersiveenchanting.datapack.cost.CostEntry;
@@ -17,6 +18,8 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -51,18 +54,19 @@ public class CostLayoutExtension implements DescriptionLayoutExtension {
                             .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
                 }
 
-                description.insertLine(0, new DescriptionLine() {
-                    @Override
-                    public void draw(GuiGraphics graphics, int lineX, int lineY) {
-                        //Draw label
-                        graphics.drawString(Minecraft.getInstance().font,
-                                getText(),
-                                lineX,
-                                lineY + 4, //Offset to centre text with cost stack
-                                0xFFFFFF);
+                //Cost
+                if(!enchantingNode.isObtained()) {
+                    description.insertLine(0, new DescriptionLine() {
+                        @Override
+                        public void draw(GuiGraphics graphics, int lineX, int lineY) {
+                            //Draw label
+                            graphics.drawString(Minecraft.getInstance().font,
+                                    getText(),
+                                    lineX,
+                                    lineY + 4, //Offset to centre text with cost stack
+                                    0xFFFFFF);
 
-                        //Draw cost stack or "Free" if no item cost defined.
-                        if (enchantingNode.isBranchUnlocked && !enchantingNode.isObtained()) {
+                            //Draw cost stack or "Free" if no item cost defined.
                             if (stackToRender.is(Items.AIR) || stackToRender.isEmpty()) {
                                 graphics.drawString(
                                         Minecraft.getInstance().font,
@@ -84,23 +88,105 @@ public class CostLayoutExtension implements DescriptionLayoutExtension {
                                         costStackPos.y);
                             }
                         }
-                    }
 
-                    @Override
-                    public @NotNull Component getText() {
-                        Component label;
-                        if (enchantingNode.isBranchUnlocked) {
-                            label = enchantingNode.isObtained() ?
-                                    Component.translatable("gui.immersiveenchanting.equipped").withStyle(ChatFormatting.LIGHT_PURPLE) :
-                                    Component.translatable("gui.immersiveenchanting.cost").withStyle(ChatFormatting.GRAY);
-                        } else {
-                            label = Component.translatable("gui.immersiveenchanting.locked_enchantment_hint")
-                                    .withStyle(ChatFormatting.OBFUSCATED, ChatFormatting.GRAY);
+
+                        @Override
+                        public @NotNull Component getText() {
+                            Component label;
+                            if (enchantingNode.isBranchUnlocked) {
+                                label = Component.translatable("gui.immersiveenchanting.cost").withStyle(ChatFormatting.GRAY);
+                            } else {
+                                label = Component.translatable("gui.immersiveenchanting.locked_enchantment_hint").withStyle(ChatFormatting.OBFUSCATED, ChatFormatting.GRAY);
+                            }
+                            return label;
                         }
-                        return label;
-                    }
-                });
+                    });
+                }
 
+                //Equipped
+                if(enchantingNode.isObtained()) {
+                    description.insertLine(0, new DescriptionLine() {
+                        @Override
+                        public void draw(GuiGraphics graphics, int lineX, int lineY) {
+                            //Draw label
+                            graphics.drawString(Minecraft.getInstance().font,
+                                    getText(),
+                                    lineX,
+                                    lineY + 4, //Offset to centre text with cost stack
+                                    0xFFFFFF);
+                        }
+
+                        @Override
+                        public @NotNull Component getText() {
+                            Component label = Component.translatable("gui.immersiveenchanting.equipped").withStyle(ChatFormatting.LIGHT_PURPLE);
+                            return label;
+                        }
+                    });
+                    int enchantmentLevel = enchantingNode.getEnchantmentLevel();
+                    int highestUnlockedLevel = enchantingNodeTooltip.screen.getMenu().getToolSlotItem().getEnchantmentLevel(enchantingNode.getEnchantmentHolder());
+
+                    //Removal
+                    if (enchantmentLevel == highestUnlockedLevel && ServerConfig.isEnchantmentRemovalAllowed()) {
+                        description.insertLine(1, new DescriptionLine() {
+                            @Override
+                            public void draw(GuiGraphics graphics, int lineX, int lineY) {
+                                graphics.drawString(Minecraft.getInstance().font,
+                                        getText(),
+                                        lineX,
+                                        lineY + 4, //Offset to centre text with cost stack
+                                        0xFFFFFF);
+                            }
+
+                            @Override
+                            public @NotNull Component getText() {
+                                return Component.translatable("gui.immersiveenchanting.hold_to_remove").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
+                            }
+                        });
+
+                        if(enchantingNodeTooltip.screen.getMouseHeldTime() > 0 ) {
+                            description.insertLine(2, new DescriptionLine() {
+                                @Override
+                                public void draw(GuiGraphics graphics, int lineX, int lineY) {
+                                    long heldTime = enchantingNodeTooltip.screen.getMouseHeldTime();
+                                    long threshold = enchantingNodeTooltip.screen.HOLD_THRESHOLD;
+                                    float progress = Math.min(1f, (float) heldTime / threshold);
+
+                                    int bars = (int) (heldTime / (threshold/15));
+
+
+                                    for (int i = enchantingNodeTooltip.lastBars; i < bars; i++) {
+                                        float pitch = 2f - progress;
+                                        pitch = Math.max(pitch, 1f);
+
+                                        enchantingNodeTooltip.screen.player.playSound(
+                                                SoundEvents.EXPERIENCE_ORB_PICKUP, 0.3f, pitch
+                                        );
+                                    }
+                                    enchantingNodeTooltip.lastBars = bars;
+
+                                    String barText = "";
+                                    for (int i = 0; i < bars; i++) {
+                                        barText += "|";
+                                    }
+
+                                    Component barComponent = Component.literal(barText).withStyle(ChatFormatting.RED, ChatFormatting.BOLD);
+                                    graphics.drawString(Minecraft.getInstance().font,
+                                            barComponent,
+                                            lineX,
+                                            lineY + 4, //Offset to centre text with cost stack
+                                            0xFFFFFF);
+                                }
+
+                                @Override
+                                public @NotNull Component getText() {
+                                    return Component.empty();
+                                }
+                            });
+                        }
+                    }
+                }
+
+                //XP rendering
                 if(renderedCost.xpLevels() > 0 && enchantingNode.isBranchUnlocked && !enchantingNode.isObtained()) {
                     description.insertLine(2, new DescriptionLine() {
                         @Override

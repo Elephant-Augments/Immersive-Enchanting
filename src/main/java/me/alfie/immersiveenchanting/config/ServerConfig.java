@@ -19,6 +19,8 @@ public class ServerConfig {
     public final ModConfigSpec.ConfigValue<Boolean> allowReplicate;
     public final ModConfigSpec.ConfigValue<Boolean> allowTransmute;
 
+    public final ModConfigSpec.ConfigValue<Boolean> allowEnchantmentRemoval;
+
 
 
     static {
@@ -64,6 +66,10 @@ public class ServerConfig {
                 .translation("immersiveenchanting.config.allow_transmute")
                 .define("allowTransmute", true);
 
+        allowEnchantmentRemoval = builder
+                .comment("Allow enchantments to be removed in the enchanting table.")
+                .translation("immersiveenchanting.config.allow_enchantment_removal")
+                .define("allowEnchantmentRemoval", true);
 
         builder.pop();
     }
@@ -96,5 +102,9 @@ public class ServerConfig {
 
     public static boolean isAllowTransmute() {
         return ServerConfig.CONFIG.allowTransmute.get();
+    }
+
+    public static boolean isEnchantmentRemovalAllowed() {
+        return ServerConfig.CONFIG.allowEnchantmentRemoval.get();
     }
 }

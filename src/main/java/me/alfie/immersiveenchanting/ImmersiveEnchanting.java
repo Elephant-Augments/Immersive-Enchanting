@@ -63,6 +63,7 @@ public class ImmersiveEnchanting {
         modEventBus.addListener(UpdateToolSlotPacket::register);
         modEventBus.addListener(TransmuteBookPacket::register);
         modEventBus.addListener(ReplicateBookPacket::register);
+        modEventBus.addListener(RemoveEnchantmentPacket::register);
 
         modContainer.registerConfig(ModConfig.Type.CLIENT, ClientConfig.CONFIG_SPEC);
         modContainer.registerConfig(ModConfig.Type.SERVER, ServerConfig.CONFIG_SPEC);

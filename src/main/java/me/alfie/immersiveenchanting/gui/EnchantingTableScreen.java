@@ -2,6 +2,7 @@ package me.alfie.immersiveenchanting.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
+import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.datacomponent.ReplicatedDataComponent;
 import me.alfie.immersiveenchanting.datapack.cost.EnchantmentCost;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
@@ -15,10 +16,7 @@ import me.alfie.immersiveenchanting.gui.transmute.TransmuteNode;
 import me.alfie.immersiveenchanting.gui.transmute.TransmuteNodeBranch;
 import me.alfie.immersiveenchanting.gui.transmute.TransmuteNodeTooltip;
 import me.alfie.immersiveenchanting.item.ModItems;
-import me.alfie.immersiveenchanting.networking.packets.EnchantItemPacket;
-import me.alfie.immersiveenchanting.networking.packets.ReplicateBookPacket;
-import me.alfie.immersiveenchanting.networking.packets.TransmuteBookPacket;
-import me.alfie.immersiveenchanting.networking.packets.UpdateToolSlotPacket;
+import me.alfie.immersiveenchanting.networking.packets.*;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.Holder;
@@ -81,6 +79,10 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
     private Vector2i virtualSlotPos;
 
     ScrollableCanvas canvas;
+
+    private Node nodeHeld;
+    private long holdStartTime;
+    public final long HOLD_THRESHOLD = 1000;
 
     public EnchantingTableScreen(EnchantingTableMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
@@ -153,6 +155,11 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.render(guiGraphics, mouseX, mouseY, partialTick);
+
+        //Mouse held
+        if(nodeHeld != null) {
+            mouseHold(mouseX, mouseY);
+        }
 
         //Render the item stack for enchanting node tooltips when hovered.
         if (nodeTooltip != null && nodeTooltip instanceof EnchantingNodeTooltip enchantingNodeTooltip) {
@@ -407,9 +414,6 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
                 }
             }
 
-
-            System.out.println(pitch);
-
             player.playSound(SoundEvents.CHISELED_BOOKSHELF_INSERT_ENCHANTED, 1f, pitch);
             lastHoveredNode = node;
         }
@@ -504,8 +508,28 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        nodeHeld = null;
+        holdStartTime = 0;
+
         canvas.stopDrag(button);
         return super.mouseReleased(mouseX, mouseY, button);
+
+    }
+
+    public void mouseHold(double mouseX, double mouseY) {
+        long heldTime = getMouseHeldTime();
+
+        if(nodeHeld instanceof EnchantingNode enchantingNode && heldTime > HOLD_THRESHOLD && ServerConfig.isEnchantmentRemovalAllowed()) {
+            int enchantmentLevel = enchantingNode.getEnchantmentLevel();
+            int highestUnlockedLevel = menu.getToolSlotItem().getEnchantmentLevel(enchantingNode.getEnchantmentHolder());
+            if (enchantmentLevel == highestUnlockedLevel) {
+                nodeHeld = null;
+                PacketDistributor.sendToServer(new RemoveEnchantmentPacket(
+                        enchantingNode.getEnchantmentHolder().getKey(),
+                        enchantingNode.getEnchantmentLevel())
+                );
+            }
+        }
 
     }
 
@@ -539,6 +563,9 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
                         enchantingNode.getEnchantmentHolder().getKey(),
                         enchantingNode.getEnchantmentLevel())
                 );
+            } else if (enchantingNode.isObtained() && enchantingNode.isBranchUnlocked) {
+                nodeHeld = node;
+                holdStartTime = System.currentTimeMillis();
             }
         }
 
@@ -551,6 +578,11 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         else if (node instanceof ReplicateNode replicateNode) {
             PacketDistributor.sendToServer(new ReplicateBookPacket(0));
         }
+    }
+
+    public long getMouseHeldTime() {
+        if(nodeHeld == null) return 0;
+        return System.currentTimeMillis() - holdStartTime;
     }
 }
 

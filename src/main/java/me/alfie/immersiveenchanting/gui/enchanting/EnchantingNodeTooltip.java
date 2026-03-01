@@ -19,6 +19,7 @@ public class EnchantingNodeTooltip extends NodeTooltip {
     private CostEntry currentRenderedCost;
     private Vector2i costStackPos = new Vector2i(0, 0);
     public List<Component> stackDescriptionComponents = new ArrayList<>() {{add(Component.empty());}};
+    public int lastBars = 0;
 
     public EnchantingNodeTooltip(EnchantingNode node,
                                  List<CostEntry> validCosts,
