@@ -24,6 +24,7 @@ import me.alfie.immersiveenchanting.networking.packets.EnchantItemPacket;
 import me.alfie.immersiveenchanting.networking.packets.ReplicateBookPacket;
 import me.alfie.immersiveenchanting.networking.packets.TransmuteBookPacket;
 import me.alfie.immersiveenchanting.networking.packets.UpdateToolSlotPacket;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.Holder;
@@ -35,8 +36,11 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -60,6 +64,8 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
             "textures/gui/container/book_closed.png");
     public static final ResourceLocation LEVEL_SPRITE = ResourceLocation.fromNamespaceAndPath(ImmersiveEnchanting.MODID,
             "textures/gui/sprites/level_10.png");
+    public static final ResourceLocation XP_LEVEL_SPRITE = ResourceLocation.fromNamespaceAndPath(ImmersiveEnchanting.MODID,
+            "textures/gui/sprites/xp_level.png");
 
     public final List<NodeBranch> branches = new ArrayList<>();
 
@@ -75,7 +81,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
     private final int TILE_TEXTURE_SIZE = 16;
     private final Vector2i VIEWPORT_TOP_LEFT = new Vector2i(5, 5); //Position that viewport starts on the texture (top left)
     private final boolean croppingEnabled = true; //Whether to crop the canvas outside of viewport - false for debugging.
-    private final Player player;
+    public final Player player;
     private final int VIRTUAL_SLOT_DIMENSIONS = 16;
 
     public int getScrollableCanvasWidth() {
@@ -337,9 +343,25 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
                     && mouseY < enchantingNodeTooltip.getCostStackPos().y + 16) {
                 guiGraphics.pose().pushPose();
                 guiGraphics.pose().translate(0, 0, 500);
+
+                //guiGraphics.renderTooltip(font,
+                //        enchantingNodeTooltip.getCurrentRenderedCost().asItemStack(),
+                //        mouseX, mouseY);
+
+                List<Component> lines = enchantingNodeTooltip.getCurrentRenderedCost().asItemStack().getTooltipLines(
+                        Item.TooltipContext.EMPTY, null, TooltipFlag.ADVANCED
+                );
+                if(!(Objects.equals(enchantingNodeTooltip.stackDescriptionComponents.get(0), Component.empty()))) {
+                    lines.add(1, enchantingNodeTooltip.stackDescriptionComponents.getFirst());
+                }
+
                 guiGraphics.renderTooltip(font,
+                        lines,
+                        enchantingNodeTooltip.getCurrentRenderedCost().asItemStack().getTooltipImage(),
                         enchantingNodeTooltip.getCurrentRenderedCost().asItemStack(),
-                        mouseX, mouseY);
+                        mouseX,
+                        mouseY);
+
                 guiGraphics.pose().popPose();
             }
         }

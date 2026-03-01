@@ -6,7 +6,7 @@
       "any_of": [
         {
           "item": "#minecraft:planks",
-          "amount": 1,
+          "amount": 5,
           "xp_levels": 5
         },
         {

@@ -9,6 +9,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import org.joml.Vector2i;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class EnchantingNodeTooltip extends NodeTooltip {
@@ -17,6 +18,7 @@ public class EnchantingNodeTooltip extends NodeTooltip {
     private final List<CostEntry> validCosts;
     private CostEntry currentRenderedCost;
     private Vector2i costStackPos = new Vector2i(0, 0);
+    public List<Component> stackDescriptionComponents = new ArrayList<>() {{add(Component.empty());}};
 
     public EnchantingNodeTooltip(EnchantingNode node,
                                  List<CostEntry> validCosts,

@@ -7,6 +7,7 @@ import me.alfie.immersiveenchanting.gui.tooltip.TooltipTitle;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
 import org.joml.Vector2i;
 
 public class NodeTooltip {
@@ -42,6 +43,10 @@ public class NodeTooltip {
         tooltipDescription = new TooltipDescription(this, DESCRIPTION_BOX_TEXTURE);
     }
 
+    public Level getLevel() {
+        return screen.player.level();
+    }
+
     public void render(GuiGraphics graphics) {
         titleBoxHeight = Math.max(Minecraft.getInstance().font.lineHeight, Node.height);
 
@@ -51,7 +56,7 @@ public class NodeTooltip {
         //Calculate width: Use title width, but if description extends it, go further.
         final int titleTextWidth = Minecraft.getInstance().font.width(tooltipTitle.getTitleText()) + Node.width + padding/2;
         final int descriptionTextWidth = Minecraft.getInstance().font.width(tooltipDescription.layout.getLongestString()) + padding;
-        titleBoxWidth = Math.max(titleTextWidth, descriptionTextWidth);
+        titleBoxWidth = Math.max(titleTextWidth, descriptionTextWidth+24); //Add a margin to prevent cost layout over expanding
 
         //Set sizes
         tooltipTitle.setBoxSize(titleBoxWidth, titleBoxHeight);

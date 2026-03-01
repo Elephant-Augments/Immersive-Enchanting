@@ -4,6 +4,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.netty.buffer.ByteBuf;
+import me.alfie.immersiveenchanting.ImmersiveEnchanting;
+import me.alfie.immersiveenchanting.ImmersiveEnchantingEvents;
+import me.alfie.immersiveenchanting.datapack.cost.CostHelper;
 import me.alfie.immersiveenchanting.datapack.parser.DatapackParser;
 import me.alfie.immersiveenchanting.datapack.cost.EnchantmentCost;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
@@ -102,6 +105,7 @@ public record EnchantmentCostRegistrySyncPacket(
             //Put in reg
             registry.getCostRegistry().put(key, cost);
         }
+
 
         return registry;
     }

@@ -1,13 +1,27 @@
 package me.alfie.immersiveenchanting.datapack.cost;
 
+import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
+import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Optional;
 
-public record CostEntry(String item, String nbt, int amount, int xpLevels) implements CostDefinition {
+/**
+ * Represents an item stack
+ * @param item The item resource location
+ * @param nbt Additional NBT data
+ * @param amount Amount of the item
+ * @param xpLevels Number of XP levels required
+ */
+public record CostEntry(String item, String nbt, int amount, int xpLevels, @Nullable CostItemTag costItemTag) implements CostDefinition {
+
+    public CostEntry(String item, String nbt, int amount, int xpLevels) {
+        this(item, nbt, amount,xpLevels, null);
+    }
 
     public Item asItem() {
         //Parse item id
@@ -25,26 +39,7 @@ public record CostEntry(String item, String nbt, int amount, int xpLevels) imple
         return itemStack;
     }
 
-    @Override
-    public CostDefinition resolveTags() {
-        if (!CostHelper.isItemTag(item)) {
-            return this;
-        }
-
-        String itemTag = item;
-
-        List<CostDefinition> children =
-                CostHelper.getItemsInItemTag(
-                                CostHelper.getItemTag(itemTag)
-                        ).stream()
-                        .map(item -> (CostDefinition) new CostEntry(
-                                item.toString(),
-                                "",
-                                amount,
-                                xpLevels
-                        ))
-                        .toList();
-
-        return new CostGroup(children, GroupType.ANY_OF, itemTag);
+    public Optional<CostItemTag> getCostItemTag() {
+        return Optional.ofNullable(costItemTag());
     }
 }

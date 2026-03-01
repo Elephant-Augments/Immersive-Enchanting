@@ -4,22 +4,15 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
-import me.alfie.immersiveenchanting.datapack.cost.EnchantmentCost;
-import me.alfie.immersiveenchanting.datapack.cost.CostDefinition;
-import me.alfie.immersiveenchanting.datapack.cost.CostEntry;
-import me.alfie.immersiveenchanting.datapack.cost.CostGroup;
-import me.alfie.immersiveenchanting.datapack.cost.GroupType;
+import me.alfie.immersiveenchanting.datapack.cost.*;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DatapackParser {
 
     /**
-     * Parse an enchantment cost json, return as an EnchantmentCost.
+     * Parse an enchantment cost json, return an EnchantmentCost.
      * @param file
      * @return
      */
@@ -58,6 +51,15 @@ public class DatapackParser {
      */
     public static CostDefinition parseCostNode(JsonObject node) {
         if(node.has(JsonProperty.ITEM.getKey()) || node.has(JsonProperty.AMOUNT.getKey()) || node.has(JsonProperty.XP_LEVELS.getKey())) {
+            if(CostHelper.isItemTag(node.get(JsonProperty.ITEM.getKey()).getAsString())) {
+                String itemTag = node.get(JsonProperty.ITEM.getKey()).getAsString();
+                int amount = node.get(JsonProperty.AMOUNT.getKey()).getAsInt();
+                int xpLevels = node.get(JsonProperty.XP_LEVELS.getKey()).getAsInt();
+
+                ImmersiveEnchanting.LOGGER.info("Parsing item tag at {}", node);
+                return new CostGroup(new ArrayList<>(), GroupType.ANY_OF,
+                        new CostItemTag(itemTag, amount, xpLevels)); //todo XP Levels?
+            }
             return parseCostEntry(node);
         }
 
@@ -134,6 +136,11 @@ public class DatapackParser {
         return levelKey;
     }
 
+    /**
+     * Convert an EnchantmentCost into a JsonObject.
+     * @param cost
+     * @return
+     */
     public static JsonObject toJson(EnchantmentCost cost) {
         JsonObject root = new JsonObject();
 
@@ -154,32 +161,49 @@ public class DatapackParser {
         return root;
     }
 
-    private static JsonObject serializeNode(CostDefinition node) {
+    private static JsonObject serializeNode(CostDefinition costDefinition) {
         JsonObject object = new JsonObject();
 
-        if(node instanceof CostEntry leaf) {
-            object.addProperty(JsonProperty.ITEM.getKey(), leaf.item());
+        if (costDefinition instanceof CostEntry costEntry) {
+            object.addProperty(JsonProperty.ITEM.getKey(), costEntry.item());
 
-            if(!leaf.nbt().isEmpty()) {
-                object.addProperty(JsonProperty.NBT.getKey(), leaf.nbt());
+            if (!costEntry.nbt().isEmpty()) {
+                object.addProperty(JsonProperty.NBT.getKey(), costEntry.nbt());
             }
 
-            object.addProperty(JsonProperty.AMOUNT.getKey(), leaf.amount());
+            object.addProperty(JsonProperty.AMOUNT.getKey(), costEntry.amount());
 
-            if(leaf.xpLevels() > 0) {
-                object.addProperty(JsonProperty.XP_LEVELS.getKey(), leaf.xpLevels());
-            }
-        } else if (node instanceof CostGroup composite) {
-            JsonArray childrenArray = new JsonArray();
-
-            for(CostDefinition child : composite.children()) {
-                childrenArray.add(serializeNode(child));
+            if (costEntry.xpLevels() > 0) {
+                object.addProperty(JsonProperty.XP_LEVELS.getKey(), costEntry.xpLevels());
             }
 
-            if(composite.type() == GroupType.ANY_OF) {
-                object.add(JsonProperty.ANY_OF.getKey(), childrenArray);
+        } else if (costDefinition instanceof CostGroup composite) {
+
+            //If this group has a CostItemTag, serialize as a tag object
+            if (composite.getCostItemTag().isPresent()) {
+                CostItemTag tag = composite.getCostItemTag().get();
+
+                object.addProperty(JsonProperty.ITEM.getKey(),
+                        tag.itemTag()); // or tag.itemTag().location() if TagKey
+
+                object.addProperty(JsonProperty.AMOUNT.getKey(), tag.amount());
+
+                if (tag.xpLevels() > 0) {
+                    object.addProperty(JsonProperty.XP_LEVELS.getKey(), tag.xpLevels());
+                }
+
             } else {
-                object.add(JsonProperty.ALL_OF.getKey(), childrenArray);
+                // Otherwise serialize children as any_of / all_of
+                JsonArray childrenArray = new JsonArray();
+                for (CostDefinition child : composite.children()) {
+                    childrenArray.add(serializeNode(child));
+                }
+
+                if (composite.type() == GroupType.ANY_OF) {
+                    object.add(JsonProperty.ANY_OF.getKey(), childrenArray);
+                } else {
+                    object.add(JsonProperty.ALL_OF.getKey(), childrenArray);
+                }
             }
         }
 

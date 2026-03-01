@@ -1,5 +1,7 @@
 package me.alfie.immersiveenchanting.datapack.cost;
 
+import me.alfie.immersiveenchanting.ImmersiveEnchanting;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -20,25 +22,6 @@ public class EnchantmentCost {
         this.enabled = enabled;
 
         this.levels = levelCosts;
-    }
-
-    public List<CostDefinition> getAllLevels() {
-        List<CostDefinition> costs = new ArrayList<>();
-        int highestLevel = getHighestLevel();
-        for (int i = 0; i < highestLevel; i++) {
-            costs.add(levels.get(String.valueOf(i)));
-        }
-        return costs;
-    }
-
-    public EnchantmentCost resolveTags() {
-        Map<String, CostDefinition> resolvedLevels = levels.entrySet().stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        e -> e.getValue().resolveTags() // replaces tagged CostEntry with CostGroup
-                ));
-
-        return new EnchantmentCost(resolvedLevels, enabled);
     }
 
     /**
@@ -73,7 +56,6 @@ public class EnchantmentCost {
                 //Ignore ALL_OF for now.
             }
         }
-
         return result;
     }
 

@@ -149,4 +149,12 @@ public class EnchantmentCostRegistry {
         }
         return enabledEnchantments;
     }
+
+    public String getName() {
+        if(this == clientEnchantmentCostRegistry) {
+            return "client";
+        } else {
+            return "server";
+        }
+    }
 }

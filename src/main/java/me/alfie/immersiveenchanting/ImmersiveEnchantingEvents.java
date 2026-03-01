@@ -13,20 +13,23 @@ import me.alfie.immersiveenchanting.commands.ImmersiveEnchantingCommand;
 import me.alfie.immersiveenchanting.creativetab.ModCreativeTab;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.datapack.EnchantmentMetadataRegistry;
+import me.alfie.immersiveenchanting.datapack.cost.CostDefinition;
+import me.alfie.immersiveenchanting.datapack.cost.CostGroup;
+import me.alfie.immersiveenchanting.datapack.cost.CostHelper;
+import me.alfie.immersiveenchanting.datapack.cost.EnchantmentCost;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
 import me.alfie.immersiveenchanting.item.AncientBook;
 import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.networking.ServerPayloadHandler;
 import me.alfie.immersiveenchanting.networking.packets.EnchantmentCostRegistrySyncPacket;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -64,9 +67,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.village.VillagerTradesEvent;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class ImmersiveEnchantingEvents {
 
@@ -168,8 +169,35 @@ public class ImmersiveEnchantingEvents {
 
     @SubscribeEvent
     public void tagsUpdated(TagsUpdatedEvent event) {
-        ImmersiveEnchanting.ENCHANTMENT_COST_DATAPACK_HANDLER.fillTagComposites();
-        ImmersiveEnchanting.LOGGER.info("Tags updated!");
+        //Ensures both client and server tags are expanded
+        //Client tags are also expanded during onEnchantmentCostRegistrySync()
+
+        EnchantmentCostRegistry serverRegistry = EnchantmentCostRegistry.getServerRegistry();
+        EnchantmentCostRegistry clientRegistry = EnchantmentCostRegistry.getClientRegistry();
+        List<EnchantmentCostRegistry> registries = List.of(serverRegistry, clientRegistry);
+
+        for(EnchantmentCostRegistry registry : registries) {
+            expandTags(registry);
+        }
+    }
+
+    /**
+     * Expand all item tags in a registry.
+     * @param registry
+     */
+    public static void expandTags(EnchantmentCostRegistry registry) {
+        Map<ResourceKey<Enchantment>, EnchantmentCost> costRegistry = registry.getCostRegistry();
+        for(EnchantmentCost cost : costRegistry.values()) {
+            for (int i = 0; i < cost.getHighestLevel(); i++) {
+                CostDefinition costDefinition = cost.getCostNodeForLevel(i+1);
+
+                if(costDefinition instanceof CostGroup costGroup) {
+                    //Search for cost groups with item tags
+                    CostHelper.expandCostGroupTagsRecursive(costGroup);
+                }
+            }
+        }
+        ImmersiveEnchanting.LOGGER.info("Expanded tags for " + registry.getName());
     }
 
     /**

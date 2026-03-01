@@ -3,6 +3,8 @@ package me.alfie.immersiveenchanting.datapack;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
+import me.alfie.immersiveenchanting.ImmersiveEnchantingEvents;
+import me.alfie.immersiveenchanting.datapack.cost.CostHelper;
 import me.alfie.immersiveenchanting.datapack.cost.EnchantmentCost;
 import me.alfie.immersiveenchanting.datapack.parser.DatapackParser;
 import me.alfie.immersiveenchanting.networking.packets.EnchantmentCostRegistrySyncPacket;
@@ -88,6 +90,14 @@ public class EnchantmentCostDatapackHandler extends SimpleJsonResourceReloadList
         ImmersiveEnchanting.LOGGER.info("Loaded " + fileCount + " enchantment costs.");
         //-----------------------///
 
+        syncRegistry();
+    }
+
+    /**
+     * Sync the server registry with the client.
+     * !Server-side only
+     */
+    public void syncRegistry() {
         //Attempt to send sync packet to all players on reload
         int count = 0;
         if(server != null) {
@@ -97,11 +107,6 @@ public class EnchantmentCostDatapackHandler extends SimpleJsonResourceReloadList
             }
             ImmersiveEnchanting.LOGGER.info("Synced server enchantment cost registry with " + count + " client(s).");
         }
-    }
-
-    public void fillTagComposites() {
-        Map<ResourceKey<Enchantment>, EnchantmentCost> costRegistry = EnchantmentCostRegistry.getServerRegistry().getCostRegistry();
-        costRegistry.replaceAll((key, cost) -> cost.resolveTags());
     }
 
     /**
