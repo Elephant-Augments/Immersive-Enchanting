@@ -26,10 +26,10 @@ public class Node {
         this.iconTexture = iconTexture;
     }
 
-    public void render(GuiGraphics guiGraphics, EnchantingTableScreen screen) {
+    public void render(GuiGraphics guiGraphics, ScrollableCanvas canvas) {
         guiGraphics.pose().pushPose();
 
-        guiGraphics.pose().translate(this.x - (int) screen.getScrollX(), this.y - (int) screen.getScrollY(), 0);
+        guiGraphics.pose().translate(this.x - (int) canvas.getScrollX(), this.y - (int) canvas.getScrollY(), 0);
         guiGraphics.pose().scale(scale, scale, scale);
 
         guiGraphics.blit(
@@ -107,31 +107,31 @@ public class Node {
         return this.obtained;
     }
 
-    public Vector2i getRenderedPosition(EnchantingTableScreen screen) {
-        int renderedX = this.x - (int) screen.getScrollX();
-        int renderedY = this.y - (int) screen.getScrollY();
+    public Vector2i getRenderedPosition(ScrollableCanvas canvas) {
+        int renderedX = this.x - (int) canvas.getScrollX();
+        int renderedY = this.y - (int) canvas.getScrollY();
         return new Vector2i(renderedX, renderedY);
     }
 
-    public Vector2i getViewportPosition(EnchantingTableScreen screen) {
-        int screenX = this.x - (int) screen.getScrollX();
-        int screenY = this.y - (int) screen.getScrollY();
+    public Vector2i getViewportPosition(ScrollableCanvas canvas) {
+        int screenX = this.x - (int) canvas.getScrollX();
+        int screenY = this.y - (int) canvas.getScrollY();
 
-        int viewportX = screenX - screen.getCanvasLeftPos();
-        int viewportY = screenY - screen.getCanvasTopPos();
+        int viewportX = screenX - canvas.getCanvasLeftPos();
+        int viewportY = screenY - canvas.getCanvasTopPos();
 
         return new Vector2i(viewportX, viewportY);
     }
 
     /**
      * Helper function to check if a node is being moused over.
-     * @param screen
+     * @param canvas
      * @param mouseX
      * @param mouseY
      * @return
      */
-    public boolean isMouseOver(EnchantingTableScreen screen, double mouseX, double mouseY) {
-        return screen.isMouseOverBoundingBox(new Vector2i(getX(), getY()),
+    public boolean isMouseOver(ScrollableCanvas canvas, double mouseX, double mouseY) {
+        return canvas.isMouseOverBoundingBox(new Vector2i(getX(), getY()),
                 width, height, mouseX, mouseY);
     }
 }

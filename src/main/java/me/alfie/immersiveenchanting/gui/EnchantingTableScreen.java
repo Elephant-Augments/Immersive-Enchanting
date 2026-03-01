@@ -10,6 +10,7 @@ import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.gui.core.Node;
 import me.alfie.immersiveenchanting.gui.core.NodeBranch;
 import me.alfie.immersiveenchanting.gui.core.NodeTooltip;
+import me.alfie.immersiveenchanting.gui.core.ScrollableCanvas;
 import me.alfie.immersiveenchanting.gui.enchanting.EnchantingNode;
 import me.alfie.immersiveenchanting.gui.enchanting.EnchantingNodeBranch;
 import me.alfie.immersiveenchanting.gui.enchanting.EnchantingNodeTooltip;
@@ -70,57 +71,20 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
     public final List<NodeBranch> branches = new ArrayList<>();
 
 
-    public final int VIEWPORT_WIDTH = 247; //Dimensions of viewport in the texture
-    public final int VIEWPORT_HEIGHT = 117; //Dimensions of viewport in the texture
+
 
     public List<Node> getRenderedNodes() {
         return rendered_nodes;
     }
 
     final List<Node> rendered_nodes = new ArrayList<>();
-    private final int TILE_TEXTURE_SIZE = 16;
-    private final Vector2i VIEWPORT_TOP_LEFT = new Vector2i(5, 5); //Position that viewport starts on the texture (top left)
+
     private final boolean croppingEnabled = true; //Whether to crop the canvas outside of viewport - false for debugging.
     public final Player player;
     private final int VIRTUAL_SLOT_DIMENSIONS = 16;
 
-    public int getScrollableCanvasWidth() {
-        return scrollableCanvasWidth;
-    }
 
-    public int getScrollableCanvasHeight() {
-        return scrollableCanvasHeight;
-    }
 
-    int scrollableCanvasWidth = TILE_TEXTURE_SIZE * 64; //Must be divisible by tileSize (16), otherwise rendered tiles/edge constraints will leave gaps
-    int scrollableCanvasHeight = TILE_TEXTURE_SIZE * 64; //Must be divisible by tileSize (16), otherwise rendered tiles/edge constraints will leave gaps
-
-    public int getCanvasLeftPos() {
-        return canvasLeftPos;
-    }
-
-    public int getCanvasTopPos() {
-        return canvasTopPos;
-    }
-
-    int canvasLeftPos;
-    int canvasTopPos;
-
-    public double getScrollX() {
-        return scrollX;
-    }
-
-    public double getScrollY() {
-        return scrollY;
-    }
-
-    double scrollX = 0;
-    double scrollY = 0;
-    private boolean dragging = false;
-    private double dragStartMouseX = 0;
-    private double dragStartMouseY = 0;
-    private double dragStartScrollX = 0;
-    private double dragStartScrollY = 0;
     private float currentBackgroundBrightness = 1f;
     private Node hoveredNode;
     private Node lastHoveredNode;
@@ -129,8 +93,11 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
     private ItemStack lastStack = ItemStack.EMPTY; //Handling which tool in slot
     private Vector2i virtualSlotPos;
 
+    ScrollableCanvas canvas;
+
     public EnchantingTableScreen(EnchantingTableMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
+        canvas = new ScrollableCanvas(this);
 
         this.titleLabelX = 10;
         this.inventoryLabelX = 10;
@@ -138,11 +105,17 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         this.imageWidth = 256;
 
         // Center the canvas inside the viewport at start
-        this.scrollX = (scrollableCanvasWidth / 2.0) - (VIEWPORT_WIDTH / 2.0);
-        this.scrollY = (scrollableCanvasHeight / 2.0) - (VIEWPORT_HEIGHT / 2.0);
+        canvas.setScrollX((canvas.getWidth() / 2.0) - (canvas.VIEWPORT_WIDTH / 2.0));
+        canvas.setScrollY((canvas.getHeight() / 2.0) - (canvas.VIEWPORT_HEIGHT / 2.0));
 
         //No branch shenanigans here, do it in init() pls <3
         this.player = playerInventory.player;
+
+
+    }
+
+    public ScrollableCanvas getCanvas() {
+        return this.canvas;
     }
 
     @Override //Init code when GUI is created.
@@ -153,8 +126,12 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         onToolSlotChanged(); //Updates if screen size is changed while screen open
     }
 
+   public Vector2i getTopLeftPos() {
+        return new Vector2i(this.leftPos, this.topPos);
+   }
+
     private void initializeScreen() {
-        calculateCanvasSize();
+        canvas.calculateSize();
 
         //Prevent tearing
         branches.clear();
@@ -199,27 +176,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         }
     }
 
-    /**
-     * Calculate the smallest possible canvas size to fit the highest level of available enchantment.
-     */
-    private void calculateCanvasSize() {
-        //Setting size dynamically requires recentering each time.
 
-        //Each NODE_STEP = 80 pixels, as canvas is centred 80 pixels * 2 reaches the centre of the first node
-        int pixels = (NodeBranch.node_step * 2) * EnchantmentCostRegistry.getClientRegistry().getHighestEnchantmentLevel();
-        int margin = TILE_TEXTURE_SIZE * 4; //Add 4 tile margin
-        int rounded = ((pixels + TILE_TEXTURE_SIZE - 1) / TILE_TEXTURE_SIZE) * TILE_TEXTURE_SIZE;
-
-        scrollableCanvasWidth = rounded + margin;
-        scrollableCanvasHeight = rounded + margin;
-
-        scrollX = (scrollableCanvasWidth / 2.0) - (VIEWPORT_WIDTH / 2.0);
-        scrollY = (scrollableCanvasHeight / 2.0) - (VIEWPORT_HEIGHT / 2.0);
-
-        //These have to be updated here, idk why but it just breaks ok?
-        canvasLeftPos = this.leftPos + VIEWPORT_TOP_LEFT.x;
-        canvasTopPos = this.topPos + VIEWPORT_TOP_LEFT.y;
-    }
 
     /**
      * Finds which enchantments are applicable for an item stack , generates branch angles, and creates the branches.
@@ -228,7 +185,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
      */
     public void buildNodeBranches(ItemStack currentItemStack) {
         //Step 1. Find which enchantments are applicable.
-        Set<Holder<Enchantment>> validEnchantments = new HashSet<>(); //Set of all enchantments that can be applied
+        List<Holder<Enchantment>> validEnchantments = new ArrayList<>(); //Set of all enchantments that can be applied
         Set<Holder<Enchantment>> unlockedEnchantments = menu.getUnlockedEnchantments();
 
         Set<Holder<Enchantment>> allEnchantments = ImmersiveEnchanting.getEnchantmentRegistry(
@@ -237,8 +194,15 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
                 .listElements()
                 .collect(Collectors.toSet());
 
+        //Sort set into alphabetical order so that branches appear in the same order every time.
+        List<Holder<Enchantment>> allEnchantmentsSorted = new ArrayList<>(allEnchantments);
+        allEnchantmentsSorted.sort(Comparator.comparing(
+                holder -> holder.getKey().location().toString()
+        ));
+        System.out.println(allEnchantmentsSorted);
+
         //Iterate through the enchantment registry, see if the item support the enchantment.
-        for (Holder<Enchantment> enchantmentHolder : allEnchantments) {
+        for (Holder<Enchantment> enchantmentHolder : allEnchantmentsSorted) {
             //Skip cursed enchantments.
             if (enchantmentHolder.is(EnchantmentTags.CURSE)) {
                 continue;
@@ -368,7 +332,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
 
         //Render the item in the enchanting table when hovered
         if(!menu.getToolSlotItem().is(Items.AIR) && !isLockHover()) {
-            if(isMouseOverBoundingBox(virtualSlotPos, VIRTUAL_SLOT_DIMENSIONS, VIRTUAL_SLOT_DIMENSIONS, mouseX, mouseY)) {
+            if(canvas.isMouseOverBoundingBox(virtualSlotPos, VIRTUAL_SLOT_DIMENSIONS, VIRTUAL_SLOT_DIMENSIONS, mouseX, mouseY)) {
                 guiGraphics.pose().pushPose();
                 guiGraphics.pose().translate(0, 0, 500);
                 guiGraphics.renderTooltip(font,
@@ -410,11 +374,10 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
             guiGraphics.setColor(0.5F, 0.5F, 0.5F, 1f);
         }
 
-        renderTiledBg(guiGraphics);
+        canvas.renderTiledBg(guiGraphics);
         renderBranchConnections(guiGraphics);
         renderCentralSprites(guiGraphics);
         renderNodes(guiGraphics);
-
 
         Node nodeToRender;
         if (isLockHover()) {
@@ -431,7 +394,6 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
             nodeTooltip = null;
         }
 
-
         //Disable scissor after drawing
         RenderSystem.disableScissor();
         RenderSystem.enableBlend();
@@ -444,57 +406,6 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         return hoveredNode != null;
     }
 
-    /**
-     * Render a tiled background and set up viewport culling.
-     *
-     * @param guiGraphics
-     */
-    private void renderTiledBg(GuiGraphics guiGraphics) {
-        //Setup viewport culling
-        int viewportLeft = this.leftPos + VIEWPORT_TOP_LEFT.x;
-        int viewportTop = this.topPos + VIEWPORT_TOP_LEFT.y;
-        int viewportRight = viewportLeft + VIEWPORT_WIDTH;
-        int viewportBottom = viewportTop + VIEWPORT_HEIGHT;
-
-        if (croppingEnabled) {
-            double scale = this.minecraft.getWindow().getGuiScale();
-            RenderSystem.enableScissor(
-                    (int) (viewportLeft * scale),
-                    (int) ((this.height - viewportBottom) * scale), // Y is flipped!
-                    (int) (VIEWPORT_WIDTH * scale),
-                    (int) (VIEWPORT_HEIGHT * scale)
-            );
-        }
-
-        //Draw a tiled background using TILE_TEXTURE as a background
-        int numberOfTilesX = (scrollableCanvasWidth / TILE_TEXTURE_SIZE);
-        int numberOfTilesY = (scrollableCanvasHeight / TILE_TEXTURE_SIZE);
-
-        for (int x = 0; x < numberOfTilesX; x++) {
-            for (int y = 0; y < numberOfTilesY; y++) {
-                // Calculate tile screen position
-                int tileScreenX = canvasLeftPos + x * TILE_TEXTURE_SIZE - (int) scrollX;
-                int tileScreenY = canvasTopPos + y * TILE_TEXTURE_SIZE - (int) scrollY;
-
-                // Skip tiles completely outside the viewport
-                if (tileScreenX + TILE_TEXTURE_SIZE < viewportLeft || tileScreenX > viewportRight ||
-                        tileScreenY + TILE_TEXTURE_SIZE < viewportTop || tileScreenY > viewportBottom) {
-                    continue;
-                }
-
-                guiGraphics.blit(
-                        TILE_TEXTURE,
-                        canvasLeftPos + x * TILE_TEXTURE_SIZE - (int) scrollX,
-                        canvasTopPos + y * TILE_TEXTURE_SIZE - (int) scrollY,
-                        0f, 0f,
-                        TILE_TEXTURE_SIZE, TILE_TEXTURE_SIZE,
-                        TILE_TEXTURE_SIZE, TILE_TEXTURE_SIZE
-                );
-            }
-        }
-        //Reset brightness
-        guiGraphics.setColor(1f, 1f, 1f, 1f);
-    }
 
     private void renderBranchConnections(GuiGraphics guiGraphics) {
         for (NodeBranch branch : branches) {
@@ -510,7 +421,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
                 branch.calculateNodeConnections();
             }
 
-            branch.renderPrecomputedConnection(guiGraphics, (int) scrollX, (int) scrollY);
+            branch.renderPrecomputedConnection(guiGraphics, (int) canvas.getScrollX(), (int) canvas.getScrollY());
 
             //Reset color after darkening
             guiGraphics.setColor(1f, 1f, 1f, 1f);
@@ -526,26 +437,26 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         //Add background book and virtual slot
         guiGraphics.blit(
                 ENCHANTING_TABLE_TOP_TEXTURE,
-                getCanvasCenterPos(32, 32).x - (int) scrollX,
-                getCanvasCenterPos(32, 32).y - (int) scrollY,
+                canvas.getCenterPos(32, 32).x - (int) canvas.getScrollX(),
+                canvas.getCenterPos(32, 32).y - (int) canvas.getScrollY(),
                 0f, 0f, 32, 32,
                 32, 32
         );
-        virtualSlotPos = getCanvasCenterPos(VIRTUAL_SLOT_DIMENSIONS, VIRTUAL_SLOT_DIMENSIONS);
+        virtualSlotPos = canvas.getCenterPos(VIRTUAL_SLOT_DIMENSIONS, VIRTUAL_SLOT_DIMENSIONS);
 
         if (this.menu.getSlot(0).getItem().isEmpty()) {
             guiGraphics.blit(
                     BOOK_CLOSED_TEXTURE,
-                    getCanvasCenterPos(32, 32).x - (int) scrollX,
-                    getCanvasCenterPos(32, 32).y - (int) scrollY,
+                    canvas.getCenterPos(32, 32).x - (int) canvas.getScrollX(),
+                    canvas.getCenterPos(32, 32).y - (int) canvas.getScrollY(),
                     0f, 0f, 32, 32,
                     32, 32
             );
         } else {
             guiGraphics.blit(
                     BOOK_OPEN_TEXTURE,
-                    getCanvasCenterPos(32, 32).x - (int) scrollX,
-                    getCanvasCenterPos(32, 32).y - (int) scrollY,
+                    canvas.getCenterPos(32, 32).x - (int) canvas.getScrollX(),
+                    canvas.getCenterPos(32, 32).y - (int) canvas.getScrollY(),
                     0f, 0f, 32, 32,
                     32, 32
             );
@@ -554,8 +465,8 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
 
         //Render the item in slot0 (tool slot)
         ItemStack stack = this.menu.getSlot(0).getItem(); //to get the ItemStack
-        guiGraphics.renderItem(stack, getCanvasCenterPos(16, 16).x - (int) scrollX,
-                getCanvasCenterPos(16, 16).y - (int) scrollY);
+        guiGraphics.renderItem(stack, canvas.getCenterPos(16, 16).x - (int) canvas.getScrollX(),
+                canvas.getCenterPos(16, 16).y - (int) canvas.getScrollY());
     }
 
     /**
@@ -566,7 +477,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
     private void renderNodes(GuiGraphics guiGraphics) {
         for (Node node : rendered_nodes) {
             guiGraphics.setColor(currentBackgroundBrightness, currentBackgroundBrightness, currentBackgroundBrightness, 1f);
-            node.render(guiGraphics, this);
+            node.render(guiGraphics, canvas);
 
             node.setScale(EnchantingNode.globalScale);
 
@@ -586,7 +497,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
      */
     private void setHoveredNode(double mouseX, double mouseY) {
         for (Node node : rendered_nodes) {
-            if (node.isMouseOver(this, mouseX, mouseY)) {
+            if (node.isMouseOver(canvas, mouseX, mouseY)) {
                 hoveredNode = node;
                 return;
             }
@@ -653,71 +564,15 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         guiGraphics.pose().pushPose();
         guiGraphics.pose().translate(0, 0, 500);
         node.setScale(1f);
-        node.render(guiGraphics, this);
+        node.render(guiGraphics, canvas);
         guiGraphics.pose().popPose();
     }
 
-    /**
-     * Helper function to get the coordinate to center an object on the canvas.
-     *
-     * @param textureWidth
-     * @param textureHeight
-     * @return
-     */
-    public Vector2i getCanvasCenterPos(int textureWidth, int textureHeight) {
-        int x = canvasLeftPos + scrollableCanvasWidth / 2 - textureWidth / 2;
-        int y = canvasTopPos + scrollableCanvasHeight / 2 - textureHeight / 2;
-        return new Vector2i(x, y);
-    }
 
 
 
-    /**
-     * Check if mouse is over a bounding box. Automatically clips the bounding box if out of viewport bounds.
-     *
-     * @param topLeftPos Top Left position of the bounding box to detect
-     * @param width      Width of the bounding box to detect
-     * @param height     Height of the bounding box to detect
-     * @param mouseX
-     * @param mouseY
-     * @return
-     */
-    public boolean isMouseOverBoundingBox(
-            Vector2i topLeftPos,
-            int width,
-            int height,
-            double mouseX,
-            double mouseY
-    ) {
-        // Node's position on screen
-        int drawX = topLeftPos.x - (int) scrollX;
-        int drawY = topLeftPos.y - (int) scrollY;
 
-        // Node bounds
-        int boxLeft = drawX;
-        int boxTop = drawY;
-        int boxRight = drawX + width;
-        int boxBottom = drawY + height;
 
-        // Viewport bounds
-        int viewportLeft = canvasLeftPos;
-        int viewportTop = canvasTopPos;
-        int viewportRight = viewportLeft + VIEWPORT_WIDTH;
-        int viewportBottom = viewportTop + VIEWPORT_HEIGHT;
-
-        // Clip node bounds to viewport
-        int visibleLeft = Math.max(boxLeft, viewportLeft);
-        int visibleTop = Math.max(boxTop, viewportTop);
-        int visibleRight = Math.min(boxRight, viewportRight);
-        int visibleBottom = Math.min(boxBottom, viewportBottom);
-
-        // If the node is fully outside the viewport, return false
-        if (visibleLeft >= visibleRight || visibleTop >= visibleBottom) return false;
-
-        // Check if mouse is over the visible part
-        return mouseX >= visibleLeft && mouseX < visibleRight
-                && mouseY >= visibleTop && mouseY < visibleBottom;
-    }
 
     private void setLockHover(boolean lockHover) {
         this.lockHover = lockHover;
@@ -731,7 +586,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
 
                 // 1. Check if hovered node was clicked
                 if (hoveredNode != null) {
-                    if (hoveredNode.isMouseOver(this, mouseX, mouseY)) {
+                    if (hoveredNode.isMouseOver(canvas, mouseX, mouseY)) {
                         this.onNodeClicked(hoveredNode);
                         return true;
                     }
@@ -739,7 +594,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
 
 
                 // Check if the centre icon was clicked
-                if (isMouseOverBoundingBox(virtualSlotPos, VIRTUAL_SLOT_DIMENSIONS, VIRTUAL_SLOT_DIMENSIONS, mouseX, mouseY)
+                if (canvas.isMouseOverBoundingBox(virtualSlotPos, VIRTUAL_SLOT_DIMENSIONS, VIRTUAL_SLOT_DIMENSIONS, mouseX, mouseY)
                         && carriedStack.isEmpty() && !isLockHover()) {
                     PacketDistributor.sendToServer(
                             new UpdateToolSlotPacket(UpdateToolSlotPacket.MODE.TAKE.ordinal())
@@ -748,27 +603,12 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
                 }
 
                 // 2. Start a drag if no node clicked
-                // Compute viewport bounds in screen coordinates
-                int viewportLeft = this.leftPos + VIEWPORT_TOP_LEFT.x;
-                int viewportTop = this.topPos + VIEWPORT_TOP_LEFT.y;
-                int viewportRight = viewportLeft + VIEWPORT_WIDTH;
-                int viewportBottom = viewportTop + VIEWPORT_HEIGHT;
-
-                // Only start dragging if the mouse is inside the viewport
-                if (mouseX >= viewportLeft && mouseX < viewportRight &&
-                        mouseY >= viewportTop && mouseY < viewportBottom) {
-                    dragging = true;
-                    dragStartMouseX = mouseX;
-                    dragStartMouseY = mouseY;
-                    dragStartScrollX = scrollX;
-                    dragStartScrollY = scrollY;
-                    return true; // consume the click
-                }
+                if(canvas.startDrag(mouseX, mouseY)) return true;
 
             } else {
                 //Send packet to place carried item in slot.
                 //Check if mouse if over the virtual slot
-                if (isMouseOverBoundingBox(virtualSlotPos, VIRTUAL_SLOT_DIMENSIONS, VIRTUAL_SLOT_DIMENSIONS, mouseX, mouseY)
+                if (canvas.isMouseOverBoundingBox(virtualSlotPos, VIRTUAL_SLOT_DIMENSIONS, VIRTUAL_SLOT_DIMENSIONS, mouseX, mouseY)
                         && !carriedStack.isEmpty()) {
                     PacketDistributor.sendToServer(
                             new UpdateToolSlotPacket(UpdateToolSlotPacket.MODE.PLACE.ordinal())
@@ -795,37 +635,13 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (dragging && button == 0) {
-            scrollX = dragStartScrollX + (dragStartMouseX - mouseX);
-            scrollY = dragStartScrollY + (dragStartMouseY - mouseY);
-
-            //Left Edge
-            if (scrollX + canvasLeftPos < canvasLeftPos) {
-                scrollX = 0;
-            }
-
-            //Top Edge
-            if (scrollY + canvasTopPos < canvasTopPos) {
-                scrollY = 0;
-            }
-
-            // Right edge
-            if (scrollX > scrollableCanvasWidth - VIEWPORT_WIDTH) {
-                scrollX = scrollableCanvasWidth - VIEWPORT_WIDTH;
-            }
-
-            // Bottom edge
-            if (scrollY > scrollableCanvasHeight - VIEWPORT_HEIGHT) {
-                scrollY = scrollableCanvasHeight - VIEWPORT_HEIGHT;
-            }
-            return true;
-        }
+        canvas.drag(mouseX, mouseY, button);
         return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
     }
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (button == 0) dragging = false;
+        canvas.stopDrag(button);
         return super.mouseReleased(mouseX, mouseY, button);
 
     }

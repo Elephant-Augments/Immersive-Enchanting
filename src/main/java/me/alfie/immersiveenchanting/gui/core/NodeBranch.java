@@ -54,7 +54,8 @@ public class NodeBranch {
         final int maxStep = 120;      // maximum allowed
         final float minScale = 0.25f; // never go below this
         final float maxScale = 1.0f;  // never go above this
-        final float nodeSize = Math.max(Node.width, Node.height);
+        final int margin = 4;
+        final float nodeSize = Math.max(Node.width+margin, Node.height+margin);
 
         List<NodeBranch> branches = screen.branches;
         int count = branches.size();
@@ -122,8 +123,8 @@ public class NodeBranch {
     public void placeNodesAlongLine() {
         // Center point of the canvas
         Vector2i center = new Vector2i(
-                screen.getCanvasLeftPos() + screen.getScrollableCanvasWidth() / 2,
-                screen.getCanvasTopPos() + screen.getScrollableCanvasHeight() / 2
+                screen.getCanvas().getCanvasLeftPos() + screen.getCanvas().getWidth() / 2,
+                screen.getCanvas().getCanvasTopPos() + screen.getCanvas().getHeight() / 2
         );
 
         // Step vector based on angle
@@ -152,8 +153,8 @@ public class NodeBranch {
 
     private void connectNodeToCenter(Node node) {
         // Use node centers for cleaner lines
-        int ax = screen.getCanvasLeftPos() + screen.getScrollableCanvasWidth() / 2;
-        int ay = screen.getCanvasTopPos() + screen.getScrollableCanvasHeight() / 2;
+        int ax = screen.getCanvas().getCanvasLeftPos() + screen.getCanvas().getWidth() / 2;
+        int ay = screen.getCanvas().getCanvasTopPos() + screen.getCanvas().getHeight() / 2;
         int bx = (int) (node.getX() + Node.width * node.getScale() / 2);
         int by = (int) (node.getY() + Node.height * node.getScale() / 2);
         calculateConnection(ax, ay, bx, by);

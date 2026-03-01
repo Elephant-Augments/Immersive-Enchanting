@@ -81,15 +81,15 @@ public class NodeTooltip {
      * Automatically sets the correct positions for enchantmentNameBoxTopLeft and costBoxTopLeft.
      */
     protected void setRenderDirection() {
-        boolean flipX = node.getViewportPosition(screen).x + tooltipTitle.getBoxWidth() > screen.VIEWPORT_WIDTH;
-        boolean flipY = node.getViewportPosition(screen).y + tooltipDescription.getBoxHeight() + tooltipTitle.getBoxHeight() / 2 - padding / 2 > screen.VIEWPORT_HEIGHT;
+        boolean flipX = node.getViewportPosition(screen.getCanvas()).x + tooltipTitle.getBoxWidth() > screen.getCanvas().VIEWPORT_WIDTH;
+        boolean flipY = node.getViewportPosition(screen.getCanvas()).y + tooltipDescription.getBoxHeight() + tooltipTitle.getBoxHeight() / 2 - padding / 2 > screen.getCanvas().VIEWPORT_HEIGHT;
         if (flipX && flipY) renderDirection = RenderDirection.LEFT_UP;
         else if (flipX) renderDirection = RenderDirection.LEFT_DOWN;
         else if (flipY) renderDirection = RenderDirection.RIGHT_UP;
         else renderDirection = RenderDirection.RIGHT_DOWN;
 
-        int baseX = node.getRenderedPosition(screen).x;
-        int baseY = node.getRenderedPosition(screen).y;
+        int baseX = node.getRenderedPosition(screen.getCanvas()).x;
+        int baseY = node.getRenderedPosition(screen.getCanvas()).y;
         switch (renderDirection) {
             case RIGHT_DOWN -> {
                 titleBoxTopLeft = new Vector2i(baseX, baseY);
