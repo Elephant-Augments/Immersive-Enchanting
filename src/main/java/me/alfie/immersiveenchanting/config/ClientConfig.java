@@ -11,7 +11,7 @@ public class ClientConfig {
     // Store the config properties as public finals
     public final ModConfigSpec.ConfigValue<Boolean> showAddedByTooltip;
 
-
+    public final ModConfigSpec.ConfigValue<Integer> itemCarouselSpeed;
 
     static {
         Pair<ClientConfig, ModConfigSpec> pair =
@@ -31,11 +31,20 @@ public class ClientConfig {
                 .translation("immersiveenchanting.config.show_added_by_tooltip")
                 .define("showAddedByTooltip", false);
 
+        itemCarouselSpeed = builder
+                .comment("How fast items will switch in the enchanting table tooltip (in milliseconds).")
+                .translation("immersiveenchanting.config.item_carousel_speed")
+                .define("itemCarouselSpeed", 700);
+
 
         builder.pop();
     }
 
     public static boolean isShowAddedByTooltipEnabled() {
         return ClientConfig.CONFIG.showAddedByTooltip.get();
+    }
+
+    public static int getItemCarouselSpeed() {
+        return ClientConfig.CONFIG.itemCarouselSpeed.get();
     }
 }

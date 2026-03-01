@@ -1,6 +1,7 @@
 package me.alfie.immersiveenchanting.api.internal;
 
 import me.alfie.immersiveenchanting.api.DescriptionLayoutExtension;
+import me.alfie.immersiveenchanting.config.ClientConfig;
 import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.datapack.cost.CostDefinition;
@@ -43,7 +44,7 @@ public class CostLayoutExtension implements DescriptionLayoutExtension {
         if(parentTooltip instanceof EnchantingNodeTooltip enchantingNodeTooltip) {
             if (enchantingNodeTooltip.node instanceof EnchantingNode enchantingNode) {
                 enchantingNodeTooltip.setCurrentRenderedCost(
-                        EnchantingNodeTooltip.getCycledElement(enchantingNodeTooltip.getValidCosts(), 700));
+                        EnchantingNodeTooltip.getCycledElement(enchantingNodeTooltip.getValidCosts(), ClientConfig.getItemCarouselSpeed()));
                 ItemStack stackToRender = enchantingNodeTooltip.getCurrentRenderedCost().asItemStack();
 
                 CostEntry renderedCost = enchantingNodeTooltip.getCurrentRenderedCost();
