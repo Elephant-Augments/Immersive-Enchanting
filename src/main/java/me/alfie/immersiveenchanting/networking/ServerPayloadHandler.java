@@ -414,17 +414,28 @@ public class ServerPayloadHandler {
     private static List<BlockEntity> getChiseledBookshelvesNearby(BlockPos pos, Level level) {
         List<BlockEntity> blockEntities = new ArrayList<>();
 
-        for (int dy = 0; dy <= ServerConfig.getBookshelfSearchHeight()-1; dy++) { // check table level and level above
-            for (int dx = -2; dx <= 2; dx++) {
-                for (int dz = -2; dz <= 2; dz++) {
-                    // Skip inner 3x3 square; only outer ring
-                    if (Math.abs(dx) < 2 && Math.abs(dz) < 2) continue;
+        int radiusX = ServerConfig.getBookshelfSearchX();
+        int radiusY = ServerConfig.getBookshelfSearchY();
+        int radiusZ = ServerConfig.getBookshelfSearchZ();
 
-                    BlockPos checkPos = pos.offset(dx, dy, dz);
-                    BlockEntity blockEntity = level.getBlockEntity(checkPos);
+        for (int dy = 0; dy < radiusY; dy++) {
 
-                    if (blockEntity instanceof ChiseledBookShelfBlockEntity) {
-                        blockEntities.add(blockEntity);
+            for (int rX = 2; rX <= radiusX; rX++) {
+                for (int rZ = 2; rZ <= radiusZ; rZ++) {
+
+                    for (int dx = -rX; dx <= rX; dx++) {
+                        for (int dz = -rZ; dz <= rZ; dz++) {
+
+                            // Only boundary of this ring
+                            if (Math.abs(dx) != rX && Math.abs(dz) != rZ) continue;
+
+                            BlockPos checkPos = pos.offset(dx, dy, dz);
+                            BlockEntity blockEntity = level.getBlockEntity(checkPos);
+
+                            if (blockEntity instanceof ChiseledBookShelfBlockEntity) {
+                                blockEntities.add(blockEntity);
+                            }
+                        }
                     }
                 }
             }

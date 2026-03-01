@@ -100,21 +100,7 @@ public class NodeBranch {
         EnchantingNode.globalScale = scale;
     }
 
-    /**
-     * Generate a list of angles based on the total number of branches.
-     *
-     * @param totalBranches
-     * @return
-     */
-    public static ArrayList<Float> generateBranchAngles(int totalBranches) {
-        // No more than 16 branches
-        ArrayList<Float> angles = new ArrayList<>();
-        for (int i = 0; i < totalBranches; i++) {
-            float angle = (float) (i * 2 * Math.PI / totalBranches); // evenly spaced
-            angles.add(angle);
-        }
-        return angles;
-    }
+
 
     public List<Node> getNodes() {
         return nodes;

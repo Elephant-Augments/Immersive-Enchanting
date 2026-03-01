@@ -2,17 +2,11 @@ package me.alfie.immersiveenchanting.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
-import me.alfie.immersiveenchanting.compat.ModCheck;
-import me.alfie.immersiveenchanting.compat.ModCompat;
 import me.alfie.immersiveenchanting.datacomponent.ReplicatedDataComponent;
 import me.alfie.immersiveenchanting.datapack.cost.EnchantmentCost;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
-import me.alfie.immersiveenchanting.gui.core.Node;
-import me.alfie.immersiveenchanting.gui.core.NodeBranch;
-import me.alfie.immersiveenchanting.gui.core.NodeTooltip;
-import me.alfie.immersiveenchanting.gui.core.ScrollableCanvas;
+import me.alfie.immersiveenchanting.gui.core.*;
 import me.alfie.immersiveenchanting.gui.enchanting.EnchantingNode;
-import me.alfie.immersiveenchanting.gui.enchanting.EnchantingNodeBranch;
 import me.alfie.immersiveenchanting.gui.enchanting.EnchantingNodeTooltip;
 import me.alfie.immersiveenchanting.gui.replicate.ReplicateNode;
 import me.alfie.immersiveenchanting.gui.replicate.ReplicateNodeBranch;
@@ -25,31 +19,24 @@ import me.alfie.immersiveenchanting.networking.packets.EnchantItemPacket;
 import me.alfie.immersiveenchanting.networking.packets.ReplicateBookPacket;
 import me.alfie.immersiveenchanting.networking.packets.TransmuteBookPacket;
 import me.alfie.immersiveenchanting.networking.packets.UpdateToolSlotPacket;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.joml.Vector2i;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTableMenu> {
 
@@ -68,7 +55,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
     public static final ResourceLocation XP_LEVEL_SPRITE = ResourceLocation.fromNamespaceAndPath(ImmersiveEnchanting.MODID,
             "textures/gui/sprites/xp_level.png");
 
-    public final List<NodeBranch> branches = new ArrayList<>();
+    public List<NodeBranch> branches = new ArrayList<>();
 
 
 
@@ -110,8 +97,6 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
 
         //No branch shenanigans here, do it in init() pls <3
         this.player = playerInventory.player;
-
-
     }
 
     public ScrollableCanvas getCanvas() {
@@ -125,10 +110,6 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         initializeScreen();
         onToolSlotChanged(); //Updates if screen size is changed while screen open
     }
-
-   public Vector2i getTopLeftPos() {
-        return new Vector2i(this.leftPos, this.topPos);
-   }
 
     private void initializeScreen() {
         canvas.calculateSize();
@@ -154,16 +135,9 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         }
 
         if(menu.getToolSlotItem().is(ModItems.ANCIENT_BOOK.get())) {
-            buildAncientBookBranch(menu.getToolSlotItem());
+            branches = BranchFactory.buildAncientBookBranch(menu.getToolSlotItem(), this);
         } else {
-            buildNodeBranches(menu.getToolSlotItem());
-        }
-
-
-        //Update canvas size
-        int largestBranchLevel = 1;
-        for (NodeBranch branch : branches) {
-            largestBranchLevel = Math.max(largestBranchLevel, branch.getNodes().size());
+            branches = BranchFactory.buildEnchantingNodeBranches(menu.getToolSlotItem(),this);
         }
 
         NodeBranch.calculateNodeAnglesAndStep(this);
@@ -174,125 +148,6 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
                 node.setScale(EnchantingNode.globalScale);
             }
         }
-    }
-
-
-
-    /**
-     * Finds which enchantments are applicable for an item stack , generates branch angles, and creates the branches.
-     *
-     * @param currentItemStack
-     */
-    public void buildNodeBranches(ItemStack currentItemStack) {
-        //Step 1. Find which enchantments are applicable.
-        List<Holder<Enchantment>> validEnchantments = new ArrayList<>(); //Set of all enchantments that can be applied
-        Set<Holder<Enchantment>> unlockedEnchantments = menu.getUnlockedEnchantments();
-
-        Set<Holder<Enchantment>> allEnchantments = ImmersiveEnchanting.getEnchantmentRegistry(
-                        player.registryAccess())
-                .asLookup()
-                .listElements()
-                .collect(Collectors.toSet());
-
-        //Sort set into alphabetical order so that branches appear in the same order every time.
-        List<Holder<Enchantment>> allEnchantmentsSorted = new ArrayList<>(allEnchantments);
-        allEnchantmentsSorted.sort(Comparator.comparing(
-                holder -> holder.getKey().location().toString()
-        ));
-        System.out.println(allEnchantmentsSorted);
-
-        //Iterate through the enchantment registry, see if the item support the enchantment.
-        for (Holder<Enchantment> enchantmentHolder : allEnchantmentsSorted) {
-            //Skip cursed enchantments.
-            if (enchantmentHolder.is(EnchantmentTags.CURSE)) {
-                continue;
-            }
-
-            ResourceKey<Enchantment> enchantmentKey = enchantmentHolder.getKey();
-
-            //Skip disabled enchantments, they won't appear in the table
-            if (EnchantmentCostRegistry.getClientRegistry().getCostRegistry().containsKey(enchantmentKey)) {
-                if(!EnchantmentCostRegistry.getClientRegistry().getCostRegistry().get(enchantmentKey).enabled) continue;
-            }
-
-            //If this enchantment isn't compatible with any enchantments already applied to the item, then skip.
-            Set<Holder<Enchantment>> itemEnchantments = new HashSet<>(currentItemStack.getTagEnchantments().keySet());
-            itemEnchantments.remove(enchantmentHolder); //Ignore the enchantment we're trying to check for
-
-            if (!EnchantmentHelper.isEnchantmentCompatible(itemEnchantments, enchantmentHolder)) {
-                continue;
-            }
-
-            //Add enchantment
-            if (currentItemStack.getItem().supportsEnchantment(currentItemStack, enchantmentHolder)) {
-                validEnchantments.add(enchantmentHolder);
-            }
-        }
-
-        // Step 2: Generate angles after filtering
-        List<Float> angles = NodeBranch.generateBranchAngles(validEnchantments.size());
-
-        int i = 0;
-        for (Holder<Enchantment> enchantmentHolder : validEnchantments) {
-            //Check if the enchantmentResourceId is unlocked.
-            boolean isUnlocked = unlockedEnchantments.contains(enchantmentHolder);
-            AtomicInteger enchantmentLevel = new AtomicInteger();
-
-            //Get the level of this enchantment
-            enchantmentLevel.set(currentItemStack.getItem().getEnchantmentLevel(currentItemStack, enchantmentHolder));
-
-
-            if(ModCheck.Mod.RELIQUARY.isLoaded()) {
-                ModCompat.reliquaryMagicbaneFix(currentItemStack, enchantmentHolder, enchantmentLevel);
-            }
-
-            branches.add(new EnchantingNodeBranch(
-                    this,
-                    angles.get(i),
-                    enchantmentHolder,
-                    enchantmentLevel.get(),
-                    isUnlocked,
-                    player
-            ));
-            i++;
-        }
-    }
-
-    /**
-     * Special method to build the upgrade node for ancient book enchantment re-roll.
-     */
-    public void buildAncientBookBranch(ItemStack currentItemStack) {
-        //If the enchantment is already unlocked (i.e, there is an identical book in the chiseled bookshelf)
-        //Reroll this ancient book to a new one (that isn't unlocked)
-
-        //All ancient books that are already present
-        Set<Holder<Enchantment>> unlockedEnchantments = menu.getUnlockedEnchantments();
-
-        //The enchantment for this ancient book
-        Set<Holder<Enchantment>> ancientBookEnchantments = currentItemStack.get(DataComponents.STORED_ENCHANTMENTS).keySet();
-
-        System.out.println(ancientBookEnchantments);
-        System.out.println(unlockedEnchantments);
-
-        //Check if the enchantment stored in this ancient book is also unlocked (in the bookshelf)
-        boolean canTransmute = false;
-        if(!Collections.disjoint(unlockedEnchantments, ancientBookEnchantments)) {
-            canTransmute = true;
-        }
-
-        boolean isBookReplicated = ReplicatedDataComponent.isReplicated(currentItemStack);
-
-        List<Float> angles = NodeBranch.generateBranchAngles(2);
-
-        branches.add(new TransmuteNodeBranch(
-                this,
-                angles.get(0),
-                canTransmute,
-                isBookReplicated));
-
-        branches.add(new ReplicateNodeBranch(
-                this,
-                angles.get(1)));
     }
 
     @Override
@@ -541,7 +396,21 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
                 );
             }
 
-            player.playSound(SoundEvents.CHISELED_BOOKSHELF_PICKUP_ENCHANTED);
+            float pitch = 1;
+            if(node instanceof EnchantingNode enchantingNode) {
+                int highestLevel = EnchantmentCostRegistry.getClientRegistry().getEnchantmentCost(enchantingNode.getEnchantment()).getHighestLevel();
+                int thisLevel = enchantingNode.getEnchantmentLevel();
+
+                if(thisLevel == highestLevel) {
+                    pitch = 2;
+                    player.playSound(SoundEvents.AMETHYST_BLOCK_RESONATE, 1f, 2);
+                }
+            }
+
+
+            System.out.println(pitch);
+
+            player.playSound(SoundEvents.CHISELED_BOOKSHELF_INSERT_ENCHANTED, 1f, pitch);
             lastHoveredNode = node;
         }
 
@@ -567,12 +436,6 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         node.render(guiGraphics, canvas);
         guiGraphics.pose().popPose();
     }
-
-
-
-
-
-
 
     private void setLockHover(boolean lockHover) {
         this.lockHover = lockHover;
