@@ -516,6 +516,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         if (button == 0) {
             //Show book screen
             if(isMouseOverTab((int) mouseX, (int) mouseY)) {
+                player.playSound(SoundEvents.UI_BUTTON_CLICK.value(), 0.3f, 1f);
                 if(canvas.getCanvasState().equals(CanvasState.ENCHANTING)) {
                     canvas.setCanvasState(CanvasState.BOOKS);
                 } else if(canvas.getCanvasState().equals(CanvasState.BOOKS)) {

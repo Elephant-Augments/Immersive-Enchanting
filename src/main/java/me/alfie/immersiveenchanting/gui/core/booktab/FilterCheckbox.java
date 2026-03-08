@@ -35,7 +35,7 @@ public class FilterCheckbox {
     public void toggleEnabled() {
         this.enabled = !this.enabled;
         bookTab.scrollbar.resetScrollIndex();
-        bookTab.screen.player.playNotifySound(SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.MASTER,
+        bookTab.screen.player.playSound(SoundEvents.UI_BUTTON_CLICK.value(),
                 0.3f, 1f);
     }
 
