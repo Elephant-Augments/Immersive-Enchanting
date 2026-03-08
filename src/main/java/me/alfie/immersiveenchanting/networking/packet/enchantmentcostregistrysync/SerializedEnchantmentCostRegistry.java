@@ -1,4 +1,4 @@
-package me.alfie.immersiveenchanting.networking;
+package me.alfie.immersiveenchanting.networking.packet.enchantmentcostregistrysync;
 
 import java.util.List;
 

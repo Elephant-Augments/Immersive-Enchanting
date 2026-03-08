@@ -1,4 +1,4 @@
-package me.alfie.immersiveenchanting.networking.payload;
+package me.alfie.immersiveenchanting.networking.packet;
 
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 

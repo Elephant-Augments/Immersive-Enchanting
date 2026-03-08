@@ -6,7 +6,7 @@ import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.datapack.cost.CostHelper;
 import me.alfie.immersiveenchanting.datapack.cost.EnchantmentCost;
 import me.alfie.immersiveenchanting.datapack.parser.DatapackParser;
-import me.alfie.immersiveenchanting.networking.packet.EnchantmentCostRegistrySyncPacket;
+import me.alfie.immersiveenchanting.networking.packet.enchantmentcostregistrysync.EnchantmentCostRegistrySyncPacket;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;

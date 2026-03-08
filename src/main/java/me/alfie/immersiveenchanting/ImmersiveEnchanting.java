@@ -11,7 +11,7 @@ import me.alfie.immersiveenchanting.datapack.EnchantmentCostDatapackHandler;
 import me.alfie.immersiveenchanting.gui.ModMenus;
 import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.lootmodifier.ModLootModifiers;
-import me.alfie.immersiveenchanting.networking.packet.*;
+import me.alfie.immersiveenchanting.networking.ModPackets;
 import me.alfie.immersiveenchanting.sound.ModSounds;
 import me.alfie.immersiveenchanting.structure.ModStructureProcessors;
 import net.minecraft.core.Holder;
@@ -59,14 +59,7 @@ public class ImmersiveEnchanting {
         ModSounds.register(modEventBus);
 
         modEventBus.addListener(ModMenus::registerMenuScreens);
-        modEventBus.addListener(EnchantItemPacket::register);
-        modEventBus.addListener(GetBookshelfContentsPacket::register);
-        modEventBus.addListener(UnlockedEnchantmentsPacket::register);
-        modEventBus.addListener(EnchantmentCostRegistrySyncPacket::register);
-        modEventBus.addListener(UpdateToolSlotPacket::register);
-        modEventBus.addListener(TransmuteBookPacket::register);
-        modEventBus.addListener(ReplicateBookPacket::register);
-        modEventBus.addListener(RemoveEnchantmentPacket::register);
+        modEventBus.addListener(ModPackets::register);
 
         modContainer.registerConfig(ModConfig.Type.CLIENT, ClientConfig.CONFIG_SPEC);
         modContainer.registerConfig(ModConfig.Type.SERVER, ServerConfig.CONFIG_SPEC);

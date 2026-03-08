@@ -21,8 +21,8 @@ import me.alfie.immersiveenchanting.datapack.cost.EnchantmentCost;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
 import me.alfie.immersiveenchanting.item.AncientBook;
 import me.alfie.immersiveenchanting.item.ModItems;
-import me.alfie.immersiveenchanting.networking.ServerPayloadHandler;
-import me.alfie.immersiveenchanting.networking.packet.EnchantmentCostRegistrySyncPacket;
+import me.alfie.immersiveenchanting.networking.packet.enchantmentcostregistrysync.EnchantmentCostRegistrySyncPacket;
+import me.alfie.immersiveenchanting.networking.server.EnchantingTableServerHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
@@ -293,7 +293,7 @@ public class ImmersiveEnchantingEvents {
                         ),
                         buf -> buf.writeBlockPos(pos)
                 );
-                ServerPayloadHandler.checkBookshelvesAndUpdateClient(pos, player.level(), serverPlayer);
+                EnchantingTableServerHandler.checkBookshelvesAndUpdateClient(pos, player.level(), serverPlayer);
             }
         }
     }

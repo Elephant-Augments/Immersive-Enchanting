@@ -1,4 +1,4 @@
-package me.alfie.immersiveenchanting.networking.payload;
+package me.alfie.immersiveenchanting.networking.packet.enchantitem;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.compat.ModCompat;
@@ -7,7 +7,7 @@ import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.datapack.cost.CostDefinition;
 import me.alfie.immersiveenchanting.datapack.cost.CostHelper;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
-import me.alfie.immersiveenchanting.networking.packet.EnchantItemPacket;
+import me.alfie.immersiveenchanting.networking.packet.PayloadHandler;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
@@ -28,10 +28,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class EnchantItemPayload implements PayloadHandler<EnchantItemPacket> {
-
-
-    //Unused
-    @Override
+    @Override //Empty
     public void execOnClient(EnchantItemPacket packet, IPayloadContext context) {}
 
     @Override

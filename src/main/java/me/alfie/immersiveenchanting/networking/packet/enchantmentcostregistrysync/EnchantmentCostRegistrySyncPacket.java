@@ -1,26 +1,21 @@
-package me.alfie.immersiveenchanting.networking.packet;
+package me.alfie.immersiveenchanting.networking.packet.enchantmentcostregistrysync;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import io.netty.buffer.ByteBuf;
 import me.alfie.immersiveenchanting.datapack.parser.DatapackParser;
 import me.alfie.immersiveenchanting.datapack.cost.EnchantmentCost;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
-import me.alfie.immersiveenchanting.networking.ClientPayloadHandler;
-import me.alfie.immersiveenchanting.networking.SerializedEnchantmentCostRegistry;
+import me.alfie.immersiveenchanting.networking.packet.NetworkPacket;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
-import net.neoforged.neoforge.network.handling.DirectionalPayloadHandler;
-import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,11 +23,11 @@ import java.util.Map;
 
 public record EnchantmentCostRegistrySyncPacket(
         List<String> enchantmentIds,
-        List<String> jsonStrings) implements CustomPacketPayload {
+        List<String> jsonStrings) implements NetworkPacket<EnchantmentCostRegistrySyncPacket> {
 
     public static final Type<EnchantmentCostRegistrySyncPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath("immersiveenchanting", "sync_enchantment_cost_registry_packet"));
 
-    public static final StreamCodec<ByteBuf, EnchantmentCostRegistrySyncPacket> STREAM_CODEC = StreamCodec.composite(
+    public static final StreamCodec<RegistryFriendlyByteBuf, EnchantmentCostRegistrySyncPacket> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.collection(ArrayList::new, ByteBufCodecs.STRING_UTF8),
             EnchantmentCostRegistrySyncPacket::enchantmentIds,
             ByteBufCodecs.collection(ArrayList::new, ByteBufCodecs.STRING_UTF8),
@@ -40,10 +35,14 @@ public record EnchantmentCostRegistrySyncPacket(
             EnchantmentCostRegistrySyncPacket::new);
 
     @Override
-    public Type<? extends CustomPacketPayload> type() {
+    public Type<EnchantmentCostRegistrySyncPacket> typeId() {
         return TYPE;
     }
 
+    @Override
+    public StreamCodec<RegistryFriendlyByteBuf, EnchantmentCostRegistrySyncPacket> codec() {
+        return STREAM_CODEC;
+    }
 
     /**
      * Convert the enchantment cost registry into a serialized object.
@@ -147,15 +146,5 @@ public record EnchantmentCostRegistrySyncPacket(
                 serializedRegistry.jsonStrings()));
     }
 
-    public static void register(final RegisterPayloadHandlersEvent event) {
-        final PayloadRegistrar registrar = event.registrar("1");
-        registrar.playBidirectional(
-                EnchantmentCostRegistrySyncPacket.TYPE,
-                EnchantmentCostRegistrySyncPacket.STREAM_CODEC,
-                new DirectionalPayloadHandler<EnchantmentCostRegistrySyncPacket>(
-                        ClientPayloadHandler::onEnchantmentCostRegistrySync,
-                        null
-                )
-        );
-    }
+
 }
