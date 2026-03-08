@@ -27,10 +27,10 @@ public record MaterialsDescriptionLine(NodeTooltip nodeTooltip) implements Descr
         if (stackToRender.is(Items.AIR) || stackToRender.isEmpty()) {
             graphics.drawString(
                     Minecraft.getInstance().font,
-                    Component.translatable("gui.immersiveenchanting.cost_free"),
-                    lineX,
-                    lineY,
-                    ChatFormatting.DARK_AQUA.getColor()
+                    Component.translatable("gui.immersiveenchanting.no_materials_required").withStyle(ChatFormatting.ITALIC),
+                    lineX + Minecraft.getInstance().font.width(getText()),
+                    lineY + 4,
+                    ChatFormatting.GRAY.getColor()
             );
         } else {
             Vector2i costStackPos = new Vector2i(lineX + Minecraft.getInstance().font.width(getText()), lineY);

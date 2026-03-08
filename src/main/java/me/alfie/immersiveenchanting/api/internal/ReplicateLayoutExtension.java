@@ -1,6 +1,9 @@
 package me.alfie.immersiveenchanting.api.internal;
 
 import me.alfie.immersiveenchanting.api.DescriptionLayoutExtension;
+import me.alfie.immersiveenchanting.api.internal.cost.LevelsDescriptionLine;
+import me.alfie.immersiveenchanting.api.internal.cost.MaterialsDescriptionLine;
+import me.alfie.immersiveenchanting.config.ClientConfig;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.core.NodeTooltip;
 import me.alfie.immersiveenchanting.gui.replicate.ReplicateNode;
@@ -25,6 +28,7 @@ public class ReplicateLayoutExtension implements DescriptionLayoutExtension {
         if(parentTooltip instanceof ReplicateNodeTooltip replicateNodeTooltip) {
             if(parentTooltip.node instanceof ReplicateNode replicateNode) {
                 //Description label
+                /*
                 String text = Component.translatable("gui.immersiveenchanting.replicate_hint").getString();
                 List<String> textChunks = DescriptionLayout.chunkString(text, 32);
                 int lineCount = 0;
@@ -49,38 +53,16 @@ public class ReplicateLayoutExtension implements DescriptionLayoutExtension {
                         }
                     });
                 }
+                */
 
-                //Cost label
-                description.insertLine(lineCount, new DescriptionLine() {
-                    @Override
-                    public void draw(GuiGraphics graphics, int lineX, int lineY) {
-                        graphics.drawString(Minecraft.getInstance().font,
-                                getText(),
-                                lineX,
-                                lineY + 4, //Offset to centre text with cost stack
-                                0xFFFFFF);
+                //Cost Layout
+                replicateNodeTooltip.setCurrentRenderedCost(NodeTooltip.getCycledElement(replicateNodeTooltip.getValidCosts(), ClientConfig.getItemCarouselSpeed()));
+                description.insertLine(0, new MaterialsDescriptionLine(replicateNodeTooltip));
 
-                        Vector2i spritePos = new Vector2i(lineX + Minecraft.getInstance().font.width(getText().getString()), lineY);
-                        graphics.blit(EnchantingTableScreen.LEVEL_SPRITE, spritePos.x, spritePos.y, 0, 0, 16, 16, 16, 16);
+                if(replicateNodeTooltip.getCurrentRenderedCost().xpLevels() > 0) {
+                    description.insertLine(2, new LevelsDescriptionLine(replicateNodeTooltip));
+                }
 
-                        int xOffset = 16+4;
-
-                        //replicateNodeTooltip.setCostStackPos(bcostStackPos.x, costStackPos.y);
-                        graphics.renderItem(
-                                new ItemStack(Items.WRITABLE_BOOK),
-                                spritePos.x + xOffset,
-                                spritePos.y);
-                        graphics.renderItemDecorations(Minecraft.getInstance().font,
-                                new ItemStack(Items.WRITABLE_BOOK),
-                                spritePos.x + xOffset,
-                                spritePos.y);
-                    }
-
-                    @Override
-                    public @NotNull Component getText() {
-                        return Component.translatable("gui.immersiveenchanting.cost").withStyle(ChatFormatting.GRAY);
-                    }
-                });
             }
         }
     }

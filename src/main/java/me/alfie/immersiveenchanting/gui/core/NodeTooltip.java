@@ -51,6 +51,7 @@ public class NodeTooltip {
     public NodeTooltip(Node node, EnchantingTableScreen screen, List<CostEntry> validCosts) {
         this.node = node;
         this.screen = screen;
+        this.validCosts = validCosts;
 
         //Create components
         tooltipTitle = new TooltipTitle(this, BOX_UNOBTAINED_TEXTURE);

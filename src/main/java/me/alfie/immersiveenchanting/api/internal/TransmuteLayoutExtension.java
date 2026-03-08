@@ -28,10 +28,9 @@ public class TransmuteLayoutExtension implements DescriptionLayoutExtension {
         public void extendLayout(DescriptionLayout description, NodeTooltip parentTooltip) {
             if(parentTooltip instanceof TransmuteNodeTooltip transmuteNodeTooltip) {
                 if(parentTooltip.node instanceof TransmuteNode transmuteNode) {
-
                     //Description label
                     String text = transmuteNode.canTransmute() ?
-                            Component.translatable("gui.immersiveenchanting.transmute_description").getString() :
+                            Component.EMPTY.getString() :
                             Component.translatable("gui.immersiveenchanting.transmute_hint").getString();
 
                     if(transmuteNode.isBookReplicated()) {
@@ -58,7 +57,8 @@ public class TransmuteLayoutExtension implements DescriptionLayoutExtension {
                             public @NotNull Component getText() {
                                 Component label = Component.literal(textChunks.get(finalI));
                                 if(transmuteNode.canTransmute()) {
-                                    label = label.copy().withStyle(ChatFormatting.GREEN);
+                                    //label = label.copy().withStyle(ChatFormatting.GREEN);
+                                    label = Component.empty();
                                 } else {
                                     label = label.copy().withStyle(ChatFormatting.GRAY).withStyle(ChatFormatting.ITALIC);
                                 }

@@ -11,7 +11,7 @@
   "itemGroup.immersiveenchanting.enchanting": "Enchanting",
 
   "gui.immersiveenchanting.cost": "Materials: ",
-  "gui.immersiveenchanting.cost_free": "Free.",
+  "gui.immersiveenchanting.no_materials_required": "None",
   "gui.immersiveenchanting.cost.xp": "Levels: ",
   "gui.immersiveenchanting.equipped": "Equipped.",
   "gui.immersiveenchanting.locked_enchantment": "???",

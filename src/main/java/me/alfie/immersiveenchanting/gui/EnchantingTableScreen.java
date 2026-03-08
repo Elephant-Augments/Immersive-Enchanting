@@ -3,6 +3,7 @@ package me.alfie.immersiveenchanting.gui;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.config.ServerConfig;
+import me.alfie.immersiveenchanting.datapack.cost.CostEntry;
 import me.alfie.immersiveenchanting.datapack.cost.EnchantmentCost;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.gui.core.*;
@@ -456,7 +457,9 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
                 nodeTooltip = new TransmuteNodeTooltip(
                         transmuteNode,
                         this,
-                        new ArrayList<>()
+                        new ArrayList<>() {{
+                            add(new CostEntry("minecraft:writable_book", "", 1, 10));
+                        }}
                 );
             }
 
@@ -464,7 +467,9 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
                 nodeTooltip = new ReplicateNodeTooltip(
                         replicateNode,
                         this,
-                        new ArrayList<>()
+                        new ArrayList<>() {{
+                            add(new CostEntry("", "", 0, 10));
+                        }}
                 );
             }
 
