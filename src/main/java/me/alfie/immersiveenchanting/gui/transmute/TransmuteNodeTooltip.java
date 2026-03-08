@@ -1,15 +1,18 @@
 package me.alfie.immersiveenchanting.gui.transmute;
 
+import me.alfie.immersiveenchanting.datapack.cost.CostEntry;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.core.Node;
 import me.alfie.immersiveenchanting.gui.core.NodeTooltip;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 
+import java.util.List;
+
 public class TransmuteNodeTooltip extends NodeTooltip {
 
-    public TransmuteNodeTooltip(Node node, EnchantingTableScreen screen) {
-        super(node, screen);
+    public TransmuteNodeTooltip(Node node, EnchantingTableScreen screen, List<CostEntry> validCosts) {
+        super(node, screen, validCosts);
 
         Component text = Component.translatable("gui.immersiveenchanting.transmute_book").withStyle(ChatFormatting.WHITE);
         tooltipTitle.setTitleText(text);

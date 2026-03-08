@@ -16,18 +16,13 @@ import java.util.List;
 
 public class EnchantingNodeTooltip extends NodeTooltip {
 
-    private final int costIconSize = 16;
-    private final List<CostEntry> validCosts;
-    private CostEntry currentRenderedCost;
-    private Vector2i costStackPos = new Vector2i(0, 0);
-    public List<Component> stackDescriptionComponents = new ArrayList<>() {{add(Component.empty());}};
+
     public int lastBars = 0;
 
     public EnchantingNodeTooltip(EnchantingNode node,
-                                 List<CostEntry> validCosts,
-                                 EnchantingTableScreen screen) {
-        super(node, screen);
-        this.validCosts = validCosts;
+                                 EnchantingTableScreen screen,
+                                 List<CostEntry> validCosts) {
+        super(node, screen, validCosts);
 
         //Decide title text
         Component titleText = Enchantment.getFullname(node.getEnchantmentHolder(), node.getEnchantmentLevel())
@@ -41,47 +36,5 @@ public class EnchantingNodeTooltip extends NodeTooltip {
 
 
         tooltipTitle.setTitleText(titleText);
-    }
-
-    public List<CostEntry> getValidCosts() {
-        return this.validCosts;
-    }
-
-    public void setCostStackPos(int x, int y) {
-        costStackPos = new Vector2i(x, y);
-    }
-
-    public Vector2i getCostStackPos() {
-        return costStackPos;
-    }
-
-    private ItemStack getCostStack(int index) {
-        return validCosts.get(index).asItemStack();
-    }
-
-    /**
-     * Returns the currently active element from a list, cycling through it
-     * based on system time and a given interval in milliseconds.
-     *
-     * @param <T> the type of elements
-     * @param list the list of elements to cycle through
-     * @param intervalMillis how long each element is shown before moving to the next
-     * @return the current element
-     */
-    public static <T> T getCycledElement(List<T> list, long intervalMillis) {
-        if (list == null || list.isEmpty()) return null;
-
-        long currentTime = System.currentTimeMillis();
-        int index = (int)((currentTime / intervalMillis) % list.size());
-
-        return list.get(index);
-    }
-
-    public void setCurrentRenderedCost(CostEntry currentRenderedCost) {
-        this.currentRenderedCost = currentRenderedCost;
-    }
-
-    public CostEntry getCurrentRenderedCost() {
-        return currentRenderedCost;
     }
 }

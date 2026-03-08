@@ -1,8 +1,12 @@
 package me.alfie.immersiveenchanting.api.internal;
 
 import me.alfie.immersiveenchanting.api.DescriptionLayoutExtension;
+import me.alfie.immersiveenchanting.api.internal.cost.LevelsDescriptionLine;
+import me.alfie.immersiveenchanting.api.internal.cost.MaterialsDescriptionLine;
+import me.alfie.immersiveenchanting.config.ClientConfig;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.core.NodeTooltip;
+import me.alfie.immersiveenchanting.gui.enchanting.EnchantingNodeTooltip;
 import me.alfie.immersiveenchanting.gui.tooltip.DescriptionLayout;
 import me.alfie.immersiveenchanting.gui.tooltip.DescriptionLine;
 import me.alfie.immersiveenchanting.gui.transmute.TransmuteNode;
@@ -11,6 +15,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector2i;
 
@@ -62,26 +68,14 @@ public class TransmuteLayoutExtension implements DescriptionLayoutExtension {
                         });
                     }
 
-                    //Cost label if unlocked
+                    //Cost Layout
                     if(transmuteNode.canTransmute()) {
-                        description.insertLine(lineCount, new DescriptionLine() {
-                            @Override
-                            public void draw(GuiGraphics graphics, int lineX, int lineY) {
-                                graphics.drawString(Minecraft.getInstance().font,
-                                        getText(),
-                                        lineX,
-                                        lineY + 4, //Offset to centre text with cost stack
-                                        0xFFFFFF);
+                        transmuteNodeTooltip.setCurrentRenderedCost(NodeTooltip.getCycledElement(transmuteNodeTooltip.getValidCosts(), ClientConfig.getItemCarouselSpeed()));
+                        description.insertLine(0, new MaterialsDescriptionLine(transmuteNodeTooltip));
 
-                                Vector2i spritePos = new Vector2i(lineX + Minecraft.getInstance().font.width(getText().getString()), lineY);
-                                graphics.blit(EnchantingTableScreen.LEVEL_SPRITE, spritePos.x, spritePos.y, 0, 0, 16, 16, 16, 16);
-                            }
-
-                            @Override
-                            public @NotNull Component getText() {
-                                return Component.translatable("gui.immersiveenchanting.cost").withStyle(ChatFormatting.GRAY);
-                            }
-                        });
+                        if(transmuteNodeTooltip.getCurrentRenderedCost().xpLevels() > 0) {
+                            description.insertLine(2, new LevelsDescriptionLine(transmuteNodeTooltip));
+                        }
                     }
 
                 }

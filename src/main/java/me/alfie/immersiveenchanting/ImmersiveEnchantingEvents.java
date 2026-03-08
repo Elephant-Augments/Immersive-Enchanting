@@ -3,7 +3,7 @@ package me.alfie.immersiveenchanting;
 import com.mojang.brigadier.CommandDispatcher;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import me.alfie.immersiveenchanting.api.TooltipDescriptionExtensions;
-import me.alfie.immersiveenchanting.api.internal.CostLayoutExtension;
+import me.alfie.immersiveenchanting.api.internal.EnchantingLayoutExtension;
 import me.alfie.immersiveenchanting.api.internal.ReplicateLayoutExtension;
 import me.alfie.immersiveenchanting.api.internal.TransmuteLayoutExtension;
 import me.alfie.immersiveenchanting.commands.DisabledEnchantmentsCommand;
@@ -135,7 +135,7 @@ public class ImmersiveEnchantingEvents {
 
     private void registerInternalTooltipDescriptions() {
         //Using the API hooks internally here to add text/custom rendering into the description box.
-        TooltipDescriptionExtensions.register(new CostLayoutExtension());
+        TooltipDescriptionExtensions.register(new EnchantingLayoutExtension());
         TooltipDescriptionExtensions.register(new TransmuteLayoutExtension());
         TooltipDescriptionExtensions.register(new ReplicateLayoutExtension());
     }

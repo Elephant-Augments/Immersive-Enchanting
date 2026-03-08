@@ -1,14 +1,21 @@
 package me.alfie.immersiveenchanting.gui.core;
 
+import me.alfie.immersiveenchanting.datapack.cost.CostEntry;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.tooltip.RenderDirection;
 import me.alfie.immersiveenchanting.gui.tooltip.TooltipDescription;
 import me.alfie.immersiveenchanting.gui.tooltip.TooltipTitle;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.joml.Vector2i;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class NodeTooltip {
     protected static final ResourceLocation BOX_UNOBTAINED_TEXTURE = ResourceLocation.fromNamespaceAndPath(
@@ -34,7 +41,14 @@ public class NodeTooltip {
 
     private String titleText;
 
-    public NodeTooltip(Node node, EnchantingTableScreen screen) {
+    private final int costIconSize = 16;
+    public List<CostEntry> validCosts;
+    private CostEntry currentRenderedCost;
+    private Vector2i costStackPos = new Vector2i(0, 0);
+    public List<Component> stackDescriptionComponents = new ArrayList<>() {{add(Component.empty());}};
+
+
+    public NodeTooltip(Node node, EnchantingTableScreen screen, List<CostEntry> validCosts) {
         this.node = node;
         this.screen = screen;
 
@@ -121,4 +135,52 @@ public class NodeTooltip {
         return tooltipTitle;
     }
 
+    public Vector2i getCostStackPos() {
+        return costStackPos;
+    }
+
+    public void setCostStackPos(Vector2i costStackPos) {
+        this.costStackPos = costStackPos;
+    }
+
+    public List<CostEntry> getValidCosts() {
+        return this.validCosts;
+    }
+
+    private ItemStack getCostStack(int index) {
+        return validCosts.get(index).asItemStack();
+    }
+
+    /**
+     * Returns the currently active element from a list, cycling through it
+     * based on system time and a given interval in milliseconds.
+     *
+     * @param <T> the type of elements
+     * @param list the list of elements to cycle through
+     * @param intervalMillis how long each element is shown before moving to the next
+     * @return the current element
+     */
+    public static <T> T getCycledElement(List<T> list, long intervalMillis) {
+        if (list == null || list.isEmpty()) return null;
+
+        long currentTime = System.currentTimeMillis();
+        int index = (int)((currentTime / intervalMillis) % list.size());
+
+        return list.get(index);
+    }
+
+    public void setCurrentRenderedCost(CostEntry currentRenderedCost) {
+        this.currentRenderedCost = currentRenderedCost;
+
+        CostEntry renderedCost = getCurrentRenderedCost();
+        if(renderedCost.getCostItemTag().isPresent()) {
+            String itemTag = renderedCost.getCostItemTag().get().itemTag();
+            stackDescriptionComponents.set(0, Component.translatable("gui.immersiveenchanting.accepts_any_tag", itemTag)
+                    .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+        }
+    }
+
+    public CostEntry getCurrentRenderedCost() {
+        return currentRenderedCost;
+    }
 }

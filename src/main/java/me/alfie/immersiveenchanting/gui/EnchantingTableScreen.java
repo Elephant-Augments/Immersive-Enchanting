@@ -444,28 +444,27 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
             if(node instanceof EnchantingNode enchantingNode) {
                 nodeTooltip = new EnchantingNodeTooltip(
                         enchantingNode,
-
+                        this,
                         EnchantmentCost.getRenderableAnyOfCosts(
                                 EnchantmentCostRegistry.getClientRegistry()
                                         .getEnchantmentCost(enchantingNode.getEnchantment())
                                         .getCostNodeForLevel(enchantingNode.getEnchantmentLevel())
-                        ),
-
-                        this
-                );
+                        ));
             }
 
             else if (node instanceof TransmuteNode transmuteNode) {
                 nodeTooltip = new TransmuteNodeTooltip(
                         transmuteNode,
-                        this
+                        this,
+                        new ArrayList<>()
                 );
             }
 
             else if (node instanceof ReplicateNode replicateNode) {
                 nodeTooltip = new ReplicateNodeTooltip(
                         replicateNode,
-                        this
+                        this,
+                        new ArrayList<>()
                 );
             }
 
