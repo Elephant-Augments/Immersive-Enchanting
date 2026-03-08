@@ -79,7 +79,6 @@ public class EnchantmentCostDatapackHandler extends SimpleJsonResourceReloadList
 
                 //Only level 1 is used for these costs
                 EnchantmentCost enchantmentCost = DatapackParser.parseJson(json);
-                //TODO only transmute rn
 
                 EnchantmentCostRegistry.InternalCosts key;
                 if(parts[1].equals("transmute")) {

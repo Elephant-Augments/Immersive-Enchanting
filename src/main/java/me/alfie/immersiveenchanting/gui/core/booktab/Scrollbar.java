@@ -8,54 +8,75 @@ public class Scrollbar {
     public final BookTab bookTab;
 
     private final int scrollerHeight = 15;
+
+    private final int scrollbarWidth = 14;
     private final int scrollbarHeight = 114;
 
     protected int scrollIndex = 0;
+
+    private int barX;
+    private int barY;
+
+    private int scrollerX;
+    private int scrollerY;
+    public boolean isMouseDraggingScroller;
 
     public Scrollbar(BookTab bookTab) {
         this.bookTab = bookTab;
     }
 
     public void render(GuiGraphics guiGraphics) {
-        int x = bookTab.screen.getGuiLeft() + 121;
-        int y = bookTab.screen.getGuiTop() + 6;
+        barX = bookTab.screen.getGuiLeft() + 121;
+        barY = bookTab.screen.getGuiTop() + 6;
 
         guiGraphics.blit(
                 Sprite.SCROLLBAR.get(),
-                x,
-                y,
-                0f, 0f, 14, scrollbarHeight,
-                14, scrollbarHeight
+                barX,
+                barY,
+                0f, 0f, scrollbarWidth, scrollbarHeight,
+                scrollbarWidth, scrollbarHeight
         );
 
-        int scrollerOffset = getScrollerOffset();
+        int scrollerOffset = getScrollwheelOffset();
+        scrollerY = barY + 1 + scrollerOffset;
+        scrollerX = barX+1;
+
 
         guiGraphics.blit(
                 Sprite.SCROLLER.get(),
-                x+1,
-                y+1+scrollerOffset,
+                scrollerX,
+                scrollerY,
                 0f, 0f, 12, scrollerHeight,
                 12, scrollerHeight
         );
     }
 
     /**
-     * Get the amount of offset for the scroller.
+     * Get the amount of offset for the scroller based on scroll index.
      * @return
      */
-    private int getScrollerOffset() {
-        int bottom = scrollbarHeight - scrollerHeight -2;
+    private int getScrollwheelOffset() {
+        int trackHeight = scrollbarHeight - scrollerHeight - 2;
 
-        int totalEnchantments = bookTab.getEnchantments().size() + 1;
-        double segmentHeight = (double) scrollbarHeight / totalEnchantments;
-        double yOffset = scrollIndex * segmentHeight;
+        int totalBoxes = bookTab.getEnchantments().size();
+        int maxScrollIndex = Math.max(0, totalBoxes - bookTab.MAX_BOXES_RENDERED);
 
-        // If we're at the last scroll index, force the scroller to the bottom of the scrollbar
-        if (scrollIndex == bookTab.getEnchantments().size() - bookTab.MAX_BOXES_RENDERED) {
-            yOffset = bottom;
-        }
-        int roundedYOffset = (int) Math.round(yOffset);
-        return roundedYOffset;
+        if (maxScrollIndex == 0) return 0;
+
+        double percent = (double) scrollIndex / maxScrollIndex;
+        return (int) Math.round(percent * trackHeight);
+    }
+
+    public void updateScrollFromMouse(int mouseY) {
+        int minY = barY + 1;
+        int maxY = barY + scrollbarHeight - scrollerHeight - 1;
+
+        int clamped = Math.max(minY, Math.min(mouseY - scrollerHeight / 2, maxY));
+
+        double percent = (double)(clamped - minY) / (maxY - minY);
+
+        int maxIndex = Math.max(0, bookTab.getEnchantments().size() - bookTab.MAX_BOXES_RENDERED);
+        scrollIndex = (int)Math.round(percent * maxIndex);
     }
 
     public void resetScrollIndex() {
@@ -69,5 +90,12 @@ public class Scrollbar {
             scrollIndex = bookTab.getEnchantments().size()- bookTab.MAX_BOXES_RENDERED;
 
         if(scrollIndex < 0) scrollIndex = 0;
+    }
+
+    public boolean isMouseOver(int mouseX, int mouseY) {
+        return bookTab.screen.isMouseOver(
+                mouseX, mouseY,
+                barX, barY,
+                scrollbarWidth, scrollbarHeight);
     }
 }

@@ -12,9 +12,10 @@ public class TransmuteNodeBranch extends NodeBranch {
                                boolean isBookReplicated) {
         super(screen, branchAngle);
 
-        NodeType nodeType = NodeType.ADVANCED;
+
         ResourceLocation iconTexture = ResourceLocation.fromNamespaceAndPath("immersiveenchanting", "textures/item/ancient_book.png");
 
+        NodeType nodeType = NodeType.ADVANCED;
         boolean nodeUnlocked = true;
         if(!canTransmute || isBookReplicated) {
             nodeUnlocked = false;

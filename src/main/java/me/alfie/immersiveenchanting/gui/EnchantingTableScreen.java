@@ -538,6 +538,11 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
                         filterCheckbox.toggleEnabled();
                     }
                 }
+
+                if(bookTab.scrollbar.isMouseOver((int) mouseX, (int) mouseY)) {
+                    bookTab.scrollbar.isMouseDraggingScroller = true;
+                    return true;
+                }
             }
 
             ItemStack carriedStack = menu.getCarried();
@@ -594,7 +599,15 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        canvas.drag(mouseX, mouseY, button);
+        if(canvas.getCanvasState().equals(CanvasState.ENCHANTING)) {
+            canvas.drag(mouseX, mouseY, button);
+        } else if(canvas.getCanvasState().equals(CanvasState.BOOKS)) {
+            if(bookTab.scrollbar.isMouseDraggingScroller) {
+                bookTab.scrollbar.updateScrollFromMouse((int) mouseY);
+                return true;
+            }
+        }
+
         return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
     }
 
@@ -604,6 +617,8 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         holdStartTime = 0;
 
         canvas.stopDrag(button);
+
+        bookTab.scrollbar.isMouseDraggingScroller = false;
         return super.mouseReleased(mouseX, mouseY, button);
 
     }

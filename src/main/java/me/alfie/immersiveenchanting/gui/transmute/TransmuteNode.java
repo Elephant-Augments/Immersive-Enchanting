@@ -19,6 +19,9 @@ public class TransmuteNode extends Node {
 
         if (!canTransmute) {
             setNodeType(NodeType.LOCKED);
+            if(isBookReplicated) {
+                setNodeType(NodeType.ALERT);
+            }
             setIconTexture(null);
         }
     }

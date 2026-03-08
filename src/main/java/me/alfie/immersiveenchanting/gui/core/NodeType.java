@@ -18,6 +18,10 @@ public enum NodeType {
         LOCKED(
                 ResourceLocation.fromNamespaceAndPath("immersiveenchanting", "textures/gui/sprites/basic_enchantment_locked.png"),
                 ResourceLocation.fromNamespaceAndPath("immersiveenchanting", "textures/gui/sprites/basic_enchantment_locked.png")
+        ),
+        ALERT(
+                ResourceLocation.fromNamespaceAndPath("immersiveenchanting", "textures/gui/sprites/warning_enchantment.png"),
+                ResourceLocation.fromNamespaceAndPath("immersiveenchanting", "textures/gui/sprites/warning_enchantment.png")
         );
 
     private final ResourceLocation unobtainedTexture;
