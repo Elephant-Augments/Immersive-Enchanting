@@ -1,5 +1,7 @@
 package me.alfie.immersiveenchanting.gui.enchanting;
 
+import me.alfie.immersiveenchanting.ImmersiveEnchanting;
+import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.datapack.cost.CostEntry;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.core.NodeTooltip;
@@ -28,15 +30,15 @@ public class EnchantingNodeTooltip extends NodeTooltip {
         this.validCosts = validCosts;
 
         //Decide title text
-        String titleText;
-        if (node.isBranchUnlocked) {
-            titleText = Enchantment.getFullname(node.getEnchantmentHolder(), node.getEnchantmentLevel())
-                    .copy() // creates a mutable copy
-                    .withStyle(ChatFormatting.WHITE)
-                    .getString();
-        } else {
-            titleText = Component.translatable("gui.immersiveenchanting.locked_enchantment").withStyle(ChatFormatting.RED).getString();
+        Component titleText = Enchantment.getFullname(node.getEnchantmentHolder(), node.getEnchantmentLevel())
+                .copy() // creates a mutable copy
+                .withStyle(ChatFormatting.WHITE);
+        if(!node.isBranchUnlocked) {
+            if(ServerConfig.isObfuscateLockedEnchantments()) {
+                titleText = ImmersiveEnchanting.getAltFont(titleText);
+            }
         }
+
 
         tooltipTitle.setTitleText(titleText);
     }

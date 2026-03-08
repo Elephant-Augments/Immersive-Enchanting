@@ -25,6 +25,7 @@ public class ServerConfig {
     public final ModConfigSpec.ConfigValue<Boolean> enableEnchantedBookTrades;
     public final ModConfigSpec.ConfigValue<Boolean> enableEnchantedBookLootTables;
 
+    public final ModConfigSpec.ConfigValue<Boolean> obfuscateLockedEnchantments;
 
 
     static {
@@ -86,6 +87,11 @@ public class ServerConfig {
                 .translation("immersiveenchanting.config.enable_enchanted_book_trades")
                 .define("enableEnchantedBookTrades", false);
 
+        obfuscateLockedEnchantments = builder
+                .comment("If enabled, enchantments that have not been found will have be obfuscated in the enchanting table.")
+                .translation("immersiveenchanting.config.obfuscate_locked_enchantments")
+                .define("obfuscateLockedEnchantments", true);
+
         builder.pop();
     }
 
@@ -133,5 +139,9 @@ public class ServerConfig {
         } catch (IllegalStateException e) { //Catch java.lang.IllegalStateException: Cannot get config value before config is loaded.
             return false;
         }
+    }
+
+    public static boolean isObfuscateLockedEnchantments() {
+        return ServerConfig.CONFIG.obfuscateLockedEnchantments.get();
     }
 }

@@ -19,6 +19,9 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -113,5 +116,11 @@ public class ImmersiveEnchanting {
 
     public static ResourceLocation getEnchantmentHolderRL(Holder<Enchantment> enchantmentHolder) {
         return ResourceLocation.parse(enchantmentHolder.getRegisteredName());
+    }
+
+    public static Component getAltFont(Component component) {
+        ResourceLocation fontStyle = ResourceLocation.withDefaultNamespace("alt");
+        MutableComponent styledComponent = component.copy().withStyle(Style.EMPTY.withFont(fontStyle));
+        return styledComponent;
     }
 }

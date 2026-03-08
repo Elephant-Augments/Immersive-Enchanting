@@ -4,21 +4,22 @@ import me.alfie.immersiveenchanting.gui.core.NodeTooltip;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 public class TooltipTitle extends NineSliceBox {
 
-    private String titleText;
+    private Component titleText;
 
     public TooltipTitle(NodeTooltip parentTooltip, ResourceLocation spriteTexture) {
         super(parentTooltip, spriteTexture);
     }
 
-    public final void setTitleText(String titleText) {
+    public final void setTitleText(Component titleText) {
         this.titleText = titleText;
     }
 
-    public String getTitleText() {
+    public Component getTitleText() {
         return titleText;
     }
 
@@ -39,6 +40,6 @@ public class TooltipTitle extends NineSliceBox {
                 titleText,
                 titleTextX,
                 titleTextY,
-                ChatFormatting.WHITE.getColor());
+                0xFFFFFF);
     }
 }

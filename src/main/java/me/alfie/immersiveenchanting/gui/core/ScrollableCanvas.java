@@ -282,9 +282,9 @@ public class ScrollableCanvas {
 
         if(this.canvasState.equals(CanvasState.BOOKS)) {
             setDraggingEnabled(false);
-            screen.bookWindow.clearSearch();
-            screen.bookWindow.resetScrollIndex();
-            screen.bookWindow.resetFilters();
+            screen.bookTab.searchbar.clearSearch();
+            screen.bookTab.scrollbar.resetScrollIndex();
+            screen.bookTab.resetFilterBoxes();
         } else if (this.canvasState.equals(CanvasState.ENCHANTING)) {
             if(!screen.getMenu().isToolSlotEmpty()) {
                 setDraggingEnabled(true);

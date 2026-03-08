@@ -3,44 +3,31 @@ package me.alfie.immersiveenchanting.gui;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.config.ServerConfig;
-import me.alfie.immersiveenchanting.datacomponent.ReplicatedDataComponent;
 import me.alfie.immersiveenchanting.datapack.cost.EnchantmentCost;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.gui.core.*;
+import me.alfie.immersiveenchanting.gui.core.booktab.BookTab;
+import me.alfie.immersiveenchanting.gui.core.booktab.FilterCheckbox;
 import me.alfie.immersiveenchanting.gui.enchanting.EnchantingNode;
 import me.alfie.immersiveenchanting.gui.enchanting.EnchantingNodeTooltip;
 import me.alfie.immersiveenchanting.gui.replicate.ReplicateNode;
-import me.alfie.immersiveenchanting.gui.replicate.ReplicateNodeBranch;
 import me.alfie.immersiveenchanting.gui.replicate.ReplicateNodeTooltip;
 import me.alfie.immersiveenchanting.gui.transmute.TransmuteNode;
-import me.alfie.immersiveenchanting.gui.transmute.TransmuteNodeBranch;
 import me.alfie.immersiveenchanting.gui.transmute.TransmuteNodeTooltip;
 import me.alfie.immersiveenchanting.item.ModItems;
-import me.alfie.immersiveenchanting.lootmodifier.AncientBookLootModifier;
 import me.alfie.immersiveenchanting.networking.packets.*;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
-import net.minecraft.client.gui.screens.options.controls.KeyBindsList;
-import net.minecraft.core.Holder;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.contents.KeybindContents;
-import net.minecraft.network.chat.contents.KeybindResolver;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
-import net.minecraft.world.item.enchantment.Enchantment;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.joml.Vector2i;
 import org.lwjgl.glfw.GLFW;
 
-import javax.swing.text.JTextComponent;
-import java.awt.*;
 import java.util.*;
 import java.util.List;
 
@@ -96,7 +83,8 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
     private int tabWidth = 20;
     private int tabHeight = 25;
 
-    public AncientBookWindow bookWindow;
+    public BookTab bookTab;
+    private ItemStack tabIcon = new ItemStack(ModItems.ANCIENT_BOOK.get(), 1);
 
     public EnchantingTableScreen(EnchantingTableMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
@@ -113,7 +101,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
 
         //No branch shenanigans here, do it in init() pls <3
         this.player = playerInventory.player;
-        bookWindow = new AncientBookWindow(this);
+        bookTab = new BookTab(this);
     }
 
     public ScrollableCanvas getCanvas() {
@@ -223,8 +211,18 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         }
 
         if(isMouseOverTab(mouseX, mouseY)) {
+            String key = "";
+            if(canvas.getCanvasState().equals(CanvasState.ENCHANTING)) {
+                key = "gui.immersiveenchanting.switch_book_tab";
+                tabIcon = new ItemStack(ModItems.ANCIENT_BOOK.get(), 1);
+            } else if (canvas.getCanvasState().equals(CanvasState.BOOKS)) {
+                key = "gui.immersiveenchanting.switch_enchanting_tab";
+                tabIcon = new ItemStack(Items.ENCHANTING_TABLE, 1);
+            }
+
+            //Draw tooltip
             guiGraphics.renderTooltip(
-                    font, Component.translatable("gui.immersiveenchanting.book_tab"), mouseX, mouseY
+                    font, Component.translatable(key), mouseX, mouseY
             );
         }
 
@@ -276,12 +274,17 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
             renderBooksScreen(guiGraphics, mouseX, mouseY);
         }
 
+
+
         //Disable scissor after drawing
         RenderSystem.disableScissor();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         guiGraphics.blit(ENCHANTING_TABLE_BACKGROUND_TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
         RenderSystem.disableBlend();
+
+        //Draw tab icon
+        guiGraphics.renderItem(tabIcon, getGuiLeft()+202, getGuiTop()+132);
     }
 
     private void renderBooksScreen(GuiGraphics guiGraphics, int mouseX, int mouseY) {
@@ -289,10 +292,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         guiGraphics.setColor(0.5F, 0.5F, 0.5F, 1f);
         canvas.renderTiledBg(guiGraphics);
 
-        bookWindow.renderEnchantmentBoxes(guiGraphics);
-        bookWindow.renderFilters(guiGraphics);
-        bookWindow.renderScrollbar(guiGraphics);
-        bookWindow.renderSearch(guiGraphics);
+        bookTab.render(guiGraphics);
     }
 
     private void renderEnchantingScreen(GuiGraphics guiGraphics, int mouseX, int mouseY) {
@@ -526,7 +526,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
             if(canvas.getCanvasState().equals(CanvasState.BOOKS)) {
 
                 //Toggle filter checkbox
-                for(FilterCheckbox filterCheckbox : bookWindow.filterCheckboxes) {
+                for(FilterCheckbox filterCheckbox : bookTab.filterCheckboxes) {
                     if(filterCheckbox.isMouseOver((int) mouseX, (int) mouseY)) {
                         filterCheckbox.toggleEnabled();
                     }
@@ -603,7 +603,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        bookWindow.incrementScrollIndex((int) -scrollY);
+        bookTab.scrollbar.incrementScrollIndex((int) -scrollY);
 
         return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
@@ -630,7 +630,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if(canvas.getCanvasState().equals(CanvasState.BOOKS)) {
             if(keyCode == GLFW.GLFW_KEY_BACKSPACE) {
-                bookWindow.removeCharFromSearch();
+                bookTab.searchbar.removeCharFromSearch();
             }
 
             if(keyCode == GLFW.GLFW_KEY_ESCAPE) {
@@ -646,7 +646,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
     @Override
     public boolean charTyped(char codePoint, int modifiers) {
         if(canvas.getCanvasState().equals(CanvasState.BOOKS)) {
-            bookWindow.addCharToSearch(codePoint);
+            bookTab.searchbar.addCharToSearch(codePoint);
         }
 
         return super.charTyped(codePoint, modifiers);

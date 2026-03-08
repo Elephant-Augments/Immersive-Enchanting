@@ -20,6 +20,7 @@ public enum Sprite {
     CHECKBOX_OFF("textures/gui/book_window/checkbox_off.png"),
     ENCHANTMENT_BOX_UNLOCKED("textures/gui/sprites/enchantment_box_unlocked.png"),
     ENCHANTMENT_BOX_LOCKED("textures/gui/sprites/enchantment_box_locked.png"),
+    UNKNOWN("textures/gui/sprites/unknown.png"),
     BACKGROUND_BOX("textures/gui/book_window/background_box.png");
 
     private final ResourceLocation location;

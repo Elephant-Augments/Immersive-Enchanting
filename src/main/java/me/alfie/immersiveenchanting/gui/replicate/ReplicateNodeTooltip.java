@@ -11,7 +11,7 @@ public class ReplicateNodeTooltip extends NodeTooltip {
     public ReplicateNodeTooltip(Node node, EnchantingTableScreen screen) {
         super(node, screen);
 
-        String text = Component.translatable("gui.immersiveenchanting.replicate_book").withStyle(ChatFormatting.GOLD).getString();
+        Component text = Component.translatable("gui.immersiveenchanting.replicate_book").withStyle(ChatFormatting.GOLD);
         tooltipTitle.setTitleText(text);
     }
 }

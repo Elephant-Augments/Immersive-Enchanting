@@ -56,7 +56,7 @@ public class CostLayoutExtension implements DescriptionLayoutExtension {
                 }
 
                 //Cost
-                if(!enchantingNode.isObtained()) {
+                if(!enchantingNode.isObtained() && enchantingNode.isBranchUnlocked) {
                     description.insertLine(0, new DescriptionLine() {
                         @Override
                         public void draw(GuiGraphics graphics, int lineX, int lineY) {
@@ -94,11 +94,28 @@ public class CostLayoutExtension implements DescriptionLayoutExtension {
                         @Override
                         public @NotNull Component getText() {
                             Component label;
-                            if (enchantingNode.isBranchUnlocked) {
-                                label = Component.translatable("gui.immersiveenchanting.cost").withStyle(ChatFormatting.GRAY);
-                            } else {
-                                label = Component.translatable("gui.immersiveenchanting.locked_enchantment_hint").withStyle(ChatFormatting.OBFUSCATED, ChatFormatting.GRAY);
-                            }
+                            label = Component.translatable("gui.immersiveenchanting.cost").withStyle(ChatFormatting.GRAY);
+                            return label;
+                        }
+                    });
+                }
+
+                //Locked branch
+                if(!enchantingNode.isBranchUnlocked) {
+                    description.insertLine(0, new DescriptionLine() {
+                        @Override
+                        public void draw(GuiGraphics graphics, int lineX, int lineY) {
+                            //Draw label
+                            graphics.drawString(Minecraft.getInstance().font,
+                                    getText(),
+                                    lineX,
+                                    lineY + 4, //Offset to centre text with cost stack
+                                    0xFFFFFF);
+                        }
+
+                        @Override
+                        public @NotNull Component getText() {
+                            Component label = Component.translatable("gui.immersiveenchanting.locked_enchantment_hint").withStyle(ChatFormatting.OBFUSCATED, ChatFormatting.GRAY);
                             return label;
                         }
                     });

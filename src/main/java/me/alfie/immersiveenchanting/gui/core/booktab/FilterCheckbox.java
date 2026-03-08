@@ -1,0 +1,81 @@
+package me.alfie.immersiveenchanting.gui.core.booktab;
+
+import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
+import me.alfie.immersiveenchanting.gui.core.BookFilters;
+import me.alfie.immersiveenchanting.gui.core.Sprite;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+
+import java.awt.*;
+
+public class FilterCheckbox {
+
+    boolean enabled = true;
+
+    public final BookFilters filterType;
+    public final BookTab bookTab;
+
+    private int x;
+    private int y;
+
+    public FilterCheckbox(BookTab bookTab, BookFilters filter) {
+        filterType = filter;
+        this.bookTab = bookTab;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public void toggleEnabled() {
+        this.enabled = !this.enabled;
+        bookTab.scrollbar.resetScrollIndex();
+        bookTab.screen.player.playNotifySound(SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.MASTER,
+                0.3f, 1f);
+    }
+
+    public void render(GuiGraphics guiGraphics) {
+        final int spriteSize = 18;
+        Sprite sprite = isEnabled() ? Sprite.CHECKBOX_ON : Sprite.CHECKBOX_OFF;
+
+        int x = bookTab.screen.getGuiLeft() + this.x;
+        int y = bookTab.screen.getGuiTop() + this.y;
+        guiGraphics.blit(
+                sprite.get(),
+                x,
+                y,
+                0f, 0f, spriteSize, spriteSize,
+                spriteSize, spriteSize
+        );
+
+        guiGraphics.drawString(bookTab.screen.getMinecraft().font, filterType.getLabel(),
+                x+20, y, Color.WHITE.hashCode());
+    }
+
+    public boolean isMouseOver(int mouseX, int mouseY) {
+        return bookTab.screen.isMouseOver(mouseX, mouseY,
+                bookTab.screen.getGuiLeft() + x,
+                bookTab.screen.getGuiTop() + y, 18, 18);
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public void setY(int y) {
+        this.y = y;
+    }
+}
