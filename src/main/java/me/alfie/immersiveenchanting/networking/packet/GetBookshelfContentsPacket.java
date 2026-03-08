@@ -1,4 +1,4 @@
-package me.alfie.immersiveenchanting.networking.packets;
+package me.alfie.immersiveenchanting.networking.packet;
 
 import io.netty.buffer.ByteBuf;
 import me.alfie.immersiveenchanting.networking.ServerPayloadHandler;

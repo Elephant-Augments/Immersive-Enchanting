@@ -22,7 +22,7 @@ import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
 import me.alfie.immersiveenchanting.item.AncientBook;
 import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.networking.ServerPayloadHandler;
-import me.alfie.immersiveenchanting.networking.packets.EnchantmentCostRegistrySyncPacket;
+import me.alfie.immersiveenchanting.networking.packet.EnchantmentCostRegistrySyncPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
@@ -190,7 +190,7 @@ public class ImmersiveEnchantingEvents {
         Map<ResourceKey<Enchantment>, EnchantmentCost> costRegistry = registry.getCostRegistry();
         for(EnchantmentCost cost : costRegistry.values()) {
             for (int i = 0; i < cost.getHighestLevel(); i++) {
-                CostDefinition costDefinition = cost.getCostNodeForLevel(i+1);
+                CostDefinition costDefinition = cost.getCostForLevel(i+1);
 
                 if(costDefinition instanceof CostGroup costGroup) {
                     //Search for cost groups with item tags

@@ -1,4 +1,4 @@
-package me.alfie.immersiveenchanting.networking.packets;
+package me.alfie.immersiveenchanting.networking.packet;
 
 import me.alfie.immersiveenchanting.networking.ClientPayloadHandler;
 import net.minecraft.core.registries.Registries;

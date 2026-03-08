@@ -1,11 +1,8 @@
 package me.alfie.immersiveenchanting.datapack.cost;
 
-import me.alfie.immersiveenchanting.ImmersiveEnchanting;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class EnchantmentCost {
     //String is the level number as a string - its a string because its from the json.
@@ -14,13 +11,11 @@ public class EnchantmentCost {
 
     public EnchantmentCost(Map<String, CostDefinition> levelCosts) {
         this.enabled = true;
-
         this.levels = levelCosts;
     }
 
     public EnchantmentCost(Map<String, CostDefinition> levelCosts, boolean enabled) {
         this.enabled = enabled;
-
         this.levels = levelCosts;
     }
 
@@ -29,7 +24,7 @@ public class EnchantmentCost {
      * @param level
      * @return
      */
-    public CostDefinition getCostNodeForLevel(int level) {
+    public CostDefinition getCostForLevel(int level) {
         return levels.get(String.valueOf(level));
     }
 
@@ -45,8 +40,8 @@ public class EnchantmentCost {
     public static List<CostEntry> getRenderableAnyOfCosts(CostDefinition node) {
         List<CostEntry> result = new ArrayList<>();
 
-        if(node instanceof CostEntry leaf) {
-            result.add(leaf);
+        if(node instanceof CostEntry entry) {
+            result.add(entry);
         } else if (node instanceof CostGroup composite) {
             if(composite.type() == GroupType.ANY_OF) {
                 for(CostDefinition child : composite.children()) {

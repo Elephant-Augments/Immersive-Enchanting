@@ -3,7 +3,6 @@ package me.alfie.immersiveenchanting.gui;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.config.ServerConfig;
-import me.alfie.immersiveenchanting.datapack.cost.CostEntry;
 import me.alfie.immersiveenchanting.datapack.cost.EnchantmentCost;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.gui.core.*;
@@ -16,7 +15,7 @@ import me.alfie.immersiveenchanting.gui.replicate.ReplicateNodeTooltip;
 import me.alfie.immersiveenchanting.gui.transmute.TransmuteNode;
 import me.alfie.immersiveenchanting.gui.transmute.TransmuteNodeTooltip;
 import me.alfie.immersiveenchanting.item.ModItems;
-import me.alfie.immersiveenchanting.networking.packets.*;
+import me.alfie.immersiveenchanting.networking.packet.*;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
@@ -445,7 +444,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
                         EnchantmentCost.getRenderableAnyOfCosts(
                                 EnchantmentCostRegistry.getClientRegistry()
                                         .getEnchantmentCost(enchantingNode.getEnchantment())
-                                        .getCostNodeForLevel(enchantingNode.getEnchantmentLevel())
+                                        .getCostForLevel(enchantingNode.getEnchantmentLevel())
                         ));
             }
 
@@ -457,7 +456,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
                                 EnchantmentCostRegistry.getClientRegistry()
                                         .getInternalRegistry()
                                         .get(EnchantmentCostRegistry.InternalCosts.TRANSMUTE)
-                                        .getCostNodeForLevel(1)));
+                                        .getCostForLevel(1)));
             }
 
             else if (node instanceof ReplicateNode replicateNode) {
@@ -468,7 +467,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
                                 EnchantmentCostRegistry.getClientRegistry()
                                         .getInternalRegistry()
                                         .get(EnchantmentCostRegistry.InternalCosts.REPLICATE)
-                                        .getCostNodeForLevel(1)));
+                                        .getCostForLevel(1)));
             }
 
             float pitch = 1;

@@ -5,8 +5,8 @@ import me.alfie.immersiveenchanting.ImmersiveEnchantingEvents;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.datapack.cost.CostHelper;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
-import me.alfie.immersiveenchanting.networking.packets.EnchantmentCostRegistrySyncPacket;
-import me.alfie.immersiveenchanting.networking.packets.UnlockedEnchantmentsPacket;
+import me.alfie.immersiveenchanting.networking.packet.EnchantmentCostRegistrySyncPacket;
+import me.alfie.immersiveenchanting.networking.packet.UnlockedEnchantmentsPacket;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -45,7 +45,7 @@ public class ClientPayloadHandler {
         ImmersiveEnchanting.LOGGER.info(CostHelper.toAsciiTree(
                 EnchantmentCostRegistry.getClientRegistry().getEnchantmentCost(
                         ResourceKey.create(Registries.ENCHANTMENT, ResourceLocation.parse("minecraft:aqua_affinity"))
-                ).getCostNodeForLevel(1)
+                ).getCostForLevel(1)
         ));
     }
 

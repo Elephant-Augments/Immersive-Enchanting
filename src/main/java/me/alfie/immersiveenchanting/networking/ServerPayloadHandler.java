@@ -9,12 +9,13 @@ import me.alfie.immersiveenchanting.datacomponent.ReplicatedDataComponent;
 import me.alfie.immersiveenchanting.datapack.cost.CostDefinition;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostDatapackHandler;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
-import me.alfie.immersiveenchanting.datapack.cost.EnchantmentCost;
+import me.alfie.immersiveenchanting.datapack.cost.CostEntry;
+import me.alfie.immersiveenchanting.datapack.cost.CostHelper;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
 import me.alfie.immersiveenchanting.item.AncientBook;
 import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.lootmodifier.AncientBookLootModifier;
-import me.alfie.immersiveenchanting.networking.packets.*;
+import me.alfie.immersiveenchanting.networking.packet.*;
 import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
@@ -38,7 +39,6 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
@@ -51,7 +51,6 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class ServerPayloadHandler {
 
@@ -116,23 +115,21 @@ public class ServerPayloadHandler {
             List<ItemStack> costItems = new ArrayList<>();
             costItems.add(costSlotItem);
 
-            boolean isCostValid =  EnchantmentCostRegistry.isCostValid(
-                    EnchantmentCostRegistry.getServerRegistry().getReplicateCost().getCostNodeForLevel(1),
+            CostEntry validCost = CostHelper.findValidCost(
+                    EnchantmentCostRegistry.getServerRegistry().getReplicateCost().getCostForLevel(1),
                     costItems,
                     player.experienceLevel);
 
-            if(isCostValid || player.isCreative()) {
-                //TODO shrink correctly
-                player.giveExperienceLevels(-10);
-                enchantingTableMenu.getCostSlotItem().shrink(1);
+            if(validCost != null || player.isCreative()) {
+                player.giveExperienceLevels(-validCost.xpLevels());
+                enchantingTableMenu.getCostSlotItem().shrink(validCost.amount());
 
-                BlockPos tablePos = enchantingTableMenu.getBlockPos();
-
+                //Create new stack with replicated tag
                 ItemStack oldStack = enchantingTableMenu.getToolSlotItem().copyAndClear();
                 ItemStack newStack = oldStack.copy();
-
-                //Copied books cannot be transmuted
                 newStack.set(ModDataComponents.REPLICATED, new ReplicatedDataComponent(true));
+
+                BlockPos tablePos = enchantingTableMenu.getBlockPos();
 
                 //Create 2 entities
                 for (int i = 0; i < 2; i++) {
@@ -148,7 +145,6 @@ public class ServerPayloadHandler {
                     level.addFreshEntity(entity);
                 }
 
-
                 //Play effects
                 level.playSound(null, tablePos, SoundEvents.ALLAY_ITEM_GIVEN,
                         SoundSource.BLOCKS, 0.7F, 1.2F);
@@ -158,7 +154,6 @@ public class ServerPayloadHandler {
                         SoundSource.BLOCKS, 0.5F, 1.5F);
                 level.playSound(null, tablePos, SoundEvents.ILLUSIONER_MIRROR_MOVE,
                         SoundSource.BLOCKS, 0.4F, 1.2F);
-
 
                 int particleCount = 30;
                 ((ServerLevel) level).sendParticles(
@@ -212,15 +207,16 @@ public class ServerPayloadHandler {
             List<ItemStack> costItems = new ArrayList<>();
             costItems.add(costSlotItem);
 
-            boolean isCostValid =  EnchantmentCostRegistry.isCostValid(
-                    EnchantmentCostRegistry.getServerRegistry().getTransmuteCost().getCostNodeForLevel(1),
+            CostEntry validCost = CostHelper.findValidCost(
+                    EnchantmentCostRegistry.getServerRegistry().getReplicateCost().getCostForLevel(1),
                     costItems,
                     player.experienceLevel);
+
             boolean isBookReplicated = ReplicatedDataComponent.isReplicated(ancientBookStack);
 
-            if(isCostValid || player.isCreative() && !isBookReplicated) {
-                //Todo shrink correctly
-                player.giveExperienceLevels(-10);
+            if(validCost != null || player.isCreative() && !isBookReplicated) {
+
+                player.giveExperienceLevels(-validCost.xpLevels());
 
                 //Save old enchantment for text
                 Registry<Enchantment> enchantmentRegistry = ImmersiveEnchanting.getEnchantmentRegistry(level.registryAccess());
@@ -304,86 +300,7 @@ public class ServerPayloadHandler {
      * @param context
      */
     public static void onEnchantItem(final EnchantItemPacket packet, final IPayloadContext context) {
-        Player player = context.player();
-        if (player == null) return;
-        Level level = player.level();
 
-        AbstractContainerMenu enchantingTableMenu = player.containerMenu;
-        ItemStack itemToEnchant = enchantingTableMenu.getSlot(EnchantingTableMenu.SLOTS.TOOL.ordinal()).getItem();
-
-        RegistryAccess registryAccess = player.registryAccess();
-        Optional<Holder.Reference<Enchantment>> enchantmentHolder = ImmersiveEnchanting.getEnchantmentHolder(
-                registryAccess,
-                packet.enchantment()
-        );
-
-        Holder<Enchantment> enchantment = enchantmentHolder.orElseThrow(() ->
-                new IllegalStateException("Enchantment not found: " + packet.enchantment())
-        );
-
-        // Currently only for Enchant Limiter.
-        // Currently, this check only exists on NeoForge 1.21.1 as Enchant Limiter is not available on Forge 1.20.1.
-        if (!ModCompat.canEnchant(itemToEnchant, enchantment)) {
-            level.playSound(null, player.blockPosition(), SoundEvents.VAULT_CLOSE_SHUTTER, SoundSource.BLOCKS, 1, 1);
-            return;
-        }
-
-        //Check enchantment cost
-        ItemStack costSlotItemStack = enchantingTableMenu.getSlot(EnchantingTableMenu.SLOTS.COST.ordinal()).getItem();
-        List<ItemStack> insertedItems = new ArrayList<>();
-        insertedItems.add(costSlotItemStack);
-
-        int playerXp = player.experienceLevel;
-
-        //TODO Use .isCostValid?
-        CostDefinition costNode = EnchantmentCostRegistry.getServerRegistry().getEnchantmentCost(packet.enchantment()).getCostNodeForLevel(packet.enchantmentLevel());
-        boolean costSlotIsValid = EnchantmentCostRegistry.isCostValid(costNode, insertedItems, playerXp);
-
-        List<Item> validEnchantingFuels = EnchantmentCostDatapackHandler.getValidEnchantingFuels();
-        ItemStack enchantingFuel = enchantingTableMenu.getSlot(EnchantingTableMenu.SLOTS.ENCHANTING_FUEL.ordinal()).getItem();
-        boolean enchantingFuelIsValid = validEnchantingFuels.contains(enchantingFuel.getItem());
-
-        boolean hasEnoughCost = player.hasInfiniteMaterials() ||
-                ( (validEnchantingFuels.isEmpty() || enchantingFuelIsValid)
-                        && costSlotIsValid);
-
-        if (hasEnoughCost) {
-            if (!player.hasInfiniteMaterials()) {
-                enchantingTableMenu.getSlot(EnchantingTableMenu.SLOTS.ENCHANTING_FUEL.ordinal()).getItem()
-                        .shrink(1); //Todo use config
-
-                //TODO shrink by correct amount from cost
-                //costSlotItemStack.shrink(requiredItemCostStack.getCount()); //Use enchantment cost if not air
-            }
-
-            //Enchant item server side
-            itemToEnchant.enchant(
-                    enchantment,
-                    packet.enchantmentLevel()
-            );
-
-            player.awardStat(Stats.ENCHANT_ITEM);
-
-            if (player instanceof ServerPlayer serverPlayer) {
-                // Number is levels spent - using 1 to as a compatible default value
-                // (Adjust if optional enchantment cost extensions in the future may include xp cost)
-                CriteriaTriggers.ENCHANTED_ITEM.trigger(serverPlayer, itemToEnchant, 1);
-            }
-
-            if (packet.enchantmentLevel() == EnchantmentCostRegistry.getServerRegistry().getEnchantmentCost(packet.enchantment()).getHighestLevel()) {
-                //Sound FX for highest tier.
-                level.playSound(null, player.blockPosition(), SoundEvents.BEACON_POWER_SELECT,
-                        SoundSource.BLOCKS, 1.0F, 1.0F);
-            } else {
-                //Sound FX for normal tier.
-                level.playSound(null, player.blockPosition(), SoundEvents.ENCHANTMENT_TABLE_USE,
-                        SoundSource.BLOCKS, 1.0F, 1.0F);
-            }
-        } else {
-            //If unable to enchant
-            level.playSound(null, player.blockPosition(), SoundEvents.VAULT_CLOSE_SHUTTER,
-                    SoundSource.BLOCKS, 1.0F, 1.0F);
-        }
     }
 
     public static void onGetBookshelfContentsPacket(final GetBookshelfContentsPacket packet, final IPayloadContext context) {

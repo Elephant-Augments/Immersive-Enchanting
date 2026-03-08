@@ -1,4 +1,4 @@
-package me.alfie.immersiveenchanting.networking.packets;
+package me.alfie.immersiveenchanting.networking.packet;
 
 import me.alfie.immersiveenchanting.networking.ServerPayloadHandler;
 import net.minecraft.core.registries.Registries;
@@ -13,15 +13,15 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.DirectionalPayloadHandler;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
-public record EnchantItemPacket(ResourceKey<Enchantment> enchantment, int enchantmentLevel) implements CustomPacketPayload {
-    public static final CustomPacketPayload.Type<EnchantItemPacket> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath("immersiveenchanting", "enchantmentpacket"));
+public record RemoveEnchantmentPacket(ResourceKey<Enchantment> enchantment, int enchantmentLevel) implements CustomPacketPayload {
+    public static final Type<RemoveEnchantmentPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath("immersiveenchanting", "removeenchantmentpacket"));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, EnchantItemPacket> STREAM_CODEC = StreamCodec.composite(
+    public static final StreamCodec<RegistryFriendlyByteBuf, RemoveEnchantmentPacket> STREAM_CODEC = StreamCodec.composite(
             ResourceKey.streamCodec(Registries.ENCHANTMENT),
-            EnchantItemPacket::enchantment,
+            RemoveEnchantmentPacket::enchantment,
             ByteBufCodecs.VAR_INT,
-            EnchantItemPacket::enchantmentLevel,
-            EnchantItemPacket::new
+            RemoveEnchantmentPacket::enchantmentLevel,
+            RemoveEnchantmentPacket::new
     );
 
     @Override
@@ -32,11 +32,11 @@ public record EnchantItemPacket(ResourceKey<Enchantment> enchantment, int enchan
     public static void register(final RegisterPayloadHandlersEvent event) {
         final PayloadRegistrar registrar = event.registrar("1");
         registrar.playBidirectional(
-                EnchantItemPacket.TYPE,
-                EnchantItemPacket.STREAM_CODEC,
-                new DirectionalPayloadHandler<EnchantItemPacket>(
+                RemoveEnchantmentPacket.TYPE,
+                RemoveEnchantmentPacket.STREAM_CODEC,
+                new DirectionalPayloadHandler<RemoveEnchantmentPacket>(
                         null,
-                        ServerPayloadHandler::onEnchantItem
+                        ServerPayloadHandler::onRemoveEnchantment
                 )
         );
     }

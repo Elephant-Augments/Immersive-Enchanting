@@ -1,4 +1,4 @@
-package me.alfie.immersiveenchanting.networking.packets;
+package me.alfie.immersiveenchanting.networking.packet;
 
 import me.alfie.immersiveenchanting.networking.ServerPayloadHandler;
 import net.minecraft.network.FriendlyByteBuf;

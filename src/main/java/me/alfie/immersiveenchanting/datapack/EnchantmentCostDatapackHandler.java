@@ -3,13 +3,10 @@ package me.alfie.immersiveenchanting.datapack;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
-import me.alfie.immersiveenchanting.ImmersiveEnchantingEvents;
 import me.alfie.immersiveenchanting.datapack.cost.CostHelper;
 import me.alfie.immersiveenchanting.datapack.cost.EnchantmentCost;
 import me.alfie.immersiveenchanting.datapack.parser.DatapackParser;
-import me.alfie.immersiveenchanting.networking.packets.EnchantmentCostRegistrySyncPacket;
-import net.minecraft.core.Holder;
-import net.minecraft.core.registries.BuiltInRegistries;
+import me.alfie.immersiveenchanting.networking.packet.EnchantmentCostRegistrySyncPacket;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -17,15 +14,12 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
-import net.minecraft.tags.TagKey;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.enchantment.Enchantment;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class EnchantmentCostDatapackHandler extends SimpleJsonResourceReloadListener {
 
@@ -62,7 +56,6 @@ public class EnchantmentCostDatapackHandler extends SimpleJsonResourceReloadList
         }
         EnchantmentCostRegistry.getServerRegistry().clear();
 
-        //TODO
         //--- NEW FILE FORMAT ---///
         int fileCount = 0;
         ImmersiveEnchanting.LOGGER.info("Parsing datapack files...");
@@ -88,9 +81,6 @@ public class EnchantmentCostDatapackHandler extends SimpleJsonResourceReloadList
                     key = EnchantmentCostRegistry.InternalCosts.REPLICATE;
                     EnchantmentCostRegistry.getServerRegistry().getInternalRegistry().put(key, enchantmentCost);
                 }
-
-
-
                 ImmersiveEnchanting.LOGGER.info("Loaded costs for transmute and replicate.");
 
             //Normal enchantment costs
@@ -107,15 +97,7 @@ public class EnchantmentCostDatapackHandler extends SimpleJsonResourceReloadList
         ImmersiveEnchanting.LOGGER.info("Loaded " + fileCount + " enchantment costs.");
         //-----------------------///
 
-        syncRegistry();
-    }
-
-    /**
-     * Sync the server registry with the client.
-     * !Server-side only
-     */
-    public void syncRegistry() {
-        //Attempt to send sync packet to all players on reload
+        //Sync client with server
         int count = 0;
         if(server != null) {
             for(ServerPlayer player : server.getPlayerList().getPlayers()) {
@@ -131,19 +113,7 @@ public class EnchantmentCostDatapackHandler extends SimpleJsonResourceReloadList
      * @return
      */
     public static List<Item> getValidEnchantingFuels() {
-        return getItemsInTag(getItemTag("neoforge:enchanting_fuels"));
+        return CostHelper.getItemsInItemTag(CostHelper.getItemTag("neoforge:enchanting_fuels"));
     }
 
-    public static List<Item> getItemsInTag(TagKey<Item> itemTag) {
-        return BuiltInRegistries.ITEM.getTag(itemTag)
-                .map(tagSet -> tagSet.stream()
-                        .map(Holder::value) // <-- convert Holder<Item> -> Item
-                        .collect(Collectors.toList()))
-                .orElse(List.of());
-    }
-
-    public static TagKey<Item> getItemTag(String resourceLocation) {
-        TagKey<Item> tag = TagKey.create(Registries.ITEM, ResourceLocation.parse(resourceLocation));
-        return tag;
-    }
 }

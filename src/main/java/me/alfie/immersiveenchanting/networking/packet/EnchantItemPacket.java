@@ -1,6 +1,7 @@
-package me.alfie.immersiveenchanting.networking.packets;
+package me.alfie.immersiveenchanting.networking.packet;
 
 import me.alfie.immersiveenchanting.networking.ServerPayloadHandler;
+import me.alfie.immersiveenchanting.networking.payload.EnchantItemPayload;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -13,15 +14,15 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.DirectionalPayloadHandler;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
-public record RemoveEnchantmentPacket(ResourceKey<Enchantment> enchantment, int enchantmentLevel) implements CustomPacketPayload {
-    public static final Type<RemoveEnchantmentPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath("immersiveenchanting", "removeenchantmentpacket"));
+public record EnchantItemPacket(ResourceKey<Enchantment> enchantment, int enchantmentLevel) implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<EnchantItemPacket> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath("immersiveenchanting", "enchantmentpacket"));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, RemoveEnchantmentPacket> STREAM_CODEC = StreamCodec.composite(
+    public static final StreamCodec<RegistryFriendlyByteBuf, EnchantItemPacket> STREAM_CODEC = StreamCodec.composite(
             ResourceKey.streamCodec(Registries.ENCHANTMENT),
-            RemoveEnchantmentPacket::enchantment,
+            EnchantItemPacket::enchantment,
             ByteBufCodecs.VAR_INT,
-            RemoveEnchantmentPacket::enchantmentLevel,
-            RemoveEnchantmentPacket::new
+            EnchantItemPacket::enchantmentLevel,
+            EnchantItemPacket::new
     );
 
     @Override
@@ -31,12 +32,15 @@ public record RemoveEnchantmentPacket(ResourceKey<Enchantment> enchantment, int 
 
     public static void register(final RegisterPayloadHandlersEvent event) {
         final PayloadRegistrar registrar = event.registrar("1");
+
+        EnchantItemPayload payloadHandler = new EnchantItemPayload();
+
         registrar.playBidirectional(
-                RemoveEnchantmentPacket.TYPE,
-                RemoveEnchantmentPacket.STREAM_CODEC,
-                new DirectionalPayloadHandler<RemoveEnchantmentPacket>(
-                        null,
-                        ServerPayloadHandler::onRemoveEnchantment
+                EnchantItemPacket.TYPE,
+                EnchantItemPacket.STREAM_CODEC,
+                new DirectionalPayloadHandler<EnchantItemPacket>(
+                        payloadHandler::execOnClient,
+                        payloadHandler::execOnServer
                 )
         );
     }
