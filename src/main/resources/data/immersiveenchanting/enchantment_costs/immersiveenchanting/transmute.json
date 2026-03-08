@@ -1,0 +1,9 @@
+{
+  "levels": {
+    "1": {
+      "item": "minecraft:diamond",
+      "amount": 1,
+      "xp_levels": 10
+    }
+  }
+}

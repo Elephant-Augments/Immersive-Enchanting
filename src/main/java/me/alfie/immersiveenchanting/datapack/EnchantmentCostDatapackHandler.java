@@ -24,6 +24,7 @@ import net.minecraft.world.item.enchantment.Enchantment;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class EnchantmentCostDatapackHandler extends SimpleJsonResourceReloadListener {
@@ -69,23 +70,40 @@ public class EnchantmentCostDatapackHandler extends SimpleJsonResourceReloadList
             ResourceLocation fileId = entry.getKey();   // e.g., immersiveenchanting:minecraft/efficiency
             JsonElement json = entry.getValue();
 
-            //TODO
-            //Skip these for now
-            if(fileId.toString().equals("immersiveenchanting:test") || fileId.toString().equals("immersiveenchanting:lapis_cost")) {
-                continue;
-            }
-
-            // Parse JSON into an EnchantmentCost
-            EnchantmentCost enchantmentCost = DatapackParser.parseJson(json);
-
             // Convert file path to actual enchantment RL: "minecraft/efficiency" → ResourceLocation("minecraft", "efficiency")
             String[] parts = fileId.getPath().split("/", 2);
             if (parts.length != 2) continue; // invalid file structure
-            ResourceLocation enchantmentResourceLocation = ResourceLocation.fromNamespaceAndPath(parts[0], parts[1]);
 
-            //Put into server registry
-            EnchantmentCostRegistry.getServerRegistry().getCostRegistry().put(ResourceKey.create(Registries.ENCHANTMENT, enchantmentResourceLocation), enchantmentCost);
-            fileCount++;
+            //Load transmute/replicate costs differently
+            if(Objects.equals(parts[0], "immersiveenchanting")) {
+
+                //Only level 1 is used for these costs
+                EnchantmentCost enchantmentCost = DatapackParser.parseJson(json);
+                //TODO only transmute rn
+
+                EnchantmentCostRegistry.InternalCosts key;
+                if(parts[1].equals("transmute")) {
+                    key = EnchantmentCostRegistry.InternalCosts.TRANSMUTE;
+                    EnchantmentCostRegistry.getServerRegistry().getInternalRegistry().put(key, enchantmentCost);
+                } else if(parts[1].equals("replicate")) {
+                    key = EnchantmentCostRegistry.InternalCosts.REPLICATE;
+                    EnchantmentCostRegistry.getServerRegistry().getInternalRegistry().put(key, enchantmentCost);
+                }
+
+
+
+                ImmersiveEnchanting.LOGGER.info("Loaded costs for transmute and replicate.");
+
+            //Normal enchantment costs
+            } else {
+                // Parse JSON into an EnchantmentCost
+                EnchantmentCost enchantmentCost = DatapackParser.parseJson(json);
+                ResourceLocation enchantmentResourceLocation = ResourceLocation.fromNamespaceAndPath(parts[0], parts[1]);
+
+                //Put into server registry
+                EnchantmentCostRegistry.getServerRegistry().getCostRegistry().put(ResourceKey.create(Registries.ENCHANTMENT, enchantmentResourceLocation), enchantmentCost);
+                fileCount++;
+            }
         }
         ImmersiveEnchanting.LOGGER.info("Loaded " + fileCount + " enchantment costs.");
         //-----------------------///

@@ -74,6 +74,20 @@ public record EnchantmentCostRegistrySyncPacket(
             jsonStrings.add(jsonString);
         }
 
+        //Special serialization for transmute/replicate
+        for(Map.Entry<EnchantmentCostRegistry.InternalCosts, EnchantmentCost> entry : registry.getInternalRegistry().entrySet()) {
+
+            String id = entry.getKey().getId();
+            EnchantmentCost cost = entry.getValue();
+
+            //Cost to JSON
+            JsonObject json = DatapackParser.toJson(cost);
+            String jsonString = json.toString();
+
+            enchantmentIds.add(id);
+            jsonStrings.add(jsonString);
+        }
+
         return new SerializedEnchantmentCostRegistry(
                 enchantmentIds,
                 jsonStrings
@@ -98,6 +112,17 @@ public record EnchantmentCostRegistrySyncPacket(
             JsonElement element = JsonParser.parseString(jsonString);
             EnchantmentCost cost = DatapackParser.parseJson(element);
 
+            //Special case for transmute/replicate
+            if(enchantmentId.equals(EnchantmentCostRegistry.InternalCosts.TRANSMUTE.getId())) {
+                registry.getInternalRegistry().put(EnchantmentCostRegistry.InternalCosts.TRANSMUTE, cost);
+                continue;
+            }
+            if(enchantmentId.equals(EnchantmentCostRegistry.InternalCosts.REPLICATE.getId())) {
+                registry.getInternalRegistry().put(EnchantmentCostRegistry.InternalCosts.REPLICATE, cost);
+                continue;
+            }
+
+            //If enchantment...
             //Id to RL
             ResourceLocation resourceLocation = ResourceLocation.parse(enchantmentId);
             ResourceKey<Enchantment> key = ResourceKey.create(Registries.ENCHANTMENT, resourceLocation);

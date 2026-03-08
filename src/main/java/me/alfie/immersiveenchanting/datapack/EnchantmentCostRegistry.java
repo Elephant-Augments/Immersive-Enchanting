@@ -36,6 +36,29 @@ public class EnchantmentCostRegistry {
     private final Map<ResourceKey<Enchantment>, EnchantmentCost> COST_REGISTRY = new HashMap<>();
     public static final EnchantmentCost EMPTY = new EnchantmentCost(new HashMap<>());
 
+
+    public enum InternalCosts {
+        TRANSMUTE("immersiveenchanting:transmute"),
+        REPLICATE("immersiveenchanting:replicate");
+
+        private final String id;
+
+        InternalCosts(String id) {
+            this.id = id;
+        }
+
+        public String getId() {
+            return this.id;
+        }
+    }
+
+    //Stores costs for thing that are not enchantments i.e - transmute/replicate.
+    private final Map<InternalCosts, EnchantmentCost> INTERNAL_REGISTRY = new HashMap<>();
+
+    public Map<InternalCosts, EnchantmentCost> getInternalRegistry() {
+        return INTERNAL_REGISTRY;
+    }
+
     /**
      * Helper method to get enchantment cost from COST_REGISTRY from its resource location.
      * @param enchantment

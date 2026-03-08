@@ -457,20 +457,22 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
                 nodeTooltip = new TransmuteNodeTooltip(
                         transmuteNode,
                         this,
-                        new ArrayList<>() {{
-                            add(new CostEntry("minecraft:writable_book", "", 1, 10));
-                        }}
-                );
+                        EnchantmentCost.getRenderableAnyOfCosts(
+                                EnchantmentCostRegistry.getClientRegistry()
+                                        .getInternalRegistry()
+                                        .get(EnchantmentCostRegistry.InternalCosts.TRANSMUTE)
+                                        .getCostNodeForLevel(1)));
             }
 
             else if (node instanceof ReplicateNode replicateNode) {
                 nodeTooltip = new ReplicateNodeTooltip(
                         replicateNode,
                         this,
-                        new ArrayList<>() {{
-                            add(new CostEntry("", "", 0, 10));
-                        }}
-                );
+                        EnchantmentCost.getRenderableAnyOfCosts(
+                                EnchantmentCostRegistry.getClientRegistry()
+                                        .getInternalRegistry()
+                                        .get(EnchantmentCostRegistry.InternalCosts.REPLICATE)
+                                        .getCostNodeForLevel(1)));
             }
 
             float pitch = 1;

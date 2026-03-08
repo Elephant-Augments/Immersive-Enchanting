@@ -2,6 +2,7 @@ package me.alfie.immersiveenchanting.gui.core.booktab;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.config.ServerConfig;
+import me.alfie.immersiveenchanting.datapack.EnchantmentMetadataRegistry;
 import me.alfie.immersiveenchanting.gui.core.Sprite;
 import me.alfie.immersiveenchanting.item.ModItems;
 import net.minecraft.ChatFormatting;
@@ -86,14 +87,15 @@ public class EnchantmentBox {
     private void renderIcon(GuiGraphics guiGraphics, int x, int y) {
         int xPos;
         if(bookTab.screen.getMenu().isEnchantmentUnlocked(enchantmentHolder)) {
-
-            ItemStack icon = new ItemStack(ModItems.ANCIENT_BOOK.get(), 1);
+            ResourceLocation icon = EnchantmentMetadataRegistry.getIconTexture(ResourceLocation.parse(enchantmentHolder.getRegisteredName()));
 
             xPos = 91;
-            guiGraphics.renderItem(
+            guiGraphics.blit(
                     icon,
                     x+xPos,
-                    y+2
+                    y+2,
+                    0f, 0f, 16, 16,
+                    16, 16
             );
 
         } else {
