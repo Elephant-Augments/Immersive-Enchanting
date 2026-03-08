@@ -16,32 +16,40 @@ import me.alfie.immersiveenchanting.gui.transmute.TransmuteNode;
 import me.alfie.immersiveenchanting.gui.transmute.TransmuteNodeBranch;
 import me.alfie.immersiveenchanting.gui.transmute.TransmuteNodeTooltip;
 import me.alfie.immersiveenchanting.item.ModItems;
+import me.alfie.immersiveenchanting.lootmodifier.AncientBookLootModifier;
 import me.alfie.immersiveenchanting.networking.packets.*;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.client.gui.screens.options.controls.KeyBindsList;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.KeybindContents;
+import net.minecraft.network.chat.contents.KeybindResolver;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.*;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.joml.Vector2i;
+import org.lwjgl.glfw.GLFW;
 
+import javax.swing.text.JTextComponent;
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTableMenu> {
 
     public static final ResourceLocation ENCHANTING_TABLE_BACKGROUND_TEXTURE = ResourceLocation.fromNamespaceAndPath(ImmersiveEnchanting.MODID,
             "textures/gui/container/enchanting_table.png");
     public static final ResourceLocation TILE_TEXTURE = ResourceLocation.fromNamespaceAndPath(ImmersiveEnchanting.MODID,
-            "textures/gui/container/background.png");
+            "textures/gui/container/enchanting_background_tile.png");
     public static final ResourceLocation BOOK_OPEN_TEXTURE = ResourceLocation.fromNamespaceAndPath(ImmersiveEnchanting.MODID,
             "textures/gui/container/book_open_shadow.png");
     public static final ResourceLocation ENCHANTING_TABLE_TOP_TEXTURE = ResourceLocation.fromNamespaceAndPath(ImmersiveEnchanting.MODID,
@@ -84,6 +92,12 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
     private long holdStartTime;
     public final long HOLD_THRESHOLD = 1000;
 
+    private Vector2i tabTopLeft = new Vector2i(200, 126);
+    private int tabWidth = 20;
+    private int tabHeight = 25;
+
+    public AncientBookWindow bookWindow;
+
     public EnchantingTableScreen(EnchantingTableMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
         canvas = new ScrollableCanvas(this);
@@ -99,6 +113,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
 
         //No branch shenanigans here, do it in init() pls <3
         this.player = playerInventory.player;
+        bookWindow = new AncientBookWindow(this);
     }
 
     public ScrollableCanvas getCanvas() {
@@ -134,6 +149,9 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
 
         if (menu.isToolSlotEmpty()) {
             initializeScreen();
+            canvas.setDraggingEnabled(false);
+        } else {
+            canvas.setDraggingEnabled(true);
         }
 
         if(menu.getToolSlotItem().is(ModItems.ANCIENT_BOOK.get())) {
@@ -204,10 +222,37 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
             }
         }
 
-
+        if(isMouseOverTab(mouseX, mouseY)) {
+            guiGraphics.renderTooltip(
+                    font, Component.translatable("gui.immersiveenchanting.book_tab"), mouseX, mouseY
+            );
+        }
 
         //Draw item tooltips
         super.renderTooltip(guiGraphics, mouseX, mouseY);
+    }
+
+    public boolean isMouseOverTab(int mouseX, int mouseY) {
+        return isMouseOver(mouseX, mouseY,
+                getGuiLeft() + tabTopLeft.x,
+                getGuiTop() + tabTopLeft.y,
+                tabWidth,
+                tabHeight);
+    }
+
+    /**
+     * Returns true if mouse is over the bounds given. Note: this should only be used for static elements on the screen.
+     * <br>For scrollable canvas elements, use ScrollableCanvas.isMouseOverBoundingBox
+     * @param mouseX
+     * @param mouseY
+     * @param x
+     * @param y
+     * @param width
+     * @param height
+     * @return
+     */
+    public boolean isMouseOver(int mouseX, int mouseY, int x, int y, int width, int height) {
+        return mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height;
     }
 
     @Override
@@ -225,6 +270,32 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
      */
     @Override
     protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY) {
+        if(canvas.getCanvasState().equals(CanvasState.ENCHANTING)) {
+            renderEnchantingScreen(guiGraphics, mouseX, mouseY);
+        } else if(canvas.getCanvasState().equals(CanvasState.BOOKS)) {
+            renderBooksScreen(guiGraphics, mouseX, mouseY);
+        }
+
+        //Disable scissor after drawing
+        RenderSystem.disableScissor();
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        guiGraphics.blit(ENCHANTING_TABLE_BACKGROUND_TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
+        RenderSystem.disableBlend();
+    }
+
+    private void renderBooksScreen(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+        //Fade the background and nodes darker if hovering
+        guiGraphics.setColor(0.5F, 0.5F, 0.5F, 1f);
+        canvas.renderTiledBg(guiGraphics);
+
+        bookWindow.renderEnchantmentBoxes(guiGraphics);
+        bookWindow.renderFilters(guiGraphics);
+        bookWindow.renderScrollbar(guiGraphics);
+        bookWindow.renderSearch(guiGraphics);
+    }
+
+    private void renderEnchantingScreen(GuiGraphics guiGraphics, int mouseX, int mouseY) {
         //Fade the background and nodes darker if hovering
         float targetBrightness = isHoveringAnyNode() ? 0.15f : 1f;
         float fadeSpeed = 0.3f;
@@ -237,6 +308,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         }
 
         canvas.renderTiledBg(guiGraphics);
+
         renderBranchConnections(guiGraphics);
         renderCentralSprites(guiGraphics);
         renderNodes(guiGraphics);
@@ -255,13 +327,6 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         } else {
             nodeTooltip = null;
         }
-
-        //Disable scissor after drawing
-        RenderSystem.disableScissor();
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        guiGraphics.blit(ENCHANTING_TABLE_BACKGROUND_TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
-        RenderSystem.disableBlend();
     }
 
     private boolean isHoveringAnyNode() {
@@ -365,6 +430,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
             }
         }
         hoveredNode = null;
+        nodeHeld = null;
     }
 
     private Node getHoveredNode() {
@@ -448,8 +514,27 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (button == 0) {
+            //Show book screen
+            if(isMouseOverTab((int) mouseX, (int) mouseY)) {
+                if(canvas.getCanvasState().equals(CanvasState.ENCHANTING)) {
+                    canvas.setCanvasState(CanvasState.BOOKS);
+                } else if(canvas.getCanvasState().equals(CanvasState.BOOKS)) {
+                    canvas.setCanvasState(CanvasState.ENCHANTING);
+                }
+            }
+
+            if(canvas.getCanvasState().equals(CanvasState.BOOKS)) {
+
+                //Toggle filter checkbox
+                for(FilterCheckbox filterCheckbox : bookWindow.filterCheckboxes) {
+                    if(filterCheckbox.isMouseOver((int) mouseX, (int) mouseY)) {
+                        filterCheckbox.toggleEnabled();
+                    }
+                }
+            }
+
             ItemStack carriedStack = menu.getCarried();
-            if (!menu.isToolSlotEmpty()) {
+            if (canvas.isDraggingEnabled()) {
 
                 // 1. Check if hovered node was clicked
                 if (hoveredNode != null) {
@@ -516,6 +601,13 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
 
     }
 
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        bookWindow.incrementScrollIndex((int) -scrollY);
+
+        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+    }
+
     public void mouseHold(double mouseX, double mouseY) {
         long heldTime = getMouseHeldTime();
 
@@ -531,6 +623,33 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
             }
         }
 
+    }
+
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if(canvas.getCanvasState().equals(CanvasState.BOOKS)) {
+            if(keyCode == GLFW.GLFW_KEY_BACKSPACE) {
+                bookWindow.removeCharFromSearch();
+            }
+
+            if(keyCode == GLFW.GLFW_KEY_ESCAPE) {
+                return super.keyPressed(keyCode, scanCode, modifiers);
+            } else {
+                return true;
+            }
+        }
+
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
+    @Override
+    public boolean charTyped(char codePoint, int modifiers) {
+        if(canvas.getCanvasState().equals(CanvasState.BOOKS)) {
+            bookWindow.addCharToSearch(codePoint);
+        }
+
+        return super.charTyped(codePoint, modifiers);
     }
 
     /**

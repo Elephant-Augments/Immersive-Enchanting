@@ -25,6 +25,10 @@
   "gui.immersiveenchanting.replicate_hint": "Make a copy of this Ancient Book.",
   "gui.immersiveenchanting.accepts_any_tag": "Accepts any: %d",
   "gui.immersiveenchanting.hold_to_remove": "Hold to remove",
+  "gui.immersiveenchanting.book_tab": "View Ancient Books",
+
+  "gui.immersiveenchanting.filter.unlocked": "Show unlocked",
+  "gui.immersiveenchanting.filter.locked": "Show locked",
 
   "immersiveenchanting.configuration.general": "General",
   "immersiveenchanting.configuration.gameplay": "Gameplay",
@@ -36,5 +40,7 @@
   "immersiveenchanting.config.allow_transmute": "Allow Ancient Book Transmuting",
   "immersiveenchanting.config.allow_replicate": "Allow Ancient Book Replicating",
   "immersiveenchanting.config.allow_enchantment_removal": "Allow Enchantment Removal",
-  "immersiveenchanting.config.item_carousel_speed": "Item Carousel Speed"
+  "immersiveenchanting.config.item_carousel_speed": "Item Carousel Speed",
+  "immersiveenchanting.config.enable_enchanted_book_loot_tables": "Enable Enchanted Book Loot Tables",
+  "immersiveenchanting.config.enable_enchanted_book_trades": "Enable Enchanted Book Villager Trades"
 }

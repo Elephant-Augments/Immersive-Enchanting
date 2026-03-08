@@ -1,5 +1,6 @@
 package me.alfie.immersiveenchanting.config;
 
+import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -20,6 +21,9 @@ public class ServerConfig {
     public final ModConfigSpec.ConfigValue<Boolean> allowTransmute;
 
     public final ModConfigSpec.ConfigValue<Boolean> allowEnchantmentRemoval;
+
+    public final ModConfigSpec.ConfigValue<Boolean> enableEnchantedBookTrades;
+    public final ModConfigSpec.ConfigValue<Boolean> enableEnchantedBookLootTables;
 
 
 
@@ -71,6 +75,17 @@ public class ServerConfig {
                 .translation("immersiveenchanting.config.allow_enchantment_removal")
                 .define("allowEnchantmentRemoval", true);
 
+        enableEnchantedBookLootTables = builder
+                .comment("If enabled, vanilla enchanted books will spawn normally in loot tables such as chests.")
+                .translation("immersiveenchanting.config.enable_enchanted_book_loot_tables")
+                .define("enableEnchantedBookLootTables", false);
+
+        enableEnchantedBookTrades = builder
+                .comment("If enabled, vanilla enchanted books will appear in villager trades.")
+                .comment("Note: You must /reload for changes to take effect for this option!")
+                .translation("immersiveenchanting.config.enable_enchanted_book_trades")
+                .define("enableEnchantedBookTrades", false);
+
         builder.pop();
     }
 
@@ -106,5 +121,17 @@ public class ServerConfig {
 
     public static boolean isEnchantmentRemovalAllowed() {
         return ServerConfig.CONFIG.allowEnchantmentRemoval.get();
+    }
+
+    public static boolean isAllowEnchantedBookLootTables() {
+        return ServerConfig.CONFIG.enableEnchantedBookLootTables.get();
+    }
+
+    public static boolean isAllowEnchantedBookTrades() {
+        try{
+            return ServerConfig.CONFIG.enableEnchantedBookTrades.get();
+        } catch (IllegalStateException e) { //Catch java.lang.IllegalStateException: Cannot get config value before config is loaded.
+            return false;
+        }
     }
 }

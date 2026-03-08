@@ -204,4 +204,8 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
         COST
     }
 
+    public boolean isEnchantmentUnlocked(Holder<Enchantment> enchantmentHolder) {
+        return unlockedEnchantments.contains(enchantmentHolder);
+    }
+
 }

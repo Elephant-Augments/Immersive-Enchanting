@@ -30,6 +30,9 @@ public class ScrollableCanvas {
     private double dragStartScrollX = 0;
     private double dragStartScrollY = 0;
 
+    private boolean isDraggingEnabled = false;
+    private CanvasState canvasState = CanvasState.ENCHANTING;
+
     private final EnchantingTableScreen screen;
 
     public ScrollableCanvas(EnchantingTableScreen screen) {
@@ -95,7 +98,7 @@ public class ScrollableCanvas {
      *
      * @param guiGraphics
      */
-    public void renderTiledBg(GuiGraphics guiGraphics) {
+    private void renderTiledBg(GuiGraphics guiGraphics, Sprite sprite) {
         //Setup viewport culling
         int viewportLeft = screen.getGuiLeft() + VIEWPORT_TOP_LEFT.x;
         int viewportTop = screen.getGuiTop() + VIEWPORT_TOP_LEFT.y;
@@ -127,7 +130,7 @@ public class ScrollableCanvas {
                 }
 
                 guiGraphics.blit(
-                        Sprite.TILE.get(),
+                        sprite.get(),
                         canvasLeftPos + x * TILE_TEXTURE_SIZE - (int) scrollX,
                         canvasTopPos + y * TILE_TEXTURE_SIZE - (int) scrollY,
                         0f, 0f,
@@ -138,6 +141,14 @@ public class ScrollableCanvas {
         }
         //Reset brightness
         guiGraphics.setColor(1f, 1f, 1f, 1f);
+    }
+
+    public void renderTiledBg(GuiGraphics guiGraphics) {
+        if(canvasState.equals(CanvasState.ENCHANTING)) {
+            renderTiledBg(guiGraphics, Sprite.ENCHANTING_TILE);
+        } else if (canvasState.equals(CanvasState.BOOKS)) {
+            renderTiledBg(guiGraphics, Sprite.ENCHANTING_TILE);
+        }
     }
 
     /**
@@ -254,4 +265,30 @@ public class ScrollableCanvas {
         return dragging;
     }
 
+    public boolean isDraggingEnabled() {
+        return isDraggingEnabled;
+    }
+
+    public void setDraggingEnabled(boolean draggingEnabled) {
+        isDraggingEnabled = draggingEnabled;
+    }
+
+    public CanvasState getCanvasState() {
+        return canvasState;
+    }
+
+    public void setCanvasState(CanvasState canvasState) {
+        this.canvasState = canvasState;
+
+        if(this.canvasState.equals(CanvasState.BOOKS)) {
+            setDraggingEnabled(false);
+            screen.bookWindow.clearSearch();
+            screen.bookWindow.resetScrollIndex();
+            screen.bookWindow.resetFilters();
+        } else if (this.canvasState.equals(CanvasState.ENCHANTING)) {
+            if(!screen.getMenu().isToolSlotEmpty()) {
+                setDraggingEnabled(true);
+            }
+        }
+    }
 }

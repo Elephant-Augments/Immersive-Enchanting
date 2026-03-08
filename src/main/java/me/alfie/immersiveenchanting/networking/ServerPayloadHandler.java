@@ -418,11 +418,7 @@ public class ServerPayloadHandler {
             unlockedEnchantments.clear();
 
             //Add all enchantments that exist
-            RegistryAccess registryAccess = level.registryAccess();
-            Registry<Enchantment> enchantmentRegistry = ImmersiveEnchanting.getEnchantmentRegistry(registryAccess);
-            List<Holder.Reference<Enchantment>> allEnchantments = enchantmentRegistry.asLookup().listElements().toList();
-
-            unlockedEnchantments = allEnchantments.stream()
+            unlockedEnchantments = AncientBookLootModifier.getAllEnchantments(level).stream()
                     .map(Holder.Reference::key)
                     .toList();
         }

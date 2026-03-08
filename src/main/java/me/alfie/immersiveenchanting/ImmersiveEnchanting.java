@@ -114,5 +114,4 @@ public class ImmersiveEnchanting {
     public static ResourceLocation getEnchantmentHolderRL(Holder<Enchantment> enchantmentHolder) {
         return ResourceLocation.parse(enchantmentHolder.getRegisteredName());
     }
-
 }

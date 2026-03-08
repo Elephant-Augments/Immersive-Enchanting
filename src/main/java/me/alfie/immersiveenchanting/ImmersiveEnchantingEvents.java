@@ -10,6 +10,7 @@ import me.alfie.immersiveenchanting.commands.DisabledEnchantmentsCommand;
 import me.alfie.immersiveenchanting.commands.EnabledEnchantmentsCommand;
 import me.alfie.immersiveenchanting.commands.GiveRandomBookCommand;
 import me.alfie.immersiveenchanting.commands.ImmersiveEnchantingCommand;
+import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.creativetab.ModCreativeTab;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.datapack.EnchantmentMetadataRegistry;
@@ -255,6 +256,8 @@ public class ImmersiveEnchantingEvents {
      */
     @SubscribeEvent
     public void onVillagerTrades(VillagerTradesEvent event) {
+        ImmersiveEnchanting.LOGGER.info(String.valueOf(ServerConfig.isAllowEnchantedBookTrades()));
+        if (ServerConfig.isAllowEnchantedBookTrades()) return;
         if (event.getType() == VillagerProfession.LIBRARIAN) {
             Int2ObjectMap<List<VillagerTrades.ItemListing>> trades = event.getTrades();
 
