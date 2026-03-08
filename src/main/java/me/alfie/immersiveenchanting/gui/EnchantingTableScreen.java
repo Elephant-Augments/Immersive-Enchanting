@@ -169,29 +169,25 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         }
 
         //Render the item stack for enchanting node tooltips when hovered.
-        if (nodeTooltip != null && nodeTooltip instanceof EnchantingNodeTooltip enchantingNodeTooltip) {
-            if (mouseX >= enchantingNodeTooltip.getCostStackPos().x
-                    && mouseX < enchantingNodeTooltip.getCostStackPos().x + 16
-                    && mouseY >= enchantingNodeTooltip.getCostStackPos().y
-                    && mouseY < enchantingNodeTooltip.getCostStackPos().y + 16) {
+        if (nodeTooltip != null) {
+            if (mouseX >= nodeTooltip.getCostStackPos().x
+                    && mouseX < nodeTooltip.getCostStackPos().x + 16
+                    && mouseY >= nodeTooltip.getCostStackPos().y
+                    && mouseY < nodeTooltip.getCostStackPos().y + 16) {
                 guiGraphics.pose().pushPose();
                 guiGraphics.pose().translate(0, 0, 500);
 
-                //guiGraphics.renderTooltip(font,
-                //        enchantingNodeTooltip.getCurrentRenderedCost().asItemStack(),
-                //        mouseX, mouseY);
-
-                List<Component> lines = enchantingNodeTooltip.getCurrentRenderedCost().asItemStack().getTooltipLines(
+                List<Component> lines = nodeTooltip.getCurrentRenderedCost().asItemStack().getTooltipLines(
                         Item.TooltipContext.EMPTY, null, TooltipFlag.ADVANCED
                 );
-                if(!(Objects.equals(enchantingNodeTooltip.stackDescriptionComponents.get(0), Component.empty()))) {
-                    lines.add(1, enchantingNodeTooltip.stackDescriptionComponents.getFirst());
+                if(!(Objects.equals(nodeTooltip.stackDescriptionComponents.get(0), Component.empty()))) {
+                    lines.add(1, nodeTooltip.stackDescriptionComponents.getFirst());
                 }
 
                 guiGraphics.renderTooltip(font,
                         lines,
-                        enchantingNodeTooltip.getCurrentRenderedCost().asItemStack().getTooltipImage(),
-                        enchantingNodeTooltip.getCurrentRenderedCost().asItemStack(),
+                        nodeTooltip.getCurrentRenderedCost().asItemStack().getTooltipImage(),
+                        nodeTooltip.getCurrentRenderedCost().asItemStack(),
                         mouseX,
                         mouseY);
 

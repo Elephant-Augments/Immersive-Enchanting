@@ -9,6 +9,7 @@ import me.alfie.immersiveenchanting.datacomponent.ReplicatedDataComponent;
 import me.alfie.immersiveenchanting.datapack.cost.CostDefinition;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostDatapackHandler;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
+import me.alfie.immersiveenchanting.datapack.cost.EnchantmentCost;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
 import me.alfie.immersiveenchanting.item.AncientBook;
 import me.alfie.immersiveenchanting.item.ModItems;
@@ -109,12 +110,22 @@ public class ServerPayloadHandler {
         Level level = context.player().level();
         Player player = context.player();
 
-        if(context.player().containerMenu instanceof EnchantingTableMenu enchantingTableMenu) {
-            if(player.experienceLevel >= 10 && enchantingTableMenu.getCostSlotItem().is(Items.WRITABLE_BOOK)
-                    || player.isCreative()) {
 
+        if(context.player().containerMenu instanceof EnchantingTableMenu enchantingTableMenu) {
+            ItemStack costSlotItem = enchantingTableMenu.getCostSlotItem();
+            List<ItemStack> costItems = new ArrayList<>();
+            costItems.add(costSlotItem);
+
+            boolean isCostValid =  EnchantmentCostRegistry.isCostValid(
+                    EnchantmentCostRegistry.getServerRegistry().getReplicateCost().getCostNodeForLevel(1),
+                    costItems,
+                    player.experienceLevel);
+
+            if(isCostValid || player.isCreative()) {
+                //TODO shrink correctly
                 player.giveExperienceLevels(-10);
                 enchantingTableMenu.getCostSlotItem().shrink(1);
+
                 BlockPos tablePos = enchantingTableMenu.getBlockPos();
 
                 ItemStack oldStack = enchantingTableMenu.getToolSlotItem().copyAndClear();
@@ -174,6 +185,7 @@ public class ServerPayloadHandler {
         Level level = player.level();
         AbstractContainerMenu menu = player.containerMenu;
 
+
         if(menu instanceof EnchantingTableMenu enchantingTableMenu) {
             ItemStack ancientBookStack = enchantingTableMenu.getToolSlotItem();
             Set<Holder<Enchantment>> unlockedEnchantments = enchantingTableMenu.getUnlockedEnchantments();
@@ -195,9 +207,19 @@ public class ServerPayloadHandler {
             int randomIndex = random.nextInt(enchantments.size());
             Holder<Enchantment> randomEnchantment = enchantments.get(randomIndex);
 
-            //If has 10 levels
+            //Check cost
+            ItemStack costSlotItem = enchantingTableMenu.getCostSlotItem();
+            List<ItemStack> costItems = new ArrayList<>();
+            costItems.add(costSlotItem);
+
+            boolean isCostValid =  EnchantmentCostRegistry.isCostValid(
+                    EnchantmentCostRegistry.getServerRegistry().getTransmuteCost().getCostNodeForLevel(1),
+                    costItems,
+                    player.experienceLevel);
             boolean isBookReplicated = ReplicatedDataComponent.isReplicated(ancientBookStack);
-            if(player.experienceLevel >= 10 || player.isCreative() && !isBookReplicated) {
+
+            if(isCostValid || player.isCreative() && !isBookReplicated) {
+                //Todo shrink correctly
                 player.giveExperienceLevels(-10);
 
                 //Save old enchantment for text

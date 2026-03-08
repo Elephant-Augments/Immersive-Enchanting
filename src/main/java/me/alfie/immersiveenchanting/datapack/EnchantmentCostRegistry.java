@@ -59,6 +59,14 @@ public class EnchantmentCostRegistry {
         return INTERNAL_REGISTRY;
     }
 
+    public EnchantmentCost getTransmuteCost() {
+        return getInternalRegistry().get(InternalCosts.TRANSMUTE);
+    }
+
+    public EnchantmentCost getReplicateCost() {
+        return getInternalRegistry().get(InternalCosts.REPLICATE);
+    }
+
     /**
      * Helper method to get enchantment cost from COST_REGISTRY from its resource location.
      * @param enchantment
