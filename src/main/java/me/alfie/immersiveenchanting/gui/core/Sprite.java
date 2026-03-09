@@ -4,24 +4,33 @@ import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import net.minecraft.resources.ResourceLocation;
 
 public enum Sprite {
-    ENCHANTING_TABLE_BACKGROUND("textures/gui/container/enchanting_table.png"),
-    ENCHANTING_TILE("textures/gui/container/enchanting_background_tile.png"),
-    BOOKS_TILE("textures/gui/container/books_background_tile.png"),
-    BOOK_OPEN("textures/gui/container/book_open_shadow.png"),
-    ENCHANTING_TABLE_TOP("textures/gui/container/enchanting_table_top.png"),
-    BOOK_CLOSED("textures/gui/container/book_closed.png"),
-    LEVEL("textures/gui/sprites/level_10.png"),
-    XP_LEVEL("textures/gui/sprites/xp_level.png"),
+    ENCHANTING_TABLE_GUI("textures/gui/container/enchanting_table.png"),
+    BACKGROUND_TILE("textures/gui/sprites/background_tile.png"),
 
-    SCROLLBAR("textures/gui/book_window/scrollbar.png"),
-    SCROLLER("textures/gui/book_window/scroller.png"),
-    SEARCH("textures/gui/book_window/search.png"),
-    CHECKBOX_ON("textures/gui/book_window/checkbox_on.png"),
-    CHECKBOX_OFF("textures/gui/book_window/checkbox_off.png"),
-    ENCHANTMENT_BOX_UNLOCKED("textures/gui/sprites/enchantment_box_unlocked.png"),
-    ENCHANTMENT_BOX_LOCKED("textures/gui/sprites/enchantment_box_locked.png"),
-    UNKNOWN("textures/gui/sprites/unknown.png"),
-    BACKGROUND_BOX("textures/gui/book_window/background_box.png");
+    //Enchanting tab
+    BOOK_OPEN("textures/gui/sprites/enchantingtab/book_open.png"),
+    ENCHANTING_TABLE_TOP("textures/gui/sprites/enchantingtab/enchanting_table_top.png"),
+    BOOK_CLOSED("textures/gui/sprites/enchantingtab/book_closed.png"),
+
+
+
+    //Tooltip
+    XP_LEVEL("textures/gui/sprites/tooltip/xp_level.png"),
+    MOUSE_HINT_OFF("textures/gui/sprites/tooltip/mouse_hint_off.png"),
+    MOUSE_HINT_ON("textures/gui/sprites/tooltip/mouse_hint_on.png"),
+    TOOLTIP_DESCRIPTION("tooltip/tooltip_description"),
+    TOOLTIP_OBTAINED("tooltip/tooltip_obtained"),
+    TOOLTIP_UNOBTAINED("tooltip/tooltip_unobtained"),
+
+    //Book Tab
+    SCROLLBAR("textures/gui/sprites/booktab/scrollbar.png"),
+    SCROLLER("textures/gui/sprites/booktab/scroller.png"),
+    SEARCH("textures/gui/sprites/booktab/search.png"),
+    CHECKBOX_ON("textures/gui/sprites/booktab/checkbox_on.png"),
+    CHECKBOX_OFF("textures/gui/sprites/booktab/checkbox_off.png"),
+    ENCHANTMENT_BOX_UNLOCKED("textures/gui/sprites/booktab/enchantment_box_unlocked.png"),
+    ENCHANTMENT_BOX_LOCKED("textures/gui/sprites/booktab/enchantment_box_locked.png"),
+    LOCKED_ENCHANTMENT("textures/gui/sprites/booktab/locked_enchantment.png");
 
     private final ResourceLocation location;
 

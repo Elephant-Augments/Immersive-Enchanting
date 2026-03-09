@@ -3,6 +3,7 @@ package me.alfie.immersiveenchanting.networking.packet.removeenchantment;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
 import me.alfie.immersiveenchanting.networking.packet.PayloadHandler;
+import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import me.alfie.immersiveenchanting.util.FxHelper;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
@@ -32,11 +33,9 @@ public class RemoveEnchantmentPayload implements PayloadHandler<RemoveEnchantmen
         AbstractContainerMenu enchantingTableMenu = player.containerMenu;
         ItemStack itemToEnchant = enchantingTableMenu.getSlot(EnchantingTableMenu.SLOTS.TOOL.ordinal()).getItem();
 
-        RegistryAccess registryAccess = player.registryAccess();
-        Optional<Holder.Reference<Enchantment>> enchantmentHolder = ImmersiveEnchanting.getEnchantmentHolder(
-                registryAccess,
-                packet.enchantment()
-        );
+        Optional<Holder.Reference<Enchantment>> enchantmentHolder = EnchantmentUtil.getEnchantmentHolder(
+                level.registryAccess(),
+                packet.enchantment());
 
         Holder<Enchantment> enchantment = enchantmentHolder.orElseThrow(() ->
                 new IllegalStateException("Enchantment not found: " + packet.enchantment())

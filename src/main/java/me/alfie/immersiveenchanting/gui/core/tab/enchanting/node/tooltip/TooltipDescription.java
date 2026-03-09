@@ -1,17 +1,13 @@
 package me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.tooltip;
 
 import me.alfie.immersiveenchanting.api.TooltipDescriptionExtensions;
+import me.alfie.immersiveenchanting.gui.core.Sprite;
 import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.NodeTooltip;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Vector2i;
 
 public class TooltipDescription extends NineSliceBox {
-
-    private static final ResourceLocation MOUSE_HINT_OFF_TEXTURE = ResourceLocation.fromNamespaceAndPath(
-            "immersiveenchanting", "textures/gui/sprites/mouse_hint_off.png");
-    private static final ResourceLocation MOUSE_HINT_ON_TEXTURE = ResourceLocation.fromNamespaceAndPath(
-            "immersiveenchanting", "textures/gui/sprites/mouse_hint_on.png");
 
     public final DescriptionLayout layout;
 
@@ -49,7 +45,8 @@ public class TooltipDescription extends NineSliceBox {
         );
 
         //Draw mouse right click hint
-        ResourceLocation texture = !this.parentTooltip.screen.enchantingTab.isLockHover() ? MOUSE_HINT_OFF_TEXTURE : MOUSE_HINT_ON_TEXTURE;
+        ResourceLocation texture = !this.parentTooltip.screen.enchantingTab.isLockHover() ?
+                Sprite.MOUSE_HINT_OFF.get() : Sprite.MOUSE_HINT_ON.get();
         //If render direction is LEFT_UP, icon blocks icon, move up slightly.
         int offset = parentTooltip.getRenderDirection().equals(RenderDirection.LEFT_UP) ? 2 : 0;
         graphics.blit(

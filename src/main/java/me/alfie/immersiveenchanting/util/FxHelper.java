@@ -1,6 +1,7 @@
 package me.alfie.immersiveenchanting.util;
 
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
+import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.Node;
 import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.enchanting.EnchantingNode;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -17,18 +18,29 @@ public class FxHelper {
         player.playSound(SoundEvents.UI_BUTTON_CLICK.value(), 0.3f, 1f);
     }
 
-    public static void playEnchantingNodeHoverSound(EnchantingNode enchantingNode, Player player) {
-        float pitch = 1;
-        int highestLevel = EnchantmentCostRegistry.getClientRegistry()
-                .getEnchantmentCost(enchantingNode.getEnchantment())
-                .getHighestLevel();
+    public static void playNodeHoverSound(Node node, Player player) {
+        if(node instanceof EnchantingNode enchantingNode) {
+            float pitch = 1;
+            int highestLevel = EnchantmentCostRegistry.getClientRegistry()
+                    .getEnchantmentCost(enchantingNode.getEnchantment())
+                    .getHighestLevel();
 
-        int nodeEnchantmentLevel = enchantingNode.getEnchantmentLevel();
-
-        if(nodeEnchantmentLevel == highestLevel) {
-            pitch = 2;
-            player.playSound(SoundEvents.AMETHYST_BLOCK_RESONATE, 1f, 2);
+            int nodeEnchantmentLevel = enchantingNode.getEnchantmentLevel();
+            if(nodeEnchantmentLevel == highestLevel) {
+                pitch = 2;
+                player.playSound(SoundEvents.AMETHYST_BLOCK_RESONATE, 1f, 2);
+                playGenericNodeHoverSound(player, nodeEnchantmentLevel);
+            } else {
+                pitch = 1f + ((float) nodeEnchantmentLevel / highestLevel);
+                playGenericNodeHoverSound(player, pitch);
+            }
+        } else {
+            playGenericNodeHoverSound(player, 1f);
         }
+
+    }
+
+    private static void playGenericNodeHoverSound(Player player, float pitch) {
         player.playSound(SoundEvents.CHISELED_BOOKSHELF_INSERT_ENCHANTED, 1f, pitch);
     }
 

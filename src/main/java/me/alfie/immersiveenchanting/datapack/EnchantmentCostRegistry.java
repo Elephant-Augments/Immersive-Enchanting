@@ -4,6 +4,7 @@ import me.alfie.immersiveenchanting.datapack.cost.*;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,6 +23,17 @@ public class EnchantmentCostRegistry {
 
     public static EnchantmentCostRegistry getServerRegistry() {
         return serverEnchantmentCostRegistry;
+    }
+
+    /**
+     * Returns the registry for the caller's side.
+     */
+    public static EnchantmentCostRegistry getRegistry(Level level) {
+        if(level.isClientSide) {
+            return getClientRegistry();
+        } else {
+            return getServerRegistry();
+        }
     }
 
     public static void setClientRegistry(EnchantmentCostRegistry enchantmentCostRegistry) {

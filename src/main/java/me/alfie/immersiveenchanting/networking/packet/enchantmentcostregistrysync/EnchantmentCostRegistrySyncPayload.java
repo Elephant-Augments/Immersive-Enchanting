@@ -3,11 +3,7 @@ package me.alfie.immersiveenchanting.networking.packet.enchantmentcostregistrysy
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostDatapack;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
-import me.alfie.immersiveenchanting.datapack.cost.CostHelper;
 import me.alfie.immersiveenchanting.networking.packet.PayloadHandler;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class EnchantmentCostRegistrySyncPayload implements PayloadHandler<EnchantmentCostRegistrySyncPacket> {

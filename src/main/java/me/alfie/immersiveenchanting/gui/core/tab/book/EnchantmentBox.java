@@ -8,6 +8,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.enchantment.Enchantment;
 
@@ -82,7 +83,12 @@ public class EnchantmentBox {
     private void renderIcon(GuiGraphics guiGraphics, int x, int y) {
         int xPos;
         if(bookTab.screen.getMenu().isEnchantmentUnlocked(enchantmentHolder)) {
-            ResourceLocation icon = EnchantmentMetadataRegistry.getIconTexture(ResourceLocation.parse(enchantmentHolder.getRegisteredName()));
+            ResourceLocation icon = ResourceLocation.fromNamespaceAndPath("immersiveenchanting", "textures/item/ancient_book.png");
+
+            //Try to get an icon
+            if (EnchantmentMetadataRegistry.getIcons().containsKey(enchantmentHolder.getKey().location())) {
+                icon = EnchantmentMetadataRegistry.getIconTexture(enchantmentHolder.getKey().location());
+            }
 
             xPos = 91;
             guiGraphics.blit(
@@ -97,7 +103,7 @@ public class EnchantmentBox {
             final int spriteSize = 19;
             xPos = 89;
             guiGraphics.blit(
-                    Sprite.UNKNOWN.get(),
+                    Sprite.LOCKED_ENCHANTMENT.get(),
                     x+xPos,
                     y,
                     0f, 0f, spriteSize, spriteSize,

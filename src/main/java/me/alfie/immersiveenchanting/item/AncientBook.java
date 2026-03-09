@@ -2,9 +2,9 @@ package me.alfie.immersiveenchanting.item;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.config.ClientConfig;
-import me.alfie.immersiveenchanting.datacomponent.EnchantmentDataComponent;
 import me.alfie.immersiveenchanting.datacomponent.ModDataComponents;
 import me.alfie.immersiveenchanting.datacomponent.ReplicatedDataComponent;
+import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
@@ -60,7 +60,7 @@ public class AncientBook extends EnchantedBookItem {
 
         if (enchantmentResourceKey != null) {
             RegistryAccess registryAccess = Minecraft.getInstance().level.registryAccess();
-            Holder<Enchantment> enchantmentHolder = ImmersiveEnchanting
+            Holder<Enchantment> enchantmentHolder = EnchantmentUtil
                     .getEnchantmentHolder(registryAccess, enchantmentResourceKey)
                     .orElse(null);
             if (enchantmentHolder == null) return;
@@ -125,8 +125,6 @@ public class AncientBook extends EnchantedBookItem {
      * @return
      */
     public static ResourceKey<Enchantment> getStoredEnchantment(ItemStack bookStack, Level level) {
-        migrateDataComponent(bookStack, level);
-
         ItemEnchantments itemEnchantments = bookStack.get(DataComponents.STORED_ENCHANTMENTS);
         if(itemEnchantments == null) {
             return null;
@@ -137,32 +135,6 @@ public class AncientBook extends EnchantedBookItem {
 
         Holder<Enchantment> enchantmentHolder = enchantments.getFirst();
         return enchantmentHolder.getKey();
-    }
-
-    /**
-     * Migrate old data component from ImmersiveEnchanting 2.x.x to StoredEnchantments <br>
-     * Server-side only, will not do anything client-side.
-     * @param stack
-     */
-    public static void migrateDataComponent(ItemStack stack, Level level) {
-        if(level == null || level.isClientSide()) return;
-        if(stack.has(DataComponents.STORED_ENCHANTMENTS)) return;
-
-        if (stack.has(ModDataComponents.LEGACY_ENCHANTMENT.get())) {
-            EnchantmentDataComponent enchantmentDataComponent = stack.get(ModDataComponents.LEGACY_ENCHANTMENT.get());
-            ResourceLocation resourceLocation = ResourceLocation.tryParse(enchantmentDataComponent.enchantmentResourceLocation());
-            ResourceKey<Enchantment> enchantmentResourceKey = ResourceKey.create(Registries.ENCHANTMENT, resourceLocation);
-
-            Optional<Holder.Reference<Enchantment>> enchantmentHolder = ImmersiveEnchanting.getEnchantmentHolder(level.registryAccess(), enchantmentResourceKey);
-            enchantmentHolder.ifPresent(enchantmentReference -> setStoredEnchantment(stack, enchantmentReference));
-
-            stack.remove(ModDataComponents.LEGACY_ENCHANTMENT.get());
-        }
-    }
-
-    @Override
-    public void inventoryTick(ItemStack stack, Level level, Entity entity, int slot, boolean selected) {
-        migrateDataComponent(stack, level);
     }
 }
 

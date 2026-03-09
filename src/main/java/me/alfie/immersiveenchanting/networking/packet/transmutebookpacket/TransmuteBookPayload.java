@@ -3,11 +3,11 @@ package me.alfie.immersiveenchanting.networking.packet.transmutebookpacket;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.datacomponent.ReplicatedDataComponent;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
+import me.alfie.immersiveenchanting.datapack.cost.CostDefinition;
 import me.alfie.immersiveenchanting.datapack.cost.CostEntry;
-import me.alfie.immersiveenchanting.datapack.cost.CostHelper;
+import me.alfie.immersiveenchanting.util.CostHelper;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
 import me.alfie.immersiveenchanting.item.AncientBook;
-import me.alfie.immersiveenchanting.lootmodifier.AncientBookLootModifier;
 import me.alfie.immersiveenchanting.networking.packet.PayloadHandler;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import me.alfie.immersiveenchanting.util.FxHelper;
@@ -15,9 +15,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -44,7 +42,6 @@ public class TransmuteBookPayload implements PayloadHandler<TransmuteBookPacket>
         Level level = player.level();
         AbstractContainerMenu menu = player.containerMenu;
 
-
         if(menu instanceof EnchantingTableMenu enchantingTableMenu) {
             ItemStack ancientBookStack = enchantingTableMenu.getToolSlotItem();
             Set<Holder<Enchantment>> unlockedEnchantments = enchantingTableMenu.getUnlockedEnchantments();
@@ -67,20 +64,23 @@ public class TransmuteBookPayload implements PayloadHandler<TransmuteBookPacket>
             Holder<Enchantment> randomEnchantment = enchantments.get(randomIndex);
 
             //Check cost
-            ItemStack costSlotItem = enchantingTableMenu.getCostSlotItem();
-            List<ItemStack> costItems = new ArrayList<>();
-            costItems.add(costSlotItem);
-
-            CostEntry validCost = CostHelper.findValidCost(
-                    EnchantmentCostRegistry.getServerRegistry().getReplicateCost().getCostForLevel(1),
-                    costItems,
-                    player.experienceLevel);
-
             boolean isBookReplicated = ReplicatedDataComponent.isReplicated(ancientBookStack);
+            int playerXp = player.experienceLevel;
+            ItemStack costSlotItemStack = enchantingTableMenu.getCostSlotItem();
+            List<ItemStack> insertedItems = new ArrayList<>();
+            insertedItems.add(costSlotItemStack);
 
-            if(validCost != null || player.isCreative() && !isBookReplicated) {
+            CostDefinition costNode = EnchantmentCostRegistry.getServerRegistry().getTransmuteCost().getCostForLevel(1);
+            CostEntry validCost = CostHelper.findValidCost(costNode, insertedItems, playerXp);
 
-               // player.giveExperienceLevels(-validCost.xpLevels());
+            boolean hasEnoughCost = player.hasInfiniteMaterials()
+                    || CostHelper.isCostValid(validCost);
+
+            if (hasEnoughCost && !isBookReplicated) {
+                if(player.hasInfiniteMaterials()) validCost = CostEntry.EMPTY;
+
+                assert validCost != null;
+                CostHelper.deductCost(validCost, costSlotItemStack, player);
 
                 //Save old enchantment for text
                 Registry<Enchantment> enchantmentRegistry = ImmersiveEnchanting.getEnchantmentRegistry(level.registryAccess());
@@ -125,9 +125,7 @@ public class TransmuteBookPayload implements PayloadHandler<TransmuteBookPacket>
 
                 player.closeContainer();
             } else {
-                //If unable to enchant
-                level.playSound(null, player.blockPosition(), SoundEvents.VAULT_CLOSE_SHUTTER,
-                        SoundSource.BLOCKS, 1.0F, 1.0F);
+                FxHelper.playEnchantFailFx(level, enchantingTableMenu.getBlockPos());
             }
 
 

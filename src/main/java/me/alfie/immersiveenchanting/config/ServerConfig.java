@@ -38,29 +38,29 @@ public class ServerConfig {
 
     // Constructor takes only the builder
     public ServerConfig(ModConfigSpec.Builder builder) {
-        builder.push("gameplay"); // optional grouping
-
-        // Define the config value here
-        disableAncientBookRequirement = builder
-                .comment("If enabled, Ancient Books are no longer required to unlock enchantments at the enchanting table. Enchantments still cost experience and materials as usual.")
-                .translation("immersiveenchanting.config.disable_ancient_book_requirement")
-                .define("disableAncientBookRequirement", false);
-
+        builder.push("bookshelves");
         bookshelfSearchX = builder
                 .comment("The number of blocks in the X-level that the enchanting table can detect chiseled bookshelves. Each 'row' can hold up to 96 books. If you have many enchantments, you may need to increase this value to provide more space.") // translatable comment
                 .translation("immersiveenchanting.config.bookshelf_search_x") // translatable label
                 .defineInRange("bookshelfSearchX", 2, 1, 8);
-
         bookshelfSearchY = builder
                 .comment("The number of blocks in the Y-level that the enchanting table can detect chiseled bookshelves. Each 'row' can hold up to 96 books. If you have many enchantments, you may need to increase this value to provide more space.") // translatable comment
                 .translation("immersiveenchanting.config.bookshelf_search_y") // translatable label
                 .defineInRange("bookshelfSearchY", 3, 1, 8);
-
         bookshelfSearchZ = builder
                 .comment("The number of blocks in the Z-level that the enchanting table can detect chiseled bookshelves. Each 'row' can hold up to 96 books. If you have many enchantments, you may need to increase this value to provide more space.") // translatable comment
                 .translation("immersiveenchanting.config.bookshelf_search_z") // translatable label
                 .defineInRange("bookshelfSearchZ", 2, 1, 8);
+        builder.pop();
 
+        builder.push("ancientbooks");
+        disableAncientBookRequirement = builder
+                .comment("If enabled, Ancient Books are no longer required to unlock enchantments at the enchanting table. Enchantments still cost experience and materials as usual.")
+                .translation("immersiveenchanting.config.disable_ancient_book_requirement")
+                .define("disableAncientBookRequirement", false);
+        builder.pop();
+
+        builder.push("enchantingtable");
         allowReplicate = builder
                 .comment("Allow ancient books to be replicated in the enchanting table.")
                 .translation("immersiveenchanting.config.allow_replicate")
@@ -76,6 +76,13 @@ public class ServerConfig {
                 .translation("immersiveenchanting.config.allow_enchantment_removal")
                 .define("allowEnchantmentRemoval", true);
 
+        obfuscateLockedEnchantments = builder
+                .comment("If enabled, enchantments that have not been found will have be obfuscated in the enchanting table.")
+                .translation("immersiveenchanting.config.obfuscate_locked_enchantments")
+                .define("obfuscateLockedEnchantments", true);
+        builder.pop();
+
+        builder.push("enchantedbooks");
         enableEnchantedBookLootTables = builder
                 .comment("If enabled, vanilla enchanted books will spawn normally in loot tables such as chests.")
                 .translation("immersiveenchanting.config.enable_enchanted_book_loot_tables")
@@ -86,12 +93,6 @@ public class ServerConfig {
                 .comment("Note: You must /reload for changes to take effect for this option!")
                 .translation("immersiveenchanting.config.enable_enchanted_book_trades")
                 .define("enableEnchantedBookTrades", false);
-
-        obfuscateLockedEnchantments = builder
-                .comment("If enabled, enchantments that have not been found will have be obfuscated in the enchanting table.")
-                .translation("immersiveenchanting.config.obfuscate_locked_enchantments")
-                .define("obfuscateLockedEnchantments", true);
-
         builder.pop();
     }
 

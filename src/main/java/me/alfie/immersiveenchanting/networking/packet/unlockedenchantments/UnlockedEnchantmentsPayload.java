@@ -3,6 +3,7 @@ package me.alfie.immersiveenchanting.networking.packet.unlockedenchantments;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
 import me.alfie.immersiveenchanting.networking.packet.PayloadHandler;
+import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -18,7 +19,7 @@ public class UnlockedEnchantmentsPayload implements PayloadHandler<UnlockedEncha
 
         Set<Holder<Enchantment>> unlockedEnchantments = new HashSet<>();
         for (ResourceKey<Enchantment> enchantmentKey : unlockedEnchantmentResourceIds) {
-            ImmersiveEnchanting.getEnchantmentHolder(context.player().registryAccess(), enchantmentKey)
+            EnchantmentUtil.getEnchantmentHolder(context.player().registryAccess(), enchantmentKey)
                     .ifPresent(unlockedEnchantments::add);
         }
 

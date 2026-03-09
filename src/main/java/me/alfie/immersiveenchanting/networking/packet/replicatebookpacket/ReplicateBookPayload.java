@@ -3,14 +3,13 @@ package me.alfie.immersiveenchanting.networking.packet.replicatebookpacket;
 import me.alfie.immersiveenchanting.datacomponent.ModDataComponents;
 import me.alfie.immersiveenchanting.datacomponent.ReplicatedDataComponent;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
+import me.alfie.immersiveenchanting.datapack.cost.CostDefinition;
 import me.alfie.immersiveenchanting.datapack.cost.CostEntry;
-import me.alfie.immersiveenchanting.datapack.cost.CostHelper;
+import me.alfie.immersiveenchanting.util.CostHelper;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
 import me.alfie.immersiveenchanting.networking.packet.PayloadHandler;
 import me.alfie.immersiveenchanting.util.FxHelper;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -34,18 +33,22 @@ public class ReplicateBookPayload implements PayloadHandler<ReplicateBookPacket>
 
 
         if(context.player().containerMenu instanceof EnchantingTableMenu enchantingTableMenu) {
-            ItemStack costSlotItem = enchantingTableMenu.getCostSlotItem();
-            List<ItemStack> costItems = new ArrayList<>();
-            costItems.add(costSlotItem);
+            int playerXp = player.experienceLevel;
+            ItemStack costSlotItemStack = enchantingTableMenu.getCostSlotItem();
+            List<ItemStack> insertedItems = new ArrayList<>();
+            insertedItems.add(costSlotItemStack);
 
-            CostEntry validCost = CostHelper.findValidCost(
-                    EnchantmentCostRegistry.getServerRegistry().getReplicateCost().getCostForLevel(1),
-                    costItems,
-                    player.experienceLevel);
+            CostDefinition costNode = EnchantmentCostRegistry.getServerRegistry().getReplicateCost().getCostForLevel(1);
+            CostEntry validCost = CostHelper.findValidCost(costNode, insertedItems, playerXp);
 
-            if(validCost != null || player.isCreative()) {
-                //player.giveExperienceLevels(-validCost.xpLevels());
-                //enchantingTableMenu.getCostSlotItem().shrink(validCost.amount());
+            boolean hasEnoughCost = player.hasInfiniteMaterials()
+                    || CostHelper.isCostValid(validCost);
+
+            if (hasEnoughCost) {
+                if(player.hasInfiniteMaterials()) validCost = CostEntry.EMPTY;
+
+                assert validCost != null;
+                CostHelper.deductCost(validCost, costSlotItemStack, player);
 
                 //Create new stack with replicated tag
                 ItemStack oldStack = enchantingTableMenu.getToolSlotItem().copyAndClear();
@@ -72,9 +75,7 @@ public class ReplicateBookPayload implements PayloadHandler<ReplicateBookPacket>
 
                 player.closeContainer();
             } else {
-                //If unable to enchant
-                level.playSound(null, player.blockPosition(), SoundEvents.VAULT_CLOSE_SHUTTER,
-                        SoundSource.BLOCKS, 1.0F, 1.0F);
+                FxHelper.playEnchantFailFx(level, enchantingTableMenu.getBlockPos());
             }
         }
     }

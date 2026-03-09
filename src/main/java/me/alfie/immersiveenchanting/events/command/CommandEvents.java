@@ -1,10 +1,7 @@
 package me.alfie.immersiveenchanting.events.command;
 
 import com.mojang.brigadier.CommandDispatcher;
-import me.alfie.immersiveenchanting.command.DisabledEnchantmentsCommand;
-import me.alfie.immersiveenchanting.command.EnabledEnchantmentsCommand;
-import me.alfie.immersiveenchanting.command.GiveRandomBookCommand;
-import me.alfie.immersiveenchanting.command.ImmersiveEnchantingCommand;
+import me.alfie.immersiveenchanting.command.*;
 import net.minecraft.commands.CommandSourceStack;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
@@ -24,7 +21,8 @@ public class CommandEvents {
         List<ImmersiveEnchantingCommand> commands = List.of(
                 DisabledEnchantmentsCommand.COMMAND,
                 EnabledEnchantmentsCommand.COMMAND,
-                GiveRandomBookCommand.COMMAND
+                GiveRandomBookCommand.COMMAND,
+                GenerateEmptyDatapack.COMMAND
         );
 
         for(ImmersiveEnchantingCommand command : commands) {

@@ -33,7 +33,11 @@
   "gui.immersiveenchanting.total_enchantments": "%d enchantment(s)",
 
   "immersiveenchanting.configuration.general": "General",
-  "immersiveenchanting.configuration.gameplay": "Gameplay",
+  "immersiveenchanting.configuration.bookshelves": "Bookshelf Search Settings",
+  "immersiveenchanting.configuration.ancientbooks": "Ancient Book Settings",
+  "immersiveenchanting.configuration.enchantingtable": "Enchanting Table Settings",
+  "immersiveenchanting.configuration.enchantedbooks": "Vanilla Enchanted Book Settings",
+
   "immersiveenchanting.config.disable_ancient_book_requirement": "Disable Ancient Book Requirement",
   "immersiveenchanting.config.bookshelf_search_x": "Bookshelf Search X Radius",
   "immersiveenchanting.config.bookshelf_search_y": "Bookshelf Search Y Radius",

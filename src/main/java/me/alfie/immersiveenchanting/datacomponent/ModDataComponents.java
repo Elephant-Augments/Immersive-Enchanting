@@ -12,16 +12,6 @@ public class ModDataComponents {
     public static final DeferredRegister.DataComponents DATA_COMPONENT_TYPES =
             DeferredRegister.createDataComponents(Registries.DATA_COMPONENT_TYPE, ImmersiveEnchanting.MODID);
 
-    @Deprecated
-    public static final DeferredHolder<DataComponentType<?>, DataComponentType<EnchantmentDataComponent>> LEGACY_ENCHANTMENT = DATA_COMPONENT_TYPES.registerComponentType(
-            "no_network",
-            builder -> builder
-                    // The codec to read/write the data to disk
-                    .persistent(EnchantmentDataComponent.BASIC_CODEC)
-                    // The codec to read/write the data across the network
-                    .networkSynchronized(EnchantmentDataComponent.BASIC_STREAM_CODEC)
-    );
-
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<ReplicatedDataComponent>> REPLICATED = DATA_COMPONENT_TYPES.registerComponentType(
             "replicated",
             builder -> builder

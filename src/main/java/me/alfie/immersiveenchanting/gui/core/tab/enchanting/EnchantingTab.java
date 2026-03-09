@@ -20,12 +20,10 @@ import me.alfie.immersiveenchanting.util.FxHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.neoforged.neoforge.network.PacketDistributor;
-import org.joml.Vector2i;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -192,8 +190,8 @@ public class EnchantingTab {
 
     private void renderNodeTooltip(Node node, GuiGraphics guiGraphics) {
         if (!node.equals(lastHoveredNode) || nodeTooltip == null) {
-            if(node instanceof EnchantingNode enchantingNode) {
-                nodeTooltip = new EnchantingNodeTooltip(
+            switch (node) {
+                case EnchantingNode enchantingNode -> nodeTooltip = new EnchantingNodeTooltip(
                         enchantingNode,
                         screen,
                         EnchantmentCost.getRenderableAnyOfCosts(
@@ -201,9 +199,7 @@ public class EnchantingTab {
                                         .getEnchantmentCost(enchantingNode.getEnchantment())
                                         .getCostForLevel(enchantingNode.getEnchantmentLevel())
                         ));
-            }
-            else if (node instanceof TransmuteNode transmuteNode) {
-                nodeTooltip = new TransmuteNodeTooltip(
+                case TransmuteNode transmuteNode -> nodeTooltip = new TransmuteNodeTooltip(
                         transmuteNode,
                         screen,
                         EnchantmentCost.getRenderableAnyOfCosts(
@@ -211,9 +207,7 @@ public class EnchantingTab {
                                         .getInternalRegistry()
                                         .get(EnchantmentCostRegistry.InternalCosts.TRANSMUTE)
                                         .getCostForLevel(1)));
-            }
-            else if (node instanceof ReplicateNode replicateNode) {
-                nodeTooltip = new ReplicateNodeTooltip(
+                case ReplicateNode replicateNode -> nodeTooltip = new ReplicateNodeTooltip(
                         replicateNode,
                         screen,
                         EnchantmentCost.getRenderableAnyOfCosts(
@@ -221,10 +215,11 @@ public class EnchantingTab {
                                         .getInternalRegistry()
                                         .get(EnchantmentCostRegistry.InternalCosts.REPLICATE)
                                         .getCostForLevel(1)));
+                default -> {
+                }
             }
 
-            if(node instanceof EnchantingNode enchantingNode) FxHelper.playEnchantingNodeHoverSound(
-                    enchantingNode, screen.player);
+            FxHelper.playNodeHoverSound(node, screen.player);
             lastHoveredNode = node;
         }
 

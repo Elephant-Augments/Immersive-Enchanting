@@ -1,29 +1,19 @@
 package me.alfie.immersiveenchanting.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.gui.core.*;
 import me.alfie.immersiveenchanting.gui.core.tab.book.BookTab;
 import me.alfie.immersiveenchanting.gui.core.tab.book.FilterCheckbox;
 import me.alfie.immersiveenchanting.gui.core.tab.TabButton;
 import me.alfie.immersiveenchanting.gui.core.tab.enchanting.EnchantingTab;
-import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.Node;
-import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.enchanting.EnchantingNode;
-import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.replicate.ReplicateNode;
-import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.transmute.TransmuteNode;
-import me.alfie.immersiveenchanting.networking.packet.enchantitem.EnchantItemPacket;
-import me.alfie.immersiveenchanting.networking.packet.removeenchantment.RemoveEnchantmentPacket;
-import me.alfie.immersiveenchanting.networking.packet.replicatebookpacket.ReplicateBookPacket;
-import me.alfie.immersiveenchanting.networking.packet.transmutebookpacket.TransmuteBookPacket;
-import me.alfie.immersiveenchanting.networking.packet.updatetoolslot.UpdateToolSlotPacket;
+import net.minecraft.advancements.AdvancementTree;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.advancements.AdvancementWidget;
+import net.minecraft.client.gui.screens.advancements.AdvancementsScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.*;
-import net.neoforged.neoforge.network.PacketDistributor;
 import org.lwjgl.glfw.GLFW;
 
 public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTableMenu> {
@@ -111,7 +101,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         RenderSystem.disableScissor();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        guiGraphics.blit(Sprite.ENCHANTING_TABLE_BACKGROUND.get(), this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
+        guiGraphics.blit(Sprite.ENCHANTING_TABLE_GUI.get(), this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
         RenderSystem.disableBlend();
 
         //Draw tab icon after scissor

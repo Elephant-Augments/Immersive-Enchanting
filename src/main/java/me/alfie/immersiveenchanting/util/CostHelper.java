@@ -1,25 +1,24 @@
-package me.alfie.immersiveenchanting.datapack.cost;
+package me.alfie.immersiveenchanting.util;
 
-import me.alfie.immersiveenchanting.ImmersiveEnchanting;
+import me.alfie.immersiveenchanting.datapack.EnchantmentCostDatapack;
+import me.alfie.immersiveenchanting.datapack.cost.CostDefinition;
+import me.alfie.immersiveenchanting.datapack.cost.CostEntry;
+import me.alfie.immersiveenchanting.datapack.cost.CostGroup;
+import me.alfie.immersiveenchanting.datapack.cost.GroupType;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.common.Tags;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class CostHelper {
-
-
-
-
     public static List<Item> getItemsInItemTag(TagKey<Item> itemTag) {
         return BuiltInRegistries.ITEM.getTag(itemTag)
                 .map(tagSet -> tagSet.stream()
@@ -41,63 +40,6 @@ public class CostHelper {
 
     public static boolean isItemTag(String id) {
         return id.startsWith("#");
-    }
-
-
-
-    public static String toAsciiTree(CostDefinition root) {
-        StringBuilder builder = new StringBuilder();
-        buildAscii(root, builder, "", true);
-        return builder.toString();
-    }
-
-    private static void buildAscii(CostDefinition node,
-                                   StringBuilder builder,
-                                   String prefix,
-                                   boolean isLast) {
-
-        builder.append(prefix)
-                .append(isLast ? "└── " : "├── ");
-
-        if (node instanceof CostEntry entry) {
-
-            builder.append("ITEM ")
-                    .append(entry.item())
-                    .append(" x")
-                    .append(entry.amount());
-
-            if (entry.xpLevels() > 0) {
-                builder.append(" (xp: ").append(entry.xpLevels()).append(")");
-            }
-
-            if (!entry.nbt().isEmpty()) {
-                builder.append(" [nbt]");
-            }
-
-            builder.append("\n");
-
-        } else if (node instanceof CostGroup group) {
-
-            builder.append(group.type());
-
-            group.getCostItemTag()
-                    .ifPresent(tag -> builder.append(" {tag ").append(tag.itemTag()).append("}"));
-
-            builder.append("\n");
-
-            var children = group.children();
-
-            for (int i = 0; i < children.size(); i++) {
-                boolean childLast = (i == children.size() - 1);
-
-                buildAscii(
-                        children.get(i),
-                        builder,
-                        prefix + (isLast ? "    " : "│   "),
-                        childLast
-                );
-            }
-        }
     }
 
     /**
@@ -147,6 +89,15 @@ public class CostHelper {
         return false;
     }
 
+    public static boolean isCostValid(CostEntry costEntry) {
+        return costEntry != null;
+    }
+
+    public static boolean isEnchantingFuelValid(ItemStack enchantingFuel) {
+        List<Item> validEnchantingFuels = EnchantmentCostDatapack.getValidEnchantingFuels();
+        return validEnchantingFuels.contains(enchantingFuel.getItem());
+    }
+
     /**
      * Searches the tree for a valid cost. Returns CostEntry if found.<br>
      * Returns null if no cost found.
@@ -157,8 +108,9 @@ public class CostHelper {
      */
     @Nullable
     public static CostEntry findValidCost(CostDefinition node, List<ItemStack> items, int playerXp) {
-        if (node instanceof CostEntry entry) {
+        if(node == null) return CostEntry.EMPTY;
 
+        if (node instanceof CostEntry entry) {
             // Check item
             ItemStack costStack = entry.asItemStack();
             for (ItemStack stack : items) {
@@ -185,5 +137,18 @@ public class CostHelper {
             }
         }
         return null;
+    }
+
+    /**
+     * Deducts items/xp for a valid cost
+     * @param validCost
+     * @param itemStack
+     * @param player
+     */
+    public static void deductCost(CostEntry validCost,
+                                  ItemStack itemStack,
+                                  Player player) {
+        itemStack.shrink(validCost.amount());
+        player.giveExperienceLevels(-validCost.xpLevels());
     }
 }

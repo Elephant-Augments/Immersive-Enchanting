@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.datapack.cost.*;
+import me.alfie.immersiveenchanting.util.CostHelper;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;

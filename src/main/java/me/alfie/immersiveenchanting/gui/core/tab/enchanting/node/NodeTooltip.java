@@ -2,6 +2,7 @@ package me.alfie.immersiveenchanting.gui.core.tab.enchanting.node;
 
 import me.alfie.immersiveenchanting.datapack.cost.CostEntry;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
+import me.alfie.immersiveenchanting.gui.core.Sprite;
 import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.tooltip.RenderDirection;
 import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.tooltip.TooltipDescription;
 import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.tooltip.TooltipTitle;
@@ -18,13 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NodeTooltip {
-    protected static final ResourceLocation BOX_UNOBTAINED_TEXTURE = ResourceLocation.fromNamespaceAndPath(
-            "immersiveenchanting", "box_unobtained");
-    protected static final ResourceLocation BOX_OBTAINED_TEXTURE = ResourceLocation.fromNamespaceAndPath(
-            "immersiveenchanting", "box_obtained");
-    protected static final ResourceLocation DESCRIPTION_BOX_TEXTURE = ResourceLocation.fromNamespaceAndPath(
-            "immersiveenchanting", "title_box");
-
     RenderDirection renderDirection;
     public final Node node;
     public final EnchantingTableScreen screen;
@@ -52,10 +46,13 @@ public class NodeTooltip {
         this.node = node;
         this.screen = screen;
         this.validCosts = validCosts;
+        if(validCosts.isEmpty()) {
+            validCosts.add(CostEntry.EMPTY);
+        }
 
         //Create components
-        tooltipTitle = new TooltipTitle(this, BOX_UNOBTAINED_TEXTURE);
-        tooltipDescription = new TooltipDescription(this, DESCRIPTION_BOX_TEXTURE);
+        tooltipTitle = new TooltipTitle(this, Sprite.TOOLTIP_UNOBTAINED.get());
+        tooltipDescription = new TooltipDescription(this, Sprite.TOOLTIP_DESCRIPTION.get());
     }
 
     public Level getLevel() {
@@ -83,7 +80,7 @@ public class NodeTooltip {
         tooltipDescription.setPos(descriptionBoxTopLeft.x, descriptionBoxTopLeft.y);
 
         //Title Settings
-        ResourceLocation titleTexture = node.isObtained() ? BOX_OBTAINED_TEXTURE : BOX_UNOBTAINED_TEXTURE;
+        ResourceLocation titleTexture = node.isObtained() ? Sprite.TOOLTIP_OBTAINED.get() : Sprite.TOOLTIP_UNOBTAINED.get();
         tooltipTitle.setSpriteTexture(titleTexture);
 
         //Draw
@@ -174,6 +171,7 @@ public class NodeTooltip {
         this.currentRenderedCost = currentRenderedCost;
 
         CostEntry renderedCost = getCurrentRenderedCost();
+
         if(renderedCost.getCostItemTag().isPresent()) {
             String itemTag = renderedCost.getCostItemTag().get().itemTag();
             stackDescriptionComponents.set(0, Component.translatable("gui.immersiveenchanting.accepts_any_tag", itemTag)

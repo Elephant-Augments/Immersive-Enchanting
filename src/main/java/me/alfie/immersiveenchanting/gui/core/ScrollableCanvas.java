@@ -145,9 +145,9 @@ public class ScrollableCanvas {
 
     public void renderTiledBg(GuiGraphics guiGraphics) {
         if(screen.getState().equals(ScreenState.ENCHANTING)) {
-            renderTiledBg(guiGraphics, Sprite.ENCHANTING_TILE);
+            renderTiledBg(guiGraphics, Sprite.BACKGROUND_TILE);
         } else if (screen.getState().equals(ScreenState.BOOKS)) {
-            renderTiledBg(guiGraphics, Sprite.ENCHANTING_TILE);
+            renderTiledBg(guiGraphics, Sprite.BACKGROUND_TILE);
         }
     }
 

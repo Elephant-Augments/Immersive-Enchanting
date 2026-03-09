@@ -91,15 +91,7 @@ public class ImmersiveEnchanting {
         }
     }
 
-    /**
-     * Automatically get an enchantment holder using RegistryAccess.
-     * @param access
-     * @param enchantment
-     * @return
-     */
-    public static Optional<Holder.Reference<Enchantment>> getEnchantmentHolder(RegistryAccess access, ResourceKey<Enchantment> enchantment) {
-        return access.registryOrThrow(Registries.ENCHANTMENT).getHolder(enchantment);
-    }
+
 
     public static ResourceLocation getEnchantmentHolderRL(Holder<Enchantment> enchantmentHolder) {
         return ResourceLocation.parse(enchantmentHolder.getRegisteredName());

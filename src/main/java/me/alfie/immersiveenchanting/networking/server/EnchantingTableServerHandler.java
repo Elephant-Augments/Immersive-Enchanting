@@ -67,7 +67,7 @@ public class EnchantingTableServerHandler {
             Set<Holder<Enchantment>> enchantmentSet = new HashSet<>();
 
             for (ResourceKey<Enchantment> key : unlockedEnchantments) {
-                ImmersiveEnchanting.getEnchantmentHolder(serverPlayer.registryAccess(), key)
+                EnchantmentUtil.getEnchantmentHolder(serverPlayer.registryAccess(), key)
                         .ifPresent(enchantmentSet::add);
             }
 

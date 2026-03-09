@@ -5,6 +5,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import org.checkerframework.checker.units.qual.C;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -18,6 +19,8 @@ import java.util.Optional;
  * @param xpLevels Number of XP levels required
  */
 public record CostEntry(String item, String nbt, int amount, int xpLevels, @Nullable CostItemTag costItemTag) implements CostDefinition {
+
+    public static final CostEntry EMPTY = new CostEntry("minecraft:air", "", 0, 0);
 
     public CostEntry(String item, String nbt, int amount, int xpLevels) {
         this(item, nbt, amount,xpLevels, null);

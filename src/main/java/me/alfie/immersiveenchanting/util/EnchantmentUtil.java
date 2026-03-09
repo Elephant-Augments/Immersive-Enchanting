@@ -5,6 +5,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.util.RandomSource;
@@ -12,6 +13,7 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
+import java.util.Optional;
 
 public class EnchantmentUtil {
 
@@ -20,24 +22,46 @@ public class EnchantmentUtil {
     }
 
     /**
-     * Returns all enchantments that are enabled.
-     * @param level
+     * Automatically get an enchantment holder using RegistryAccess.
+     * @param access
+     * @param enchantment
      * @return
      */
-    public static List<Holder.Reference<Enchantment>> getAllEnchantments(Level level) {
+    public static Optional<Holder.Reference<Enchantment>> getEnchantmentHolder(RegistryAccess access, ResourceKey<Enchantment> enchantment) {
+        return access.registryOrThrow(Registries.ENCHANTMENT).getHolder(enchantment);
+    }
+
+    /**
+     * Returns all enchantments.
+     * @param level
+     * @param filterDisabledEnchantments if true, will return all enchantments including disabled ones.
+     * @return
+     */
+    public static List<Holder.Reference<Enchantment>> getAllEnchantments(Level level, boolean filterDisabledEnchantments) {
         HolderLookup.RegistryLookup<Enchantment> lookup = getEnchantmentLookup(level.registryAccess());
         List<Holder.Reference<Enchantment>> allEnchantments = lookup.listElements().toList();
 
         //Filter disabled enchantments and curses
         return allEnchantments.stream()
                 .filter(enchantment -> {
-                    if (EnchantmentCostRegistry.getServerRegistry().getCostRegistry().containsKey(enchantment.key())) {
-                        if (!EnchantmentCostRegistry.getServerRegistry().getCostRegistry().get(enchantment.key()).enabled) return false;
+                    if(filterDisabledEnchantments) {
+                        if (EnchantmentCostRegistry.getRegistry(level).getCostRegistry().containsKey(enchantment.key())) {
+                            if (!EnchantmentCostRegistry.getRegistry(level).getCostRegistry().get(enchantment.key()).enabled) return false;
+                        }
                     }
 
                     if (enchantment.is(EnchantmentTags.CURSE)) return false;
                     return true;
                 }).toList();
+    }
+
+    /**
+     * Returns all enchantments that are enabled.
+     * @param level
+     * @return
+     */
+    public static List<Holder.Reference<Enchantment>> getAllEnchantments(Level level) {
+        return getAllEnchantments(level, true);
     }
 
 
