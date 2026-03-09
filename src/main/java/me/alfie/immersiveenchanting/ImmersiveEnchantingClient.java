@@ -9,11 +9,8 @@ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 @Mod(value = ImmersiveEnchanting.MODID, dist = Dist.CLIENT)
 public class ImmersiveEnchantingClient {
 
-    // In the main client mod file
     public ImmersiveEnchantingClient(ModContainer container) {
-
-        // This will use NeoForge's ConfigurationScreen to display this mod's configs
+        //NeoForge's ConfigurationScreen to display mod configs
         container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
-
     }
 }

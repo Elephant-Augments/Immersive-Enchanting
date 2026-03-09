@@ -17,31 +17,7 @@ import java.util.stream.Collectors;
 
 public class CostHelper {
 
-    public static void expandCostGroupTagsRecursive(CostGroup costGroup) {
-        costGroup.getCostItemTag().ifPresent(tag -> {
-            expandCostGroupTag(costGroup);
-        });
 
-        for(CostDefinition child : costGroup.children()) {
-            if(child instanceof CostGroup childGroup) {
-                expandCostGroupTagsRecursive(childGroup);
-            }
-        }
-    }
-
-    private static void expandCostGroupTag(CostGroup costGroup) {
-        if(costGroup.getCostItemTag().isPresent()) {
-            CostItemTag costItemTag = costGroup.getCostItemTag().get();
-
-            List<Item> itemsInTag = getItemsInItemTag(getItemTag(costItemTag.itemTag()));
-
-            for(Item item : itemsInTag) {
-                CostEntry costEntry = new CostEntry(item.toString(), "", costItemTag.amount(), costItemTag.xpLevels(), costItemTag);
-                costGroup.children().add(costEntry);
-            }
-            ImmersiveEnchanting.LOGGER.info("Expanded {}", costGroup);
-        }
-    }
 
 
     public static List<Item> getItemsInItemTag(TagKey<Item> itemTag) {

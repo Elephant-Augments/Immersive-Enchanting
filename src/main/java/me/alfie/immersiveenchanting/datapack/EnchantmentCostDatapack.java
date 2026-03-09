@@ -3,8 +3,7 @@ package me.alfie.immersiveenchanting.datapack;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
-import me.alfie.immersiveenchanting.datapack.cost.CostHelper;
-import me.alfie.immersiveenchanting.datapack.cost.EnchantmentCost;
+import me.alfie.immersiveenchanting.datapack.cost.*;
 import me.alfie.immersiveenchanting.datapack.parser.DatapackParser;
 import me.alfie.immersiveenchanting.networking.packet.enchantmentcostregistrysync.EnchantmentCostRegistrySyncPacket;
 import net.minecraft.core.registries.Registries;
@@ -16,33 +15,31 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.enchantment.Enchantment;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class EnchantmentCostDatapackHandler extends SimpleJsonResourceReloadListener {
+public class EnchantmentCostDatapack extends SimpleJsonResourceReloadListener {
 
-    private final Gson gson;
-    public static final String DIRECTORY = "enchantment_costs";
+    private static final String DIRECTORY = "enchantment_costs";
+    public static final EnchantmentCostDatapack DATAPACK = new EnchantmentCostDatapack(
+            new Gson(), EnchantmentCostDatapack.DIRECTORY);
+
     private MinecraftServer server;
 
-    public EnchantmentCostDatapackHandler(Gson gson, String directory) {
+    public EnchantmentCostDatapack(Gson gson, String directory) {
         super(gson, directory);
-        this.gson = gson;
     }
 
-    /**
-     * Set the server, so that client registries can be resynced
-     * @param server
-     */
     public void setServer(MinecraftServer server) {
         this.server = server;
     }
 
     /**
-     * Fires server-side.
-     * Reads data pack from directory into the server's enchantment cost registry.
+     * Fires server-side.<br>
+     * Reads datapack from directory "enchantment_costs" into the server's enchantment cost registry.<br>
      * Triggers on /reload.
      * @param object
      * @param resourceManager
@@ -56,22 +53,21 @@ public class EnchantmentCostDatapackHandler extends SimpleJsonResourceReloadList
         }
         EnchantmentCostRegistry.getServerRegistry().clear();
 
-        //--- NEW FILE FORMAT ---///
         int fileCount = 0;
+
         ImmersiveEnchanting.LOGGER.info("Parsing datapack files...");
+
         for(Map.Entry<ResourceLocation, JsonElement> entry : object.entrySet()) {
-            ResourceLocation fileId = entry.getKey();   // e.g., immersiveenchanting:minecraft/efficiency
+            ResourceLocation fileId = entry.getKey();   //e.g. immersiveenchanting:minecraft/efficiency
             JsonElement json = entry.getValue();
 
-            // Convert file path to actual enchantment RL: "minecraft/efficiency" → ResourceLocation("minecraft", "efficiency")
+            //Convert file path to actual enchantment RL: "minecraft/efficiency" -> ResourceLocation("minecraft", "efficiency")
             String[] parts = fileId.getPath().split("/", 2);
-            if (parts.length != 2) continue; // invalid file structure
+            if (parts.length != 2) continue; //invalid file structure
 
             //Load transmute/replicate costs differently
+            EnchantmentCost enchantmentCost = DatapackParser.parseJson(json);
             if(Objects.equals(parts[0], "immersiveenchanting")) {
-
-                //Only level 1 is used for these costs
-                EnchantmentCost enchantmentCost = DatapackParser.parseJson(json);
 
                 EnchantmentCostRegistry.InternalCosts key;
                 if(parts[1].equals("transmute")) {
@@ -86,7 +82,6 @@ public class EnchantmentCostDatapackHandler extends SimpleJsonResourceReloadList
             //Normal enchantment costs
             } else {
                 // Parse JSON into an EnchantmentCost
-                EnchantmentCost enchantmentCost = DatapackParser.parseJson(json);
                 ResourceLocation enchantmentResourceLocation = ResourceLocation.fromNamespaceAndPath(parts[0], parts[1]);
 
                 //Put into server registry
@@ -98,8 +93,8 @@ public class EnchantmentCostDatapackHandler extends SimpleJsonResourceReloadList
         //-----------------------///
 
         //Sync client with server
-        int count = 0;
         if(server != null) {
+            int count = 0;
             for(ServerPlayer player : server.getPlayerList().getPlayers()) {
                 EnchantmentCostRegistrySyncPacket.syncClientWithServer(player);
                 count++;
@@ -114,6 +109,61 @@ public class EnchantmentCostDatapackHandler extends SimpleJsonResourceReloadList
      */
     public static List<Item> getValidEnchantingFuels() {
         return CostHelper.getItemsInItemTag(CostHelper.getItemTag("neoforge:enchanting_fuels"));
+    }
+
+    /**
+     * Expand all item tags in a registry.
+     * @param registry
+     */
+    public static void expandTags(EnchantmentCostRegistry registry) {
+        Map<ResourceKey<Enchantment>, EnchantmentCost> costRegistry = registry.getCostRegistry();
+
+        for(EnchantmentCost cost : costRegistry.values()) {
+            for (int i = 0; i < cost.getHighestLevel(); i++) {
+                CostDefinition costDefinition = cost.getCostForLevel(i+1);
+
+                if(costDefinition instanceof CostGroup costGroup) {
+                    expandCostGroupTagsRecursive(costGroup);
+                }
+            }
+        }
+        ImmersiveEnchanting.LOGGER.info("Expanded tags for " + registry.getName());
+    }
+
+    /**
+     * Recursively expand tags with a CostGroup
+     * @param costGroup
+     */
+    private static void expandCostGroupTagsRecursive(CostGroup costGroup) {
+        costGroup.getCostItemTag().ifPresent(tag -> {
+            expandCostGroupTag(costGroup);
+        });
+
+        for(CostDefinition child : costGroup.children()) {
+            if(child instanceof CostGroup childGroup) {
+                expandCostGroupTagsRecursive(childGroup);
+            }
+        }
+    }
+
+    /**
+     * Expand tags within a CostGroup
+     * @param costGroup
+     */
+    private static void expandCostGroupTag(CostGroup costGroup) {
+        if(costGroup.getCostItemTag().isPresent()) {
+            CostItemTag costItemTag = costGroup.getCostItemTag().get();
+
+            List<Item> itemsInTag = CostHelper.getItemsInItemTag(
+                    CostHelper.getItemTag(costItemTag.itemTag()));
+
+            for(Item item : itemsInTag) {
+                CostEntry costEntry = new CostEntry(item.toString(), "", costItemTag.amount(), costItemTag.xpLevels(), costItemTag);
+                costGroup.children().add(costEntry);
+            }
+
+            ImmersiveEnchanting.LOGGER.info("Expanded {}", costGroup);
+        }
     }
 
 }

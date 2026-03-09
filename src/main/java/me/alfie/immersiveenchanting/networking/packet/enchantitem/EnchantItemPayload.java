@@ -2,7 +2,7 @@ package me.alfie.immersiveenchanting.networking.packet.enchantitem;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.compat.ModCompat;
-import me.alfie.immersiveenchanting.datapack.EnchantmentCostDatapackHandler;
+import me.alfie.immersiveenchanting.datapack.EnchantmentCostDatapack;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.datapack.cost.CostDefinition;
 import me.alfie.immersiveenchanting.datapack.cost.CostHelper;
@@ -68,7 +68,7 @@ public class EnchantItemPayload implements PayloadHandler<EnchantItemPacket> {
         CostDefinition costNode = EnchantmentCostRegistry.getServerRegistry().getEnchantmentCost(packet.enchantment()).getCostForLevel(packet.enchantmentLevel());
         boolean costSlotIsValid = CostHelper.isCostValid(costNode, insertedItems, playerXp);
 
-        List<Item> validEnchantingFuels = EnchantmentCostDatapackHandler.getValidEnchantingFuels();
+        List<Item> validEnchantingFuels = EnchantmentCostDatapack.getValidEnchantingFuels();
         ItemStack enchantingFuel = enchantingTableMenu.getSlot(EnchantingTableMenu.SLOTS.ENCHANTING_FUEL.ordinal()).getItem();
         boolean enchantingFuelIsValid = validEnchantingFuels.contains(enchantingFuel.getItem());
 

@@ -1,11 +1,9 @@
-package me.alfie.immersiveenchanting.commands;
+package me.alfie.immersiveenchanting.command;
 
 import com.mojang.brigadier.CommandDispatcher;
-import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.item.AncientBook;
 import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.lootmodifier.AncientBookLootModifier;
-import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;

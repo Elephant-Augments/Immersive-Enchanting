@@ -1,4 +1,4 @@
-package me.alfie.immersiveenchanting.commands;
+package me.alfie.immersiveenchanting.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
@@ -10,20 +10,20 @@ import net.minecraft.network.chat.Component;
 import java.util.Collections;
 import java.util.List;
 
-public enum EnabledEnchantmentsCommand implements ImmersiveEnchantingCommand {
+public enum DisabledEnchantmentsCommand implements ImmersiveEnchantingCommand {
     COMMAND;
 
     @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
                 Commands.literal("immersiveenchanting")
-                        .then(Commands.literal("getEnabledEnchantments")
+                        .then(Commands.literal("getDisabledEnchantments")
                                 .executes(context -> {
-                                    List<String> strings = EnchantmentCostRegistry.getServerRegistry().getEnabledEnchantments();
+                                    List<String> strings = EnchantmentCostRegistry.getServerRegistry().getDisabledEnchantments();
                                     Collections.sort(strings);
 
-                                    String enabled = String.join(", ", strings);
-                                    context.getSource().sendSuccess(() -> Component.literal("Enabled enchantments: " + enabled).withStyle(ChatFormatting.GREEN), false);
+                                    String disabled = String.join(", ", strings);
+                                    context.getSource().sendSuccess(() -> Component.literal("Disabled enchantments: " + disabled).withStyle(ChatFormatting.RED), false);
                                     return 1;
                                 })
                         )

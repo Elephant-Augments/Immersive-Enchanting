@@ -1,6 +1,9 @@
 package me.alfie.immersiveenchanting.api;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
+import me.alfie.immersiveenchanting.api.internal.EnchantingLayoutExtension;
+import me.alfie.immersiveenchanting.api.internal.ReplicateLayoutExtension;
+import me.alfie.immersiveenchanting.api.internal.TransmuteLayoutExtension;
 import me.alfie.immersiveenchanting.gui.core.NodeTooltip;
 import me.alfie.immersiveenchanting.gui.tooltip.DescriptionLayout;
 
@@ -35,7 +38,10 @@ public final class TooltipDescriptionExtensions {
     }
 
     //Register internal description layouts.
-    public void registerInternalDescriptions() {
-
+    public static void registerInternalTooltipDescriptions() {
+        //Using the API hooks internally here to add text/custom rendering into the description box.
+        TooltipDescriptionExtensions.register(new EnchantingLayoutExtension());
+        TooltipDescriptionExtensions.register(new TransmuteLayoutExtension());
+        TooltipDescriptionExtensions.register(new ReplicateLayoutExtension());
     }
 }

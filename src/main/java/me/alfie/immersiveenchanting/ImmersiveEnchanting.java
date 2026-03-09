@@ -1,13 +1,12 @@
 package me.alfie.immersiveenchanting;
 
-import com.google.gson.Gson;
 import com.mojang.logging.LogUtils;
 import me.alfie.immersiveenchanting.block.ModBlocks;
 import me.alfie.immersiveenchanting.config.ClientConfig;
 import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.creativetab.ModCreativeTab;
 import me.alfie.immersiveenchanting.datacomponent.ModDataComponents;
-import me.alfie.immersiveenchanting.datapack.EnchantmentCostDatapackHandler;
+import me.alfie.immersiveenchanting.events.ModEvents;
 import me.alfie.immersiveenchanting.gui.ModMenus;
 import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.lootmodifier.ModLootModifiers;
@@ -29,7 +28,6 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
-import net.neoforged.neoforge.common.NeoForge;
 import org.slf4j.Logger;
 
 import java.util.Optional;
@@ -39,27 +37,23 @@ public class ImmersiveEnchanting {
     public static final String MODID = "immersiveenchanting";
     public static final Logger LOGGER = LogUtils.getLogger();
 
-    protected static final EnchantmentCostDatapackHandler ENCHANTMENT_COST_DATAPACK_HANDLER = new EnchantmentCostDatapackHandler(
-            new Gson(), EnchantmentCostDatapackHandler.DIRECTORY);
+
 
     public ImmersiveEnchanting(IEventBus modEventBus, ModContainer modContainer) {
-        ImmersiveEnchantingEvents events = new ImmersiveEnchantingEvents();
-        modEventBus.addListener(events::onClientStart);
-        modEventBus.addListener(events::buildCreativeTab);
-        modEventBus.addListener(events::onLoadComplete);
-        NeoForge.EVENT_BUS.register(events);
-
-        ModItems.register(modEventBus);
-        ModMenus.register(modEventBus);
-        ModLootModifiers.register(modEventBus);
-        ModDataComponents.register(modEventBus);
-        ModCreativeTab.register(modEventBus);
-        ModBlocks.register(modEventBus);
-        ModStructureProcessors.register(modEventBus);
-        ModSounds.register(modEventBus);
-
-        modEventBus.addListener(ModMenus::registerMenuScreens);
+        ModEvents.register(modEventBus);
         modEventBus.addListener(ModPackets::register);
+
+        ModSounds.register(modEventBus);
+        ModItems.register(modEventBus);
+        ModBlocks.register(modEventBus);
+        ModCreativeTab.register(modEventBus);
+
+        ModMenus.register(modEventBus);
+        modEventBus.addListener(ModMenus::registerMenuScreens);
+
+        ModDataComponents.register(modEventBus);
+        ModLootModifiers.register(modEventBus);
+        ModStructureProcessors.register(modEventBus);
 
         modContainer.registerConfig(ModConfig.Type.CLIENT, ClientConfig.CONFIG_SPEC);
         modContainer.registerConfig(ModConfig.Type.SERVER, ServerConfig.CONFIG_SPEC);

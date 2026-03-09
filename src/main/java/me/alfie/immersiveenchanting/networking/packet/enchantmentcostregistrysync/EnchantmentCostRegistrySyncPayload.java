@@ -1,7 +1,7 @@
 package me.alfie.immersiveenchanting.networking.packet.enchantmentcostregistrysync;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
-import me.alfie.immersiveenchanting.ImmersiveEnchantingEvents;
+import me.alfie.immersiveenchanting.datapack.EnchantmentCostDatapack;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.datapack.cost.CostHelper;
 import me.alfie.immersiveenchanting.networking.packet.PayloadHandler;
@@ -24,13 +24,7 @@ public class EnchantmentCostRegistrySyncPayload implements PayloadHandler<Enchan
         EnchantmentCostRegistry.setClientRegistry(
                 EnchantmentCostRegistrySyncPacket.deserialize(serializedRegistry)
         );
-        ImmersiveEnchantingEvents.expandTags(EnchantmentCostRegistry.getClientRegistry());
-
-        ImmersiveEnchanting.LOGGER.info(CostHelper.toAsciiTree(
-                EnchantmentCostRegistry.getClientRegistry().getEnchantmentCost(
-                        ResourceKey.create(Registries.ENCHANTMENT, ResourceLocation.parse("minecraft:aqua_affinity"))
-                ).getCostForLevel(1)
-        ));
+        EnchantmentCostDatapack.expandTags(EnchantmentCostRegistry.getClientRegistry());
     }
 
     @Override //Empty
