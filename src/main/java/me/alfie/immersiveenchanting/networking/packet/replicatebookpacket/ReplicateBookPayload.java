@@ -7,6 +7,7 @@ import me.alfie.immersiveenchanting.datapack.cost.CostEntry;
 import me.alfie.immersiveenchanting.datapack.cost.CostHelper;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
 import me.alfie.immersiveenchanting.networking.packet.PayloadHandler;
+import me.alfie.immersiveenchanting.util.FxHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -43,8 +44,8 @@ public class ReplicateBookPayload implements PayloadHandler<ReplicateBookPacket>
                     player.experienceLevel);
 
             if(validCost != null || player.isCreative()) {
-                player.giveExperienceLevels(-validCost.xpLevels());
-                enchantingTableMenu.getCostSlotItem().shrink(validCost.amount());
+                //player.giveExperienceLevels(-validCost.xpLevels());
+                //enchantingTableMenu.getCostSlotItem().shrink(validCost.amount());
 
                 //Create new stack with replicated tag
                 ItemStack oldStack = enchantingTableMenu.getToolSlotItem().copyAndClear();
@@ -67,25 +68,7 @@ public class ReplicateBookPayload implements PayloadHandler<ReplicateBookPacket>
                     level.addFreshEntity(entity);
                 }
 
-                //Play effects
-                level.playSound(null, tablePos, SoundEvents.ALLAY_ITEM_GIVEN,
-                        SoundSource.BLOCKS, 0.7F, 1.2F);
-                level.playSound(null, tablePos, SoundEvents.VILLAGER_WORK_CARTOGRAPHER,
-                        SoundSource.BLOCKS, 0.8F, 1.5F);
-                level.playSound(null, tablePos, SoundEvents.BOOK_PAGE_TURN,
-                        SoundSource.BLOCKS, 0.5F, 1.5F);
-                level.playSound(null, tablePos, SoundEvents.ILLUSIONER_MIRROR_MOVE,
-                        SoundSource.BLOCKS, 0.4F, 1.2F);
-
-                int particleCount = 30;
-                ((ServerLevel) level).sendParticles(
-                        ParticleTypes.END_ROD,
-                        tablePos.getX() + 0.5,
-                        tablePos.getY() + 1,
-                        tablePos.getZ() + 0.5,
-                        particleCount,
-                        0.1, 0.1, 0.1,
-                        0.1);
+                FxHelper.playReplicateFx(level, tablePos);
 
                 player.closeContainer();
             } else {

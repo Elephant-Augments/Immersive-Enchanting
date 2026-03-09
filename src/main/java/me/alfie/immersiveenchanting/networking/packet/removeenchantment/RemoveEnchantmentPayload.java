@@ -3,6 +3,7 @@ package me.alfie.immersiveenchanting.networking.packet.removeenchantment;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
 import me.alfie.immersiveenchanting.networking.packet.PayloadHandler;
+import me.alfie.immersiveenchanting.util.FxHelper;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.sounds.SoundEvents;
@@ -68,9 +69,6 @@ public class RemoveEnchantmentPayload implements PayloadHandler<RemoveEnchantmen
 
         ItemEnchantments newEnchantments = mutable.toImmutable();
         EnchantmentHelper.setEnchantments(itemToEnchant, newEnchantments);
-
-        System.out.println("remove");
-        level.playSound(null, player.blockPosition(), SoundEvents.GLASS_BREAK,
-                SoundSource.BLOCKS, 1.0F, 0.8F);
+        FxHelper.playEnchantmentRemoveSound(level, player);
     }
 }

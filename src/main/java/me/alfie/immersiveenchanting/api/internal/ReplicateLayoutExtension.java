@@ -4,22 +4,10 @@ import me.alfie.immersiveenchanting.api.DescriptionLayoutExtension;
 import me.alfie.immersiveenchanting.api.internal.cost.LevelsDescriptionLine;
 import me.alfie.immersiveenchanting.api.internal.cost.MaterialsDescriptionLine;
 import me.alfie.immersiveenchanting.config.ClientConfig;
-import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
-import me.alfie.immersiveenchanting.gui.core.NodeTooltip;
-import me.alfie.immersiveenchanting.gui.replicate.ReplicateNode;
-import me.alfie.immersiveenchanting.gui.replicate.ReplicateNodeTooltip;
-import me.alfie.immersiveenchanting.gui.tooltip.DescriptionLayout;
-import me.alfie.immersiveenchanting.gui.tooltip.DescriptionLine;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import org.jetbrains.annotations.NotNull;
-import org.joml.Vector2i;
-
-import java.util.List;
+import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.NodeTooltip;
+import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.replicate.ReplicateNode;
+import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.replicate.ReplicateNodeTooltip;
+import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.tooltip.DescriptionLayout;
 
 public class ReplicateLayoutExtension implements DescriptionLayoutExtension {
 

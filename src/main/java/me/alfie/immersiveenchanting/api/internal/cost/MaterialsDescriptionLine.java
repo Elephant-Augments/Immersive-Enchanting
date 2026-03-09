@@ -1,7 +1,7 @@
 package me.alfie.immersiveenchanting.api.internal.cost;
 
-import me.alfie.immersiveenchanting.gui.core.NodeTooltip;
-import me.alfie.immersiveenchanting.gui.tooltip.DescriptionLine;
+import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.NodeTooltip;
+import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.tooltip.DescriptionLine;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;

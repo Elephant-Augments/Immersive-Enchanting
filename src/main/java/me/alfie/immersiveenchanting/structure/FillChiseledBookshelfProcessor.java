@@ -6,6 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import me.alfie.immersiveenchanting.item.AncientBook;
 import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.lootmodifier.AncientBookLootModifier;
+import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
@@ -92,7 +93,7 @@ public class FillChiseledBookshelfProcessor extends StructureProcessor {
             // Determine what item to place in the slot based on the chance
             if (randomRoll < fillChance) {
                 // Chance to put an ancient book
-                Holder<Enchantment> randomEnchantment = AncientBookLootModifier.getRandomEnchantment(serverLevel, randomSource);
+                Holder<Enchantment> randomEnchantment = EnchantmentUtil.getRandomEnchantment(serverLevel, randomSource);
                 ItemStack ancientBook = new ItemStack(ModItems.ANCIENT_BOOK.get(), 1);
                 AncientBook.setStoredEnchantment(ancientBook, randomEnchantment);
                 block = setBookshelfSlot(block, i, ancientBook, serverLevel);

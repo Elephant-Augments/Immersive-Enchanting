@@ -4,21 +4,16 @@ import me.alfie.immersiveenchanting.api.DescriptionLayoutExtension;
 import me.alfie.immersiveenchanting.api.internal.cost.LevelsDescriptionLine;
 import me.alfie.immersiveenchanting.api.internal.cost.MaterialsDescriptionLine;
 import me.alfie.immersiveenchanting.config.ClientConfig;
-import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
-import me.alfie.immersiveenchanting.gui.core.NodeTooltip;
-import me.alfie.immersiveenchanting.gui.enchanting.EnchantingNodeTooltip;
-import me.alfie.immersiveenchanting.gui.tooltip.DescriptionLayout;
-import me.alfie.immersiveenchanting.gui.tooltip.DescriptionLine;
-import me.alfie.immersiveenchanting.gui.transmute.TransmuteNode;
-import me.alfie.immersiveenchanting.gui.transmute.TransmuteNodeTooltip;
+import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.NodeTooltip;
+import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.tooltip.DescriptionLayout;
+import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.tooltip.DescriptionLine;
+import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.transmute.TransmuteNode;
+import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.transmute.TransmuteNodeTooltip;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.NotNull;
-import org.joml.Vector2i;
 
 import java.util.List;
 

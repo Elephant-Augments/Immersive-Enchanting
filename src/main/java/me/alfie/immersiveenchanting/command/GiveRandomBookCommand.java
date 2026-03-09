@@ -4,6 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import me.alfie.immersiveenchanting.item.AncientBook;
 import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.lootmodifier.AncientBookLootModifier;
+import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -30,7 +31,7 @@ public enum GiveRandomBookCommand implements ImmersiveEnchantingCommand {
                                             for (ServerPlayer player : players) {
                                                 ItemStack book = new ItemStack(ModItems.ANCIENT_BOOK.get(), 1);
                                                 Holder<Enchantment> randomEnchantment =
-                                                        AncientBookLootModifier.getRandomEnchantment(player.level(), player.getRandom());
+                                                        EnchantmentUtil.getRandomEnchantment(player.level(), player.getRandom());
                                                 AncientBook.setStoredEnchantment(book, randomEnchantment);
                                                 player.getInventory().add(book);
                                             }

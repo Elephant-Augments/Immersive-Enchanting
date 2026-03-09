@@ -9,6 +9,8 @@ import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
 import me.alfie.immersiveenchanting.item.AncientBook;
 import me.alfie.immersiveenchanting.lootmodifier.AncientBookLootModifier;
 import me.alfie.immersiveenchanting.networking.packet.PayloadHandler;
+import me.alfie.immersiveenchanting.util.EnchantmentUtil;
+import me.alfie.immersiveenchanting.util.FxHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -49,7 +51,7 @@ public class TransmuteBookPayload implements PayloadHandler<TransmuteBookPacket>
 
             //Get all enchantments
             List<Holder.Reference<Enchantment>> enchantments = new ArrayList<>(
-                    AncientBookLootModifier.getAllEnchantments(player.level()));
+                    EnchantmentUtil.getAllEnchantments(player.level()));
 
             //Remove all enchantments that are already in bookshelf
             enchantments.removeIf(unlockedEnchantments::contains);
@@ -57,7 +59,7 @@ public class TransmuteBookPayload implements PayloadHandler<TransmuteBookPacket>
             //If all enchantments are unlocked already, pick any random enchantment.
             if(enchantments.isEmpty()) {
                 enchantments = new ArrayList<>(
-                        AncientBookLootModifier.getAllEnchantments(player.level()));
+                        EnchantmentUtil.getAllEnchantments(player.level()));
             }
 
             Random random = new Random();
@@ -78,7 +80,7 @@ public class TransmuteBookPayload implements PayloadHandler<TransmuteBookPacket>
 
             if(validCost != null || player.isCreative() && !isBookReplicated) {
 
-                player.giveExperienceLevels(-validCost.xpLevels());
+               // player.giveExperienceLevels(-validCost.xpLevels());
 
                 //Save old enchantment for text
                 Registry<Enchantment> enchantmentRegistry = ImmersiveEnchanting.getEnchantmentRegistry(level.registryAccess());
@@ -87,14 +89,7 @@ public class TransmuteBookPayload implements PayloadHandler<TransmuteBookPacket>
                 AncientBook.setStoredEnchantment(ancientBookStack, randomEnchantment);
                 BlockPos tablePos = enchantingTableMenu.getBlockPos();
 
-                level.playSound(null, tablePos, SoundEvents.ENDER_CHEST_OPEN,
-                        SoundSource.BLOCKS, 0.4F, 1.0F);
-                level.playSound(null, tablePos, SoundEvents.FIREWORK_ROCKET_LARGE_BLAST,
-                        SoundSource.BLOCKS, 0.8F, 0.8F);
-                level.playSound(null, tablePos, SoundEvents.EVOKER_CAST_SPELL,
-                        SoundSource.BLOCKS, 0.8F, 1F);
-                level.playSound(null, tablePos, SoundEvents.EVOKER_PREPARE_SUMMON,
-                        SoundSource.BLOCKS, 0.1F, 1.2F);
+                FxHelper.playTransmuteFx(level, tablePos);
 
                 ItemStack stack = enchantingTableMenu.getToolSlotItem().copyAndClear();
 
@@ -109,24 +104,7 @@ public class TransmuteBookPayload implements PayloadHandler<TransmuteBookPacket>
 
                 level.addFreshEntity(entity);
 
-                int particleCount = 70;
-                ((ServerLevel) level).sendParticles(
-                        ParticleTypes.ENCHANT,
-                        tablePos.getX() + 0.5,
-                        tablePos.getY() + 1,
-                        tablePos.getZ() + 0.5,
-                        particleCount,
-                        0.2, 0.2, 0.2,
-                        0.1);
 
-                ((ServerLevel) level).sendParticles(
-                        ParticleTypes.GLOW,
-                        tablePos.getX() + 0.5,
-                        tablePos.getY() + 1,
-                        tablePos.getZ() + 0.5,
-                        particleCount,
-                        0.2, 0.2, 0.2,
-                        0.1);
 
 
                 //Get the enchantment from the registry.

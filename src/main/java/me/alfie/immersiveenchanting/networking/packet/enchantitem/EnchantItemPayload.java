@@ -8,7 +8,9 @@ import me.alfie.immersiveenchanting.datapack.cost.CostDefinition;
 import me.alfie.immersiveenchanting.datapack.cost.CostHelper;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
 import me.alfie.immersiveenchanting.networking.packet.PayloadHandler;
+import me.alfie.immersiveenchanting.util.FxHelper;
 import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.level.ServerPlayer;
@@ -16,7 +18,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -37,8 +38,10 @@ public class EnchantItemPayload implements PayloadHandler<EnchantItemPacket> {
         if (player == null) return;
         Level level = player.level();
 
-        AbstractContainerMenu enchantingTableMenu = player.containerMenu;
-        ItemStack itemToEnchant = enchantingTableMenu.getSlot(EnchantingTableMenu.SLOTS.TOOL.ordinal()).getItem();
+        EnchantingTableMenu enchantingTableMenu = (EnchantingTableMenu) player.containerMenu;
+        ItemStack itemToEnchant = enchantingTableMenu.getToolSlotItem();
+
+        BlockPos tablePos = enchantingTableMenu.getBlockPos();
 
         RegistryAccess registryAccess = player.registryAccess();
         Optional<Holder.Reference<Enchantment>> enchantmentHolder = ImmersiveEnchanting.getEnchantmentHolder(
@@ -53,7 +56,7 @@ public class EnchantItemPayload implements PayloadHandler<EnchantItemPacket> {
         // Currently only for Enchant Limiter.
         // Currently, this check only exists on NeoForge 1.21.1 as Enchant Limiter is not available on Forge 1.20.1.
         if (!ModCompat.canEnchant(itemToEnchant, enchantment)) {
-            level.playSound(null, player.blockPosition(), SoundEvents.VAULT_CLOSE_SHUTTER, SoundSource.BLOCKS, 1, 1);
+            FxHelper.playEnchantFailFx(level, tablePos);
             return;
         }
 
@@ -99,19 +102,10 @@ public class EnchantItemPayload implements PayloadHandler<EnchantItemPacket> {
                 CriteriaTriggers.ENCHANTED_ITEM.trigger(serverPlayer, itemToEnchant, 1);
             }
 
-            if (packet.enchantmentLevel() == EnchantmentCostRegistry.getServerRegistry().getEnchantmentCost(packet.enchantment()).getHighestLevel()) {
-                //Sound FX for highest tier.
-                level.playSound(null, player.blockPosition(), SoundEvents.BEACON_POWER_SELECT,
-                        SoundSource.BLOCKS, 1.0F, 1.0F);
-            } else {
-                //Sound FX for normal tier.
-                level.playSound(null, player.blockPosition(), SoundEvents.ENCHANTMENT_TABLE_USE,
-                        SoundSource.BLOCKS, 1.0F, 1.0F);
-            }
+            boolean isHighestTier = packet.enchantmentLevel() == EnchantmentCostRegistry.getServerRegistry().getEnchantmentCost(packet.enchantment()).getHighestLevel();
+            FxHelper.playEnchantSuccessFx(level, tablePos, isHighestTier);
         } else {
-            //If unable to enchant
-            level.playSound(null, player.blockPosition(), SoundEvents.VAULT_CLOSE_SHUTTER,
-                    SoundSource.BLOCKS, 1.0F, 1.0F);
+            FxHelper.playEnchantFailFx(level, tablePos);
         }
     }
 }

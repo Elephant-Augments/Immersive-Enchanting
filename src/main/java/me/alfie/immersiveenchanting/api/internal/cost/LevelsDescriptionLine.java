@@ -1,8 +1,9 @@
 package me.alfie.immersiveenchanting.api.internal.cost;
 
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
-import me.alfie.immersiveenchanting.gui.core.NodeTooltip;
-import me.alfie.immersiveenchanting.gui.tooltip.DescriptionLine;
+import me.alfie.immersiveenchanting.gui.core.Sprite;
+import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.NodeTooltip;
+import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.tooltip.DescriptionLine;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -25,7 +26,7 @@ public record LevelsDescriptionLine(NodeTooltip nodeTooltip) implements Descript
 
         //Draw XP sprite
         graphics.blit(
-                EnchantingTableScreen.XP_LEVEL_SPRITE,
+                Sprite.XP_LEVEL.get(),
                 levelLabelPos.x,
                 lineY,
                 0, 0, 16, 16, 16, 16);

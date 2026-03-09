@@ -3,6 +3,7 @@ package me.alfie.immersiveenchanting.gui.core;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
+import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.NodeBranch;
 import net.minecraft.client.gui.GuiGraphics;
 import org.joml.Vector2i;
 
@@ -31,7 +32,6 @@ public class ScrollableCanvas {
     private double dragStartScrollY = 0;
 
     private boolean isDraggingEnabled = false;
-    private CanvasState canvasState = CanvasState.ENCHANTING;
 
     private final EnchantingTableScreen screen;
 
@@ -144,9 +144,9 @@ public class ScrollableCanvas {
     }
 
     public void renderTiledBg(GuiGraphics guiGraphics) {
-        if(canvasState.equals(CanvasState.ENCHANTING)) {
+        if(screen.getState().equals(ScreenState.ENCHANTING)) {
             renderTiledBg(guiGraphics, Sprite.ENCHANTING_TILE);
-        } else if (canvasState.equals(CanvasState.BOOKS)) {
+        } else if (screen.getState().equals(ScreenState.BOOKS)) {
             renderTiledBg(guiGraphics, Sprite.ENCHANTING_TILE);
         }
     }
@@ -273,22 +273,5 @@ public class ScrollableCanvas {
         isDraggingEnabled = draggingEnabled;
     }
 
-    public CanvasState getCanvasState() {
-        return canvasState;
-    }
 
-    public void setCanvasState(CanvasState canvasState) {
-        this.canvasState = canvasState;
-
-        if(this.canvasState.equals(CanvasState.BOOKS)) {
-            setDraggingEnabled(false);
-            screen.bookTab.searchbar.clearSearch();
-            screen.bookTab.scrollbar.resetScrollIndex();
-            screen.bookTab.resetFilterBoxes();
-        } else if (this.canvasState.equals(CanvasState.ENCHANTING)) {
-            if(!screen.getMenu().isToolSlotEmpty()) {
-                setDraggingEnabled(true);
-            }
-        }
-    }
 }

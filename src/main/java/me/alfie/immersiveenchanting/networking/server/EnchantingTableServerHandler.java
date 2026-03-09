@@ -8,6 +8,7 @@ import me.alfie.immersiveenchanting.item.AncientBook;
 import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.lootmodifier.AncientBookLootModifier;
 import me.alfie.immersiveenchanting.networking.packet.unlockedenchantments.UnlockedEnchantmentsPacket;
+import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
@@ -57,7 +58,7 @@ public class EnchantingTableServerHandler {
             unlockedEnchantments.clear();
 
             //Add all enchantments that exist
-            unlockedEnchantments = AncientBookLootModifier.getAllEnchantments(level).stream()
+            unlockedEnchantments = EnchantmentUtil.getAllEnchantments(level).stream()
                     .map(Holder.Reference::key)
                     .toList();
         }

@@ -5,16 +5,16 @@ import me.alfie.immersiveenchanting.api.internal.cost.LevelsDescriptionLine;
 import me.alfie.immersiveenchanting.api.internal.cost.MaterialsDescriptionLine;
 import me.alfie.immersiveenchanting.config.ClientConfig;
 import me.alfie.immersiveenchanting.config.ServerConfig;
-import me.alfie.immersiveenchanting.gui.core.NodeTooltip;
-import me.alfie.immersiveenchanting.gui.enchanting.EnchantingNode;
-import me.alfie.immersiveenchanting.gui.enchanting.EnchantingNodeTooltip;
-import me.alfie.immersiveenchanting.gui.tooltip.DescriptionLayout;
-import me.alfie.immersiveenchanting.gui.tooltip.DescriptionLine;
+import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.NodeTooltip;
+import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.enchanting.EnchantingNode;
+import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.enchanting.EnchantingNodeTooltip;
+import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.tooltip.DescriptionLayout;
+import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.tooltip.DescriptionLine;
+import me.alfie.immersiveenchanting.util.FxHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.minecraft.sounds.SoundEvents;
 import org.jetbrains.annotations.NotNull;
 
 public class EnchantingLayoutExtension implements DescriptionLayoutExtension {
@@ -96,25 +96,18 @@ public class EnchantingLayoutExtension implements DescriptionLayoutExtension {
                             }
                         });
 
-                        if(enchantingNodeTooltip.screen.getMouseHeldTime() > 0 ) {
+                        if(enchantingNodeTooltip.screen.enchantingTab.getNodeHeldTime() > 0 ) {
                             description.insertLine(2, new DescriptionLine() {
                                 @Override
                                 public void draw(GuiGraphics graphics, int lineX, int lineY) {
-                                    long heldTime = enchantingNodeTooltip.screen.getMouseHeldTime();
-                                    long threshold = enchantingNodeTooltip.screen.HOLD_THRESHOLD;
+                                    long heldTime = enchantingNodeTooltip.screen.enchantingTab.getNodeHeldTime();
+                                    long threshold = enchantingNodeTooltip.screen.enchantingTab.HOLD_THRESHOLD;
                                     float progress = Math.min(1f, (float) heldTime / threshold);
 
                                     int bars = (int) (heldTime / (threshold/15));
 
-
-                                    for (int i = enchantingNodeTooltip.lastBars; i < bars; i++) {
-                                        float pitch = 2f - progress;
-                                        pitch = Math.max(pitch, 1f);
-
-                                        enchantingNodeTooltip.screen.player.playSound(
-                                                SoundEvents.EXPERIENCE_ORB_PICKUP, 0.3f, pitch
-                                        );
-                                    }
+                                    FxHelper.playRemoveProgressSound(enchantingNodeTooltip.screen.player,
+                                            enchantingNodeTooltip.lastBars, bars, progress);
                                     enchantingNodeTooltip.lastBars = bars;
 
                                     String barText = "";

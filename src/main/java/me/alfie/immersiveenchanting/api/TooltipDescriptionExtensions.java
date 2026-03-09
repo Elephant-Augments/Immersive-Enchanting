@@ -4,8 +4,8 @@ import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.api.internal.EnchantingLayoutExtension;
 import me.alfie.immersiveenchanting.api.internal.ReplicateLayoutExtension;
 import me.alfie.immersiveenchanting.api.internal.TransmuteLayoutExtension;
-import me.alfie.immersiveenchanting.gui.core.NodeTooltip;
-import me.alfie.immersiveenchanting.gui.tooltip.DescriptionLayout;
+import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.NodeTooltip;
+import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.tooltip.DescriptionLayout;
 
 import java.util.ArrayList;
 import java.util.List;
