@@ -1,17 +1,14 @@
 package me.alfie.immersiveenchanting.lootmodifier;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
-import me.alfie.immersiveenchanting.datapack.LevelCost;
 import me.alfie.immersiveenchanting.item.AncientBook;
 import me.alfie.immersiveenchanting.item.ModItems;
+import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import net.minecraft.core.Holder;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -21,10 +18,9 @@ import net.minecraftforge.common.loot.IGlobalLootModifier;
 import net.minecraftforge.common.loot.LootModifier;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import java.util.List;
-
 
 public class AncientBookLootModifier extends LootModifier {
+
 
     public static final Codec<AncientBookLootModifier> CODEC =
             RecordCodecBuilder.create(inst ->
@@ -54,10 +50,9 @@ public class AncientBookLootModifier extends LootModifier {
         return CODEC;
     }
 
-
     /**
      * Apply loot modifier.
-     *
+     * Fires server-side.
      * @param generatedLoot
      * @param context
      * @return
@@ -68,39 +63,15 @@ public class AncientBookLootModifier extends LootModifier {
             ItemStack lootItem = new ItemStack(item, count);
 
             if (lootItem.getItem() == ModItems.ANCIENT_BOOK.get()) {
-                // Get all available types
-                RegistryAccess registryAccess = context.getLevel().registryAccess();
-                HolderLookup.RegistryLookup<Enchantment> lookup = registryAccess.lookupOrThrow(Registries.ENCHANTMENT);
-                List<Holder.Reference<Enchantment>> allEnchantments = lookup.listElements().toList();
-
-                // Filter out MENDING if disabled
-                List<Holder.Reference<Enchantment>> filteredEnchantments = allEnchantments.stream()
-                        .filter(enchantment -> {
-                            ResourceLocation keyLocation = enchantment.key().location();
-
-                            // Remove disabled enchantments, such as mending
-                            //If enchantment has DO_NOT_INCLUDE tag. (Empty json)
-                            if (EnchantmentCostRegistry.getServerRegistry().getCostRegistry().containsKey(enchantment.key())) {
-                                if (EnchantmentCostRegistry.getServerRegistry().getCostRegistry()
-                                        .get(enchantment.key())
-                                        .getLevel(-1).item().equals(LevelCost.DO_NOT_INCLUDE)) {
-                                    return false;
-                                }
-                            }
-
-                            // Skip cursed enchantments
-                            return !enchantment.get().isCurse();// include everything else
-                        })
-                        .toList();
-
-                // Pick a random enchantment type from the filtered list
-                if (!filteredEnchantments.isEmpty()) {
-                    Holder<Enchantment> randomEnchantment = filteredEnchantments.get(context.getRandom().nextInt(filteredEnchantments.size()));
-                    AncientBook.setStoredEnchantment(lootItem, randomEnchantment);
-                }
+                Holder<Enchantment> randomEnchantment = EnchantmentUtil.getRandomEnchantment(context.getLevel(), context.getRandom());
+                AncientBook.setStoredEnchantment(lootItem, randomEnchantment);
             }
             generatedLoot.add(lootItem);
         }
         return generatedLoot;
     }
+
+
+
+
 }

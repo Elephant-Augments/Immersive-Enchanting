@@ -1,0 +1,18 @@
+{
+  "biblioclasm": {
+    "sounds": [
+      {
+       "name": "immersiveenchanting:biblioclasm",
+        "stream": true
+      }
+    ]
+  },
+  "arcane_memories": {
+    "sounds": [
+      {
+        "name": "immersiveenchanting:arcane_memories",
+        "stream": true
+      }
+    ]
+  }
+}

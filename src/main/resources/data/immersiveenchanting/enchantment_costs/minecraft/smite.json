@@ -2,23 +2,23 @@
   "levels": {
     "1": {
       "item": "minecraft:pointed_dripstone",
-      "amount": 1
+      "amount": 16
     },
     "2": {
       "item": "minecraft:lightning_rod",
-      "amount": 1
+      "amount": 4
     },
     "3": {
       "item": "minecraft:glistering_melon_slice",
-      "amount": 1
+      "amount": 8
     },
     "4": {
       "item": "minecraft:glowstone",
-      "amount": 1
+      "amount": 16
     },
     "5": {
       "item": "minecraft:ghast_tear",
-      "amount": 1
+      "amount": 8
     }
   }
 }

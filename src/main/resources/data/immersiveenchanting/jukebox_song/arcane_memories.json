@@ -1,0 +1,8 @@
+{
+  "comparator_output": 15,
+  "description": {
+    "translate": "item.immersiveenchanting.music_disc_arcane_memories.desc"
+  },
+  "length_in_seconds": 156.0,
+  "sound_event": "immersiveenchanting:arcane_memories"
+}

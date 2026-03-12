@@ -10,13 +10,22 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
+import java.util.function.Supplier;
+
 public class ModItems {
 
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, ImmersiveEnchanting.MODID);
-    public static final RegistryObject<Item> ANCIENT_BOOK = ITEMS.register(
+    public static final Supplier<Item> ANCIENT_BOOK = ITEMS.register(
             "ancient_book",
-            () -> new AncientBook(new Item.Properties())
-    );
+            () -> new AncientBook(new Item.Properties()));
+
+    public static final Supplier<Item> BIBLIOCLASM_MUSIC_DISC = ITEMS.register(
+            "music_disc_biblioclasm",
+            BiblioclasmDisc::new);
+
+    public static final Supplier<Item> ARCANE_MEMORIES_MUSIC_DISC = ITEMS.register(
+            "music_disc_arcane_memories",
+            ArcaneMemoriesDisc::new);
 
     public static final RegistryObject<BlockItem> CREATIVE_BOOKSHELF =
             ITEMS.register("creative_bookshelf",

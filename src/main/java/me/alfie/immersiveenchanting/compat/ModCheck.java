@@ -7,22 +7,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
-/**
- * Separate class to make sure we're not loading any unnecessary classes when mixins are being initialized<br>
- * Example usage:{@code ModCheck.Mod.MODNAME.isLoaded()}
- */
+/** Separate class to make sure we're not loading any unnecessary classes when mixins are being initialized<br>
+ *  Example usage:{@code ModCheck.Mod.MODNAME.isLoaded()}
+ * */
 public class ModCheck {
-    private static final Map<String, List<String>> ALIAS = Map.of();
-    private static final Map<String, Boolean> MODS = new HashMap<>();
+    private static final Map<String, List<String>> ALIAS = Map.of(); //For mods that have multiple modids across versions, defined here.
+    private static final Map<String, Boolean> MODS = new HashMap<>(); //Cache mods after checking isModLoaded()
 
     /**
      * Check if a mod is loaded and cache it in ModCheck.MODS
-     *
      * @param modid
      * @return
      */
-    private static boolean isModLoaded(final String modid) {
+    public static boolean isModLoaded(final String modid) {
         return MODS.computeIfAbsent(modid, key -> {
             if (check(key)) {
                 return true;
@@ -40,7 +37,6 @@ public class ModCheck {
 
     /**
      * Query the mod loader to check if a mod of "modid" is present.
-     *
      * @param modid
      * @return
      */

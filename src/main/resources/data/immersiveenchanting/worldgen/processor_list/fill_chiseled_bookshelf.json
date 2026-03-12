@@ -1,0 +1,8 @@
+{
+  "processors": [
+    {
+      "processor_type": "immersiveenchanting:fill_chiseled_bookshelf",
+      "fill_chance": 0.025
+    }
+  ]
+}

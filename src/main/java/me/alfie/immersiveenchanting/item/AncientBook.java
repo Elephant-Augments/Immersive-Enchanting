@@ -1,90 +1,96 @@
 package me.alfie.immersiveenchanting.item;
 
-import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.config.ClientConfig;
+import me.alfie.immersiveenchanting.datacomponent.ReplicatedNBT;
+import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
+
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.EnchantedBookItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+
 import net.minecraft.world.level.Level;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.forgespi.language.IModInfo;
+import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Optional;
 
+
+//Now handled as an EnchantedBookItem .enchant() uses the STORED_ENCHANTMENTS data component.
 public class AncientBook extends EnchantedBookItem {
 
+    public static final String TRANSLATION_KEY = "lore.immersiveenchanting.ancient_book";
 
     public AncientBook(Properties properties) {
-        super(properties.stacksTo(1).rarity(Rarity.UNCOMMON));
+        super(properties.stacksTo(16).rarity(Rarity.UNCOMMON));
     }
 
     @Override
-    public boolean isEnchantable(ItemStack stack) {
+    public boolean isEnchantable(ItemStack stack) { 
         return false;
     }
-    
+
+    @Override
+    public boolean isFoil(ItemStack stack) {
+        return true;
+    }
+
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         super.appendHoverText(stack, level, tooltipComponents, tooltipFlag);
 
-        //Get data component for this item stack.
-        ResourceKey<Enchantment> enchantmentResourceKey = AncientBook.getEnchantment(stack, level);
+        ResourceKey<Enchantment> enchantmentResourceKey = getStoredEnchantment(stack);
         if (enchantmentResourceKey != null) {
-            //Get the enchantment from the registry.
-            Registry<Enchantment> enchantmentRegistry = ImmersiveEnchanting.getEnchantmentRegistry(
-                    Minecraft.getInstance().level.registryAccess()
-            );
-            Enchantment enchantment = enchantmentRegistry.get(enchantmentResourceKey);
-            if(enchantment == null) return;
+            RegistryAccess registryAccess = Minecraft.getInstance().level.registryAccess();
+            Holder<Enchantment> enchantmentHolder = EnchantmentUtil
+                    .getEnchantmentHolder(registryAccess, enchantmentResourceKey)
+                    .orElse(null);
+            if (enchantmentHolder == null) return;
+            Enchantment enchantment = enchantmentHolder.value();
 
-            //Translation key for lore text.
-            MutableComponent loreText = Component.translatable("lore.immersiveenchanting.ancient_book");
-
-            //Enchantment name (styled)
+            MutableComponent loreText = Component.translatable("lore.immersiveenchanting.ancient_book").withStyle(ChatFormatting.GOLD);
             String enchantName = enchantment.getDescriptionId();
-            loreText.withStyle(ChatFormatting.GOLD);
-
-            //Combine lore text + enchantment name
             Component fullTooltip = loreText.append(" ").append(Component.translatable(enchantName));
-
-            //Add to tooltip list
             tooltipComponents.add(fullTooltip);
+
+            //Add replicated tooltip
+            if(ReplicatedNBT.isReplicated(stack)) {
+                Component replicatedHint = Component.translatable("lore.immersiveenchanting.replicated")
+                        .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
+                tooltipComponents.add(replicatedHint);
+            }
 
             //Added by mod tooltip
             if(ClientConfig.isShowAddedByTooltipEnabled()) {
-                ResourceLocation enchantmentRL = enchantmentResourceKey.location();
-                String modNamespace = enchantmentRL.getNamespace();
-
-                IModInfo modInfo = ModList.get().getModContainerById(modNamespace)
+                ResourceLocation enchantmentId = enchantmentResourceKey.location();
+                String modNamespace = enchantmentId.getNamespace();
+                ModInfo modInfo = (ModInfo) ModList.get().getModContainerById(modNamespace)
                         .map(ModContainer::getModInfo)
                         .orElse(null);
 
-                if (modInfo != null) {
-                    String modName = modInfo.getDisplayName();
-                    Component addedBy = Component.translatable("lore.immersiveenchanting.added_by").append(" " + modName).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
-                    tooltipComponents.add(addedBy);
-                } else {
-                    Component addedBy = Component.translatable("lore.immersiveenchanting.added_by").append(" " + modNamespace).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
-                    tooltipComponents.add(addedBy);
-                }
+                String modName = modInfo != null ? modInfo.getDisplayName() : modNamespace;
+
+                Component addedBy = Component.translatable("lore.immersiveenchanting.added_by")
+                        .append(" " + modName)
+                        .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
+
+                tooltipComponents.add(addedBy);
             }
         }
 
@@ -102,12 +108,9 @@ public class AncientBook extends EnchantedBookItem {
     /**
      * Get the enchantment in an ancient book and automatically migrate old NBT.
      * @param bookStack
-     * @param level Used to migrate NBT.
      * @return
      */
-    public static ResourceKey<Enchantment> getEnchantment(ItemStack bookStack, Level level) {
-        migrateNBT(bookStack, level);
-
+    public static ResourceKey<Enchantment> getStoredEnchantment(ItemStack bookStack) {
         ListTag listTag = getEnchantments(bookStack);
         if (listTag.isEmpty()) return null;
 
@@ -116,51 +119,6 @@ public class AncientBook extends EnchantedBookItem {
         if(enchantmentRL == null) return null;
 
         return ResourceKey.create(Registries.ENCHANTMENT, enchantmentRL);
-    }
-
-    @Override
-    public boolean isFoil(ItemStack stack) {
-        return true;
-    }
-
-    /**
-     * Migrate old NBT from ImmersiveEnchanting 2.x.x to StoredEnchantments <br>
-     * Server-side only.
-     * @param stack
-     */
-    public static void migrateNBT(ItemStack stack, Level level) {
-        if(level == null || level.isClientSide()) return;
-        if(!stack.hasTag()) return;
-
-        CompoundTag tag = stack.getTag();
-        //Already migrated
-        if (tag.contains("StoredEnchantments")) return;
-
-        String oldNBT = ImmersiveEnchanting.MODID+":ancient_book_enchantment_type";
-        if (tag.contains(oldNBT)) {
-
-            ResourceKey<Enchantment> enchantmentResourceKey = ResourceKey.create(
-                    Registries.ENCHANTMENT, ResourceLocation.tryParse(tag.getString(oldNBT))
-            );
-
-            Optional<Holder.Reference<Enchantment>> enchantmentHolder = ImmersiveEnchanting.getEnchantmentHolder(Minecraft.getInstance().level.registryAccess(), enchantmentResourceKey);
-            enchantmentHolder.ifPresent(enchantmentReference -> setStoredEnchantment(stack, enchantmentReference));
-
-            tag.remove(oldNBT);
-        }
-    }
-
-    /**
-     * Migrate NBT in player inventory.
-     * @param stack
-     * @param level
-     * @param entity
-     * @param slot
-     * @param selected
-     */
-    @Override
-    public void inventoryTick(ItemStack stack, Level level, Entity entity, int slot, boolean selected) {
-        migrateNBT(stack, level);
     }
 }
 

@@ -2,7 +2,7 @@
   "levels": {
     "1": {
       "item": "minecraft:lightning_rod",
-      "amount": 1
+      "amount": 8
     }
   }
 }

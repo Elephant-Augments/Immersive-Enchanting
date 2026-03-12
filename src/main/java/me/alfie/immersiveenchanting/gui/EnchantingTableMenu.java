@@ -1,18 +1,21 @@
 package me.alfie.immersiveenchanting.gui;
 
+import me.alfie.immersiveenchanting.item.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.Container;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraftforge.common.Tags;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.items.SlotItemHandler;
@@ -24,12 +27,19 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
 
     private BlockPos blockPos;
     private ContainerLevelAccess access;
-    private Level level;
     private IItemHandler containerInventory;
     private Set<Holder<Enchantment>> unlockedEnchantments = new HashSet<>();
 
+    // --------------------
+    // Game constructor
+    // --------------------
+    public EnchantingTableMenu(int containerId, Inventory inventory, FriendlyByteBuf buf) {
+        this(containerId, inventory, new ItemStackHandler(3), inventory.player.level(), buf.readBlockPos());
+    }
 
-    //My constructor
+    // --------------------
+    // My constructor
+    // --------------------
     public EnchantingTableMenu(int containerId, Inventory inventory, IItemHandler containerInventory, Level level, BlockPos pos) {
         super(ModMenus.ENCHANTING_TABLE_MENU.get(), containerId);
         this.containerInventory = containerInventory;
@@ -38,21 +48,21 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
         setupSlots(inventory);
     }
 
-    //Game constructor
-    public EnchantingTableMenu(int containerId, Inventory inventory, FriendlyByteBuf buf) {
-        this(containerId, inventory, new ItemStackHandler(3), inventory.player.level(), buf.readBlockPos());
-    }
-
     //Helper methods
     public void setupSlots(Inventory playerInventory) {
         //Tool slot
-        this.addSlot(new SlotItemHandler(this.containerInventory, 0, 233, 141));
+        this.addSlot(new SlotItemHandler(this.containerInventory, 0, 233, 141) {
+            @Override
+            public int getMaxStackSize() {
+                return 1;
+            }
+        });
 
-        //Lapis slot
-        this.addSlot(new SlotItemHandler(this.containerInventory,1, 233, 199));
+        //Enchanting fuel slot
+        this.addSlot(new SlotItemHandler(this.containerInventory, 1, 233, 199));
 
         //Cost slot
-        this.addSlot(new SlotItemHandler(this.containerInventory,2, 233, 170));
+        this.addSlot(new SlotItemHandler(this.containerInventory, 2, 233, 170));
 
         //Add player inventory slots
         int startX = 17;
@@ -69,6 +79,8 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
         for (int col = 0; col < 9; ++col) {
             this.addSlot(new Slot(playerInventory, col, startX + col * 18, startY + 58));
         }
+
+
     }
 
     @Override
@@ -87,9 +99,9 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
                     return ItemStack.EMPTY;
                 }
             }
-            // ---- LAPIS SLOT ----
-            else if (index == SLOTS.LAPIS.ordinal()) {
-                // Move lapis back to player inventory
+            // ---- ENCHANTING FUEL SLOT ----
+            else if (index == SLOTS.ENCHANTING_FUEL.ordinal()) {
+                // Move enchanting fuel back to player inventory
                 if (!this.moveItemStackTo(stackInSlot, 3, 39, true)) {
                     return ItemStack.EMPTY;
                 }
@@ -104,11 +116,11 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
             // ---- PLAYER INVENTORY ----
             else {
                 // Try tool → slot 0
-                if (stackInSlot.getItem().isEnchantable(stackInSlot)) {
+                if (stackInSlot.getItem().isEnchantable(stackInSlot) || stackInSlot.is(ModItems.ANCIENT_BOOK.get())) {
                     if (!this.moveItemStackTo(stackInSlot, 0, 1, false)) return ItemStack.EMPTY;
                 }
-                // Try lapis → slot 1
-                else if (stackInSlot.is(Items.LAPIS_LAZULI)) {
+                // Try enchanting fuel → slot 1 (Uses #neoforge:enchanting_fuels tag)
+                else if (stackInSlot.is(Tags.Items.ENCHANTING_FUELS)) {
                     if (!this.moveItemStackTo(stackInSlot, 1, 2, false)) return ItemStack.EMPTY;
                 }
                 // Everything else → cost slot (slot 2)
@@ -152,6 +164,10 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
         return AbstractContainerMenu.stillValid(this.access, player, Blocks.ENCHANTING_TABLE);
     }
 
+    public BlockPos getBlockPos() {
+        return blockPos;
+    }
+
     public Set<Holder<Enchantment>> getUnlockedEnchantments() {
         return unlockedEnchantments;
     }
@@ -168,6 +184,14 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
         return getItemInSlot(SLOTS.TOOL);
     }
 
+    public ItemStack getCostSlotItem() {
+        return getItemInSlot(SLOTS.COST);
+    }
+
+    public ItemStack getEnchantingFuelSlotItem() {
+        return getItemInSlot(SLOTS.ENCHANTING_FUEL);
+    }
+
     /**
      * Helper to get item in slot using SLOTS enum.
      *
@@ -180,8 +204,12 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
 
     public enum SLOTS {
         TOOL,
-        LAPIS, //By default, this is the lapis slot, but it can be configured to other itemIds.
+        ENCHANTING_FUEL, //Any item in the #neoforge:enchanting_fuels tag.
         COST
+    }
+
+    public boolean isEnchantmentUnlocked(Holder<Enchantment> enchantmentHolder) {
+        return unlockedEnchantments.contains(enchantmentHolder);
     }
 
 }

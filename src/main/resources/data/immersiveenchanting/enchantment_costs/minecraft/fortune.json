@@ -5,11 +5,11 @@
       "amount": 1
     },
     "2": {
-      "item": "minecraft:amethyst_block",
-      "amount": 1
+      "item": "minecraft:emerald_block",
+      "amount": 8
     },
     "3": {
-      "item": "minecraft:emerald_block",
+      "item": "minecraft:pitcher_plant",
       "amount": 1
     }
   }
