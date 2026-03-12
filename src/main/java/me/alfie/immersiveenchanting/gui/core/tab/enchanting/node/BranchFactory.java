@@ -1,7 +1,5 @@
 package me.alfie.immersiveenchanting.gui.core.tab.enchanting.node;
 
-import me.alfie.immersiveenchanting.compat.ModCheck;
-import me.alfie.immersiveenchanting.compat.ModCompat;
 import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.datacomponent.ReplicatedNBT;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;

@@ -3,7 +3,6 @@ package me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.transmute;
 import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.Node;
 import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.NodeType;
 import me.alfie.immersiveenchanting.networking.ModPackets;
-import me.alfie.immersiveenchanting.networking.packet.enchantitem.EnchantItemPacket;
 import me.alfie.immersiveenchanting.networking.packet.transmutebookpacket.TransmuteBookPacket;
 import net.minecraft.resources.ResourceLocation;
 

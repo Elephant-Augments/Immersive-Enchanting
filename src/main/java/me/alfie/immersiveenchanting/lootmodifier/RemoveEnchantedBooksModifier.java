@@ -1,7 +1,6 @@
 package me.alfie.immersiveenchanting.lootmodifier;
 
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.alfie.immersiveenchanting.config.ServerConfig;

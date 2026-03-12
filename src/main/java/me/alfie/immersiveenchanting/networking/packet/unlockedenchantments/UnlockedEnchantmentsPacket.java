@@ -1,7 +1,6 @@
 package me.alfie.immersiveenchanting.networking.packet.unlockedenchantments;
 
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
-import me.alfie.immersiveenchanting.networking.packet.transmutebookpacket.TransmuteBookPacket;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;

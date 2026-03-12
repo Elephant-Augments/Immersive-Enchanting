@@ -1,7 +1,6 @@
 package me.alfie.immersiveenchanting.lootmodifier;
 
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import net.minecraftforge.common.loot.IGlobalLootModifier;
 import net.minecraftforge.eventbus.api.IEventBus;

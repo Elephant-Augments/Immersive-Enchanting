@@ -7,7 +7,6 @@ import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.NodeTooltip;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.enchantment.Enchantment;
 
 import java.util.List;
 
