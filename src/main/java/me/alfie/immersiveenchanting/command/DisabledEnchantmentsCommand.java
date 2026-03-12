@@ -18,6 +18,7 @@ public enum DisabledEnchantmentsCommand implements ImmersiveEnchantingCommand {
         dispatcher.register(
                 Commands.literal("immersiveenchanting")
                         .then(Commands.literal("getDisabledEnchantments")
+                                .requires(source -> source.hasPermission(2))
                                 .executes(context -> {
                                     List<String> strings = EnchantmentCostRegistry.getServerRegistry().getDisabledEnchantments();
                                     Collections.sort(strings);

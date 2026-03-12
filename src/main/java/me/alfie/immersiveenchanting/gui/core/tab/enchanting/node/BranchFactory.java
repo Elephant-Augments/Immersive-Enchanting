@@ -10,6 +10,7 @@ import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.enchanting.EnchantingNodeBranch;
 import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.replicate.ReplicateNodeBranch;
 import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.transmute.TransmuteNodeBranch;
+import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceKey;
@@ -33,66 +34,31 @@ public class BranchFactory {
         List<NodeBranch> branches = new ArrayList<>();
 
         //Step 1. Find which enchantments are applicable.
-        List<Holder<Enchantment>> validEnchantments = new ArrayList<>(); //Set of all enchantments that can be applied
+        List<Holder<Enchantment>> applicableEnchantments = new ArrayList<>();
         Set<Holder<Enchantment>> unlockedEnchantments = screen.getMenu().getUnlockedEnchantments();
+        List<Holder.Reference<Enchantment>> allEnchantments = EnchantmentUtil.getAllEnchantments(screen.player.level());
 
-        Set<Holder<Enchantment>> allEnchantments = ImmersiveEnchanting.getEnchantmentRegistry(
-                        screen.player.registryAccess())
-                .asLookup()
-                .listElements()
-                .collect(Collectors.toSet());
-
-        //Sort set into alphabetical order so that branches appear in the same order every time.
         List<Holder<Enchantment>> allEnchantmentsSorted = new ArrayList<>(allEnchantments);
         allEnchantmentsSorted.sort(Comparator.comparing(
-                holder -> holder.getKey().location().toString()
-        ));
-        System.out.println(allEnchantmentsSorted);
+                holder -> holder.getKey().location().toString()));
 
         //Iterate through the enchantment registry, see if the item support the enchantment.
         for (Holder<Enchantment> enchantmentHolder : allEnchantmentsSorted) {
-            //Skip cursed enchantments.
-            if (enchantmentHolder.is(EnchantmentTags.CURSE)) {
-                continue;
-            }
-
-            ResourceKey<Enchantment> enchantmentKey = enchantmentHolder.getKey();
-
-            //Skip disabled enchantments, they won't appear in the table
-            if (EnchantmentCostRegistry.getClientRegistry().getCostRegistry().containsKey(enchantmentKey)) {
-                if(!EnchantmentCostRegistry.getClientRegistry().getCostRegistry().get(enchantmentKey).enabled) continue;
-            }
-
-            //If this enchantment isn't compatible with any enchantments already applied to the item, then skip.
             Set<Holder<Enchantment>> itemEnchantments = new HashSet<>(stack.getTagEnchantments().keySet());
             itemEnchantments.remove(enchantmentHolder); //Ignore the enchantment we're trying to check for
-
-            if (!EnchantmentHelper.isEnchantmentCompatible(itemEnchantments, enchantmentHolder)) {
-                continue;
-            }
-
-            //Add enchantment
-            if (stack.getItem().supportsEnchantment(stack, enchantmentHolder)) {
-                validEnchantments.add(enchantmentHolder);
-            }
+            if (!EnchantmentHelper.isEnchantmentCompatible(itemEnchantments, enchantmentHolder)) continue; //Skip if incompatible
+            if (stack.getItem().supportsEnchantment(stack, enchantmentHolder)) applicableEnchantments.add(enchantmentHolder);
         }
 
-        // Step 2: Generate angles after filtering
-        List<Float> angles = generateBranchAngles(validEnchantments.size());
+        List<Float> angles = generateBranchAngles(applicableEnchantments.size());
 
         int i = 0;
-        for (Holder<Enchantment> enchantmentHolder : validEnchantments) {
-            //Check if the enchantmentResourceId is unlocked.
+        for (Holder<Enchantment> enchantmentHolder : applicableEnchantments) {
             boolean isUnlocked = unlockedEnchantments.contains(enchantmentHolder);
             AtomicInteger enchantmentLevel = new AtomicInteger();
-
-            //Get the level of this enchantment
             enchantmentLevel.set(stack.getItem().getEnchantmentLevel(stack, enchantmentHolder));
 
-
-            if(ModCheck.Mod.RELIQUARY.isLoaded()) {
-                ModCompat.reliquaryMagicbaneFix(stack, enchantmentHolder, enchantmentLevel);
-            }
+            if(ModCheck.Mod.RELIQUARY.isLoaded()) ModCompat.reliquaryMagicbaneFix(stack, enchantmentHolder, enchantmentLevel);
 
             branches.add(new EnchantingNodeBranch(
                     screen,
@@ -100,8 +66,7 @@ public class BranchFactory {
                     enchantmentHolder,
                     enchantmentLevel.get(),
                     isUnlocked,
-                    screen.player
-            ));
+                    screen.player));
             i++;
         }
         return branches;
@@ -113,24 +78,11 @@ public class BranchFactory {
     public static List<NodeBranch> buildAncientBookBranch(ItemStack currentItemStack, EnchantingTableScreen screen) {
         List<NodeBranch> branches = new ArrayList<>();
 
-        //If the enchantment is already unlocked (i.e, there is an identical book in the chiseled bookshelf)
-        //Reroll this ancient book to a new one (that isn't unlocked)
-
-        //All ancient books that are already present
         Set<Holder<Enchantment>> unlockedEnchantments = screen.getMenu().getUnlockedEnchantments();
-
-        //The enchantment for this ancient book
-        Set<Holder<Enchantment>> ancientBookEnchantments = currentItemStack.get(DataComponents.STORED_ENCHANTMENTS).keySet();
-
-        System.out.println(ancientBookEnchantments);
-        System.out.println(unlockedEnchantments);
+        Set<Holder<Enchantment>> ancientBookEnchantment = currentItemStack.get(DataComponents.STORED_ENCHANTMENTS).keySet();
 
         //Check if the enchantment stored in this ancient book is also unlocked (in the bookshelf)
-        boolean canTransmute = false;
-        if(!Collections.disjoint(unlockedEnchantments, ancientBookEnchantments)) {
-            canTransmute = true;
-        }
-
+        boolean canTransmute = !Collections.disjoint(unlockedEnchantments, ancientBookEnchantment);
         boolean isBookReplicated = ReplicatedDataComponent.isReplicated(currentItemStack);
 
         List<Float> angles = generateBranchAngles(2);
@@ -142,7 +94,6 @@ public class BranchFactory {
                     canTransmute,
                     isBookReplicated));
         }
-
 
         if(ServerConfig.isAllowReplicate()) {
             branches.add(new ReplicateNodeBranch(

@@ -13,31 +13,20 @@ import me.alfie.immersiveenchanting.lootmodifier.ModLootModifiers;
 import me.alfie.immersiveenchanting.networking.ModPackets;
 import me.alfie.immersiveenchanting.sound.ModSounds;
 import me.alfie.immersiveenchanting.structure.ModStructureProcessors;
-import net.minecraft.core.Holder;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.enchantment.Enchantment;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import org.slf4j.Logger;
 
-import java.util.Optional;
-
 @Mod(ImmersiveEnchanting.MODID)
 public class ImmersiveEnchanting {
     public static final String MODID = "immersiveenchanting";
     public static final Logger LOGGER = LogUtils.getLogger();
-
-
 
     public ImmersiveEnchanting(IEventBus modEventBus, ModContainer modContainer) {
         ModEvents.register(modEventBus);
@@ -59,45 +48,7 @@ public class ImmersiveEnchanting {
         modContainer.registerConfig(ModConfig.Type.SERVER, ServerConfig.CONFIG_SPEC);
     }
 
-    /**
-     * Return the enchantment registry from a RegistryAccess.
-     * @param access
-     * @return
-     */
-    public static Registry<Enchantment> getEnchantmentRegistry(RegistryAccess access) {
-        return access.registryOrThrow(Registries.ENCHANTMENT);
-    }
-
-    public static HolderLookup<Enchantment> getEnchantmentHolderLookup(RegistryAccess access) {
-        return getEnchantmentRegistry(access).asLookup();
-    }
-
-    /**
-     * Get an enchantment holder using a holder lookup.
-     * @param lookup
-     * @param enchantmentResourceId
-     * @return
-     */
-    private static Optional<Holder.Reference<Enchantment>> getEnchantmentHolder(HolderLookup<Enchantment> lookup, String enchantmentResourceId) {
-        try {
-            ResourceLocation location = ResourceLocation.tryParse(enchantmentResourceId);
-            if (location == null) return Optional.empty();
-
-            ResourceKey<Enchantment> key = ResourceKey.create(Registries.ENCHANTMENT, location);
-            return lookup.get(key);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return Optional.empty();
-        }
-    }
-
-
-
-    public static ResourceLocation getEnchantmentHolderRL(Holder<Enchantment> enchantmentHolder) {
-        return ResourceLocation.parse(enchantmentHolder.getRegisteredName());
-    }
-
-    public static Component getAltFont(Component component) {
+    public static Component styleWithAltFont(Component component) {
         ResourceLocation fontStyle = ResourceLocation.withDefaultNamespace("alt");
         MutableComponent styledComponent = component.copy().withStyle(Style.EMPTY.withFont(fontStyle));
         return styledComponent;

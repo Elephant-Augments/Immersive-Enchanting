@@ -8,7 +8,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.enchantment.Enchantment;
 
@@ -65,7 +64,7 @@ public class EnchantmentBox {
         boolean isUnlocked = bookTab.screen.getMenu().isEnchantmentUnlocked(enchantmentHolder);
         Component enchantmentTitleStyled;
         if(ServerConfig.isObfuscateLockedEnchantments() && !isUnlocked) {
-            enchantmentTitleStyled = ImmersiveEnchanting.getAltFont(enchantmentTitle.copy().withStyle(ChatFormatting.GRAY));
+            enchantmentTitleStyled = ImmersiveEnchanting.styleWithAltFont(enchantmentTitle.copy().withStyle(ChatFormatting.GRAY));
         } else {
             enchantmentTitleStyled = enchantmentTitle.copy().withStyle(ChatFormatting.WHITE);
 

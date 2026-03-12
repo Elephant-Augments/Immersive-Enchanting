@@ -42,9 +42,8 @@ public class RemoveEnchantedBooksModifier extends LootModifier {
      */
     @Override
     protected ObjectArrayList<ItemStack> doApply(ObjectArrayList<ItemStack> generatedLoot, LootContext context) {
-        if(!ServerConfig.isAllowEnchantedBookLootTables()) {
+        if(!ServerConfig.isAllowEnchantedBookLootTables())
             generatedLoot.removeIf(stack -> stack.getItem() == Items.ENCHANTED_BOOK);
-        }
         return generatedLoot;
     }
 }

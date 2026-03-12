@@ -47,17 +47,13 @@ public class TransmuteBookPayload implements PayloadHandler<TransmuteBookPacket>
             Set<Holder<Enchantment>> unlockedEnchantments = enchantingTableMenu.getUnlockedEnchantments();
 
             //Get all enchantments
-            List<Holder.Reference<Enchantment>> enchantments = new ArrayList<>(
-                    EnchantmentUtil.getAllEnchantments(player.level()));
+            List<Holder.Reference<Enchantment>> enchantments = new ArrayList<>(EnchantmentUtil.getAllEnchantments(player.level()));
 
             //Remove all enchantments that are already in bookshelf
             enchantments.removeIf(unlockedEnchantments::contains);
 
             //If all enchantments are unlocked already, pick any random enchantment.
-            if(enchantments.isEmpty()) {
-                enchantments = new ArrayList<>(
-                        EnchantmentUtil.getAllEnchantments(player.level()));
-            }
+            if(enchantments.isEmpty()) enchantments = new ArrayList<>(EnchantmentUtil.getAllEnchantments(player.level()));
 
             Random random = new Random();
             int randomIndex = random.nextInt(enchantments.size());
@@ -78,21 +74,15 @@ public class TransmuteBookPayload implements PayloadHandler<TransmuteBookPacket>
 
             if (hasEnoughCost && !isBookReplicated) {
                 if(player.hasInfiniteMaterials()) validCost = CostEntry.EMPTY;
-
                 assert validCost != null;
-                CostHelper.deductCost(validCost, costSlotItemStack, player);
 
-                //Save old enchantment for text
-                Registry<Enchantment> enchantmentRegistry = ImmersiveEnchanting.getEnchantmentRegistry(level.registryAccess());
-                Enchantment oldEnchantment = enchantmentRegistry.get(AncientBook.getStoredEnchantment(ancientBookStack, level));
+                CostHelper.deductCost(validCost, costSlotItemStack, player);
 
                 AncientBook.setStoredEnchantment(ancientBookStack, randomEnchantment);
                 BlockPos tablePos = enchantingTableMenu.getBlockPos();
-
                 FxHelper.playTransmuteFx(level, tablePos);
 
                 ItemStack stack = enchantingTableMenu.getToolSlotItem().copyAndClear();
-
                 ItemEntity entity = new ItemEntity(
                         level,
                         tablePos.getX() + 0.5,
@@ -101,34 +91,20 @@ public class TransmuteBookPayload implements PayloadHandler<TransmuteBookPacket>
                         stack);
                 entity.setPickUpDelay(40);
                 entity.setDeltaMovement(Vec3.ZERO);
-
                 level.addFreshEntity(entity);
 
-
-
-
-                //Get the enchantment from the registry.
-                Enchantment newEnchantment = enchantmentRegistry.get(randomEnchantment.getKey());
-
+                Enchantment newEnchantment = randomEnchantment.value();
                 Component enchantmentName = newEnchantment.description().copy().withStyle(ChatFormatting.GOLD);
-
-                Component text = Component.translatable(
-                                "gui.immersiveenchanting.transmuted_to",
+                Component text = Component.translatable("gui.immersiveenchanting.transmuted_to",
                                 enchantmentName)
                         .withStyle(ChatFormatting.GRAY);
 
 
-                player.displayClientMessage(
-                        text,
-                        true
-                );
-
+                player.displayClientMessage(text, true);
                 player.closeContainer();
             } else {
                 FxHelper.playEnchantFailFx(level, enchantingTableMenu.getBlockPos());
             }
-
-
         }
     }
 }

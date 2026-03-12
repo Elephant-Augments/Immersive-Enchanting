@@ -31,12 +31,9 @@ import java.util.List;
 
 public class FillChiseledBookshelfProcessor extends StructureProcessor {
 
-
     //85 bookshelves per structure
     private final float fillChance;
-
     private final float musicDiscChance = 0.002f;
-
 
     public static final MapCodec<FillChiseledBookshelfProcessor> CODEC =
             RecordCodecBuilder.mapCodec(instance -> instance.group(
@@ -87,25 +84,17 @@ public class FillChiseledBookshelfProcessor extends StructureProcessor {
                                          ServerLevel serverLevel) {
         //Try each slot
         for (int i = 0; i < 6; i++) {
-            // Generate a random float for this slot only once
             float randomRoll = randomSource.nextFloat();
-
-            // Determine what item to place in the slot based on the chance
             if (randomRoll < fillChance) {
-                // Chance to put an ancient book
                 Holder<Enchantment> randomEnchantment = EnchantmentUtil.getRandomEnchantment(serverLevel, randomSource);
                 ItemStack ancientBook = new ItemStack(ModItems.ANCIENT_BOOK.get(), 1);
                 AncientBook.setStoredEnchantment(ancientBook, randomEnchantment);
                 block = setBookshelfSlot(block, i, ancientBook, serverLevel);
-
-            } else if (randomRoll < fillChance + 0.3) {
-                // If not ancient book, 30% chance to put normal book
+            } else if (randomRoll < fillChance + 0.3) { //30% chance for normal book
                 block = setBookshelfSlot(block, i, new ItemStack(Items.BOOK, 1), serverLevel);
 
             } else if (randomRoll < fillChance + 0.3 + musicDiscChance) {
-                // If not ancient book, 30% chance to put normal book, and then 0.2% chance for the music disc
                 block = setBookshelfSlot(block, i, new ItemStack(ModItems.ARCANE_MEMORIES_MUSIC_DISC.get(), 1), serverLevel);
-                System.out.println("Spawn disc at " + block.pos());
             }
         }
         return block;

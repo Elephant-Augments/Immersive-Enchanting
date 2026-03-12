@@ -24,7 +24,7 @@ public enum GiveRandomBookCommand implements ImmersiveEnchantingCommand {
         dispatcher.register(
                 Commands.literal("immersiveenchanting")
                         .then(Commands.literal("giveRandomBook")
-                                // target argument
+                                .requires(source -> source.hasPermission(2))
                                 .then(Commands.argument("target", EntityArgument.players())
                                         .executes(context -> {
                                             Collection<ServerPlayer> players = EntityArgument.getPlayers(context, "target");

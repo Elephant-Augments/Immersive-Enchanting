@@ -6,6 +6,7 @@ import me.alfie.immersiveenchanting.datapack.EnchantmentMetadataRegistry;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.NodeBranch;
 import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.NodeType;
+import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
@@ -41,14 +42,12 @@ public class EnchantingNodeBranch extends NodeBranch {
             iconTexture = EnchantmentMetadataRegistry.getIconTexture(enchantmentRL);
         }
 
-        //Get the max level, if 10 levels are in the config, then player can get level 10 enchantments.
         int maxEnchantmentLevel;
         if (EnchantmentCostRegistry.getClientRegistry().getCostRegistry().containsKey(enchantmentKey)) {
             maxEnchantmentLevel = EnchantmentCostRegistry.getClientRegistry().getEnchantmentCost(enchantmentKey).getHighestLevel();
         } else {
-            //Fallback if there is no enchantment cost set up, use the default max level from the enchantment
-            Registry<Enchantment> enchantmentRegistry = ImmersiveEnchanting.getEnchantmentRegistry(player.registryAccess());
-            maxEnchantmentLevel = enchantmentRegistry.get(enchantmentKey).getMaxLevel();
+            //Fallback if no cost
+            maxEnchantmentLevel = enchantmentHolder.value().getMaxLevel();
         }
 
         //Reveal ladder up to (equippedLevel + 1).

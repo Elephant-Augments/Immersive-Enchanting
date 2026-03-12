@@ -55,9 +55,7 @@ public class AncientBook extends EnchantedBookItem {
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
 
-
         ResourceKey<Enchantment> enchantmentResourceKey = getStoredEnchantment(stack, context.level());
-
         if (enchantmentResourceKey != null) {
             RegistryAccess registryAccess = Minecraft.getInstance().level.registryAccess();
             Holder<Enchantment> enchantmentHolder = EnchantmentUtil
@@ -65,23 +63,11 @@ public class AncientBook extends EnchantedBookItem {
                     .orElse(null);
             if (enchantmentHolder == null) return;
 
+            Enchantment enchantment = enchantmentHolder.value();
 
-            //Get the enchantment from the registry.
-            ResourceLocation enchantmentResourceLocation = ResourceLocation.parse(enchantmentHolder.getRegisteredName());
-            Registry<Enchantment> enchantmentRegistry = ImmersiveEnchanting.getEnchantmentRegistry(registryAccess);
-            Enchantment enchantment = enchantmentRegistry.get(enchantmentResourceKey);
-            if (enchantment == null) return;
-
-            //Translation key for lore text.
-            MutableComponent loreText = Component.translatable(TRANSLATION_KEY);
-
-
-            //Enchantment name (styled)
+            MutableComponent loreText = Component.translatable(TRANSLATION_KEY).withStyle(ChatFormatting.GOLD);
             MutableComponent enchantName = (MutableComponent) enchantment.description();
 
-            loreText.withStyle(ChatFormatting.GOLD);
-
-            //Combine lore text + enchantment name
             Component fullTooltip = loreText.append(" ").append(enchantName);
             tooltipComponents.add(fullTooltip);
 
@@ -94,19 +80,19 @@ public class AncientBook extends EnchantedBookItem {
 
             //Added by mod tooltip
             if(ClientConfig.isShowAddedByTooltipEnabled()) {
-                String modNamespace = enchantmentResourceLocation.getNamespace();
+                ResourceLocation enchantmentId = enchantmentResourceKey.location();
+                String modNamespace = enchantmentId.getNamespace();
                 ModInfo modInfo = (ModInfo) ModList.get().getModContainerById(modNamespace)
                         .map(ModContainer::getModInfo)
                         .orElse(null);
 
-                if (modInfo != null) {
-                    String modName = modInfo.getDisplayName();
-                    Component addedBy = Component.translatable("lore.immersiveenchanting.added_by").append(" " + modName).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
-                    tooltipComponents.add(addedBy);
-                } else {
-                    Component addedBy = Component.translatable("lore.immersiveenchanting.added_by").append(" " + modNamespace).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
-                    tooltipComponents.add(addedBy);
-                }
+                String modName = modInfo != null ? modInfo.getDisplayName() : modNamespace;
+
+                Component addedBy = Component.translatable("lore.immersiveenchanting.added_by")
+                        .append(" " + modName)
+                        .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
+
+                tooltipComponents.add(addedBy);
             }
         }
 

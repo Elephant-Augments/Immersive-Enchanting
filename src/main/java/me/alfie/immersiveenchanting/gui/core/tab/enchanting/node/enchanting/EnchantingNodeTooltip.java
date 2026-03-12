@@ -27,7 +27,7 @@ public class EnchantingNodeTooltip extends NodeTooltip {
                 .withStyle(ChatFormatting.WHITE);
         if(!node.isBranchUnlocked) {
             if(ServerConfig.isObfuscateLockedEnchantments()) {
-                titleText = ImmersiveEnchanting.getAltFont(titleText);
+                titleText = ImmersiveEnchanting.styleWithAltFont(titleText);
             }
         }
 
