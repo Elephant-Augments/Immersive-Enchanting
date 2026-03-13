@@ -9,6 +9,7 @@ import me.alfie.immersiveenchanting.gui.core.tab.enchanting.node.transmute.Trans
 import me.alfie.immersiveenchanting.item.AncientBook;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import net.minecraft.core.Holder;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -73,10 +74,12 @@ public class BranchFactory {
         Level level = screen.player.level();
 
         Set<Holder<Enchantment>> unlockedEnchantments = screen.getMenu().getUnlockedEnchantments();
+        if (!currentItemStack.hasTag() || !currentItemStack.getTag().contains("StoredEnchantments", Tag.TAG_LIST)) {
+            return branches;
+        }
 
         ResourceKey<Enchantment> enchantmentResourceKey = AncientBook.getStoredEnchantment(currentItemStack);
         Holder<Enchantment> enchantmentHolder = EnchantmentUtil.getEnchantmentHolder(level.registryAccess(), enchantmentResourceKey).get();
-
         Set<Holder<Enchantment>> ancientBookEnchantment = new HashSet<>(Set.of(enchantmentHolder));
 
         //Check if the enchantment stored in this ancient book is also unlocked (in the bookshelf)

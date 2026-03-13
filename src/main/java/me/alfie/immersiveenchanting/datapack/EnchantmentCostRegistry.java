@@ -50,7 +50,8 @@ public class EnchantmentCostRegistry {
 
     public enum InternalCosts {
         TRANSMUTE("immersiveenchanting:transmute"),
-        REPLICATE("immersiveenchanting:replicate");
+        REPLICATE("immersiveenchanting:replicate"),
+        ENCHANTING_FUELS("immersiveenchanting:enchanting_fuels");
 
         private final String id;
 
@@ -77,6 +78,8 @@ public class EnchantmentCostRegistry {
     public EnchantmentCost getReplicateCost() {
         return getInternalRegistry().get(InternalCosts.REPLICATE);
     }
+
+    public EnchantmentCost getEnchantingFuels() { return getInternalRegistry().get(InternalCosts.ENCHANTING_FUELS); }
 
     /**
      * Helper method to get enchantment cost from COST_REGISTRY from its resource location.

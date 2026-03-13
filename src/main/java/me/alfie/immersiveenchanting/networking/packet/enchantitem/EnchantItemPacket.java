@@ -72,21 +72,32 @@ public class EnchantItemPacket {
         ItemStack costSlotItemStack = enchantingTableMenu.getCostSlotItem();
         List<ItemStack> insertedItems = new ArrayList<>();
         insertedItems.add(costSlotItemStack);
+        List<ItemStack> insertedFuels = new ArrayList<>();
+        insertedFuels.add(enchantingTableMenu.getEnchantingFuelSlotItem());
 
         CostDefinition costNode = EnchantmentCostRegistry.getServerRegistry().getEnchantmentCost(packet.enchantment).getCostForLevel(packet.enchantmentLevel);
         CostEntry validCost = CostHelper.findValidCost(costNode, insertedItems, playerXp);
 
+        //Check fuel
+        CostDefinition enchantingFuelNode = EnchantmentCostRegistry.getServerRegistry().getEnchantingFuels().getCostForLevel(packet.enchantmentLevel);
+        CostEntry validEnchantingFuel = CostHelper.findValidCost(enchantingFuelNode, insertedFuels, playerXp);
+
         boolean hasEnoughCost = player.isCreative()
                 || (CostHelper.isCostValid(validCost)
-                && CostHelper.isEnchantingFuelValid(enchantingTableMenu.getEnchantingFuelSlotItem()));
+                && CostHelper.isCostValid(validEnchantingFuel));
 
 
         if (hasEnoughCost) {
-            if(player.isCreative()) validCost = CostEntry.EMPTY;
+            if(player.isCreative()) {
+                validCost = CostEntry.EMPTY;
+                validEnchantingFuel = CostEntry.EMPTY;
+            }
 
             assert validCost != null;
-            enchantingTableMenu.getEnchantingFuelSlotItem().shrink(1);
-            CostHelper.deductCost(validCost, costSlotItemStack, player);
+            assert validEnchantingFuel != null;
+            CostHelper.deductCost(validCost, validEnchantingFuel,
+                    costSlotItemStack, enchantingTableMenu.getEnchantingFuelSlotItem(),
+                    player);
 
             //1.20.1 item.enchant() doesnt overwrite enchantments, it appends them
             Map<Enchantment, Integer> enchantments = EnchantmentHelper.getEnchantments(itemToEnchant);

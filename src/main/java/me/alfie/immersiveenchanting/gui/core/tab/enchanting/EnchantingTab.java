@@ -251,8 +251,8 @@ public class EnchantingTab {
                     asItemStack()
                     .getTooltipLines(screen.player, TooltipFlag.ADVANCED);
 
-            if(!(Objects.equals(nodeTooltip.stackDescriptionComponents.get(0), Component.empty()))) {
-                lines.add(1, nodeTooltip.stackDescriptionComponents.get(0));
+            if(!(Objects.equals(nodeTooltip.costDescriptionComponents.get(0), Component.empty()))) {
+                lines.add(1, nodeTooltip.costDescriptionComponents.get(0));
             }
 
             guiGraphics.renderTooltip(Minecraft.getInstance().font,
@@ -263,6 +263,35 @@ public class EnchantingTab {
                     mouseY);
 
             guiGraphics.pose().popPose();
+        }
+
+        //Fuel stack
+        if(nodeTooltip instanceof EnchantingNodeTooltip enchantingNodeTooltip) {
+            if (screen.isMouseOver(
+                    mouseX, mouseY,
+                    enchantingNodeTooltip.getFuelStackPos().x, enchantingNodeTooltip.getFuelStackPos().y,
+                    16, 16)) {
+
+                guiGraphics.pose().pushPose();
+                guiGraphics.pose().translate(0, 0, 500);
+
+                List<Component> lines = enchantingNodeTooltip.getCurrentRenderedFuel().
+                        asItemStack()
+                        .getTooltipLines(screen.player, TooltipFlag.ADVANCED);
+
+                if(!(Objects.equals(enchantingNodeTooltip.fuelDescriptionComponents.get(0), Component.empty()))) {
+                    lines.add(1, enchantingNodeTooltip.fuelDescriptionComponents.get(0));
+                }
+
+                guiGraphics.renderTooltip(Minecraft.getInstance().font,
+                        lines,
+                        enchantingNodeTooltip.getCurrentRenderedFuel().asItemStack().getTooltipImage(),
+                        enchantingNodeTooltip.getCurrentRenderedFuel().asItemStack(),
+                        mouseX,
+                        mouseY);
+
+                guiGraphics.pose().popPose();
+            }
         }
     }
 
