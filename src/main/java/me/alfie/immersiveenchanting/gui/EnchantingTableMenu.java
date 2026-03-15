@@ -121,7 +121,7 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
             // ---- PLAYER INVENTORY ----
             else {
                 List<Item> enchantingFuels = CostHelper.getItems(EnchantmentCostRegistry
-                        .getServerRegistry()
+                        .getRegistry(player.level())
                         .getEnchantingFuels().levels.values().stream().toList());
 
                 // Try tool → slot 0
