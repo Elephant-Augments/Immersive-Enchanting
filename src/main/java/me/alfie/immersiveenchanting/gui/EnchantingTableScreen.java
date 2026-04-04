@@ -1,5 +1,6 @@
 package me.alfie.immersiveenchanting.gui;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.EnchantingTab;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -38,13 +39,18 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
     public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
         super.extractBackground(graphics, mouseX, mouseY, a);
 
-        canvas().setScale(2f);
+
+        Rect viewportRect = canvas().getViewportRect();
+        //graphics.enableScissor(viewportRect.x1(), viewportRect.y1(), viewportRect.x2(), viewportRect.y2());
 
         graphics.pose().pushMatrix();
         graphics.pose().scale(canvas().scale());
+
         canvas().render(graphics);
         enchantingTab.render(graphics, mouseX, mouseY);
         graphics.pose().popMatrix();
+
+        //graphics.disableScissor();
 
         graphics.blit(RenderPipelines.GUI_TEXTURED,
                 Sprite.ENCHANTING_TABLE_GUI.get(),
@@ -86,6 +92,8 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
 
     @Override
     public boolean mouseScrolled(double x, double y, double scrollX, double scrollY) {
+        if(canvas().onMouseScrolled(x, y, scrollY)) return true;
+
         return super.mouseScrolled(x, y, scrollX, scrollY);
     }
 
@@ -106,7 +114,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
 
         if(isState(ScreenState.ENCHANTING)) enchantingTab.buildBranches(newStack);
 
-        canvas().resizeAndCenter(16);
+        canvas().resizeAndCenter(32);
     }
 
     public void setState(ScreenState state) {

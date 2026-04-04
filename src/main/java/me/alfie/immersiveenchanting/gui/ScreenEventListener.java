@@ -15,4 +15,8 @@ public interface ScreenEventListener {
     default boolean onMouseRelease(MouseButtonEvent mouse) {
         return false;
     }
+
+    default boolean onMouseScrolled(double mouseX, double mouseY, double scrollY) {
+        return false;
+    }
 }
