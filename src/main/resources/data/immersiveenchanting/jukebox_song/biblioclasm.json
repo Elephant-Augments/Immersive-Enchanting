@@ -1,8 +1,0 @@
-{
-  "comparator_output": 15,
-  "description": {
-    "translate": "item.immersiveenchanting.music_disc_biblioclasm.desc"
-  },
-  "length_in_seconds": 127.0,
-  "sound_event": "immersiveenchanting:biblioclasm"
-}

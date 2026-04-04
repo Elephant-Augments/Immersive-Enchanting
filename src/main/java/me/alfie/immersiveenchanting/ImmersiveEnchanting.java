@@ -1,26 +1,17 @@
 package me.alfie.immersiveenchanting;
 
 import com.mojang.logging.LogUtils;
-import me.alfie.immersiveenchanting.block.ModBlocks;
-import me.alfie.immersiveenchanting.config.ClientConfig;
-import me.alfie.immersiveenchanting.config.ServerConfig;
-import me.alfie.immersiveenchanting.creativetab.ModCreativeTab;
-import me.alfie.immersiveenchanting.datacomponent.ModDataComponents;
-import me.alfie.immersiveenchanting.events.ModEvents;
+import me.alfie.immersiveenchanting.datapack.ModDatapack;
+import me.alfie.immersiveenchanting.event.ModEvents;
 import me.alfie.immersiveenchanting.gui.ModMenus;
-import me.alfie.immersiveenchanting.item.ModItems;
-import me.alfie.immersiveenchanting.lootmodifier.ModLootModifiers;
-import me.alfie.immersiveenchanting.networking.ModPackets;
-import me.alfie.immersiveenchanting.sound.ModSounds;
-import me.alfie.immersiveenchanting.structure.ModStructureProcessors;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.FontDescription;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.config.ModConfig;
+import net.neoforged.neoforge.common.NeoForge;
 import org.slf4j.Logger;
 
 @Mod(ImmersiveEnchanting.MODID)
@@ -30,27 +21,11 @@ public class ImmersiveEnchanting {
 
     public ImmersiveEnchanting(IEventBus modEventBus, ModContainer modContainer) {
         ModEvents.register(modEventBus);
-        modEventBus.addListener(ModPackets::register);
-
-        ModSounds.register(modEventBus);
-        ModItems.register(modEventBus);
-        ModBlocks.register(modEventBus);
-        ModCreativeTab.register(modEventBus);
-
         ModMenus.register(modEventBus);
-        modEventBus.addListener(ModMenus::registerMenuScreens);
-
-        ModDataComponents.register(modEventBus);
-        ModLootModifiers.register(modEventBus);
-        ModStructureProcessors.register(modEventBus);
-
-        modContainer.registerConfig(ModConfig.Type.CLIENT, ClientConfig.CONFIG_SPEC);
-        modContainer.registerConfig(ModConfig.Type.SERVER, ServerConfig.CONFIG_SPEC);
     }
 
     public static Component styleWithAltFont(Component component) {
-        ResourceLocation fontStyle = ResourceLocation.withDefaultNamespace("alt");
-        MutableComponent styledComponent = component.copy().withStyle(Style.EMPTY.withFont(fontStyle));
-        return styledComponent;
+        FontDescription altFont = new FontDescription.Resource(Identifier.withDefaultNamespace("alt"));
+        return component.copy().withStyle(Style.EMPTY.withFont(altFont));
     }
 }
