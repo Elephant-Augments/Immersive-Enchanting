@@ -6,6 +6,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class EnchantingTab {
@@ -13,17 +14,17 @@ public class EnchantingTab {
     private final CentralSlot centralSlot;
 
     private final EnchantingTableScreen screen;
-
-    private final List<NodeBranch> cachedBranches = new ArrayList<>();
+    private final BranchManager branchManager;
 
     public EnchantingTab(EnchantingTableScreen screen) {
         this.screen = screen;
 
+        branchManager = new BranchManager(screen);
         centralSlot = new CentralSlot(screen.canvas());
     }
 
     public void render(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-        for(NodeBranch branch : cachedBranches) {
+        for(NodeBranch branch : branchManager.branches()) {
             branch.render(graphics, mouseX, mouseY);
         }
 
@@ -34,9 +35,7 @@ public class EnchantingTab {
         return centralSlot;
     }
 
-    public void buildBranches(ItemStack stack) {
-        cachedBranches.clear();
-        cachedBranches.addAll(BranchFactory.buildBranches(stack, screen.registryAccess(), screen.canvas()));
+    public BranchManager branchManager() {
+        return branchManager;
     }
-
 }

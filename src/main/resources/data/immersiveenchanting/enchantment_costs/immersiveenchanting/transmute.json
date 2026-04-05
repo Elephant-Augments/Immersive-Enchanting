@@ -1,0 +1,11 @@
+{
+  "levels": {
+    "1": [
+      {
+        "item": "minecraft:air",
+        "amount": 1,
+        "xp_levels": 10
+      }
+    ]
+  }
+}

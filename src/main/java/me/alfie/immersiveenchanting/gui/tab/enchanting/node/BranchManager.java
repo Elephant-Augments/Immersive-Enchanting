@@ -1,0 +1,87 @@
+package me.alfie.immersiveenchanting.gui.tab.enchanting.node;
+
+import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
+import net.minecraft.world.item.ItemStack;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
+/**
+ * Functions to calculate node step/angles and position.
+ */
+public class BranchManager {
+    private int nodeStep = 100;
+    private float nodeBranchScale = 1f;
+    private final List<NodeBranch> cachedBranches = new ArrayList<>();
+    private EnchantingTableScreen screen;
+
+    public BranchManager(EnchantingTableScreen screen) {
+        this.screen = screen;
+    }
+
+    public List<NodeBranch> branches() {
+        return cachedBranches;
+    }
+
+    public void buildBranches(ItemStack stack) {
+        cachedBranches.clear();
+        cachedBranches.addAll(BranchFactory.buildBranches(stack, screen.registryAccess(), screen.canvas()));
+        calculateNodeAnglesAndStep();
+    }
+
+    public void positionBranches() {
+        for(NodeBranch branch : cachedBranches) {
+            branch.placeNodesAlongLine(this);
+        }
+    }
+
+    private void calculateNodeAnglesAndStep() {
+        final int baseStep = 40;
+        final int minStep = 40;
+        final int maxStep = 120;
+        final float minScale = 0.25f;
+        final float maxScale = 1f;
+        final int margin = 4;
+        final float nodeSize = Math.max(Node.WIDTH + margin, Node.HEIGHT + margin);
+
+        cachedBranches.sort(Comparator.comparingDouble(NodeBranch::angle));
+
+        //Smallest angular distance
+        double smallestAngle = Double.MAX_VALUE;
+        for (int i = 0; i < cachedBranches.size(); i++) {
+            double a1 = cachedBranches.get(i).angle();
+            double a2 = cachedBranches.get((i+1) % cachedBranches.size()).angle();
+            double difference = Math.abs(a2 - a1);
+            difference = Math.min(difference, 2 * Math.PI - difference);
+            smallestAngle = Math.min(smallestAngle, difference);
+        }
+
+        //Calculate node step
+        nodeStep = baseStep;
+        double minDistance = nodeSize;
+        double currentDistance = nodeStep * smallestAngle;
+
+        if(currentDistance < minDistance) nodeStep = (int) Math.ceil(minDistance / smallestAngle);
+        nodeStep = Math.max(minStep, Math.min(nodeStep, maxStep));
+
+        //Scale down if max nodeStep
+        float scale = 1f;
+        currentDistance = nodeStep * smallestAngle;
+        if(currentDistance < minDistance) {
+            scale = (float) (currentDistance / minDistance);
+            scale = Math.max(scale, minScale);
+        }
+        scale = Math.min(scale, maxScale);
+
+        nodeBranchScale = scale;
+    }
+
+    public int getNodeStep() {
+        return nodeStep;
+    }
+
+    public float getNodeBranchScale() {
+        return nodeBranchScale;
+    }
+}

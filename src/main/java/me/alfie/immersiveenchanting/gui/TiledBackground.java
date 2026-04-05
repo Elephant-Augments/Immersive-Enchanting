@@ -20,10 +20,13 @@ public class TiledBackground extends CanvasRenderable {
                 setPos(tileX, tileY);
 
                 //Viewport culling
-                if(getScreenX()+TILE_SIZE < canvas().getViewportRect().x1() / canvas().scale()) continue;
-                if(getScreenX()-TILE_SIZE > canvas().getViewportRect().x2() / canvas().scale()) continue;
-                if(getScreenY()+TILE_SIZE < canvas().getViewportRect().y1() / canvas().scale()) continue;
-                if(getScreenY()-TILE_SIZE > canvas().getViewportRect().y2() / canvas().scale()) continue;
+                if(!canvas().DEBUG_DISABLE_CULLING) {
+                    if(getScreenX()+TILE_SIZE < canvas().getViewportRect().x1() / canvas().scale()) continue;
+                    if(getScreenX()-TILE_SIZE > canvas().getViewportRect().x2() / canvas().scale()) continue;
+                    if(getScreenY()+TILE_SIZE < canvas().getViewportRect().y1() / canvas().scale()) continue;
+                    if(getScreenY()-TILE_SIZE > canvas().getViewportRect().y2() / canvas().scale()) continue;
+                }
+
 
                 blit(Sprite.BACKGROUND_TILE, graphics);
             }

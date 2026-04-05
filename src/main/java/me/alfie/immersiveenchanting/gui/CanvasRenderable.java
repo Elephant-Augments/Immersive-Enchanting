@@ -25,7 +25,7 @@ public abstract class CanvasRenderable {
     }
 
     public int getScreenX() {
-        return (int) Math.round(x + canvas().getLocalX());
+        return (int) Math.round((x + canvas().getLocalX()) / getScale());
     }
 
     /**
@@ -37,7 +37,7 @@ public abstract class CanvasRenderable {
     }
 
     public int getScreenY() {
-        return (int) Math.round(y + canvas().getLocalY());
+        return (int) Math.round((y + canvas().getLocalY()) / getScale());
     }
 
     public double getX() {

@@ -18,13 +18,19 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Functions to create branches pre-filled with nodes.
+ */
 public class BranchFactory {
 
-    public static List<NodeBranch> buildBranches(ItemStack stack, RegistryAccess registryAccess, ScrollableCanvas canvas) {
+    public static List<NodeBranch> buildBranches(ItemStack stack,
+                                                 RegistryAccess registryAccess,
+                                                 ScrollableCanvas canvas) {
         return buildEnchantingBranches(stack, registryAccess, canvas);
     }
 
-    private static List<Holder<Enchantment>> getApplicableEnchantments(ItemStack stack, RegistryAccess registryAccess) {
+    private static List<Holder<Enchantment>> getApplicableEnchantments(ItemStack stack,
+                                                                       RegistryAccess registryAccess) {
         List<Holder<Enchantment>> enchantments = EnchantmentUtil.idsToHolders(EnchantmentCostRegistry.getAllEnchantmentIds(), registryAccess);
         List<Holder<Enchantment>> applicableEnchantments = new ArrayList<>();
 
@@ -44,8 +50,8 @@ public class BranchFactory {
      * @return
      */
     private static List<NodeBranch> buildEnchantingBranches(ItemStack stack,
-                                                           RegistryAccess registryAccess,
-                                                           ScrollableCanvas canvas) {
+                                                            RegistryAccess registryAccess,
+                                                            ScrollableCanvas canvas) {
         List<NodeBranch> result = new ArrayList<>();
         List<Holder<Enchantment>> applicableEnchantments = getApplicableEnchantments(stack, registryAccess);
 
@@ -71,9 +77,7 @@ public class BranchFactory {
             NodeState state = equippedLevel > enchantmentLevel ? NodeState.OBTAINED : NodeState.UNOBTAINED;
             NodeTier tier = enchantmentLevel+1 == maxLevel ? NodeTier.ELITE : NodeTier.BASIC;
 
-            Identifier iconTexture = Identifier.fromNamespaceAndPath("immersiveenchanting", "textures/item/ancient_book.png");
-
-            nodes.add(new EnchantingNode(canvas, state, tier, iconTexture));
+            nodes.add(new Node(EnchantmentUtil.toId(enchantment), canvas, state, tier));
         }
 
         return new NodeBranch(canvas, nodes, angle);
@@ -94,6 +98,4 @@ public class BranchFactory {
         }
         return angles;
     }
-
-
 }

@@ -14,12 +14,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public record EnchantmentCost(ItemOrTag itemOrTag, int amount) {
+public record EnchantmentCost(ItemOrTag itemOrTag, int amount, int xpLevels) {
 
     public static final Codec<EnchantmentCost> CODEC = RecordCodecBuilder.create(
             instance -> instance.group(
                     ItemOrTag.CODEC.fieldOf("item").forGetter(EnchantmentCost::itemOrTag),
-                    Codec.INT.fieldOf("amount").forGetter(EnchantmentCost::amount)
+                    Codec.INT.fieldOf("amount").forGetter(EnchantmentCost::amount),
+                    Codec.INT.optionalFieldOf("xp_levels", 0).forGetter(EnchantmentCost::xpLevels)
             ).apply(instance, EnchantmentCost::new)
     );
 

@@ -1,13 +1,16 @@
 package me.alfie.immersiveenchanting.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.EnchantingTab;
+import me.alfie.immersiveenchanting.gui.tab.enchanting.node.BranchManager;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 
@@ -41,7 +44,8 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
 
 
         Rect viewportRect = canvas().getViewportRect();
-        //graphics.enableScissor(viewportRect.x1(), viewportRect.y1(), viewportRect.x2(), viewportRect.y2());
+
+        if(!canvas().DEBUG_DISABLE_CULLING) graphics.enableScissor(viewportRect.x1(), viewportRect.y1(), viewportRect.x2(), viewportRect.y2());
 
         graphics.pose().pushMatrix();
         graphics.pose().scale(canvas().scale());
@@ -50,7 +54,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         enchantingTab.render(graphics, mouseX, mouseY);
         graphics.pose().popMatrix();
 
-        //graphics.disableScissor();
+        if(!canvas().DEBUG_DISABLE_CULLING) graphics.disableScissor();
 
         graphics.blit(RenderPipelines.GUI_TEXTURED,
                 Sprite.ENCHANTING_TABLE_GUI.get(),
@@ -111,10 +115,24 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
 
     private void onToolSlotUpdate(ItemStack newStack) {
         canvas().setDragLocked(newStack.isEmpty());
+        int tileCount = 16;
 
-        if(isState(ScreenState.ENCHANTING)) enchantingTab.buildBranches(newStack);
+        if(isState(ScreenState.ENCHANTING)) {
+            int maxLevel = 0;
+            for (Identifier id : EnchantmentCostRegistry.getAllEnchantmentIds()) {
+                maxLevel = Math.max(maxLevel, EnchantmentCostRegistry.get(id).levelCosts().maxLevel());
+            }
 
-        canvas().resizeAndCenter(32);
+            enchantingTab.branchManager().buildBranches(newStack);
+            int pixels =  enchantingTab.branchManager().getNodeStep() * 2 * maxLevel;
+            int margin = TiledBackground.TILE_SIZE * 2;
+            int rounded = ((pixels + TiledBackground.TILE_SIZE - 1) / TiledBackground.TILE_SIZE) * TiledBackground.TILE_SIZE;
+            int size = rounded + margin;
+            tileCount = size / TiledBackground.TILE_SIZE;
+
+            canvas().resizeAndCenter(tileCount);
+            enchantingTab.branchManager().positionBranches();
+        }
     }
 
     public void setState(ScreenState state) {

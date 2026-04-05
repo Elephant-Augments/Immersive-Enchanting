@@ -16,6 +16,7 @@ public class ScrollableCanvas implements ScreenEventListener {
     private float scale;
     private boolean dragging;
     private boolean dragLocked;
+    protected boolean DEBUG_DISABLE_CULLING = false;
 
     private static final int MIN_WIDTH = 256;
     private static final float MAX_SCALE = 2f;
@@ -23,6 +24,7 @@ public class ScrollableCanvas implements ScreenEventListener {
     private static final int VIEWPORT_TOP = 4;
     private static final int VIEWPORT_WIDTH = 247;
     private static final int VIEWPORT_HEIGHT = 117;
+    private static final float INITIAL_ZOOM = 0.8f;
 
     private final TiledBackground background;
 
@@ -30,7 +32,6 @@ public class ScrollableCanvas implements ScreenEventListener {
         this.background = new TiledBackground(this);
         this.screen = screen;
 
-        setScale(1f);
         resizeAndCenter(16);
     }
 
@@ -134,12 +135,12 @@ public class ScrollableCanvas implements ScreenEventListener {
         return ScreenEventListener.super.onMouseScrolled(mouseX, mouseY, scrollY);
     }
 
-    public int getLocalX() {
-        return (int) (x + screen.getGuiLeft() / scale);
+    public double getLocalX() {
+        return x + screen.getGuiLeft() / scale;
     }
 
-    public int getLocalY() {
-        return (int) (y + screen.getGuiTop() / scale);
+    public double getLocalY() {
+        return y + screen.getGuiTop() / scale;
     }
 
     /**
@@ -190,7 +191,7 @@ public class ScrollableCanvas implements ScreenEventListener {
 
     public void setDragLocked(boolean dragLocked) {
         this.dragLocked = dragLocked;
-        setScale(1f);
+        setScale(INITIAL_ZOOM);
     }
 
     public boolean isDragLocked() {
