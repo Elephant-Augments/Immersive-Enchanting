@@ -1,13 +1,9 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.node;
 
-import me.alfie.immersiveenchanting.gui.CanvasRenderable;
-import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
-import me.alfie.immersiveenchanting.gui.ScrollableCanvas;
-import me.alfie.immersiveenchanting.gui.tab.enchanting.EnchantingTab;
+import me.alfie.immersiveenchanting.gui.canvas.CanvasRenderable;
+import me.alfie.immersiveenchanting.gui.canvas.Canvas;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import org.joml.Vector2i;
 
-import java.util.Comparator;
 import java.util.List;
 
 public class NodeBranch extends CanvasRenderable {
@@ -16,7 +12,7 @@ public class NodeBranch extends CanvasRenderable {
     private float angle;
     private BranchTexture texture;
 
-    public NodeBranch(ScrollableCanvas canvas, List<Node> nodes, float angle) {
+    public NodeBranch(Canvas canvas, List<Node> nodes, float angle) {
         super(canvas);
         this.nodes = nodes;
         this.angle = angle;
@@ -32,14 +28,18 @@ public class NodeBranch extends CanvasRenderable {
         return angle;
     }
 
-    public void placeNodesAlongLine(BranchManager branchManager) {
-        Vector2i centerPos = canvas().getLocalCenterPos(Node.WIDTH, Node.HEIGHT);
-        double stepX = Math.cos(angle) * branchManager.getNodeStep();
-        double stepY = Math.sin(angle) * branchManager.getNodeStep();
+    public void placeNodesAlongLine() {
+        double stepX = Math.cos(angle) * BranchManager.getNodeStep();
+        double stepY = Math.sin(angle) * BranchManager.getNodeStep();
 
         for (int i = 0; i < nodes.size(); i++) {
-            Node node = nodes.get(i);
-            node.setPos(centerPos.x + stepX * (i+1), centerPos.y + stepY * (i+1));
+            int x = (int) Math.round(canvas().getCenter().x() + stepX * (i+1));
+            int y = (int) Math.round(canvas().getCenter().y() + stepY * (i+1));
+
+            Node node = nodes().get(i);
+            node.setCanvasPos(x - (float) Node.WIDTH / 2, y - (float) Node.HEIGHT / 2);
+            node.setScaleKeepPos(BranchManager.getNodeBranchScale(),
+                    node.getState().getSpriteForTier(node.getTier()));
         }
 
         texture.calculateNodeConnections();

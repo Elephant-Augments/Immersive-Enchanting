@@ -3,6 +3,7 @@ package me.alfie.immersiveenchanting.datapack;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.enchantment.Enchantment;
 
@@ -24,6 +25,10 @@ public class EnchantmentUtil {
 
     public static Identifier toId(Holder<Enchantment> enchantmentHolder) {
         return enchantmentHolder.unwrapKey().orElseThrow().identifier();
+    }
+
+    public static Component getEnchantmentTitleFromId(Identifier id, int enchantmentLevel, RegistryAccess access) {
+        return Enchantment.getFullname(toHolder(id, access), enchantmentLevel);
     }
 
 }

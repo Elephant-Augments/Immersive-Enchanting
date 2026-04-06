@@ -11,8 +11,9 @@ import java.util.List;
  * Functions to calculate node step/angles and position.
  */
 public class BranchManager {
-    private int nodeStep = 100;
-    private float nodeBranchScale = 1f;
+    private static int nodeStep = 100;
+    private static float nodeBranchScale = 1f;
+
     private final List<NodeBranch> cachedBranches = new ArrayList<>();
     private EnchantingTableScreen screen;
 
@@ -24,15 +25,22 @@ public class BranchManager {
         return cachedBranches;
     }
 
+    /**
+     * You must buildBranches() before positionBranches()!
+     * @param stack
+     */
     public void buildBranches(ItemStack stack) {
         cachedBranches.clear();
         cachedBranches.addAll(BranchFactory.buildBranches(stack, screen.registryAccess(), screen.canvas()));
         calculateNodeAnglesAndStep();
     }
 
+    /**
+     * You must buildBranches() before positionBranches()!
+     */
     public void positionBranches() {
         for(NodeBranch branch : cachedBranches) {
-            branch.placeNodesAlongLine(this);
+            branch.placeNodesAlongLine();
         }
     }
 
@@ -40,10 +48,16 @@ public class BranchManager {
         final int baseStep = 40;
         final int minStep = 40;
         final int maxStep = 120;
-        final float minScale = 0.25f;
+        final float minScale = 0.3f;
         final float maxScale = 1f;
         final int margin = 4;
-        final float nodeSize = Math.max(Node.WIDTH + margin, Node.HEIGHT + margin);
+        final float nodeSize = Math.max(Node.WIDTH + margin, Node.HEIGHT + margin) * Node.DEFAULT_SCALE;
+
+        if(cachedBranches.size() <= 1) {
+            nodeStep = baseStep;
+            nodeBranchScale = Math.min(maxScale, Node.DEFAULT_SCALE);
+            return;
+        }
 
         cachedBranches.sort(Comparator.comparingDouble(NodeBranch::angle));
 
@@ -66,7 +80,7 @@ public class BranchManager {
         nodeStep = Math.max(minStep, Math.min(nodeStep, maxStep));
 
         //Scale down if max nodeStep
-        float scale = 1f;
+        float scale = Node.DEFAULT_SCALE;
         currentDistance = nodeStep * smallestAngle;
         if(currentDistance < minDistance) {
             scale = (float) (currentDistance / minDistance);
@@ -77,11 +91,11 @@ public class BranchManager {
         nodeBranchScale = scale;
     }
 
-    public int getNodeStep() {
+    public static int getNodeStep() {
         return nodeStep;
     }
 
-    public float getNodeBranchScale() {
+    public static float getNodeBranchScale() {
         return nodeBranchScale;
     }
 }

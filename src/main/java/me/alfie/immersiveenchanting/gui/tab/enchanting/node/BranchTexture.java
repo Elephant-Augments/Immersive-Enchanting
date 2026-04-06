@@ -2,12 +2,15 @@ package me.alfie.immersiveenchanting.gui.tab.enchanting.node;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
-import me.alfie.immersiveenchanting.gui.CanvasRenderable;
-import me.alfie.immersiveenchanting.gui.ScrollableCanvas;
+import me.alfie.immersiveenchanting.gui.canvas.CanvasCamera;
+import me.alfie.immersiveenchanting.gui.canvas.CanvasRenderable;
+import me.alfie.immersiveenchanting.gui.canvas.Canvas;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.Identifier;
+import org.joml.Vector2f;
+import org.joml.Vector2i;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -26,39 +29,40 @@ public class BranchTexture extends CanvasRenderable {
     private int textureWidth;
     private int textureHeight;
 
-    public BranchTexture(NodeBranch branch, ScrollableCanvas canvas) {
+    public BranchTexture(NodeBranch branch, Canvas canvas) {
         super(canvas);
         this.branch = branch;
     }
 
     @Override
     public void render(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-        blit(textureId, textureWidth, textureHeight, graphics);
+        blit(graphics, textureId, textureWidth, textureHeight);
     }
 
     public void calculateNodeConnections() {
-        for (int i = 0; i < branch.nodes().size(); i++) {
-            if (i == 0) {
-                connectNodeToCenter(branch.nodes().get(i)); //Connect first node to the center
-            } else {
-                connectNodes(branch.nodes().get(i - 1), branch.nodes().get(i)); //Connect nodes together
-            }
+        if (branch.nodes().isEmpty()) return;
+
+        connectNodeToCenter(branch.nodes().getFirst());
+
+        for (int i = 1; i < branch.nodes().size(); i++) {
+            connectNodes(branch.nodes().get(i - 1), branch.nodes().get(i));
         }
+        bakeTexture();
     }
 
     private void connectNodeToCenter(Node node) {
-        int ax = canvas().getLocalCenterPos(0, 0).x();
-        int ay = canvas().getLocalCenterPos(0, 0).y();
-        int bx = Math.round((float)(node.getX() + Node.WIDTH * node.getScale() / 2));
-        int by = Math.round((float)(node.getY() + Node.HEIGHT * node.getScale() / 2));
-        makeTexture(ax, ay, bx, by);
+        Vector2i a = canvas().getCenter();
+        int bx = (int) Math.round(node.canvasX() + node.getScaledLength(Node.WIDTH) / 2.0);
+        int by = (int) Math.round(node.canvasY() + node.getScaledLength(Node.HEIGHT) / 2.0);
+
+        makeTexture(a.x(), a.y(), bx, by);
     }
 
     private void connectNodes(Node node1, Node node2) {
-        int ax = (int) (node1.getX() + Node.WIDTH * node1.getScale() / 2);
-        int ay = (int) (node1.getY() + Node.HEIGHT * node1.getScale() / 2);
-        int bx = (int) (node2.getX() + Node.WIDTH * node2.getScale() / 2);
-        int by = (int) (node2.getY() + Node.HEIGHT * node2.getScale() / 2);
+        int ax = (int) Math.round(node1.canvasX() + node1.getScaledLength(Node.WIDTH) / 2.0);
+        int ay = (int) Math.round(node1.canvasY() + node1.getScaledLength(Node.HEIGHT) / 2.0);
+        int bx = (int) Math.round(node2.canvasX() + node2.getScaledLength(Node.WIDTH) / 2.0);
+        int by = (int) Math.round(node2.canvasY() + node2.getScaledLength(Node.HEIGHT) / 2.0);
         makeTexture(ax, ay, bx, by);
     }
 
@@ -123,8 +127,6 @@ public class BranchTexture extends CanvasRenderable {
             calculateBorderPixel(px - 1, py + 1, whitePixels, BLACK);
             calculateBorderPixel(px + 1, py + 1, whitePixels, BLACK);
         }
-
-        bakeTexture();
     }
 
     private void bakeTexture() {
@@ -143,8 +145,7 @@ public class BranchTexture extends CanvasRenderable {
 
         textureWidth = maxX - minX + 1;
         textureHeight = maxY - minY + 1;
-
-        setPos(minX, minY);
+        setCanvasPos(minX, minY);
 
         // Create dynamic texture
         String label = "branch_connection";

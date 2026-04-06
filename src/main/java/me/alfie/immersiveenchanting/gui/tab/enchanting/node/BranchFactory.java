@@ -1,14 +1,10 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.node;
 
-import com.mojang.blaze3d.platform.NativeImage;
 import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.datapack.EnchantmentUtil;
-import me.alfie.immersiveenchanting.gui.ScrollableCanvas;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.DynamicTexture;
+import me.alfie.immersiveenchanting.gui.canvas.Canvas;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -25,7 +21,7 @@ public class BranchFactory {
 
     public static List<NodeBranch> buildBranches(ItemStack stack,
                                                  RegistryAccess registryAccess,
-                                                 ScrollableCanvas canvas) {
+                                                 Canvas canvas) {
         return buildEnchantingBranches(stack, registryAccess, canvas);
     }
 
@@ -51,7 +47,7 @@ public class BranchFactory {
      */
     private static List<NodeBranch> buildEnchantingBranches(ItemStack stack,
                                                             RegistryAccess registryAccess,
-                                                            ScrollableCanvas canvas) {
+                                                            Canvas canvas) {
         List<NodeBranch> result = new ArrayList<>();
         List<Holder<Enchantment>> applicableEnchantments = getApplicableEnchantments(stack, registryAccess);
 
@@ -69,7 +65,7 @@ public class BranchFactory {
     private static NodeBranch buildEnchantingBranch(Holder<Enchantment> enchantment,
                                                     int equippedLevel,
                                                     float angle,
-                                                    ScrollableCanvas canvas) {
+                                                    Canvas canvas) {
         List<Node> nodes = new ArrayList<>();
 
         int maxLevel = EnchantmentCostRegistry.get(EnchantmentUtil.toId(enchantment)).levelCosts().maxLevel();
@@ -77,7 +73,7 @@ public class BranchFactory {
             NodeState state = equippedLevel > enchantmentLevel ? NodeState.OBTAINED : NodeState.UNOBTAINED;
             NodeTier tier = enchantmentLevel+1 == maxLevel ? NodeTier.ELITE : NodeTier.BASIC;
 
-            nodes.add(new Node(EnchantmentUtil.toId(enchantment), canvas, state, tier));
+            nodes.add(new Node(EnchantmentUtil.toId(enchantment), enchantmentLevel+1, canvas, state, tier));
         }
 
         return new NodeBranch(canvas, nodes, angle);

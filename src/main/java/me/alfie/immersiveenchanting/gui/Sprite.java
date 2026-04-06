@@ -18,9 +18,6 @@ public enum Sprite {
     XP_LEVEL("textures/gui/sprites/tooltip/xp_level.png", 16, 16),
     MOUSE_HINT_OFF("textures/gui/sprites/tooltip/mouse_hint_off.png", 16, 16),
     MOUSE_HINT_ON("textures/gui/sprites/tooltip/mouse_hint_on.png", 16, 16),
-    TOOLTIP_DESCRIPTION("tooltip/tooltip_description", 0, 0),
-    TOOLTIP_OBTAINED("tooltip/tooltip_obtained", 0, 0),
-    TOOLTIP_UNOBTAINED("tooltip/tooltip_unobtained", 0, 0),
 
     //Book Tab
     SCROLLBAR("textures/gui/sprites/booktab/scrollbar.png", 12, 117),
@@ -52,7 +49,7 @@ public enum Sprite {
         this.height = height;
     }
 
-    public Identifier get() {
+    public Identifier id() {
         return identifier;
     }
 
@@ -67,7 +64,7 @@ public enum Sprite {
     public void draw(GuiGraphicsExtractor graphics, int x, int y) {
         graphics.blit(
                 RenderPipelines.GUI_TEXTURED,
-                get(),
+                id(),
                 x, y,
                 0, 0,
                 width(), height(),

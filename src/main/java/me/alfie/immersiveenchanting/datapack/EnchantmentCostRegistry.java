@@ -57,4 +57,17 @@ public class EnchantmentCostRegistry {
         return result;
     }
 
+    /**
+     * Find the highest enchantment level that exists in the cost registry.
+     * @return highestLevel
+     */
+    public static int getHighestLevel() {
+        int highestLevel = 0;
+        for (Identifier id : EnchantmentCostRegistry.getAllEnchantmentIds()) {
+            int level = EnchantmentCostRegistry.get(id).levelCosts().maxLevel();
+            if(level > highestLevel) highestLevel = level;
+        }
+        return highestLevel;
+    }
+
 }
