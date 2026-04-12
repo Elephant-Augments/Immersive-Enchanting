@@ -31,7 +31,7 @@ public class BranchManager {
      */
     public void buildBranches(ItemStack stack) {
         cachedBranches.clear();
-        cachedBranches.addAll(BranchFactory.buildBranches(stack, screen.registryAccess(), screen.canvas()));
+        cachedBranches.addAll(BranchFactory.buildBranches(stack, screen.canvas()));
         calculateNodeAnglesAndStep();
     }
 

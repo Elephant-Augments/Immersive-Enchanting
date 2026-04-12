@@ -1,7 +1,7 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.node;
 
-import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
-import me.alfie.immersiveenchanting.datapack.EnchantmentUtil;
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.EnchantmentCostRegistry;
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.EnchantmentUtil;
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
@@ -19,18 +19,16 @@ import java.util.Set;
  */
 public class BranchFactory {
 
-    public static List<NodeBranch> buildBranches(ItemStack stack,
-                                                 RegistryAccess registryAccess,
-                                                 Canvas canvas) {
-        return buildEnchantingBranches(stack, registryAccess, canvas);
+    public static List<NodeBranch> buildBranches(ItemStack stack, Canvas canvas) {
+        return buildEnchantingBranches(stack, canvas);
     }
 
-    private static List<Holder<Enchantment>> getApplicableEnchantments(ItemStack stack,
-                                                                       RegistryAccess registryAccess) {
-        List<Holder<Enchantment>> enchantments = EnchantmentUtil.idsToHolders(EnchantmentCostRegistry.getAllEnchantmentIds(), registryAccess);
+    private static List<Holder<Enchantment>> getApplicableEnchantments(ItemStack stack) {
+        List<Holder<Enchantment>> sortedEnchantments = EnchantmentUtil.sortByName(EnchantmentCostRegistry.getAllEnchantmentHolders());
+
         List<Holder<Enchantment>> applicableEnchantments = new ArrayList<>();
 
-        for(Holder<Enchantment> enchantment : enchantments) {
+        for(Holder<Enchantment> enchantment : sortedEnchantments) {
             Set<Holder<Enchantment>> itemEnchantments = new HashSet<>(stack.getTagEnchantments().keySet());
             itemEnchantments.remove(enchantment);
             if(!EnchantmentHelper.isEnchantmentCompatible(itemEnchantments, enchantment)) continue;
@@ -42,14 +40,11 @@ public class BranchFactory {
     /**
      * Gets all enchantments from the EnchantmentCostRegistry and creates a NodeBranch for each one.
      * @param stack
-     * @param registryAccess
      * @return
      */
-    private static List<NodeBranch> buildEnchantingBranches(ItemStack stack,
-                                                            RegistryAccess registryAccess,
-                                                            Canvas canvas) {
+    private static List<NodeBranch> buildEnchantingBranches(ItemStack stack, Canvas canvas) {
         List<NodeBranch> result = new ArrayList<>();
-        List<Holder<Enchantment>> applicableEnchantments = getApplicableEnchantments(stack, registryAccess);
+        List<Holder<Enchantment>> applicableEnchantments = getApplicableEnchantments(stack);
 
         List<Float> angles = generateBranchAngles(applicableEnchantments.size());
 
@@ -73,7 +68,12 @@ public class BranchFactory {
             NodeState state = equippedLevel > enchantmentLevel ? NodeState.OBTAINED : NodeState.UNOBTAINED;
             NodeTier tier = enchantmentLevel+1 == maxLevel ? NodeTier.ELITE : NodeTier.BASIC;
 
+            if(!canvas.screen().getAvailableEnchantments().contains(enchantment)) state = NodeState.LOCKED;
+            System.out.println(canvas.screen().getAvailableEnchantments());
+
             nodes.add(new Node(EnchantmentUtil.toId(enchantment), enchantmentLevel+1, canvas, state, tier));
+
+            if(equippedLevel < enchantmentLevel+1) break;
         }
 
         return new NodeBranch(canvas, nodes, angle);

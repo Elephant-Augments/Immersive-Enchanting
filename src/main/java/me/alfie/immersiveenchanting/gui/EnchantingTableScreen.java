@@ -1,22 +1,38 @@
 package me.alfie.immersiveenchanting.gui;
 
-import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
+import me.alfie.immersiveenchanting.FxHelper;
+import me.alfie.immersiveenchanting.api.description.EnchantmentCostRenderer;
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.EnchantmentCostRegistry;
 import me.alfie.immersiveenchanting.gui.canvas.CanvasCamera;
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
+import me.alfie.immersiveenchanting.gui.core.ScreenState;
+import me.alfie.immersiveenchanting.gui.core.Sprite;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.EnchantingTab;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.NodeTooltip;
+import me.alfie.immersiveenchanting.networking.CheckBookshelvesPacket;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTableMenu> {
 
+    private static final Logger log = LogManager.getLogger(EnchantingTableScreen.class);
     private CanvasCamera camera;
     private final Canvas scrollableCanvas;
     private ScreenState screenState;
@@ -28,18 +44,28 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
     private final RegistryAccess registryAccess;
 
     private NodeTooltip nextNodeTooltip;
+    private NodeTooltip lastActiveNodeTooltip;
+    private NodeTooltip activeNodeTooltip;
+    private Node lockedTooltipNode;
+    private final EnchantmentCostRenderer enchantmentCostRenderer;
+    private List<Holder<Enchantment>> availableEnchantments = new ArrayList<>();
+
+    private final Player player;
 
     public EnchantingTableScreen(EnchantingTableMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title, 256, 222);
         registryAccess = inventory.player.registryAccess();
-
-
+        this.player = inventory.player;
         this.scrollableCanvas = new Canvas(this);
         setState(ScreenState.ENCHANTING);
 
         enchantingTab = new EnchantingTab(this);
 
+        this.enchantmentCostRenderer = new EnchantmentCostRenderer();
+
         onToolSlotUpdate(ItemStack.EMPTY);
+
+
     }
 
     @Override
@@ -77,25 +103,94 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
                 imageWidth, imageHeight,
                 Sprite.ENCHANTING_TABLE_GUI.width(), Sprite.ENCHANTING_TABLE_GUI.height());
 
-        if(nextNodeTooltip != null) {
-            nextNodeTooltip.render(graphics, mouseX, mouseY);
-            nextNodeTooltip = null;
-        }
+    }
+
+    public void setAvailableEnchantments(List<Holder<Enchantment>> availableEnchantments) {
+        this.availableEnchantments.clear();
+        this.availableEnchantments.addAll(availableEnchantments);
+    }
+
+    public List<Holder<Enchantment>> getAvailableEnchantments() {
+        return availableEnchantments;
+    }
+
+    public void lockTooltip(Node node) {
+        lockedTooltipNode = node;
+    }
+
+    public void unlockTooltip() {
+        lockedTooltipNode = null;
+    }
+
+    public boolean isTooltipLocked(Node node) {
+        return lockedTooltipNode == node;
+    }
+
+    public boolean isTooltipLocked() {
+        return lockedTooltipNode != null;
     }
 
     public void setNextNodeTooltip(Node node) {
         nextNodeTooltip = new NodeTooltip(this, node);
     }
 
+    public boolean isNextNodeTooltip(Node node) {
+        return nextNodeTooltip.node().equals(node);
+    }
+
+    public boolean hasNextNodeTooltip() {
+        return nextNodeTooltip != null;
+    }
+
+    public Node getActiveNodeTooltipNode() {
+        return activeNodeTooltip.node();
+    }
+
+    public boolean hasActiveNodeTooltip() {
+        return activeNodeTooltip != null;
+    }
+
     @Override
-    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
-        super.extractRenderState(graphics, mouseX, mouseY, a);
+    public void extractRenderState(@NotNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+        this.extractContents(graphics, mouseX, mouseY, a);
+        this.extractCarriedItem(graphics, mouseX, mouseY);
+        this.extractSnapbackItem(graphics);
+
+        if(hasNextNodeTooltip()) {
+            activeNodeTooltip = nextNodeTooltip;
+            nextNodeTooltip = null;
+        } else {
+            activeNodeTooltip = null;
+            lastActiveNodeTooltip = null;
+        }
+
+        if(activeNodeTooltip != null) {
+            activeNodeTooltip.render(graphics, mouseX, mouseY);
+
+            if(lastActiveNodeTooltip == null || !lastActiveNodeTooltip.node().equals(activeNodeTooltip.node())) {
+                FxHelper.playNodeHover(player().level(), activeNodeTooltip.node());
+            }
+
+            lastActiveNodeTooltip = activeNodeTooltip;
+        }
+
+        if(!isTooltipLocked()) {
+            this.extractTooltip(graphics, mouseX, mouseY);
+        }
+    }
+
+    @Override
+    protected void extractLabels(GuiGraphicsExtractor graphics, int xm, int ym) {
+        this.inventoryLabelX = 16;
+        graphics.text(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, -12566464, false);
     }
 
     @Override
     public boolean mouseClicked(MouseButtonEvent mouse, boolean doubleClick) {
         if(isState(ScreenState.ENCHANTING)) {
             if(enchantingTab.centralSlot().onMouseClick(mouse)) return true;
+
+            if(activeNodeTooltip != null && activeNodeTooltip.onMouseClick(mouse)) return true;
 
             if(camera.onMouseClick(mouse)) return true;
         }
@@ -124,6 +219,24 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         return super.mouseScrolled(x, y, scrollX, scrollY);
     }
 
+    /**
+     * Checks if the mouse is over a rectangle.
+     *
+     * @param x      top-left x of the rectangle
+     * @param y      top-left y of the rectangle
+     * @param width  width of the rectangle
+     * @param height height of the rectangle
+     * @param mouseX current mouse x
+     * @param mouseY current mouse y
+     * @return true if mouse is inside the rectangle
+     */
+    public boolean isMouseOver(float x, float y, int width, int height, double mouseX, double mouseY) {
+        return mouseX >= x && mouseX < x + width
+                && mouseY >= y && mouseY < y + height;
+    }
+
+
+
 
 
     @Override
@@ -141,19 +254,14 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         canvas().setSizeToFitNodes(EnchantmentCostRegistry.getHighestLevel());
         enchantingTab.branchManager().positionBranches();
 
+        FxHelper.playToolSlotChanged(player().level());
+
         if(camera() == null) return;
-        if(newStack.isEmpty()) {
-            camera().setDraggingEnabled(false);
-            camera().setZoom(1f);
-            camera().centerCameraOnCanvas();
-        } else {
-            camera().setDraggingEnabled(true);
-        }
-
-
-
-
+        camera().setDraggingEnabled(!newStack.isEmpty());
+        camera().setZoom(1f);
+        camera().centerCameraOnCanvas();
     }
+
 
     public void setState(ScreenState state) {
         this.screenState = state;
@@ -173,5 +281,13 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
 
     public RegistryAccess registryAccess() {
         return registryAccess;
+    }
+
+    public Player player() {
+        return player;
+    }
+
+    public EnchantmentCostRenderer enchantmentCostRenderer() {
+        return enchantmentCostRenderer;
     }
 }

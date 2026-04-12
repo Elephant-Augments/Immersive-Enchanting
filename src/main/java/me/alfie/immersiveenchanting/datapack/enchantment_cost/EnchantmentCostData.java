@@ -1,4 +1,4 @@
-package me.alfie.immersiveenchanting.datapack;
+package me.alfie.immersiveenchanting.datapack.enchantment_cost;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;

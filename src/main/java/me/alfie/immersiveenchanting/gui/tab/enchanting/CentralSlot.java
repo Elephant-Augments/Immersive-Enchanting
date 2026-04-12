@@ -1,9 +1,10 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting;
 
-import me.alfie.immersiveenchanting.gui.Sprite;
-import me.alfie.immersiveenchanting.gui.canvas.CanvasCamera;
+import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.platform.cursor.CursorTypes;
+import me.alfie.immersiveenchanting.gui.core.Sprite;
 import me.alfie.immersiveenchanting.gui.canvas.CanvasRenderable;
-import me.alfie.immersiveenchanting.gui.ScreenEventListener;
+import me.alfie.immersiveenchanting.gui.core.ScreenEventListener;
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
 import me.alfie.immersiveenchanting.networking.UpdateToolSlotPacket;
 import net.minecraft.client.Minecraft;
@@ -20,37 +21,46 @@ public class CentralSlot extends CanvasRenderable implements ScreenEventListener
 
     public void render(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         setCenterPos(Sprite.ENCHANTING_TABLE_TOP);
-        blit(graphics, Sprite.ENCHANTING_TABLE_TOP);
+        blit(graphics, Sprite.ENCHANTING_TABLE_TOP, Canvas.FULL_BRIGHTNESS);
 
         ItemStack toolSlotStack = canvas().screen().getMenu().getToolSlot().getItem();
 
         if(!toolSlotStack.isEmpty()) {
-            blit(graphics, Sprite.BOOK_OPEN);
+            blit(graphics, Sprite.BOOK_OPEN, Canvas.FULL_BRIGHTNESS);
             renderItem(graphics, toolSlotStack, mouseX, mouseY);
         } else {
-            blit(graphics, Sprite.BOOK_CLOSED);
+            blit(graphics, Sprite.BOOK_CLOSED, Canvas.FULL_BRIGHTNESS);
+        }
+
+        if(canvas().isMouseOver(canvasX(), canvasY(), 32, 32, mouseX, mouseY)) {
+            if(!canvas().screen().getMenu().getCarried().isEmpty() || canvas().screen().getMenu().getToolSlot().hasItem()) {
+                graphics.requestCursor(CursorTypes.POINTING_HAND);
+            }
         }
     }
 
     private void renderItem(GuiGraphicsExtractor graphics, ItemStack stack, int mouseX, int mouseY) {
         setCenterPos(16, 16);
         graphics.item(stack, (int) canvasX(), (int) canvasY());
-        if(canvas().isMouseOver(canvasX(), canvasY(), 16, 16, mouseX, mouseY)) {
+
+        if(canvas().isMouseOver(canvasX(), canvasY(), 16, 16, mouseX, mouseY) && !canvas().screen().isTooltipLocked()) {
             graphics.setTooltipForNextFrame(Minecraft.getInstance().font, stack, mouseX, mouseY);
         }
+
         setCenterPos(Sprite.ENCHANTING_TABLE_TOP);
     }
 
     @Override
     public boolean onMouseClick(MouseButtonEvent mouse) {
-        if(canvas().isMouseOver(canvasX(), canvasY(),
-                32, 32,
-                mouse.x(), mouse.y())) {
+        if(mouse.button() != InputConstants.MOUSE_BUTTON_LEFT) return ScreenEventListener.super.onMouseClick(mouse);
+
+        if(canvas().isMouseOver(canvasX(), canvasY(), 32, 32, mouse.x(), mouse.y())) {
 
            UpdateToolSlotPacket.Mode mode = canvas().screen().getMenu().getCarried().isEmpty() ?
                     UpdateToolSlotPacket.Mode.TAKE : UpdateToolSlotPacket.Mode.PLACE;
 
             ClientPacketDistributor.sendToServer(new UpdateToolSlotPacket(mode.ordinal()));
+
             return true;
         }
 

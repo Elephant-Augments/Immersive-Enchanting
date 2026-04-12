@@ -3,7 +3,8 @@
     "1": [
       {
         "item": "minecraft:axolotl_bucket",
-        "amount": 1
+        "amount": 1,
+        "xp_levels": 1
       }
     ]
   }

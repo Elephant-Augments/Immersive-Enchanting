@@ -1,6 +1,6 @@
 package me.alfie.immersiveenchanting.gui.canvas;
 
-import me.alfie.immersiveenchanting.gui.Sprite;
+import me.alfie.immersiveenchanting.gui.core.Sprite;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
@@ -151,8 +151,8 @@ public abstract class CanvasRenderable {
      * @param graphics The graphics context
      * @param sprite The sprite to draw
      */
-    public void blit(GuiGraphicsExtractor graphics, Sprite sprite) {
-        blit(graphics, sprite.id(), sprite.width(), sprite.height());
+    public void blit(GuiGraphicsExtractor graphics, Sprite sprite, int color) {
+        blit(graphics, sprite.id(), sprite.width(), sprite.height(), color);
     }
 
     /**
@@ -164,8 +164,8 @@ public abstract class CanvasRenderable {
      * @param height Height of the texture
      */
     public void blit(GuiGraphicsExtractor graphics, Identifier id,
-                     int width, int height) {
-        blit(graphics, id, width, height, 0, 0);
+                     int width, int height, int color) {
+        blit(graphics, id, width, height, 0, 0, color);
     }
 
     /**
@@ -184,7 +184,7 @@ public abstract class CanvasRenderable {
      */
     public void blit(GuiGraphicsExtractor graphics, Identifier id,
                            int width, int height,
-                           int offsetX, int offsetY) {
+                           int offsetX, int offsetY, int color) {
         graphics.pose().pushMatrix();
 
         graphics.pose().translate(canvasX(), canvasY());
@@ -197,7 +197,8 @@ public abstract class CanvasRenderable {
                 (int) canvasX() + offsetX, (int) canvasY() + offsetY,
                 0, 0,
                 width, height,
-                width, height
+                width, height,
+                color
         );
 
         graphics.pose().popMatrix();

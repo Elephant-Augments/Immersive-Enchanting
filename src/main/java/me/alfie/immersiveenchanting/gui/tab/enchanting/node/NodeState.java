@@ -1,6 +1,6 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.node;
 
-import me.alfie.immersiveenchanting.gui.Sprite;
+import me.alfie.immersiveenchanting.gui.core.Sprite;
 
 public enum NodeState {
     UNOBTAINED(Sprite.BASIC_NODE_UNOBTAINED, Sprite.ADVANCED_NODE_UNOBTAINED, Sprite.ELITE_NODE_UNOBTAINED),

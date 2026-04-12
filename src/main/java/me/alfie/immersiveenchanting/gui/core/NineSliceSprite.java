@@ -1,4 +1,4 @@
-package me.alfie.immersiveenchanting.gui;
+package me.alfie.immersiveenchanting.gui.core;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import net.minecraft.resources.Identifier;

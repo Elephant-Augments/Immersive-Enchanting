@@ -36,7 +36,12 @@ public class BranchTexture extends CanvasRenderable {
 
     @Override
     public void render(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-        blit(graphics, textureId, textureWidth, textureHeight);
+        int brightness = (canvas().screen().hasActiveNodeTooltip() &&
+                branch.nodes().contains(canvas().screen().getActiveNodeTooltipNode()))
+                ? Canvas.FULL_BRIGHTNESS
+                : canvas().getCurrentBrightness();
+
+        blit(graphics, textureId, textureWidth, textureHeight, brightness);
     }
 
     public void calculateNodeConnections() {

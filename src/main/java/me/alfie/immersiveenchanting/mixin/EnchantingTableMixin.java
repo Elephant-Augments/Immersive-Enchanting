@@ -25,20 +25,18 @@ public class EnchantingTableMixin {
             cancellable = true
     )
     private void overrideGetMenuProvider(BlockState state, Level level, BlockPos pos, CallbackInfoReturnable<MenuProvider> cir) {
-        // Get the block entity at this position
         BlockEntity blockEntity = level.getBlockEntity(pos);
 
         if (blockEntity instanceof EnchantingTableBlockEntity enchantingTable) {
             Component title = enchantingTable.getDisplayName();
 
-            // Return your custom menu
             cir.setReturnValue(new SimpleMenuProvider(
                     (containerId, inventory, player) ->
                             new EnchantingTableMenu(containerId, inventory, level, pos),
                     title
             ));
+
         } else {
-            // Not an enchanting table block entity → return null
             cir.setReturnValue(null);
         }
     }

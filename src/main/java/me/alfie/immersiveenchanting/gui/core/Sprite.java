@@ -1,4 +1,4 @@
-package me.alfie.immersiveenchanting.gui;
+package me.alfie.immersiveenchanting.gui.core;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -16,8 +16,8 @@ public enum Sprite {
 
     //Tooltip
     XP_LEVEL("textures/gui/sprites/tooltip/xp_level.png", 16, 16),
-    MOUSE_HINT_OFF("textures/gui/sprites/tooltip/mouse_hint_off.png", 16, 16),
-    MOUSE_HINT_ON("textures/gui/sprites/tooltip/mouse_hint_on.png", 16, 16),
+    MOUSE_HINT_OFF("textures/gui/sprites/tooltip/mouse_hint_off.png", 8, 8),
+    MOUSE_HINT_ON("textures/gui/sprites/tooltip/mouse_hint_on.png", 8, 8),
 
     //Book Tab
     SCROLLBAR("textures/gui/sprites/booktab/scrollbar.png", 12, 117),

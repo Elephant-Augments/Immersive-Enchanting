@@ -3,6 +3,7 @@ package me.alfie.immersiveenchanting.gui.tab.enchanting.node;
 import me.alfie.immersiveenchanting.gui.canvas.CanvasRenderable;
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.resources.Identifier;
 
 import java.util.List;
 

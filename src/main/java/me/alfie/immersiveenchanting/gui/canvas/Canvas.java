@@ -1,8 +1,8 @@
 package me.alfie.immersiveenchanting.gui.canvas;
 
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
-import me.alfie.immersiveenchanting.gui.ScreenEventListener;
-import me.alfie.immersiveenchanting.gui.Sprite;
+import me.alfie.immersiveenchanting.gui.core.ScreenEventListener;
+import me.alfie.immersiveenchanting.gui.core.Sprite;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.BranchManager;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -20,6 +20,10 @@ public class Canvas implements ScreenEventListener {
 
     private static final int TILE_SIZE = 16;
 
+    public static final int FULL_BRIGHTNESS = 0xFFFFFFFF;
+    public static final int TINTED_BRIGHTNESS = 0xFF353535;
+    private int currentBrightness = FULL_BRIGHTNESS;
+
     public Canvas(EnchantingTableScreen screen) {
         this.screen = screen;
 
@@ -31,6 +35,9 @@ public class Canvas implements ScreenEventListener {
     }
 
     public void render(GuiGraphicsExtractor graphics) {
+        updateBrightness(screen().hasActiveNodeTooltip(),
+                0.02f);
+
         float viewportLeft = screen().camera().VIEWPORT_X;
         float viewportTop = screen().camera().VIEWPORT_Y;
         float viewportRight = viewportLeft + screen().camera().VIEWPORT_WIDTH;
@@ -59,8 +66,10 @@ public class Canvas implements ScreenEventListener {
                         x * TILE_SIZE, y * TILE_SIZE,
                         0, 0,
                         Sprite.BACKGROUND_TILE.width(), Sprite.BACKGROUND_TILE.height(),
-                        Sprite.BACKGROUND_TILE.width(), Sprite.BACKGROUND_TILE.height()
+                        Sprite.BACKGROUND_TILE.width(), Sprite.BACKGROUND_TILE.height(),
+                        getCurrentBrightness()
                 );
+
             }
         }
     }
@@ -109,6 +118,38 @@ public class Canvas implements ScreenEventListener {
 
     private float getScaledLength(float length) {
         return length * screen().camera().zoom();
+    }
+
+    public void updateBrightness(boolean hovered, float deltaTime) {
+        int targetBrightness = hovered ? TINTED_BRIGHTNESS : FULL_BRIGHTNESS;
+        if(screen().getMenu().getToolSlot().getItem().isEmpty()) targetBrightness = TINTED_BRIGHTNESS;
+
+        // Split ARGB components
+        int aCurr = (currentBrightness >> 24) & 0xFF;
+        int rCurr = (currentBrightness >> 16) & 0xFF;
+        int gCurr = (currentBrightness >> 8) & 0xFF;
+        int bCurr = currentBrightness & 0xFF;
+
+        int aTarget = (targetBrightness >> 24) & 0xFF;
+        int rTarget = (targetBrightness >> 16) & 0xFF;
+        int gTarget = (targetBrightness >> 8) & 0xFF;
+        int bTarget = targetBrightness & 0xFF;
+
+        // Interpolation speed (adjust for faster/slower fade)
+        float speed = 5f; // higher = faster transition
+
+        // Lerp each channel
+        aCurr += (int)((aTarget - aCurr) * speed * deltaTime);
+        rCurr += (int)((rTarget - rCurr) * speed * deltaTime);
+        gCurr += (int)((gTarget - gCurr) * speed * deltaTime);
+        bCurr += (int)((bTarget - bCurr) * speed * deltaTime);
+
+        // Recombine into a single ARGB int
+        currentBrightness = (aCurr << 24) | (rCurr << 16) | (gCurr << 8) | bCurr;
+    }
+
+    public int getCurrentBrightness() {
+        return currentBrightness;
     }
 
     /**

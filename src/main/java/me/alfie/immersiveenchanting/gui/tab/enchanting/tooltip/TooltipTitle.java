@@ -1,51 +1,114 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
-import me.alfie.immersiveenchanting.datapack.EnchantmentUtil;
-import me.alfie.immersiveenchanting.gui.NineSliceSprite;
+import me.alfie.immersiveenchanting.gui.core.NineSliceSprite;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeState;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 
 import java.awt.*;
 
-public class TooltipTitle extends NineSliceBox {
+/**
+ * A visual component representing the title section of a node tooltip.
+ *
+ * <p>Displays the node's background sprite, icon (if present), and the node's
+ * title text. The title text is styled based on the node's state: white by default,
+ * or using an alternate font for locked nodes.</p>
+ */
+public class TooltipTitle extends TooltipComponent {
 
     private Component titleText;
-    private final NodeTooltip nodeTooltip;
+    private final NodeTooltip tooltip;
 
-    public TooltipTitle(NodeTooltip nodeTooltip) {
-        super(nodeTooltip.node().isState(NodeState.OBTAINED) ?
+    /**
+     * Constructs a TooltipTitle for the given NodeTooltip.
+     *
+     * <p>Selects the appropriate background sprite depending on whether the
+     * node is obtained or not, and sets the initial title text with proper styling.</p>
+     *
+     * @param tooltip The NodeTooltip this title belongs to
+     */
+    public TooltipTitle(NodeTooltip tooltip) {
+        super(tooltip.node().isState(NodeState.OBTAINED) ?
                 NineSliceSprite.TOOLTIP_OBTAINED.id()
                 : NineSliceSprite.TOOLTIP_UNOBTAINED.id());
-        this.nodeTooltip = nodeTooltip;
+        this.tooltip = tooltip;
 
-        Component titleText = EnchantmentUtil.getEnchantmentTitleFromId(nodeTooltip.node().enchantmentId(),
-                nodeTooltip.node().enchantmentLevel(),
-                nodeTooltip.screen().registryAccess());
+        Component titleText = tooltip.node().getTitle();
         setTitleText(titleText);
     }
 
-    public void setTitleText(Component component) {
+    /**
+     * Sets the title text for this tooltip title, applying the appropriate style.
+     *
+     * <p>All titles are styled white by default. If the node is locked, an alternate
+     * font style is applied to indicate that the node is inaccessible.</p>
+     *
+     * @param component The original title text component
+     */
+    private void setTitleText(Component component) {
         component = component.copy().withStyle(ChatFormatting.WHITE);
 
-        if(nodeTooltip.node().isState(NodeState.LOCKED)) {
-            component = ImmersiveEnchanting.styleWithAltFont(component);
-        }
-
-        this.titleText = component.copy().withStyle(ChatFormatting.WHITE);
+        if(tooltip.node().isState(NodeState.LOCKED)) component = ImmersiveEnchanting.styleWithAltFont(component);
+        this.titleText = component;
     }
 
+    /**
+     * Returns the current title text of this tooltip.
+     *
+     * @return The styled title Component
+     */
     public Component getTitleText() {
         return titleText;
     }
 
+    /**
+     * Renders the tooltip title on the screen.
+     *
+     * <p>Draws the NineSlice background, then the node's tier sprite, the optional icon,
+     * and finally the title text. The title text is vertically centered relative to the node
+     * sprite. A small horizontal offset is applied to position the title correctly.</p>
+     *
+     * @param graphics The graphics context used for rendering
+     */
     @Override
-    public void render(GuiGraphicsExtractor graphics) {
-        super.render(graphics);
-        graphics.text(Minecraft.getInstance().font, titleText, x(), y(), Color.WHITE.getRGB());
+    public void blitNineSliceSprite(GuiGraphicsExtractor graphics) {
+        setPos(x()+2, y());
+        super.blitNineSliceSprite(graphics);
+        setPos(x()-2, y());
+
+        Node node = tooltip.node();
+        graphics.blit(
+                RenderPipelines.GUI_TEXTURED,
+                node.getState().getSpriteForTier(node.getTier()).id(),
+                x(), y(),
+                0, 0,
+                Node.WIDTH, Node.HEIGHT,
+                Node.WIDTH, Node.HEIGHT
+        );
+
+        Identifier iconTexture = node.getIconTexture();
+        if(iconTexture != null) {
+            graphics.blit(
+                    RenderPipelines.GUI_TEXTURED,
+                    iconTexture,
+                    x()+4, y()+4,
+                    0, 0,
+                    16, 16,
+                    16, 16
+            );
+        }
+
+        int xo = Node.WIDTH;
+        int yo = Node.HEIGHT/2 - Minecraft.getInstance().font.lineHeight/2;
+        setTextStartPos(x() + xo, y() + yo);
+        graphics.text(Minecraft.getInstance().font, titleText,
+                getTextStartPos().x(), getTextStartPos().y(),
+                Color.WHITE.getRGB());
     }
 }

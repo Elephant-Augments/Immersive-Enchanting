@@ -1,4 +1,4 @@
-package me.alfie.immersiveenchanting.gui;
+package me.alfie.immersiveenchanting.gui.core;
 
 import net.minecraft.client.input.MouseButtonEvent;
 

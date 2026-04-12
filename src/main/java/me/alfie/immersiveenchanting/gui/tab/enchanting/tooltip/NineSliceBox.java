@@ -20,7 +20,7 @@ public class NineSliceBox {
         this.height = 16;
     }
 
-    public void render(GuiGraphicsExtractor graphics) {
+    public void blitNineSliceSprite(GuiGraphicsExtractor graphics) {
         graphics.blitSprite(
                 RenderPipelines.GUI_TEXTURED,
                 texture,
@@ -34,6 +34,14 @@ public class NineSliceBox {
 
     public void setHeight(int height) {
         this.height = height;
+    }
+
+    public int getWidth() {
+        return this.width;
+    }
+
+    public int getHeight() {
+        return this.height;
     }
 
     public void setPos(int x, int y) {
