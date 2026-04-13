@@ -1,21 +1,28 @@
 package me.alfie.immersiveenchanting.event;
 
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.manager.ClientCostManager;
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.manager.ServerCostManager;
 import me.alfie.immersiveenchanting.item.ModCreativeTab;
 import me.alfie.immersiveenchanting.api.description.TooltipDescriptionExtensions;
-import me.alfie.immersiveenchanting.datapack.enchantment_cost.EnchantmentCostDatapack;
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostDatapack;
 import me.alfie.immersiveenchanting.datapack.node_sounds.NodeSoundsDatapack;
 import me.alfie.immersiveenchanting.gui.ModMenus;
 import me.alfie.immersiveenchanting.networking.ModPackets;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 
 public class ModEvents {
 
     public static void register(IEventBus modEventBus) {
-        NeoForge.EVENT_BUS.addListener(EnchantmentCostDatapack::registerServerDatapack);
-        modEventBus.addListener(EnchantmentCostDatapack::registerClientDatapack);
-        NeoForge.EVENT_BUS.addListener(EnchantmentCostDatapack::resolveEnchantmentHolders);
+        NeoForge.EVENT_BUS.addListener(CostDatapack::registerServerDatapack);
+
+        NeoForge.EVENT_BUS.addListener(ServerCostManager::onServerStart);
+        NeoForge.EVENT_BUS.addListener(ServerCostManager::onServerFinished);
+        NeoForge.EVENT_BUS.addListener(ServerCostManager::onServerReload);
+        NeoForge.EVENT_BUS.addListener(ServerCostManager::onServerStop);
+
+        NeoForge.EVENT_BUS.addListener(ServerCostManager::resolveEnchantmentHolders);
+        NeoForge.EVENT_BUS.addListener(ClientCostManager::resolveEnchantmentHolders);
 
         NeoForge.EVENT_BUS.addListener(NodeSoundsDatapack::registerServerDatapack);
         modEventBus.addListener(NodeSoundsDatapack::registerClientDatapack);

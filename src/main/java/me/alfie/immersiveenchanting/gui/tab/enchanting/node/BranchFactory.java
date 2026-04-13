@@ -1,10 +1,9 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.node;
 
-import me.alfie.immersiveenchanting.datapack.enchantment_cost.EnchantmentCostRegistry;
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.EnchantmentUtil;
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
 import net.minecraft.core.Holder;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -19,12 +18,12 @@ import java.util.Set;
  */
 public class BranchFactory {
 
-    public static List<NodeBranch> buildBranches(ItemStack stack, Canvas canvas) {
-        return buildEnchantingBranches(stack, canvas);
+    public static List<NodeBranch> buildBranches(ItemStack stack, CostRegistry costRegistry, Canvas canvas) {
+        return buildEnchantingBranches(stack, costRegistry, canvas);
     }
 
-    private static List<Holder<Enchantment>> getApplicableEnchantments(ItemStack stack) {
-        List<Holder<Enchantment>> sortedEnchantments = EnchantmentUtil.sortByName(EnchantmentCostRegistry.getAllEnchantmentHolders());
+    private static List<Holder<Enchantment>> getApplicableEnchantments(ItemStack stack, CostRegistry costRegistry) {
+        List<Holder<Enchantment>> sortedEnchantments = EnchantmentUtil.sortByName(costRegistry.getAllEnchantmentHolders());
 
         List<Holder<Enchantment>> applicableEnchantments = new ArrayList<>();
 
@@ -37,14 +36,9 @@ public class BranchFactory {
         return applicableEnchantments;
     }
 
-    /**
-     * Gets all enchantments from the EnchantmentCostRegistry and creates a NodeBranch for each one.
-     * @param stack
-     * @return
-     */
-    private static List<NodeBranch> buildEnchantingBranches(ItemStack stack, Canvas canvas) {
+    private static List<NodeBranch> buildEnchantingBranches(ItemStack stack, CostRegistry costRegistry, Canvas canvas) {
         List<NodeBranch> result = new ArrayList<>();
-        List<Holder<Enchantment>> applicableEnchantments = getApplicableEnchantments(stack);
+        List<Holder<Enchantment>> applicableEnchantments = getApplicableEnchantments(stack, costRegistry);
 
         List<Float> angles = generateBranchAngles(applicableEnchantments.size());
 
@@ -52,18 +46,19 @@ public class BranchFactory {
             Holder<Enchantment> enchantment = applicableEnchantments.get(i);
             int equippedLevel = stack.getEnchantmentLevel(enchantment);
 
-            result.add(buildEnchantingBranch(enchantment, equippedLevel, angles.get(i), canvas));
+            result.add(buildEnchantingBranch(enchantment, costRegistry, equippedLevel, angles.get(i), canvas));
         }
         return result;
     }
 
     private static NodeBranch buildEnchantingBranch(Holder<Enchantment> enchantment,
+                                                    CostRegistry costRegistry,
                                                     int equippedLevel,
                                                     float angle,
                                                     Canvas canvas) {
         List<Node> nodes = new ArrayList<>();
 
-        int maxLevel = EnchantmentCostRegistry.get(EnchantmentUtil.toId(enchantment)).levelCosts().maxLevel();
+        int maxLevel = costRegistry.get(EnchantmentUtil.toId(enchantment)).levelCosts().maxLevel();
         for (int enchantmentLevel = 0; enchantmentLevel < maxLevel; enchantmentLevel++) {
             NodeState state = equippedLevel > enchantmentLevel ? NodeState.OBTAINED : NodeState.UNOBTAINED;
             NodeTier tier = enchantmentLevel+1 == maxLevel ? NodeTier.ELITE : NodeTier.BASIC;
@@ -79,12 +74,7 @@ public class BranchFactory {
         return new NodeBranch(canvas, nodes, angle);
     }
 
-    /**
-     * Generate a list of angles based on the total number of branches.
-     *
-     * @param totalBranches
-     * @return
-     */
+
     private static ArrayList<Float> generateBranchAngles(int totalBranches) {
         // No more than 16 branches
         ArrayList<Float> angles = new ArrayList<>();

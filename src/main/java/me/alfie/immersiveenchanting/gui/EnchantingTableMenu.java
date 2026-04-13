@@ -1,15 +1,10 @@
 package me.alfie.immersiveenchanting.gui;
 
-import me.alfie.immersiveenchanting.datapack.enchantment_cost.EnchantmentCost;
-import me.alfie.immersiveenchanting.datapack.enchantment_cost.EnchantmentCostRegistry;
-import me.alfie.immersiveenchanting.datapack.enchantment_cost.EnchantmentUtil;
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.codec.Cost;
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.item.ModItems;
-import me.alfie.immersiveenchanting.networking.AvailableEnchantmentsPacket;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.Identifier;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -19,16 +14,12 @@ import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.ChiseledBookShelfBlockEntity;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -103,6 +94,7 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
         this.level = level;
         this.access = ContainerLevelAccess.create(level, pos);
         buildSlots(playerInventory);
+        ClientPacketDistributor.sendToServer(new CheckBookshelvesPacket(blockPos));
     }
 
     public BlockPos getBlockPos() {
@@ -171,6 +163,8 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
     @Override
     public @NotNull ItemStack quickMoveStack(@NotNull Player player, int i) {
         ItemStack stack = ItemStack.EMPTY;
+        if(level == null) return stack;
+
         Slot slot = getSlot(i);
 
         if(!slot.hasItem()) return stack;
@@ -184,11 +178,11 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
         } else if (i == Slots.COST.id()) {
             if (!this.moveItemStackTo(stack, 3, 39, true)) return ItemStack.EMPTY;
         } else {
-            List<EnchantmentCost> enchantingFuels = EnchantmentCostRegistry.get(EnchantmentCostRegistry.ENCHANTING_FUELS)
+            List<Cost> enchantingFuels = CostRegistry.server().get(CostRegistry.ENCHANTING_FUELS)
                     .levelCosts().getAllLevels();
 
             Set<Item> enchantingFuelItems = new HashSet<>();
-            for(EnchantmentCost enchantmentCost : enchantingFuels) {
+            for(Cost enchantmentCost : enchantingFuels) {
                 for(ItemStack fuelStack : enchantmentCost.getItemStacks()) {
                     enchantingFuelItems.add(fuelStack.getItem());
                 }

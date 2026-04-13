@@ -1,29 +1,18 @@
 package me.alfie.immersiveenchanting;
 
-import ca.weblite.objc.Client;
-import me.alfie.immersiveenchanting.datapack.enchantment_cost.EnchantmentCostRegistry;
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.datapack.node_sounds.NodeSound;
 import me.alfie.immersiveenchanting.datapack.node_sounds.NodeSoundsDatapack;
-import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.PauseScreen;
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.resources.sounds.SoundInstance;
-import net.minecraft.client.resources.sounds.UnderwaterAmbientSoundInstances;
-import net.minecraft.client.sounds.WeighedSoundEvents;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import org.jspecify.annotations.Nullable;
 
-import java.util.Objects;
 import java.util.Optional;
 
 public class FxHelper {
@@ -46,7 +35,7 @@ public class FxHelper {
         }
 
         playClientUISound(level, SoundEvents.CHISELED_BOOKSHELF_BREAK, 0.2f, 1f);
-        if(node.getEnchantmentLevel() == EnchantmentCostRegistry.get(node.id()).levelCosts().maxLevel()) {
+        if(node.getEnchantmentLevel() == CostRegistry.client().get(node.id()).levelCosts().maxLevel()) {
             playClientUISound(level, SoundEvents.AMETHYST_BLOCK_RESONATE, 1f, 2);
         }
     }

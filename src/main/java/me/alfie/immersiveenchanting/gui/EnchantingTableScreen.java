@@ -1,8 +1,9 @@
 package me.alfie.immersiveenchanting.gui;
 
 import me.alfie.immersiveenchanting.FxHelper;
-import me.alfie.immersiveenchanting.api.description.EnchantmentCostRenderer;
-import me.alfie.immersiveenchanting.datapack.enchantment_cost.EnchantmentCostRegistry;
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.manager.ClientCostManager;
+import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.CostRenderer;
 import me.alfie.immersiveenchanting.gui.canvas.CanvasCamera;
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
 import me.alfie.immersiveenchanting.gui.core.ScreenState;
@@ -10,7 +11,6 @@ import me.alfie.immersiveenchanting.gui.core.Sprite;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.EnchantingTab;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.NodeTooltip;
-import me.alfie.immersiveenchanting.networking.CheckBookshelvesPacket;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -22,7 +22,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -47,7 +46,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
     private NodeTooltip lastActiveNodeTooltip;
     private NodeTooltip activeNodeTooltip;
     private Node lockedTooltipNode;
-    private final EnchantmentCostRenderer enchantmentCostRenderer;
+    private final CostRenderer enchantmentCostRenderer;
     private List<Holder<Enchantment>> availableEnchantments = new ArrayList<>();
 
     private final Player player;
@@ -61,7 +60,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
 
         enchantingTab = new EnchantingTab(this);
 
-        this.enchantmentCostRenderer = new EnchantmentCostRenderer();
+        this.enchantmentCostRenderer = new CostRenderer(CostRegistry.client());
 
         onToolSlotUpdate(ItemStack.EMPTY);
 
@@ -251,7 +250,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
 
     private void onToolSlotUpdate(ItemStack newStack) {
         enchantingTab.branchManager().buildBranches(newStack);
-        canvas().setSizeToFitNodes(EnchantmentCostRegistry.getHighestLevel());
+        canvas().setSizeToFitNodes(CostRegistry.client().getHighestLevel());
         enchantingTab.branchManager().positionBranches();
 
         FxHelper.playToolSlotChanged(player().level());
@@ -287,7 +286,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         return player;
     }
 
-    public EnchantmentCostRenderer enchantmentCostRenderer() {
+    public CostRenderer enchantmentCostRenderer() {
         return enchantmentCostRenderer;
     }
 }

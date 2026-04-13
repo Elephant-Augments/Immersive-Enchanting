@@ -1,9 +1,8 @@
-package me.alfie.immersiveenchanting.api.description;
+package me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip;
 
-import me.alfie.immersiveenchanting.datapack.enchantment_cost.EnchantmentCost;
-import me.alfie.immersiveenchanting.datapack.enchantment_cost.EnchantmentCostHolder;
-import me.alfie.immersiveenchanting.datapack.enchantment_cost.EnchantmentCostRegistry;
-import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.RenderedCost;
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.codec.Cost;
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.codec.CostHolder;
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
@@ -11,32 +10,34 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class EnchantmentCostRenderer {
+public class CostRenderer {
 
-    private EnchantmentCostHolder holder;
-    private EnchantmentCostHolder fuelHolder;
+    private CostHolder holder;
+    private CostHolder fuelHolder;
 
     private List<RenderedCost> renderedCosts;
     private List<RenderedCost> renderedFuelCosts;
 
     public static long CAROUSEL_SPEED = 700;
 
-    public EnchantmentCostRenderer() {
+    private final CostRegistry costRegistry;
 
+    public CostRenderer(CostRegistry costRegistry) {
+        this.costRegistry = costRegistry;
     }
 
     public void setCostToRender(Identifier id, int level) {
-        holder = EnchantmentCostRegistry.get(id).levelCosts().getLevel(level);
+        holder = costRegistry.get(id).levelCosts().getLevel(level);
         this.renderedCosts = getRenderedCosts(holder);
 
-        fuelHolder = EnchantmentCostRegistry.get(EnchantmentCostRegistry.ENCHANTING_FUELS).levelCosts().getLevel(level);
+        fuelHolder = costRegistry.get(CostRegistry.ENCHANTING_FUELS).levelCosts().getLevel(level);
         this.renderedFuelCosts = getRenderedCosts(fuelHolder);
     }
 
-    private List<RenderedCost> getRenderedCosts(EnchantmentCostHolder holder) {
+    private List<RenderedCost> getRenderedCosts(CostHolder holder) {
         List<RenderedCost> entries = new ArrayList<>();
 
-        for(EnchantmentCost cost : holder.costs()) {
+        for(Cost cost : holder.costs()) {
             for(ItemStack stack : cost.getItemStacks()) {
                 entries.add(new RenderedCost(stack, cost.xpLevels()));
             }

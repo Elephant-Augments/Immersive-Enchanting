@@ -2,8 +2,6 @@ package me.alfie.immersiveenchanting.datapack.node_sounds;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import me.alfie.immersiveenchanting.datapack.enchantment_cost.EnchantmentCostData;
-import me.alfie.immersiveenchanting.datapack.enchantment_cost.EnchantmentCostLevels;
 import net.minecraft.resources.Identifier;
 
 public record NodeSound(Identifier sound, float volume, float pitch) {

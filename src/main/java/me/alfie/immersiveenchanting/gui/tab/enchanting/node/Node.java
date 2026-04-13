@@ -1,6 +1,6 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.node;
 
-import me.alfie.immersiveenchanting.datapack.enchantment_cost.EnchantmentCostRegistry;
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.EnchantmentUtil;
 import me.alfie.immersiveenchanting.gui.canvas.CanvasRenderable;
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
@@ -9,7 +9,6 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -203,7 +202,7 @@ public class Node extends CanvasRenderable {
      * @return {@code true} if this is an enchantment node, {@code false} if it is a special node
      */
     public boolean isEnchantment() {
-        return id != EnchantmentCostRegistry.TRANSMUTE && id != EnchantmentCostRegistry.REPLICATE;
+        return id != CostRegistry.TRANSMUTE && id != CostRegistry.REPLICATE;
     }
 
     /**
