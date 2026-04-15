@@ -3,12 +3,15 @@ package me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import me.alfie.immersiveenchanting.FxHelper;
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.EnchantmentUtil;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.core.ScreenEventListener;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
+import me.alfie.immersiveenchanting.networking.EnchantPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import org.joml.Vector2f;
 
 /**
@@ -115,8 +118,11 @@ public class NodeTooltip implements ScreenEventListener {
     public boolean onMouseClick(MouseButtonEvent mouse) {
         if(screen().isMouseOver(screenPos.x(), screenPos.y(), Node.WIDTH, Node.HEIGHT, mouse.x(), mouse.y())) {
             if(mouse.button() == InputConstants.MOUSE_BUTTON_LEFT) {
-                //tryEnchant
-                System.out.println("Try Enchant");
+                ClientPacketDistributor.sendToServer(new EnchantPacket(
+                        EnchantmentUtil.toHolder(node().id(), screen().registryAccess()),
+                        node().getEnchantmentLevel()
+                ));
+
                 return true;
             }
         }

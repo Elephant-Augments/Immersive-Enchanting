@@ -23,8 +23,6 @@ public class NodeSoundsDatapack extends SimpleJsonResourceReloadListener<NodeSou
 
     @Override
     protected void apply(Map<Identifier, NodeSoundMap> identifierNodeSoundMapMap, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
-        System.out.println(identifierNodeSoundMapMap.entrySet());
-
         Identifier key = Identifier.fromNamespaceAndPath("immersiveenchanting", "node_sounds");
         if(identifierNodeSoundMapMap.containsKey(key)) map = identifierNodeSoundMapMap.get(key).enchantments();
     }

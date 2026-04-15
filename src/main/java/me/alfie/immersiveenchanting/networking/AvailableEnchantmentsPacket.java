@@ -15,6 +15,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -34,7 +35,6 @@ public record AvailableEnchantmentsPacket(List<Holder<Enchantment>> availableEnc
 
     public static final Type<@NotNull AvailableEnchantmentsPacket> TYPE = new Type<>(Identifier.fromNamespaceAndPath(ImmersiveEnchanting.MODID, "available_enchantments"));
 
-    private static final StreamCodec<RegistryFriendlyByteBuf, Holder<Enchantment>> ENCHANTMENT_HOLDER_CODEC = ByteBufCodecs.holderRegistry(Registries.ENCHANTMENT);
 
     public static final StreamCodec<RegistryFriendlyByteBuf, AvailableEnchantmentsPacket> STREAM_CODEC = new StreamCodec<>() {
         @Override
@@ -42,7 +42,7 @@ public record AvailableEnchantmentsPacket(List<Holder<Enchantment>> availableEnc
             buf.writeInt(packet.availableEnchantments.size());
 
             for (Holder<Enchantment> enchantmentHolder : packet.availableEnchantments) {
-                ENCHANTMENT_HOLDER_CODEC.encode(buf, enchantmentHolder);
+                ModPackets.ENCHANTMENT_HOLDER_CODEC.encode(buf, enchantmentHolder);
             }
         }
 
@@ -51,7 +51,7 @@ public record AvailableEnchantmentsPacket(List<Holder<Enchantment>> availableEnc
             int size = buf.readInt();
             List<Holder<Enchantment>> result = new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
-                result.add(ENCHANTMENT_HOLDER_CODEC.decode(buf));
+                result.add(ModPackets.ENCHANTMENT_HOLDER_CODEC.decode(buf));
             }
 
             return new AvailableEnchantmentsPacket(result);
@@ -73,6 +73,7 @@ public record AvailableEnchantmentsPacket(List<Holder<Enchantment>> availableEnc
     public void exec(AvailableEnchantmentsPacket packet, IPayloadContext context) {
         Screen screen = Minecraft.getInstance().screen;
 
+        System.out.println(context.player().containerMenu);
         if(screen instanceof EnchantingTableScreen enchantingTableScreen) {
             enchantingTableScreen.setAvailableEnchantments(packet.availableEnchantments());
         }

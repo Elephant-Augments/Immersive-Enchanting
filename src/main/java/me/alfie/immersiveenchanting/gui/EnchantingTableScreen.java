@@ -149,6 +149,18 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         return activeNodeTooltip != null;
     }
 
+    public void requestNodeTooltip(Node node) {
+        setNodeTooltip(node);
+    }
+
+    public void setNodeTooltip(Node node) {
+        if(activeNodeTooltip == null || !activeNodeTooltip.node().equals(node)) {
+            activeNodeTooltip = new NodeTooltip(this, node);
+
+            FxHelper.playNodeHover(player().level(), node);
+        }
+    }
+
     @Override
     public void extractRenderState(@NotNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
         this.extractContents(graphics, mouseX, mouseY, a);

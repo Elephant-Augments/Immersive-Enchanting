@@ -64,7 +64,6 @@ public class BranchFactory {
             NodeTier tier = enchantmentLevel+1 == maxLevel ? NodeTier.ELITE : NodeTier.BASIC;
 
             if(!canvas.screen().getAvailableEnchantments().contains(enchantment)) state = NodeState.LOCKED;
-            System.out.println(canvas.screen().getAvailableEnchantments());
 
             nodes.add(new Node(EnchantmentUtil.toId(enchantment), enchantmentLevel+1, canvas, state, tier));
 

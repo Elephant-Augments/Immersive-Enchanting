@@ -1,11 +1,18 @@
 package me.alfie.immersiveenchanting.networking;
 
-import com.mojang.datafixers.types.templates.Check;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.neoforged.neoforge.client.network.event.RegisterClientPayloadHandlersEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 public class ModPackets {
+
+    public static final StreamCodec<RegistryFriendlyByteBuf, Holder<Enchantment>> ENCHANTMENT_HOLDER_CODEC = ByteBufCodecs.holderRegistry(Registries.ENCHANTMENT);
 
     /**
      * Register payloads inbound to server.
@@ -17,7 +24,7 @@ public class ModPackets {
         registrar.playToServer(UpdateToolSlotPacket.TYPE, UpdateToolSlotPacket.STREAM_CODEC,
                 (packet, context) -> packet.exec(packet, context));
 
-        registrar.playToServer(CheckBookshelvesPacket.TYPE, CheckBookshelvesPacket.STREAM_CODEC,
+        registrar.playToServer(EnchantPacket.TYPE, EnchantPacket.STREAM_CODEC,
                 (packet, context) -> packet.exec(packet, context));
 
         registrar.playToClient(AvailableEnchantmentsPacket.TYPE, AvailableEnchantmentsPacket.STREAM_CODEC,

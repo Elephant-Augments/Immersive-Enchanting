@@ -14,9 +14,9 @@ import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -94,7 +94,6 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
         this.level = level;
         this.access = ContainerLevelAccess.create(level, pos);
         buildSlots(playerInventory);
-        ClientPacketDistributor.sendToServer(new CheckBookshelvesPacket(blockPos));
     }
 
     public BlockPos getBlockPos() {
@@ -189,7 +188,7 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
             }
 
             //Quick move into menu
-            if(stack.isEnchantable() || stack.is(ModItems.ANCIENT_BOOK.get())) {
+            if(EnchantmentHelper.canStoreEnchantments(stack) || stack.is(ModItems.ANCIENT_BOOK.get())) {
                 if (!this.moveItemStackTo(stack, 0, 1, false)) return ItemStack.EMPTY;
             } else if(enchantingFuelItems.contains(stack.getItem())) {
                 if (!this.moveItemStackTo(stack, 1, 2, false)) return ItemStack.EMPTY;
