@@ -1,6 +1,8 @@
-package me.alfie.immersiveenchanting;
+package me.alfie.immersiveenchanting.util;
 
-import me.alfie.immersiveenchanting.datapack.enchantment_cost.EnchantmentUtil;
+import me.alfie.immersiveenchanting.ImmersiveEnchanting;
+import me.alfie.immersiveenchanting.block.ModBlocks;
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.networking.AvailableEnchantmentsPacket;
 import net.minecraft.core.BlockPos;
@@ -15,16 +17,19 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public class BookshelfChecker {
     public static void checkBookshelves(BlockPos blockPos, Level level, ServerPlayer serverPlayer) {
         List<Holder<Enchantment>> availableEnchantments = getEnchantmentsInBookshelves(blockPos, level);
 
-        ImmersiveEnchanting.LOGGER.debug("Sending available enchantments packet...");
         PacketDistributor.sendToPlayer(serverPlayer, new AvailableEnchantmentsPacket(availableEnchantments));
     }
 
     public static List<Holder<Enchantment>> getEnchantmentsInBookshelves(BlockPos blockPos, Level level) {
+        if(isCreativeBookshelfNearby(blockPos, level)) return CostRegistry.server().getAllEnchantmentHolders();
+
         List<ChiseledBookShelfBlockEntity> bookshelves = getNearbyBookshelves(blockPos, level);
         List<Holder<Enchantment>> result = new ArrayList<>();
 
@@ -50,29 +55,17 @@ public class BookshelfChecker {
      *
      * @return A list of nearby {@link ChiseledBookShelfBlockEntity} instances
      */
-    private static List<ChiseledBookShelfBlockEntity> getNearbyBookshelves(BlockPos blockPos, Level level) {
+    private static List<ChiseledBookShelfBlockEntity> getNearbyBookshelves(BlockPos pos, Level level) {
         List<ChiseledBookShelfBlockEntity> result = new ArrayList<>();
 
-        int radiusX = 2;
-        int radiusY = 3;
-        int radiusZ = 2;
+        forEachRingPos(pos, 2, 3, 2, checkPos -> {
+            BlockEntity be = level.getBlockEntity(checkPos);
 
-        for (int dy = 0; dy < radiusY; dy++) {
-            for (int rX = 2; rX <= radiusX; rX++) {
-                for (int rZ = 2; rZ <= radiusZ; rZ++) {
-                    for (int dx = -rX; dx <= rX; dx++) {
-                        for (int dz = -rZ; dz <= rZ; dz++) {
-                            if (Math.abs(dx) != rX && Math.abs(dz) != rZ) continue;
-
-                            BlockPos checkPos = blockPos.offset(dx, dy, dz);
-                            BlockEntity blockEntity = level.getBlockEntity(checkPos);
-
-                            if (blockEntity instanceof ChiseledBookShelfBlockEntity chiseledBookshelf) result.add(chiseledBookshelf);
-                        }
-                    }
-                }
+            if (be instanceof ChiseledBookShelfBlockEntity shelf) {
+                result.add(shelf);
             }
-        }
+        });
+
         return result;
     }
 
@@ -90,5 +83,46 @@ public class BookshelfChecker {
         }
 
         return result;
+    }
+
+    private static void forEachRingPos(BlockPos center, int radiusX, int radiusY, int radiusZ, Consumer<BlockPos> consumer) {
+        for (int dy = 0; dy < radiusY; dy++) {
+            for (int dx = -radiusX; dx <= radiusX; dx++) {
+                for (int dz = -radiusZ; dz <= radiusZ; dz++) {
+                    if (Math.abs(dx) < radiusX && Math.abs(dz) < radiusZ) continue;
+
+                    consumer.accept(center.offset(dx, dy, dz));
+                }
+            }
+        }
+    }
+
+    private static boolean anyInRing(BlockPos center, int radiusX, int radiusY, int radiusZ, Predicate<BlockPos> predicate) {
+        for (int dy = 0; dy < radiusY; dy++) {
+            for (int dx = -radiusX; dx <= radiusX; dx++) {
+                for (int dz = -radiusZ; dz <= radiusZ; dz++) {
+
+                    if (Math.abs(dx) < radiusX && Math.abs(dz) < radiusZ) continue;
+
+                    if (predicate.test(center.offset(dx, dy, dz))) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns true if a creative bookshelf is within the 5x5 ring.
+     * @param pos
+     * @param level
+     * @return
+     */
+    private static boolean isCreativeBookshelfNearby(BlockPos pos, Level level) {
+        return anyInRing(pos, 2, 3, 2, checkPos ->
+                level.getBlockState(checkPos).getBlock()
+                        .equals(ModBlocks.CREATIVE_BOOKSHELF_BLOCK.get())
+        );
     }
 }

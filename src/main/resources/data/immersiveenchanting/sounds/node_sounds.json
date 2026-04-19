@@ -1,5 +1,16 @@
 {
   "enchantments": {
+    "immersiveenchanting:replicate": {
+      "sound": "minecraft:entity.illusioner.mirror_move",
+      "volume": 0.5,
+      "pitch": 1.2
+    },
+    "immersiveenchanting:transmute": {
+      "sound": "minecraft:entity.firework_rocket.blast_far",
+      "volume": 0.5,
+      "pitch": 1.0
+    },
+
     "minecraft:aqua_affinity": {
       "sound": "minecraft:entity.axolotl.attack",
       "volume": 0.5,
@@ -61,7 +72,7 @@
       "pitch": 1.0
     },
     "minecraft:fortune": {
-      "sound": "minecraft:entity.experience_orb.pickup",
+      "sound": "minecraft:entity.allay.item_given",
       "volume": 0.5,
       "pitch": 1.5
     },

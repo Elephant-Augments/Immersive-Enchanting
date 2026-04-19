@@ -2,8 +2,12 @@ package me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.cursor.CursorTypes;
-import me.alfie.immersiveenchanting.FxHelper;
-import me.alfie.immersiveenchanting.datapack.enchantment_cost.EnchantmentUtil;
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
+import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeState;
+import me.alfie.immersiveenchanting.networking.ReplicatePacket;
+import me.alfie.immersiveenchanting.networking.TransmutePacket;
+import me.alfie.immersiveenchanting.util.FxHelper;
+import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.core.ScreenEventListener;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
@@ -51,11 +55,10 @@ public class NodeTooltip implements ScreenEventListener {
     public NodeTooltip(EnchantingTableScreen screen, Node node) {
         this.node = node;
         this.screen = screen;
+        screen().enchantmentCostRenderer().setCostToRender(node().id(), node().getEnchantmentLevel());
 
         this.title = new TooltipTitle(this);
         this.description = new TooltipDescription(this);
-
-        screen().enchantmentCostRenderer().setCostToRender(node().id(), node().getEnchantmentLevel());
     }
 
     /**
@@ -104,7 +107,7 @@ public class NodeTooltip implements ScreenEventListener {
         }
 
         if(screen().isMouseOver(screenPos.x(), screenPos.y(), hoverWidth, hoverHeight, mouseX, mouseY)) {
-            screen().setNextNodeTooltip(node());
+            screen().requestNodeTooltip(node());
         } else {
             screen().unlockTooltip();
         }
@@ -118,10 +121,24 @@ public class NodeTooltip implements ScreenEventListener {
     public boolean onMouseClick(MouseButtonEvent mouse) {
         if(screen().isMouseOver(screenPos.x(), screenPos.y(), Node.WIDTH, Node.HEIGHT, mouse.x(), mouse.y())) {
             if(mouse.button() == InputConstants.MOUSE_BUTTON_LEFT) {
-                ClientPacketDistributor.sendToServer(new EnchantPacket(
-                        EnchantmentUtil.toHolder(node().id(), screen().registryAccess()),
-                        node().getEnchantmentLevel()
-                ));
+                if(node().isEnchantment()) {
+
+                    if(node().isState(NodeState.OBTAINED)) {
+
+                    } else {
+                        ClientPacketDistributor.sendToServer(new EnchantPacket(
+                                EnchantmentUtil.toHolder(node().id(), screen().registryAccess()),
+                                node().getEnchantmentLevel()));
+                    }
+
+
+
+                } else if (node.id().equals(CostRegistry.TRANSMUTE)) {
+                    ClientPacketDistributor.sendToServer(new TransmutePacket());
+                } else if (node.id().equals(CostRegistry.REPLICATE)) {
+                    ClientPacketDistributor.sendToServer(new ReplicatePacket());
+                }
+
 
                 return true;
             }
@@ -137,7 +154,7 @@ public class NodeTooltip implements ScreenEventListener {
                     FxHelper.playTooltipLock(screen().player().level());
                 }
             }
-            return true; //Always consume clicks in the tooltip box
+            return true;
         }
 
 

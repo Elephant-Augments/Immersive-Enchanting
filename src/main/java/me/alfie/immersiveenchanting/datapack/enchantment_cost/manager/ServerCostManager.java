@@ -30,14 +30,14 @@ public class ServerCostManager {
         ImmersiveEnchanting.LOGGER.debug("Server finished loading... attempting to pull built cost registry.");
 
         pullBuiltRegistry();
-        CostRegistry.resolveEnchantmentHolders(registry(), event.getServer().registryAccess());
+        registry().resolveEnchantmentHolders(event.getServer().registryAccess());
     }
 
     public static void onServerReload(OnDatapackSyncEvent event) {
         if(event.getPlayer() == null) {
             ImmersiveEnchanting.LOGGER.debug("Server reloading... attempting to pull built cost registry.");
             pullBuiltRegistry();
-
+            registry().resolveEnchantmentHolders(SERVER.registryAccess());
             for (ServerPlayer player : event.getPlayerList().getPlayers()) {
                 sendSyncPacket(player);
             }
@@ -49,7 +49,7 @@ public class ServerCostManager {
     public static void resolveEnchantmentHolders(TagsUpdatedEvent event) {
         if(event.getUpdateCause() == TagsUpdatedEvent.UpdateCause.SERVER_DATA_LOAD) {
             if(SERVER == null) return; //Prevent tags updating before server is ready.
-            CostRegistry.resolveEnchantmentHolders(registry(), event.getLookupProvider());
+            registry().resolveEnchantmentHolders(event.getLookupProvider());
         }
     }
 

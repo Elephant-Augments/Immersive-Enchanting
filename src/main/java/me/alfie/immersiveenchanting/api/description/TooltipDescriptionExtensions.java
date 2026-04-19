@@ -1,7 +1,9 @@
 package me.alfie.immersiveenchanting.api.description;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
-import me.alfie.immersiveenchanting.api.description.internal.EnchantingLayoutExtension;
+import me.alfie.immersiveenchanting.api.description.internal.EnchantLayoutExtension;
+import me.alfie.immersiveenchanting.api.description.internal.ReplicateLayoutExtension;
+import me.alfie.immersiveenchanting.api.description.internal.TransmuteLayoutExtension;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.NodeTooltip;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 
@@ -36,6 +38,8 @@ public final class TooltipDescriptionExtensions {
     }
 
     public static void registerInternalTooltipDescriptions(FMLLoadCompleteEvent event) {
-        TooltipDescriptionExtensions.register(new EnchantingLayoutExtension());
+        TooltipDescriptionExtensions.register(new EnchantLayoutExtension());
+        TooltipDescriptionExtensions.register(new TransmuteLayoutExtension());
+        TooltipDescriptionExtensions.register(new ReplicateLayoutExtension());
     }
 }

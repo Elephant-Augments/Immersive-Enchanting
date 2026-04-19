@@ -1,13 +1,12 @@
-package me.alfie.immersiveenchanting.item;
+package me.alfie.immersiveenchanting.creativetab;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
-import me.alfie.immersiveenchanting.datapack.enchantment_cost.EnchantmentUtil;
-import me.alfie.immersiveenchanting.datapack.enchantment_cost.manager.ClientCostManager;
+import me.alfie.immersiveenchanting.item.ModItems;
+import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -36,14 +35,14 @@ public class ModCreativeTab {
         if(event.getTab() == ModCreativeTab.ENCHANTING_TAB.get()) {
             event.accept(new ItemStack(Items.ENCHANTING_TABLE));
             event.accept(new ItemStack(Items.CHISELED_BOOKSHELF));
+            event.accept(new ItemStack(ModItems.CREATIVE_BOOKSHELF_ITEM.get()));
             event.accept(new ItemStack(Items.LAPIS_LAZULI));
 
-            HolderLookup.RegistryLookup<Enchantment> enchantmentRegistryLookup = event.getParameters().holders().lookupOrThrow(Registries.ENCHANTMENT);
-            enchantmentRegistryLookup.listElements().forEach(holder -> {
-                        ItemStack stack = new ItemStack(ModItems.ANCIENT_BOOK.get());
-                        EnchantmentUtil.setStoredEnchantment(stack, holder, null);
-                        event.accept(stack);
-                    });
+            for(Holder<Enchantment> enchantmentHolder : EnchantmentUtil.getAllRegisteredEnchantments(event.getParameters().holders())) {
+                ItemStack stack = new ItemStack(ModItems.ANCIENT_BOOK.get());
+                EnchantmentUtil.setStoredEnchantment(stack, enchantmentHolder, null);
+                event.accept(stack);
+            }
         }
     }
 }

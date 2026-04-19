@@ -1,8 +1,9 @@
 package me.alfie.immersiveenchanting.event;
 
+import me.alfie.immersiveenchanting.command.ModCommands;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.manager.ClientCostManager;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.manager.ServerCostManager;
-import me.alfie.immersiveenchanting.item.ModCreativeTab;
+import me.alfie.immersiveenchanting.creativetab.ModCreativeTab;
 import me.alfie.immersiveenchanting.api.description.TooltipDescriptionExtensions;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostDatapack;
 import me.alfie.immersiveenchanting.datapack.node_sounds.NodeSoundsDatapack;
@@ -27,7 +28,9 @@ public class ModEvents {
         NeoForge.EVENT_BUS.addListener(NodeSoundsDatapack::registerServerDatapack);
         modEventBus.addListener(NodeSoundsDatapack::registerClientDatapack);
 
+        NeoForge.EVENT_BUS.addListener(ModCommands::registerCommands);
         modEventBus.addListener(ModMenus::registerScreens);
+
         modEventBus.addListener(ModPackets::registerClient);
         modEventBus.addListener(ModPackets::registerServer);
 

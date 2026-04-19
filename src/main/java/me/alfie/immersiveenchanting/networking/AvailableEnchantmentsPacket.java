@@ -1,32 +1,17 @@
 package me.alfie.immersiveenchanting.networking;
 
-import com.mojang.authlib.minecraft.client.MinecraftClient;
-import io.netty.buffer.ByteBuf;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
-import me.alfie.immersiveenchanting.datapack.enchantment_cost.EnchantmentUtil;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
-import me.alfie.immersiveenchanting.item.ModItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.*;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.MenuProvider;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.ChiseledBookShelfBlockEntity;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,11 +56,8 @@ public record AvailableEnchantmentsPacket(List<Holder<Enchantment>> availableEnc
 
     @Override
     public void exec(AvailableEnchantmentsPacket packet, IPayloadContext context) {
-        Screen screen = Minecraft.getInstance().screen;
-
-        System.out.println(context.player().containerMenu);
-        if(screen instanceof EnchantingTableScreen enchantingTableScreen) {
-            enchantingTableScreen.setAvailableEnchantments(packet.availableEnchantments());
+        if(context.player().containerMenu instanceof EnchantingTableMenu menu) {
+            menu.setAvailableEnchantments(packet.availableEnchantments());
         }
     }
 

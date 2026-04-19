@@ -27,6 +27,12 @@ public class ModPackets {
         registrar.playToServer(EnchantPacket.TYPE, EnchantPacket.STREAM_CODEC,
                 (packet, context) -> packet.exec(packet, context));
 
+        registrar.playToServer(TransmutePacket.TYPE, TransmutePacket.STREAM_CODEC,
+                (packet, context) -> packet.exec(packet, context));
+
+        registrar.playToServer(ReplicatePacket.TYPE, ReplicatePacket.STREAM_CODEC,
+                (packet, context) -> packet.exec(packet, context));
+
         registrar.playToClient(AvailableEnchantmentsPacket.TYPE, AvailableEnchantmentsPacket.STREAM_CODEC,
                 (packet, context) -> packet.exec(packet, context));
 

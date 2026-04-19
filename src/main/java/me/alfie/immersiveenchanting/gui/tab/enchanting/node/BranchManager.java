@@ -26,6 +26,15 @@ public class BranchManager {
         return cachedBranches;
     }
 
+    public List<Node> getAllNodes() {
+        List<Node> result = new ArrayList<>();
+        for(NodeBranch branch : branches()) {
+            result.addAll(branch.nodes());
+        }
+
+        return result;
+    }
+
     /**
      * You must buildBranches() before positionBranches()!
      * @param stack

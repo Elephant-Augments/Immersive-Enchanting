@@ -61,6 +61,10 @@ public class CanvasCamera implements ScreenEventListener {
         return draggingEnabled;
     }
 
+    public boolean isDragging() {
+        return dragging;
+    }
+
     /** @return current camera X position (world space) */
     public float x() {
         return x;

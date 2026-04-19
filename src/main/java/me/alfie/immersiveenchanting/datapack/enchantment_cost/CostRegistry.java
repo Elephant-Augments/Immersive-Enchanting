@@ -9,6 +9,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
 
@@ -23,9 +24,9 @@ public class CostRegistry {
     private final Map<Holder<Enchantment>, CostData> ENCHANTMENT_HOLDER_REGISTRY = new HashMap<>();
     private final Map<Identifier, CostData> ID_REGISTRY = new HashMap<>();
 
-    public static final Identifier TRANSMUTE = Identifier.parse("immersiveennchanting:transmute");
-    public static final Identifier REPLICATE = Identifier.parse("immersiveennchanting:replicate");
-    public static final Identifier ENCHANTING_FUELS = Identifier.parse("immersiveenchanting:enchanting_fuels");
+    public static final Identifier TRANSMUTE = Identifier.fromNamespaceAndPath(ImmersiveEnchanting.MODID, "transmute");
+    public static final Identifier REPLICATE = Identifier.fromNamespaceAndPath(ImmersiveEnchanting.MODID, "replicate");
+    public static final Identifier ENCHANTING_FUELS = Identifier.fromNamespaceAndPath(ImmersiveEnchanting.MODID, "enchanting_fuels");
 
     public CostRegistry() {
 
@@ -43,25 +44,25 @@ public class CostRegistry {
         return ServerCostManager.registry();
     }
 
-    public static void resolveEnchantmentHolders(CostRegistry registry, HolderLookup.Provider lookup) {
-        for (Identifier id : registry.getAllEnchantmentIds()) {
+    public void resolveEnchantmentHolders(HolderLookup.Provider lookup) {
+        for (Identifier id : getAllEnchantmentIds()) {
             Holder<Enchantment> enchantmentHolder = lookup.lookupOrThrow(Registries.ENCHANTMENT)
                     .get(ResourceKey.create(Registries.ENCHANTMENT, id))
                     .orElseThrow();
 
-            registry.register(enchantmentHolder);
+            register(enchantmentHolder);
         }
 
         //Debug
         String side;
-        if(registry.equals(client())) {
+        if(this.equals(client())) {
             side = "client";
         } else {
             side = "server";
         }
 
         ImmersiveEnchanting.LOGGER.debug("Resolved enchantment holders for {}", side);
-        registry.printRegistry();
+        printRegistry();
     }
 
     public void register(Identifier id, CostData data) {
@@ -123,5 +124,9 @@ public class CostRegistry {
 
     public Map<Identifier, CostData> snapshotIdRegistry() {
         return Map.copyOf(ID_REGISTRY);
+    }
+
+    public Holder<Enchantment> getRandomEnchantment(RandomSource randomSource) {
+        return getAllEnchantmentHolders().get(randomSource.nextInt(getAllEnchantmentHolders().size()));
     }
 }

@@ -4,6 +4,8 @@ import me.alfie.immersiveenchanting.datapack.enchantment_cost.codec.Cost;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.item.ModItems;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -14,12 +16,14 @@ import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -62,6 +66,9 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
     private final ContainerLevelAccess access;
     private final Container container;
     private final Level level;
+
+    private List<Holder<Enchantment>> availableEnchantments = new ArrayList<>();
+
     /**
      * Client-side constructor used when the menu is opened.
      *
@@ -188,7 +195,7 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
             }
 
             //Quick move into menu
-            if(EnchantmentHelper.canStoreEnchantments(stack) || stack.is(ModItems.ANCIENT_BOOK.get())) {
+            if(stack.has(DataComponents.ENCHANTABLE) || stack.is(ModItems.ANCIENT_BOOK.get())) {
                 if (!this.moveItemStackTo(stack, 0, 1, false)) return ItemStack.EMPTY;
             } else if(enchantingFuelItems.contains(stack.getItem())) {
                 if (!this.moveItemStackTo(stack, 1, 2, false)) return ItemStack.EMPTY;
@@ -272,5 +279,14 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
      */
     public Slot getCostSlot() {
         return this.getSlot(Slots.COST.id());
+    }
+
+    public void setAvailableEnchantments(List<Holder<Enchantment>> availableEnchantments) {
+        this.availableEnchantments.clear();
+        this.availableEnchantments.addAll(availableEnchantments);
+    }
+
+    public List<Holder<Enchantment>> getAvailableEnchantments() {
+        return availableEnchantments;
     }
 }

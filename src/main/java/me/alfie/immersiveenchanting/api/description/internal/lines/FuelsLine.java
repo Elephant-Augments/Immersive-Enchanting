@@ -1,4 +1,4 @@
-package me.alfie.immersiveenchanting.api.description.internal;
+package me.alfie.immersiveenchanting.api.description.internal.lines;
 
 import me.alfie.immersiveenchanting.api.description.DescriptionHelper;
 import me.alfie.immersiveenchanting.api.description.DescriptionLine;
@@ -12,16 +12,15 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
-public record MaterialsLine(NodeTooltip tooltip) implements DescriptionLine {
-
+public record FuelsLine(NodeTooltip tooltip) implements DescriptionLine {
     @Override
     public void render(GuiGraphicsExtractor graphics, int lineX, int lineY, double mouseX, double mouseY) {
         DescriptionHelper.text(graphics, getText(), lineX, lineY);
 
         EnchantingTableScreen screen = tooltip.screen();
-        RenderedCost renderedCost = screen.enchantmentCostRenderer().getCurrentRenderedCost();
+        RenderedCost renderedFuel = screen.enchantmentCostRenderer().getCurrentRenderedFuel();
 
-        HoverableItemStack stack = new HoverableItemStack(screen, renderedCost.stack());
+        HoverableItemStack stack = new HoverableItemStack(screen, renderedFuel.stack());
         stack.setPos(lineX + Minecraft.getInstance().font.width(getText().getString()),
                 lineY - 4);
         stack.render(graphics, mouseX, mouseY);
@@ -29,6 +28,6 @@ public record MaterialsLine(NodeTooltip tooltip) implements DescriptionLine {
 
     @Override
     public @NotNull Component getText() {
-        return Component.translatable("gui.immersiveenchanting.desc.materials").withStyle(ChatFormatting.GRAY);
+        return Component.translatable("immersiveenchanting.tooltip.desc.enchanting_fuel").withStyle(ChatFormatting.GRAY);
     }
 }

@@ -22,7 +22,7 @@ public class Canvas implements ScreenEventListener {
 
     public static final int FULL_BRIGHTNESS = 0xFFFFFFFF;
     public static final int TINTED_BRIGHTNESS = 0xFF353535;
-    private int currentBrightness = FULL_BRIGHTNESS;
+    private int currentBrightness = TINTED_BRIGHTNESS;
 
     public Canvas(EnchantingTableScreen screen) {
         this.screen = screen;

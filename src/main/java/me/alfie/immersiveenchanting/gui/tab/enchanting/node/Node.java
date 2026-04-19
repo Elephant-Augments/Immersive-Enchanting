@@ -1,7 +1,7 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.node;
 
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
-import me.alfie.immersiveenchanting.datapack.enchantment_cost.EnchantmentUtil;
+import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import me.alfie.immersiveenchanting.gui.canvas.CanvasRenderable;
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
 import net.minecraft.client.Minecraft;
@@ -119,17 +119,15 @@ public class Node extends CanvasRenderable {
     public void render(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         setScaleKeepPos(BranchManager.getNodeBranchScale(), state.getSpriteForTier(tier));
 
-        if(!canvas().screen().hasNextNodeTooltip()) {
-            if(canvas().isMouseOver(canvasX(), canvasY(),
-                    getScaledLength(Node.WIDTH), getScaledLength(Node.HEIGHT),
-                    mouseX, mouseY)) {
-                canvas().screen().setNextNodeTooltip(this);
-                return;
-            }
-        } else {
-            if(canvas().screen().isNextNodeTooltip(this)) return;;
+        if(canvas().isMouseOver(
+                canvasX(), canvasY(),
+                getScaledLength(Node.WIDTH), getScaledLength(Node.HEIGHT),
+                mouseX, mouseY)) {
+
+            if(!canvas().screen().camera().isDragging()) canvas().screen().requestNodeTooltip(this);
         }
 
+        if(canvas().screen().isActiveNodeTooltipNode(this)) return;
         blit(graphics, state.getSpriteForTier(tier), canvas().getCurrentBrightness());
         if(iconTexture != null) {
             blit(graphics, iconTexture, 16, 16, 4, 4, canvas().getCurrentBrightness());
@@ -153,7 +151,7 @@ public class Node extends CanvasRenderable {
             iconTexture = Identifier.fromNamespaceAndPath("immersiveenchanting", "textures/item/ancient_book.png");
         }
 
-        if(isState(NodeState.LOCKED)) iconTexture = null;
+        if(isState(NodeState.LOCKED) || isState(NodeState.ALERT)) iconTexture = null;
     }
 
     /**
@@ -193,7 +191,11 @@ public class Node extends CanvasRenderable {
      * @return A {@link Component} representing the node title
      */
     public Component getTitle() {
-        return Enchantment.getFullname(EnchantmentUtil.toHolder(id, canvas().screen().registryAccess()), enchantmentLevel);
+        if(isEnchantment()) {
+            return Enchantment.getFullname(EnchantmentUtil.toHolder(id, canvas().screen().registryAccess()), enchantmentLevel);
+        } else {
+            return Component.translatable("immersiveenchanting.tooltip.title." + id().getPath());
+        }
     }
 
     /**

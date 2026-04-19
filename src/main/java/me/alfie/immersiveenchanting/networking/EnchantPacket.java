@@ -1,8 +1,11 @@
 package me.alfie.immersiveenchanting.networking;
 
+import me.alfie.immersiveenchanting.util.EnchantmentUtil;
+import me.alfie.immersiveenchanting.util.FxHelper;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
-import me.alfie.immersiveenchanting.BookshelfChecker;
+import me.alfie.immersiveenchanting.util.BookshelfChecker;
 import net.minecraft.core.Holder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -38,16 +41,19 @@ public record EnchantPacket(Holder<Enchantment> enchantmentHolder, int level) im
     public void exec(EnchantPacket packet, IPayloadContext context) {
         if(!(context.player().containerMenu instanceof EnchantingTableMenu menu)) return;
 
-        List<Holder<Enchantment>> availableEnchantments = BookshelfChecker.getEnchantmentsInBookshelves(menu.getBlockPos(), context.player().level());
-        if(!availableEnchantments.contains(packet.enchantmentHolder())) return;
-
         ItemStack stackToEnchant = menu.getToolSlot().getItem();
-        if(!stackToEnchant.supportsEnchantment(packet.enchantmentHolder())) return;
-        int equippedLevel = stackToEnchant.getEnchantmentLevel(packet.enchantmentHolder());
-        if (packet.level() != equippedLevel + 1) return;
+        if(EnchantmentUtil.canEnchant(menu, packet.enchantmentHolder(), packet.level(), context)) {
+            EnchantmentUtil.deductValidCost(menu, EnchantmentUtil.toId(packet.enchantmentHolder()), packet.level(),
+                        context.player(), CostRegistry.server());
 
+            stackToEnchant.enchant(packet.enchantmentHolder(), packet.level());
+            boolean isHighestTier = packet.level() == CostRegistry.server()
+                    .get(packet.enchantmentHolder())
+                    .levelCosts()
+                    .maxLevel();
 
-
-        stackToEnchant.enchant(packet.enchantmentHolder(), packet.level());
+            FxHelper.playEnchantSuccess(context.player().level(), menu.getBlockPos(), isHighestTier);
+        }
     }
+
 }

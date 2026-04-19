@@ -1,4 +1,4 @@
-package me.alfie.immersiveenchanting.api.description.internal;
+package me.alfie.immersiveenchanting.api.description.internal.lines;
 
 import me.alfie.immersiveenchanting.api.description.DescriptionHelper;
 import me.alfie.immersiveenchanting.api.description.DescriptionLine;
@@ -40,6 +40,6 @@ public record LevelsLine(NodeTooltip tooltip) implements DescriptionLine {
 
     @Override
     public @NotNull Component getText() {
-        return Component.translatable("gui.immersiveenchanting.desc.xp_levels").withStyle(ChatFormatting.GRAY);
+        return Component.translatable("immersiveenchanting.tooltip.desc.xp_levels").withStyle(ChatFormatting.GRAY);
     }
 }

@@ -12,7 +12,7 @@ public class ClientCostManager {
 
     public static void setRegistry(CostRegistry newRegistry, HolderLookup.Provider lookup) {
         registry = newRegistry;
-        CostRegistry.resolveEnchantmentHolders(registry(), lookup);
+        registry().resolveEnchantmentHolders(lookup);
     }
 
     public static CostRegistry registry() {
@@ -21,7 +21,7 @@ public class ClientCostManager {
 
     public static void resolveEnchantmentHolders(TagsUpdatedEvent event) {
         if(event.getUpdateCause() == TagsUpdatedEvent.UpdateCause.CLIENT_PACKET_RECEIVED) {
-            CostRegistry.resolveEnchantmentHolders(registry(), event.getLookupProvider());
+            registry().resolveEnchantmentHolders(event.getLookupProvider());
         }
     }
 }

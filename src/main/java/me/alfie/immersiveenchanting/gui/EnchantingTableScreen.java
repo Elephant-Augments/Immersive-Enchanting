@@ -1,8 +1,7 @@
 package me.alfie.immersiveenchanting.gui;
 
-import me.alfie.immersiveenchanting.FxHelper;
+import me.alfie.immersiveenchanting.util.FxHelper;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
-import me.alfie.immersiveenchanting.datapack.enchantment_cost.manager.ClientCostManager;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.CostRenderer;
 import me.alfie.immersiveenchanting.gui.canvas.CanvasCamera;
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
@@ -22,6 +21,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -42,12 +42,11 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
 
     private final RegistryAccess registryAccess;
 
-    private NodeTooltip nextNodeTooltip;
-    private NodeTooltip lastActiveNodeTooltip;
+    private List<Node> renderedNodes = new ArrayList<>();
+    private boolean nodeTooltipRequestedThisFrame;
     private NodeTooltip activeNodeTooltip;
     private Node lockedTooltipNode;
     private final CostRenderer enchantmentCostRenderer;
-    private List<Holder<Enchantment>> availableEnchantments = new ArrayList<>();
 
     private final Player player;
 
@@ -63,8 +62,6 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         this.enchantmentCostRenderer = new CostRenderer(CostRegistry.client());
 
         onToolSlotUpdate(ItemStack.EMPTY);
-
-
     }
 
     @Override
@@ -104,14 +101,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
 
     }
 
-    public void setAvailableEnchantments(List<Holder<Enchantment>> availableEnchantments) {
-        this.availableEnchantments.clear();
-        this.availableEnchantments.addAll(availableEnchantments);
-    }
 
-    public List<Holder<Enchantment>> getAvailableEnchantments() {
-        return availableEnchantments;
-    }
 
     public void lockTooltip(Node node) {
         lockedTooltipNode = node;
@@ -129,20 +119,13 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         return lockedTooltipNode != null;
     }
 
-    public void setNextNodeTooltip(Node node) {
-        nextNodeTooltip = new NodeTooltip(this, node);
-    }
-
-    public boolean isNextNodeTooltip(Node node) {
-        return nextNodeTooltip.node().equals(node);
-    }
-
-    public boolean hasNextNodeTooltip() {
-        return nextNodeTooltip != null;
-    }
-
     public Node getActiveNodeTooltipNode() {
         return activeNodeTooltip.node();
+    }
+
+    public boolean isActiveNodeTooltipNode(Node node) {
+        if(activeNodeTooltip == null) return false;
+        return getActiveNodeTooltipNode().equals(node);
     }
 
     public boolean hasActiveNodeTooltip() {
@@ -150,11 +133,12 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
     }
 
     public void requestNodeTooltip(Node node) {
+        nodeTooltipRequestedThisFrame = true;
         setNodeTooltip(node);
     }
 
-    public void setNodeTooltip(Node node) {
-        if(activeNodeTooltip == null || !activeNodeTooltip.node().equals(node)) {
+    private void setNodeTooltip(Node node) {
+        if(activeNodeTooltip == null || !activeNodeTooltip.node().equals(node) && !isTooltipLocked()) {
             activeNodeTooltip = new NodeTooltip(this, node);
 
             FxHelper.playNodeHover(player().level(), node);
@@ -167,27 +151,17 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         this.extractCarriedItem(graphics, mouseX, mouseY);
         this.extractSnapbackItem(graphics);
 
-        if(hasNextNodeTooltip()) {
-            activeNodeTooltip = nextNodeTooltip;
-            nextNodeTooltip = null;
-        } else {
-            activeNodeTooltip = null;
-            lastActiveNodeTooltip = null;
-        }
+        renderedNodes = enchantingTab.branchManager().getAllNodes();
 
-        if(activeNodeTooltip != null) {
-            activeNodeTooltip.render(graphics, mouseX, mouseY);
+        if(activeNodeTooltip != null && !renderedNodes.contains(getActiveNodeTooltipNode())) activeNodeTooltip = null;
 
-            if(lastActiveNodeTooltip == null || !lastActiveNodeTooltip.node().equals(activeNodeTooltip.node())) {
-                FxHelper.playNodeHover(player().level(), activeNodeTooltip.node());
-            }
+        if(activeNodeTooltip != null) activeNodeTooltip.render(graphics, mouseX, mouseY);
 
-            lastActiveNodeTooltip = activeNodeTooltip;
-        }
+        if(!isTooltipLocked()) this.extractTooltip(graphics, mouseX, mouseY);
 
-        if(!isTooltipLocked()) {
-            this.extractTooltip(graphics, mouseX, mouseY);
-        }
+        if(!nodeTooltipRequestedThisFrame && !isTooltipLocked()) activeNodeTooltip = null;
+
+        nodeTooltipRequestedThisFrame = false;
     }
 
     @Override
@@ -252,7 +226,6 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
 
     @Override
     protected void containerTick() {
-        //Check for tool slot updates
         ItemStack stack = getMenu().getToolSlot().getItem();
         if(!ItemStack.isSameItemSameComponents(stack, lastToolSlotStack)) {
             onToolSlotUpdate(stack);
@@ -268,6 +241,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         FxHelper.playToolSlotChanged(player().level());
 
         if(camera() == null) return;
+        if(newStack.getItem().equals(lastToolSlotStack.getItem())) return;
         camera().setDraggingEnabled(!newStack.isEmpty());
         camera().setZoom(1f);
         camera().centerCameraOnCanvas();

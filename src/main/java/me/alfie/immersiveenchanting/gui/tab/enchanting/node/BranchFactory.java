@@ -1,7 +1,8 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.node;
 
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
-import me.alfie.immersiveenchanting.datapack.enchantment_cost.EnchantmentUtil;
+import me.alfie.immersiveenchanting.item.ModItems;
+import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
 import net.minecraft.core.Holder;
 import net.minecraft.world.item.ItemStack;
@@ -19,7 +20,49 @@ import java.util.Set;
 public class BranchFactory {
 
     public static List<NodeBranch> buildBranches(ItemStack stack, CostRegistry costRegistry, Canvas canvas) {
-        return buildEnchantingBranches(stack, costRegistry, canvas);
+        if(stack.is(ModItems.ANCIENT_BOOK.get())) {
+            return buildAncientBookBranches(stack, costRegistry, canvas);
+        } else {
+            return buildEnchantingBranches(stack, costRegistry, canvas);
+
+        }
+    }
+
+    private static List<NodeBranch> buildAncientBookBranches(ItemStack stack, CostRegistry costRegistry, Canvas canvas) {
+        List<NodeBranch> result = new ArrayList<>();
+        List<Float> angles = generateBranchAngles(2);
+
+        result.add(buildTransmuteBranch(stack, angles.getFirst(), canvas));
+        result.add(buildReplicateBranch(angles.get(1), canvas));
+
+        return result;
+    }
+
+    private static NodeBranch buildTransmuteBranch(ItemStack stack, float angle, Canvas canvas) {
+        List<Node> nodes = new ArrayList<>();
+
+        NodeState state = NodeState.UNOBTAINED;
+        NodeTier tier = NodeTier.ADVANCED;
+
+        if(!canvas.screen().getMenu()
+                .getAvailableEnchantments().contains(EnchantmentUtil.getStoredEnchantment(stack))) state = NodeState.LOCKED;
+
+        if(EnchantmentUtil.isReplicated(stack)) state = NodeState.ALERT;
+
+        nodes.add(new Node(CostRegistry.TRANSMUTE, canvas, state, tier));
+
+        return new NodeBranch(canvas, nodes, angle);
+    }
+
+    private static NodeBranch buildReplicateBranch(float angle, Canvas canvas) {
+        List<Node> nodes = new ArrayList<>();
+
+        NodeState state = NodeState.UNOBTAINED;
+        NodeTier tier = NodeTier.ADVANCED;
+
+        nodes.add(new Node(CostRegistry.REPLICATE, canvas, state, tier));
+
+        return new NodeBranch(canvas, nodes, angle);
     }
 
     private static List<Holder<Enchantment>> getApplicableEnchantments(ItemStack stack, CostRegistry costRegistry) {
@@ -63,7 +106,7 @@ public class BranchFactory {
             NodeState state = equippedLevel > enchantmentLevel ? NodeState.OBTAINED : NodeState.UNOBTAINED;
             NodeTier tier = enchantmentLevel+1 == maxLevel ? NodeTier.ELITE : NodeTier.BASIC;
 
-            if(!canvas.screen().getAvailableEnchantments().contains(enchantment)) state = NodeState.LOCKED;
+            if(!canvas.screen().getMenu().getAvailableEnchantments().contains(enchantment)) state = NodeState.LOCKED;
 
             nodes.add(new Node(EnchantmentUtil.toId(enchantment), enchantmentLevel+1, canvas, state, tier));
 
