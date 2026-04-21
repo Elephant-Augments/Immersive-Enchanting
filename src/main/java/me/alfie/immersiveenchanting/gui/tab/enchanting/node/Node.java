@@ -124,10 +124,10 @@ public class Node extends CanvasRenderable {
                 getScaledLength(Node.WIDTH), getScaledLength(Node.HEIGHT),
                 mouseX, mouseY)) {
 
-            if(!canvas().screen().camera().isDragging()) canvas().screen().requestNodeTooltip(this);
+            if(!canvas().screen().camera().isDragging()) canvas().screen().tooltipManager().requestTooltip(this);
         }
 
-        if(canvas().screen().isActiveNodeTooltipNode(this)) return;
+        if(canvas().screen().tooltipManager().isActiveTooltipFor(this)) return;
         blit(graphics, state.getSpriteForTier(tier), canvas().getCurrentBrightness());
         if(iconTexture != null) {
             blit(graphics, iconTexture, 16, 16, 4, 4, canvas().getCurrentBrightness());

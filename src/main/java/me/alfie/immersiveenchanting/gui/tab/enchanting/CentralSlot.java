@@ -43,7 +43,7 @@ public class CentralSlot extends CanvasRenderable implements ScreenEventListener
         setCenterPos(16, 16);
         graphics.item(stack, (int) canvasX(), (int) canvasY());
 
-        if(canvas().isMouseOver(canvasX(), canvasY(), 16, 16, mouseX, mouseY) && !canvas().screen().isTooltipLocked()) {
+        if(canvas().isMouseOver(canvasX(), canvasY(), 16, 16, mouseX, mouseY) && !canvas().screen().tooltipManager().isTooltipLocked()) {
             graphics.setTooltipForNextFrame(Minecraft.getInstance().font, stack, mouseX, mouseY);
         }
 

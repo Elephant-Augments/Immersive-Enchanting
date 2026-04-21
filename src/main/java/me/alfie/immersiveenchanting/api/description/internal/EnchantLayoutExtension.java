@@ -2,9 +2,11 @@ package me.alfie.immersiveenchanting.api.description.internal;
 
 import me.alfie.immersiveenchanting.api.description.*;
 import me.alfie.immersiveenchanting.api.description.internal.lines.*;
+import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
+import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeState;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.NodeTooltip;
-import net.minecraft.world.item.Items;
+import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 
 public class EnchantLayoutExtension implements DescriptionLayoutExtension {
 
@@ -13,13 +15,25 @@ public class EnchantLayoutExtension implements DescriptionLayoutExtension {
         if(!tooltip.node().isEnchantment()) return;
 
         description.widthPadding = 16;
-        tooltip.screen().enchantmentCostRenderer().setCostToRender(tooltip.node().id(), tooltip.node().getEnchantmentLevel());
 
-        if(tooltip.node().isState(NodeState.UNOBTAINED)) {
+        Node node = tooltip.node();
+        EnchantingTableScreen screen = tooltip.screen();
+
+        if(node.isState(NodeState.UNOBTAINED)) {
             DescriptionHelper.insertCostLines(tooltip, description, 0);
-        } else if(tooltip.node().isState(NodeState.OBTAINED)) {
-            description.insertLine(0, new EquippedLine(tooltip));
-        } else if(tooltip.node().isState(NodeState.LOCKED)) {
+        } else if(node.isState(NodeState.OBTAINED)) {
+            if(screen.tooltipManager().isHoldingTooltip()) {
+                description.insertLine(0, new RemovingLine(tooltip));
+                description.insertLine(1, new RemoveProgressLine(tooltip));
+            } else {
+                description.insertLine(0, new EquippedLine(tooltip));
+
+                if(tooltip.canRemove()) {
+                    description.insertLine(1, new RemoveHintLine(tooltip));
+                }
+
+            }
+        } else if(node.isState(NodeState.LOCKED)) {
             description.insertLine(0, new UnavailableEnchantmentLine(tooltip));
         }
     }

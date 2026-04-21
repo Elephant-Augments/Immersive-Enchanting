@@ -21,6 +21,8 @@ import java.util.Optional;
 
 public class FxHelper {
 
+    private static float lastRemoveSoundStep;
+
     public static void playToolSlotChanged(Level level) {
         playClientUISound(level, SoundEvents.ARMOR_EQUIP_GENERIC.value(), 0.5f, 1f);
         playClientUISound(level, SoundEvents.BOOK_PAGE_TURN, 0.3f, 1.2f);
@@ -65,10 +67,6 @@ public class FxHelper {
             level.playSound(null, tablePos, SoundEvents.ENCHANTMENT_TABLE_USE,
                     SoundSource.BLOCKS, 1.0F, 1.0F);
         }
-    }
-
-    public static void playEnchantmentRemoveSound(Level level, Player player) {
-        level.playSound(null, player.blockPosition(), SoundEvents.ZOMBIE_VILLAGER_CONVERTED, SoundSource.MASTER, 0.5F, 1.2F);
     }
 
     private static void playClientUISound(Level level, SoundEvent sound, float volume, float pitch) {
@@ -148,5 +146,20 @@ public class FxHelper {
                 particleCount,
                 0.1, 0.1, 0.1,
                 0.1);
+    }
+
+    public static void playRemoveProgress(Level level, float progress) {
+        float step = (float) Math.floor(progress * 10f);
+
+        if (step == lastRemoveSoundStep) return;
+        lastRemoveSoundStep = step;
+
+        float pitch = 1.8f - progress;
+
+        playClientUISound(level, SoundEvents.EXPERIENCE_ORB_PICKUP, 0.5f, pitch);
+    }
+
+    public static void playEnchantmentRemove(Level level, BlockPos tablePos) {
+        level.playSound(null, tablePos, SoundEvents.ZOMBIE_VILLAGER_CONVERTED, SoundSource.MASTER, 0.5F, 1.2F);
     }
 }

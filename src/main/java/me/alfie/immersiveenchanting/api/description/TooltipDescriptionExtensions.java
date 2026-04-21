@@ -37,6 +37,12 @@ public final class TooltipDescriptionExtensions {
         }
     }
 
+    public static void rebuild(NodeTooltip parentTooltip,
+                               DescriptionLayout descriptionLayout) {
+        descriptionLayout.clear();
+        apply(parentTooltip, descriptionLayout);
+    }
+
     public static void registerInternalTooltipDescriptions(FMLLoadCompleteEvent event) {
         TooltipDescriptionExtensions.register(new EnchantLayoutExtension());
         TooltipDescriptionExtensions.register(new TransmuteLayoutExtension());

@@ -2,15 +2,21 @@ package me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip;
 
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
+import me.alfie.immersiveenchanting.networking.RemoveEnchantmentPacket;
+import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import me.alfie.immersiveenchanting.util.FxHelper;
-import net.minecraft.client.gui.screens.Screen;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 public class TooltipManager {
 
     private Node lockedTooltipNode;
-    private NodeTooltip activeNodeTooltip;
-    private boolean nodeTooltipRequestedThisFrame;
+    private NodeTooltip activeTooltip;
+    private boolean isTooltipRequestedThisFrame;
     private final EnchantingTableScreen screen;
+
+    private Node heldTooltipNode;
+    private long holdStartTime;
+    public static final long HOLD_TRESHOLD_MILLIS = 1000;
 
     public TooltipManager(EnchantingTableScreen screen) {
         this.screen = screen;
@@ -28,43 +34,81 @@ public class TooltipManager {
         return lockedTooltipNode != null;
     }
 
-    public boolean isTooltipLocked(Node node) {
+    public boolean isTooltipLockedFor(Node node) {
         return lockedTooltipNode == node;
     }
 
-    public Node getActiveNodeTooltipNode() {
-        return activeNodeTooltip != null ? activeNodeTooltip.node() : null;
+    public Node getActiveTooltipNode() {
+        return activeTooltip != null ? activeTooltip.node() : null;
     }
 
-    public boolean hasActiveNodeTooltip() {
-        return activeNodeTooltip != null;
+    public NodeTooltip getActiveTooltip() {
+        return activeTooltip;
     }
 
-    public boolean isActiveNodeTooltipNode(Node node) {
-        return activeNodeTooltip != null && activeNodeTooltip.node().equals(node);
+    public boolean hasActiveTooltip() {
+        return activeTooltip != null;
     }
 
-    public void requestNodeTooltip(Node node) {
-        nodeTooltipRequestedThisFrame = true;
-        setNodeTooltip(node);
+    public boolean isActiveTooltipFor(Node node) {
+        return activeTooltip != null && activeTooltip.node().equals(node);
     }
 
-    private void setNodeTooltip(Node node) {
-        if (shouldShowTooltip(node)) {
-            activeNodeTooltip = new NodeTooltip(this, node);
-            FxHelper.playNodeHover(screen.player().level(), node);
-        }
+    public void requestTooltip(Node node) {
+        isTooltipRequestedThisFrame = true;
+        setTooltip(node);
     }
 
-    private boolean shouldShowTooltip(Node node) {
-        if (isTooltipLocked()) return false;
+    public boolean isTooltipRequestedThisFrame() {
+        return isTooltipRequestedThisFrame;
+    }
 
-        return activeNodeTooltip == null
-                || !activeNodeTooltip.node().equals(node);
+    private void setTooltip(Node node) {
+        if(isTooltipLocked()) return;
+        if(hasActiveTooltip() && getActiveTooltipNode().equals(node)) return;
+
+        activeTooltip = new NodeTooltip(screen, node);
+        FxHelper.playNodeHover(screen.player().level(), node);
     }
 
     public void resetFrameState() {
-        nodeTooltipRequestedThisFrame = false;
+        isTooltipRequestedThisFrame = false;
     }
 
+    public void clearActiveTooltip() {
+        activeTooltip = null;
+    }
+
+
+    public void startHold(Node node) {
+        heldTooltipNode = node;
+        holdStartTime = System.currentTimeMillis();
+    }
+
+    public void resetHold() {
+        heldTooltipNode = null;
+        holdStartTime = -1;
+    }
+
+    public boolean isHoldingTooltip() {
+        return heldTooltipNode != null;
+    }
+
+    public void updateHold() {
+        if(heldTooltipNode == null) return;
+
+        if(getElapsedHeldTime() >= HOLD_TRESHOLD_MILLIS) triggerHeldTooltip();
+    }
+
+    public long getElapsedHeldTime() {
+        return System.currentTimeMillis() - holdStartTime;
+    }
+
+    private void triggerHeldTooltip() {
+        ClientPacketDistributor.sendToServer(new RemoveEnchantmentPacket(
+                EnchantmentUtil.toHolder(heldTooltipNode.id(), screen.registryAccess()),
+                heldTooltipNode.getEnchantmentLevel()));
+
+        resetHold();
+    }
 }

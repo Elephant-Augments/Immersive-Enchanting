@@ -98,7 +98,7 @@ public class NodeTooltip implements ScreenEventListener {
         description.render(graphics, mouseX, mouseY);
         title.blitNineSliceSprite(graphics);
 
-        boolean locked = screen().isTooltipLocked(node());
+        boolean locked = screen().tooltipManager().isTooltipLockedFor(node());
         hoverWidth = locked ? sharedWidth : Node.WIDTH;
         hoverHeight = locked ? titleHeight+descHeight-13 : Node.HEIGHT;
 
@@ -107,9 +107,13 @@ public class NodeTooltip implements ScreenEventListener {
         }
 
         if(screen().isMouseOver(screenPos.x(), screenPos.y(), hoverWidth, hoverHeight, mouseX, mouseY)) {
-            screen().requestNodeTooltip(node());
+            screen().tooltipManager().requestTooltip(node());
+
+            if(screen().tooltipManager().isHoldingTooltip()) screen().tooltipManager().updateHold();
         } else {
-            screen().unlockTooltip();
+            screen().tooltipManager().unlockTooltip();
+
+            screen().tooltipManager().resetHold();
         }
 
 
@@ -123,22 +127,19 @@ public class NodeTooltip implements ScreenEventListener {
             if(mouse.button() == InputConstants.MOUSE_BUTTON_LEFT) {
                 if(node().isEnchantment()) {
 
-                    if(node().isState(NodeState.OBTAINED)) {
-
+                    if(node().isState(NodeState.OBTAINED) && canRemove()) {
+                        screen().tooltipManager().startHold(node());
                     } else {
                         ClientPacketDistributor.sendToServer(new EnchantPacket(
                                 EnchantmentUtil.toHolder(node().id(), screen().registryAccess()),
                                 node().getEnchantmentLevel()));
                     }
 
-
-
                 } else if (node.id().equals(CostRegistry.TRANSMUTE)) {
                     ClientPacketDistributor.sendToServer(new TransmutePacket());
                 } else if (node.id().equals(CostRegistry.REPLICATE)) {
                     ClientPacketDistributor.sendToServer(new ReplicatePacket());
                 }
-
 
                 return true;
             }
@@ -147,10 +148,10 @@ public class NodeTooltip implements ScreenEventListener {
 
         if(screen().isMouseOver(screenPos.x(), screenPos.y(), hoverWidth, hoverHeight, mouse.x(), mouse.y())) {
             if(mouse.button() == InputConstants.MOUSE_BUTTON_RIGHT) {
-                if(screen().isTooltipLocked(node())) {
-                    screen().unlockTooltip();
+                if(screen().tooltipManager().isTooltipLockedFor(node())) {
+                    screen().tooltipManager().unlockTooltip();
                 } else {
-                    screen().lockTooltip(node());
+                    screen().tooltipManager().lockTooltip(node());
                     FxHelper.playTooltipLock(screen().player().level());
                 }
             }
@@ -159,6 +160,13 @@ public class NodeTooltip implements ScreenEventListener {
 
 
         return ScreenEventListener.super.onMouseClick(mouse);
+    }
+
+    @Override
+    public boolean onMouseRelease(MouseButtonEvent mouse) {
+        screen().tooltipManager().resetHold();
+
+        return ScreenEventListener.super.onMouseRelease(mouse);
     }
 
     /**
@@ -173,5 +181,13 @@ public class NodeTooltip implements ScreenEventListener {
      */
     public EnchantingTableScreen screen() {
         return screen;
+    }
+
+    public boolean canRemove() {
+        return node().getEnchantmentLevel() == screen()
+                .getMenu()
+                .getToolSlot()
+                .getItem()
+                .getEnchantmentLevel(EnchantmentUtil.toHolder(node().id(), screen().registryAccess()));
     }
 }

@@ -2,6 +2,7 @@ package me.alfie.immersiveenchanting.gui.tab.enchanting;
 
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.*;
+import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.TooltipManager;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.item.ItemStack;
 

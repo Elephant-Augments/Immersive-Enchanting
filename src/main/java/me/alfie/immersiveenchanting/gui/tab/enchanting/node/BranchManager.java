@@ -85,8 +85,9 @@ public class BranchManager {
         nodeStep = baseStep;
         double minDistance = nodeSize;
         double currentDistance = nodeStep * smallestAngle;
+        float safety = 1.1f;
 
-        if(currentDistance < minDistance) nodeStep = (int) Math.ceil(minDistance / smallestAngle);
+        if(currentDistance < minDistance * safety) nodeStep = (int) Math.ceil((minDistance * safety) / smallestAngle);
         nodeStep = Math.max(minStep, Math.min(nodeStep, maxStep));
 
         //Scale down if max nodeStep

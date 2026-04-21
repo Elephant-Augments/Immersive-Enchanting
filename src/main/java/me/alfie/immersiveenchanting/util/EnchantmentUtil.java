@@ -127,17 +127,18 @@ public class EnchantmentUtil {
         ItemStack stackToEnchant = menu.getToolSlot().getItem();
         if(!isNextLevel(stackToEnchant, enchantmentHolder, level)) return false;
         if(!stackToEnchant.supportsEnchantment(enchantmentHolder)) return false;
+        if(!isEnchantmentAvailableInBookshelves(enchantmentHolder, menu, context)) return false;
 
         if(context.player().hasInfiniteMaterials()) return true;
-        if(!isEnchantmentAvailableInBookshelves(enchantmentHolder, menu, context)) return false;
         if(!hasValidCostAndFuel(menu.getCostSlot().getItem(), menu.getFuelSlot().getItem(), toId(enchantmentHolder), level, context.player(), CostRegistry.server())) return false;
 
         return true;
     }
 
     public static boolean canTransmute(EnchantingTableMenu menu, Holder<Enchantment> newEnchantment, IPayloadContext context) {
-        if(context.player().hasInfiniteMaterials()) return true;
         if(!isEnchantmentAvailableInBookshelves(newEnchantment, menu, context)) return false;
+
+        if(context.player().hasInfiniteMaterials()) return true;
         if(!hasValidCostAndFuel(menu.getCostSlot().getItem(), menu.getFuelSlot().getItem(), CostRegistry.TRANSMUTE, 1, context.player(), CostRegistry.server())) return false;
 
         return true;

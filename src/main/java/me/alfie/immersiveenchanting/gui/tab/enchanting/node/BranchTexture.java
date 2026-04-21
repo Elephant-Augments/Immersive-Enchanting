@@ -2,14 +2,12 @@ package me.alfie.immersiveenchanting.gui.tab.enchanting.node;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
-import me.alfie.immersiveenchanting.gui.canvas.CanvasCamera;
 import me.alfie.immersiveenchanting.gui.canvas.CanvasRenderable;
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.Identifier;
-import org.joml.Vector2f;
 import org.joml.Vector2i;
 
 import java.util.ArrayList;
@@ -36,8 +34,8 @@ public class BranchTexture extends CanvasRenderable {
 
     @Override
     public void render(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-        int brightness = (canvas().screen().hasActiveNodeTooltip() &&
-                branch.nodes().contains(canvas().screen().getActiveNodeTooltipNode()))
+        int brightness = (canvas().screen().tooltipManager().hasActiveTooltip() &&
+                branch.nodes().contains(canvas().screen().tooltipManager().getActiveTooltipNode()))
                 ? Canvas.FULL_BRIGHTNESS
                 : canvas().getCurrentBrightness();
 

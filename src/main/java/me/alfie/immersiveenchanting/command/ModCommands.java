@@ -25,7 +25,8 @@ public class ModCommands {
                 DisabledEnchantmentsCommand.COMMAND,
                 EnabledEnchantmentsCommand.COMMAND,
                 GiveRandomAncientBookCommand.COMMAND,
-                GenerateEmptyDatapackCommand.COMMAND
+                GenerateEmptyDatapackCommand.COMMAND,
+                DumpDatapackToolsCommand.COMMAND
         );
 
         for(ModCommand command : commands) {

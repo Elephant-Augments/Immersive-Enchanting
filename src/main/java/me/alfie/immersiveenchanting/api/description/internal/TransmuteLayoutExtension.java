@@ -14,6 +14,8 @@ public class TransmuteLayoutExtension implements DescriptionLayoutExtension {
     public void extendLayout(DescriptionLayout description, NodeTooltip tooltip) {
         if(!tooltip.node().id().equals(CostRegistry.TRANSMUTE)) return;
 
+        description.widthPadding = 16;
+
         int linesCreated = 0;
         if(tooltip.node().isState(NodeState.UNOBTAINED)) {
             linesCreated = DescriptionHelper.lineWrapComponent(

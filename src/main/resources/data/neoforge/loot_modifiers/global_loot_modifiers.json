@@ -1,7 +1,6 @@
 {
   "replace": false,
   "entries": [
-    "immersiveenchanting:ancient_books_loot",
-    "immersiveenchanting:remove_enchanted_books"
+    "immersiveenchanting:inject_all_enabled_enchantments"
   ]
 }

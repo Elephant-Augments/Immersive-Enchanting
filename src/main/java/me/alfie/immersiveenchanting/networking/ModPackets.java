@@ -33,6 +33,9 @@ public class ModPackets {
         registrar.playToServer(ReplicatePacket.TYPE, ReplicatePacket.STREAM_CODEC,
                 (packet, context) -> packet.exec(packet, context));
 
+        registrar.playToServer(RemoveEnchantmentPacket.TYPE, RemoveEnchantmentPacket.STREAM_CODEC,
+                (packet, context) -> packet.exec(packet, context));
+
         registrar.playToClient(AvailableEnchantmentsPacket.TYPE, AvailableEnchantmentsPacket.STREAM_CODEC,
                 (packet, context) -> packet.exec(packet, context));
 

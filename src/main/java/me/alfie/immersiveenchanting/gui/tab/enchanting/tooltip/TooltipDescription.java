@@ -17,10 +17,11 @@ public class TooltipDescription extends TooltipComponent {
         super(NineSliceSprite.TOOLTIP_DESCRIPTION.id());
         this.tooltip = tooltip;
         this.layout = new DescriptionLayout(this);
-        TooltipDescriptionExtensions.apply(tooltip, layout);
     }
 
     public void render(GuiGraphicsExtractor graphics, double mouseX, double mouseY) {
+        TooltipDescriptionExtensions.rebuild(tooltip, layout);
+
         int yOffset = Node.HEIGHT-10;
         setPos(x()+1, y()+yOffset);
         super.blitNineSliceSprite(graphics);
@@ -28,7 +29,7 @@ public class TooltipDescription extends TooltipComponent {
         setTextStartPos(x() + 4, y() + 12);
         layout.render(graphics, getTextStartPos().x(), getTextStartPos().y(), mouseX, mouseY);
 
-        Sprite mouseSprite = tooltip.screen().isTooltipLocked() ? Sprite.MOUSE_HINT_ON : Sprite.MOUSE_HINT_OFF;
+        Sprite mouseSprite = tooltip.screen().tooltipManager().isTooltipLocked() ? Sprite.MOUSE_HINT_ON : Sprite.MOUSE_HINT_OFF;
         graphics.blit(
                 RenderPipelines.GUI_TEXTURED,
                 mouseSprite.id(),

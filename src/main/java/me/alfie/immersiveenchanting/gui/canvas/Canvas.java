@@ -35,7 +35,7 @@ public class Canvas implements ScreenEventListener {
     }
 
     public void render(GuiGraphicsExtractor graphics) {
-        updateBrightness(screen().hasActiveNodeTooltip(),
+        updateBrightness(screen().tooltipManager().hasActiveTooltip(),
                 0.02f);
 
         float viewportLeft = screen().camera().VIEWPORT_X;

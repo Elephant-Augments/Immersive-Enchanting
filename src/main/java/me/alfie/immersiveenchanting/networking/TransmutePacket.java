@@ -50,13 +50,16 @@ public record TransmutePacket() implements ModNetworkPacket<TransmutePacket> {
         List<Holder<Enchantment>> availableEnchantments = menu.getAvailableEnchantments();
         List<Holder<Enchantment>> allEnchantments = CostRegistry.server().getAllEnchantmentHolders();
 
-        allEnchantments.removeIf(availableEnchantments::contains);
+        allEnchantments.removeIf(holder ->
+                availableEnchantments.stream().anyMatch(av -> av.value().equals(holder.value())));
         if(allEnchantments.isEmpty()) allEnchantments = CostRegistry.server().getAllEnchantmentHolders();
 
         RandomSource random = level.getRandom();
         int randomIndex = random.nextInt(allEnchantments.size());
         Holder<Enchantment> newEnchantment = allEnchantments.get(randomIndex);
-        if(EnchantmentUtil.canTransmute(menu, newEnchantment, context)) {
+        Holder<Enchantment> oldEnchantment = EnchantmentUtil.getStoredEnchantment(ancientBookStack);
+
+        if(EnchantmentUtil.canTransmute(menu, oldEnchantment, context)) {
             EnchantmentUtil.deductValidCost(menu, CostRegistry.TRANSMUTE, 1, player, CostRegistry.server());
 
             EnchantmentUtil.setStoredEnchantment(ancientBookStack, newEnchantment, level);

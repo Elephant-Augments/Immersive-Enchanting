@@ -62,7 +62,7 @@
       "pitch": 1.0
     },
     "minecraft:fire_protection": {
-      "sound": "minecraft:block.fire.extinguish",
+      "sound": "minecraft:entity.player.hurt_on_fire",
       "volume": 0.5,
       "pitch": 1.0
     },

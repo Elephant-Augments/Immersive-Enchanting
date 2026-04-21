@@ -1,5 +1,6 @@
 package me.alfie.immersiveenchanting.gui;
 
+import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.TooltipManager;
 import me.alfie.immersiveenchanting.util.FxHelper;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.CostRenderer;
@@ -9,19 +10,15 @@ import me.alfie.immersiveenchanting.gui.core.ScreenState;
 import me.alfie.immersiveenchanting.gui.core.Sprite;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.EnchantingTab;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
-import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.NodeTooltip;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.neoforged.neoforge.network.PacketDistributor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -43,10 +40,9 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
     private final RegistryAccess registryAccess;
 
     private List<Node> renderedNodes = new ArrayList<>();
-    private boolean nodeTooltipRequestedThisFrame;
-    private NodeTooltip activeNodeTooltip;
-    private Node lockedTooltipNode;
     private final CostRenderer enchantmentCostRenderer;
+    private final TooltipManager tooltipManager;
+
 
     private final Player player;
 
@@ -60,6 +56,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         enchantingTab = new EnchantingTab(this);
 
         this.enchantmentCostRenderer = new CostRenderer(CostRegistry.client());
+        this.tooltipManager = new TooltipManager(this);
 
         onToolSlotUpdate(ItemStack.EMPTY);
     }
@@ -101,50 +98,6 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
 
     }
 
-
-
-    public void lockTooltip(Node node) {
-        lockedTooltipNode = node;
-    }
-
-    public void unlockTooltip() {
-        lockedTooltipNode = null;
-    }
-
-    public boolean isTooltipLocked(Node node) {
-        return lockedTooltipNode == node;
-    }
-
-    public boolean isTooltipLocked() {
-        return lockedTooltipNode != null;
-    }
-
-    public Node getActiveNodeTooltipNode() {
-        return activeNodeTooltip.node();
-    }
-
-    public boolean isActiveNodeTooltipNode(Node node) {
-        if(activeNodeTooltip == null) return false;
-        return getActiveNodeTooltipNode().equals(node);
-    }
-
-    public boolean hasActiveNodeTooltip() {
-        return activeNodeTooltip != null;
-    }
-
-    public void requestNodeTooltip(Node node) {
-        nodeTooltipRequestedThisFrame = true;
-        setNodeTooltip(node);
-    }
-
-    private void setNodeTooltip(Node node) {
-        if(activeNodeTooltip == null || !activeNodeTooltip.node().equals(node) && !isTooltipLocked()) {
-            activeNodeTooltip = new NodeTooltip(this, node);
-
-            FxHelper.playNodeHover(player().level(), node);
-        }
-    }
-
     @Override
     public void extractRenderState(@NotNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
         this.extractContents(graphics, mouseX, mouseY, a);
@@ -153,15 +106,18 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
 
         renderedNodes = enchantingTab.branchManager().getAllNodes();
 
-        if(activeNodeTooltip != null && !renderedNodes.contains(getActiveNodeTooltipNode())) activeNodeTooltip = null;
+        if(tooltipManager.hasActiveTooltip() && !renderedNodes.contains(tooltipManager.getActiveTooltipNode()))
+            tooltipManager.clearActiveTooltip();
 
-        if(activeNodeTooltip != null) activeNodeTooltip.render(graphics, mouseX, mouseY);
+        if(tooltipManager.hasActiveTooltip())
+            tooltipManager.getActiveTooltip().render(graphics, mouseX, mouseY);
 
-        if(!isTooltipLocked()) this.extractTooltip(graphics, mouseX, mouseY);
+        if(!tooltipManager.isTooltipLocked()) this.extractTooltip(graphics, mouseX, mouseY);
 
-        if(!nodeTooltipRequestedThisFrame && !isTooltipLocked()) activeNodeTooltip = null;
+        if(!tooltipManager.isTooltipRequestedThisFrame() && !tooltipManager.isTooltipLocked())
+            tooltipManager.clearActiveTooltip();
 
-        nodeTooltipRequestedThisFrame = false;
+        tooltipManager.resetFrameState();
     }
 
     @Override
@@ -175,7 +131,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         if(isState(ScreenState.ENCHANTING)) {
             if(enchantingTab.centralSlot().onMouseClick(mouse)) return true;
 
-            if(activeNodeTooltip != null && activeNodeTooltip.onMouseClick(mouse)) return true;
+            if(tooltipManager.hasActiveTooltip() && tooltipManager.getActiveTooltip().onMouseClick(mouse)) return true;
 
             if(camera.onMouseClick(mouse)) return true;
         }
@@ -192,6 +148,8 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
 
     @Override
     public boolean mouseReleased(MouseButtonEvent mouse) {
+        if(tooltipManager().hasActiveTooltip() && tooltipManager().getActiveTooltip().onMouseRelease(mouse)) return true;
+
         if(camera.onMouseRelease(mouse)) return true;
 
         return super.mouseReleased(mouse);
@@ -274,5 +232,9 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
 
     public CostRenderer enchantmentCostRenderer() {
         return enchantmentCostRenderer;
+    }
+
+    public TooltipManager tooltipManager() {
+        return tooltipManager;
     }
 }

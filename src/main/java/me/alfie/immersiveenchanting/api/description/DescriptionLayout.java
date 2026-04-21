@@ -5,12 +5,15 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class DescriptionLayout {
+    private static final Logger log = LoggerFactory.getLogger(DescriptionLayout.class);
     protected final List<DescriptionLine> lines = new ArrayList<>();
     protected final int lineSpace;
 

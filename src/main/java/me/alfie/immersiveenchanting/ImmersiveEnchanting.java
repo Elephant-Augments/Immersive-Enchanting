@@ -7,6 +7,7 @@ import me.alfie.immersiveenchanting.event.ModEvents;
 import me.alfie.immersiveenchanting.gui.ModMenus;
 import me.alfie.immersiveenchanting.creativetab.ModCreativeTab;
 import me.alfie.immersiveenchanting.item.ModItems;
+import me.alfie.immersiveenchanting.loot.ModGlobalLootModifiers;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FontDescription;
 import net.minecraft.network.chat.Style;
@@ -28,6 +29,7 @@ public class ImmersiveEnchanting {
         ModItems.register(modEventBus);
         ModCreativeTab.register(modEventBus);
         ModDataComponents.register(modEventBus);
+        ModGlobalLootModifiers.register(modEventBus);
     }
 
     public static Component styleWithAltFont(Component component) {

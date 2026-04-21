@@ -13,6 +13,8 @@ public class ReplicateLayoutExtension implements DescriptionLayoutExtension {
     public void extendLayout(DescriptionLayout description, NodeTooltip tooltip) {
         if(!tooltip.node().id().equals(CostRegistry.REPLICATE)) return;
 
+        description.widthPadding = 16;
+
         int linesCreated = DescriptionHelper.lineWrapComponent(
                 Component.translatable("immersiveenchanting.tooltip.desc.replicate")
                         .withStyle(ChatFormatting.GRAY),
