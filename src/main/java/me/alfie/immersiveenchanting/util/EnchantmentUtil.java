@@ -134,6 +134,7 @@ public class EnchantmentUtil {
 
     public static boolean canTransmute(EnchantingTableMenu menu, Holder<Enchantment> newEnchantment, IPayloadContext context) {
         if(!isEnchantmentAvailableInBookshelves(newEnchantment, menu, context)) return false;
+        if(EnchantmentUtil.isReplicated(menu.getToolSlot().getItem())) return false;
 
         if(context.player().hasInfiniteMaterials()) return true;
         if(!hasValidCostAndFuel(menu.getCostSlot().getItem(), menu.getFuelSlot().getItem(), CostRegistry.TRANSMUTE, 1, context.player(), CostRegistry.server())) return false;

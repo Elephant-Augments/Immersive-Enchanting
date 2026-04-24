@@ -1,5 +1,6 @@
 package me.alfie.immersiveenchanting.gui.tab.book;
 
+import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import me.alfie.immersiveenchanting.gui.core.ScreenEventListener;
 import me.alfie.immersiveenchanting.gui.core.Sprite;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -28,7 +29,7 @@ public class Scrollbar implements ScreenEventListener {
         this.bookTab = bookTab;
     }
 
-    public void render(GuiGraphicsExtractor graphics) {
+    public void render(GuiGraphicsExtractor graphics, double mouseX, double mouseY) {
         barX = bookTab.screen().getGuiLeft() + 121;
         barY = bookTab.screen().getGuiTop() + 6;
 
@@ -56,6 +57,8 @@ public class Scrollbar implements ScreenEventListener {
                 Sprite.SCROLLER.width(),  Sprite.SCROLLER.height(),
                 Sprite.SCROLLER.width(),  Sprite.SCROLLER.height()
         );
+
+        if(this.isMouseOver(mouseX, mouseY)) graphics.requestCursor(CursorTypes.POINTING_HAND);
     }
 
     /**

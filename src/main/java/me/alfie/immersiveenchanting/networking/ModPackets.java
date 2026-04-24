@@ -39,7 +39,7 @@ public class ModPackets {
         registrar.playToClient(AvailableEnchantmentsPacket.TYPE, AvailableEnchantmentsPacket.STREAM_CODEC,
                 (packet, context) -> packet.exec(packet, context));
 
-        registrar.playToClient(SyncClientCostManagerPacket.TYPE, SyncClientCostManagerPacket.STREAM_CODEC,
+        registrar.playToClient(SyncClientDatapackManagerPacket.TYPE, SyncClientDatapackManagerPacket.STREAM_CODEC,
                 (packet, context) -> packet.exec(packet, context));
 
     }

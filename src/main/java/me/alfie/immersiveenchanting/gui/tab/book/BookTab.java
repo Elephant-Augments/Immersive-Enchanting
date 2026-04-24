@@ -65,7 +65,7 @@ public class BookTab {
                     new HashSet<>(screen.getMenu().getAvailableEnchantments());
 
             renderedEnchantments.addAll(
-                    CostRegistry.server().getAllEnchantmentHolders().stream()
+                    CostRegistry.client().getAllEnchantmentHolders().stream()
                             .filter(e -> !unlocked.contains(e))
                             .toList()
             );
@@ -81,10 +81,10 @@ public class BookTab {
         }
     }
 
-    public void render(GuiGraphicsExtractor graphics) {
-        renderFilterCheckboxes(graphics);
+    public void render(GuiGraphicsExtractor graphics, double mouseX, double mouseY) {
+        renderFilterCheckboxes(graphics, mouseX, mouseY);
         renderEnchantmentBoxes(graphics);
-        scrollbar.render(graphics);
+        scrollbar.render(graphics, mouseX, mouseY);
         searchbar.render(graphics);
     }
 
@@ -108,14 +108,14 @@ public class BookTab {
         }
     }
 
-    private void renderFilterCheckboxes(GuiGraphicsExtractor graphics) {
+    private void renderFilterCheckboxes(GuiGraphicsExtractor graphics, double mouseX, double mouseY) {
         int count = 0;
         final int spacing = 18;
 
         for(FilterCheckbox filterCheckbox : filterCheckboxes()) {
             filterCheckbox.setX(138);
             filterCheckbox.setY(12 + (count*spacing));
-            filterCheckbox.render(graphics);
+            filterCheckbox.render(graphics, mouseX, mouseY);
             count++;
         }
 

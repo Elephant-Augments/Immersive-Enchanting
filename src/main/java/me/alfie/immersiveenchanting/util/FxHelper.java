@@ -2,6 +2,7 @@ package me.alfie.immersiveenchanting.util;
 
 import me.alfie.immersiveenchanting.config.ClientConfig;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
+import me.alfie.immersiveenchanting.datapack.manager.ClientDatapackManager;
 import me.alfie.immersiveenchanting.datapack.node_sounds.NodeSound;
 import me.alfie.immersiveenchanting.datapack.node_sounds.NodeSoundsDatapack;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
@@ -38,7 +39,7 @@ public class FxHelper {
         }
 
         if(doesSoundExist(node.id())) {
-            NodeSound nodeSound = NodeSoundsDatapack.map.get(node.id());
+            NodeSound nodeSound = ClientDatapackManager.nodeSoundMap().get(node.id());
             int nodeLevel = node.getEnchantmentLevel();
             float defaultPitch = nodeSound.pitch();
             float newPitch = defaultPitch + (nodeLevel - 1) * 0.5f;
@@ -84,8 +85,8 @@ public class FxHelper {
     }
 
     public static boolean doesSoundExist(Identifier id) {
-        if (NodeSoundsDatapack.map.containsKey(id)) {
-            NodeSound nodeSound = NodeSoundsDatapack.map.get(id);
+        if (ClientDatapackManager.nodeSoundMap().containsKey(id)) {
+            NodeSound nodeSound = ClientDatapackManager.nodeSoundMap().get(id);
             Optional<Holder.Reference<SoundEvent>> soundEvent = BuiltInRegistries.SOUND_EVENT.get(nodeSound.sound());
             return soundEvent.isPresent();
         }
@@ -95,7 +96,8 @@ public class FxHelper {
 
     public static SoundEvent getSoundEvent(Identifier id) {
         if(doesSoundExist(id)) {
-            return BuiltInRegistries.SOUND_EVENT.get(NodeSoundsDatapack.map.get(id).sound()).get().value();
+            return BuiltInRegistries.SOUND_EVENT.get(ClientDatapackManager.nodeSoundMap().get(id)
+                    .sound()).get().value();
         }
         throw new IllegalArgumentException(id + " is not a valid sound identifier!");
     }

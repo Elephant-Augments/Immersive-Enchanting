@@ -2,16 +2,17 @@ package me.alfie.immersiveenchanting.datapack.enchantment_cost;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.codec.CostData;
-import me.alfie.immersiveenchanting.datapack.enchantment_cost.manager.ClientCostManager;
-import me.alfie.immersiveenchanting.datapack.enchantment_cost.manager.ServerCostManager;
+import me.alfie.immersiveenchanting.datapack.manager.ClientDatapackManager;
+import me.alfie.immersiveenchanting.datapack.manager.ServerDatapackManager;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,24 +25,48 @@ public class CostRegistry {
     private final Map<Holder<Enchantment>, CostData> ENCHANTMENT_HOLDER_REGISTRY = new HashMap<>();
     private final Map<Identifier, CostData> ID_REGISTRY = new HashMap<>();
 
+    public static final StreamCodec<RegistryFriendlyByteBuf, CostRegistry> STREAM_CODEC =
+            StreamCodec.of(CostRegistry::encode, CostRegistry::decode);
+
+    private static void encode(RegistryFriendlyByteBuf buf, CostRegistry registry) {
+        Map<Identifier, CostData> map = registry.ID_REGISTRY;
+
+        buf.writeInt(map.size());
+
+        for (var entry : map.entrySet()) {
+            buf.writeIdentifier(entry.getKey());
+            CostData.STREAM_CODEC.encode(buf, entry.getValue());
+        }
+    }
+
+    private static CostRegistry decode(RegistryFriendlyByteBuf buf) {
+        CostRegistry registry = new CostRegistry();
+
+        int size = buf.readInt();
+
+        for (int i = 0; i < size; i++) {
+            Identifier id = buf.readIdentifier();
+            CostData data = CostData.STREAM_CODEC.decode(buf);
+
+            registry.ID_REGISTRY.put(id, data);
+        }
+
+        return registry;
+    }
+
     public static final Identifier TRANSMUTE = Identifier.fromNamespaceAndPath(ImmersiveEnchanting.MODID, "transmute");
     public static final Identifier REPLICATE = Identifier.fromNamespaceAndPath(ImmersiveEnchanting.MODID, "replicate");
     public static final Identifier ENCHANTING_FUELS = Identifier.fromNamespaceAndPath(ImmersiveEnchanting.MODID, "enchanting_fuels");
 
     public CostRegistry() {
-
-    }
-
-    public CostRegistry(Map<Identifier, CostData> idRegistry) {
-        ID_REGISTRY.putAll(idRegistry);
     }
 
     public static CostRegistry client() {
-        return ClientCostManager.registry();
+        return ClientDatapackManager.costRegistry();
     }
 
     public static CostRegistry server() {
-        return ServerCostManager.registry();
+        return ServerDatapackManager.costRegistry();
     }
 
     public void resolveEnchantmentHolders(HolderLookup.Provider lookup) {
@@ -120,10 +145,6 @@ public class CostRegistry {
             if(level > highestLevel) highestLevel = level;
         }
         return highestLevel;
-    }
-
-    public Map<Identifier, CostData> snapshotIdRegistry() {
-        return Map.copyOf(ID_REGISTRY);
     }
 
     public Holder<Enchantment> getRandomEnchantment(RandomSource randomSource) {

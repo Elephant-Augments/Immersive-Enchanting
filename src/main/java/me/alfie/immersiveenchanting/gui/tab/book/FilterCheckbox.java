@@ -1,5 +1,7 @@
 package me.alfie.immersiveenchanting.gui.tab.book;
 
+import com.mojang.blaze3d.platform.cursor.CursorType;
+import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import me.alfie.immersiveenchanting.gui.core.ScreenEventListener;
 import me.alfie.immersiveenchanting.gui.core.Sprite;
 import me.alfie.immersiveenchanting.util.FxHelper;
@@ -37,7 +39,7 @@ public class FilterCheckbox implements ScreenEventListener {
         bookTab.scrollbar().resetScrollIndex();
     }
 
-    public void render(GuiGraphicsExtractor graphics) {
+    public void render(GuiGraphicsExtractor graphics, double mouseX, double mouseY) {
         Sprite sprite = isEnabled() ? Sprite.CHECKBOX_ON : Sprite.CHECKBOX_OFF;
 
         int x = bookTab.screen().getGuiLeft() + this.x;
@@ -53,6 +55,8 @@ public class FilterCheckbox implements ScreenEventListener {
         );
 
         graphics.text(Minecraft.getInstance().font, filterType.getLabel(), x+20, y, Color.WHITE.getRGB());
+
+        if(this.isMouseOver(mouseX, mouseY)) graphics.requestCursor(CursorTypes.POINTING_HAND);
     }
 
     private boolean isMouseOver(double mouseX, double mouseY) {

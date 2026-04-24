@@ -100,7 +100,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<@NotNull Ench
         graphics.pose().popMatrix();
 
         if(isState(ScreenState.BOOKS)) {
-            bookTab.render(graphics);
+            bookTab.render(graphics, mouseX, mouseY);
         }
 
         if(!canvas().DEBUG_DISABLE_CULLING) graphics.disableScissor();
