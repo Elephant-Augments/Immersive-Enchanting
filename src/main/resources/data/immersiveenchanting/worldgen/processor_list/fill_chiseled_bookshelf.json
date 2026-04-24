@@ -1,0 +1,13 @@
+{
+  "processors": [
+    {
+      "processor_type": "immersiveenchanting:fill_chiseled_bookshelf",
+      "items": [
+        {"item": "immersiveenchanting:ancient_book", "chancePerSlot": 0.04},
+        {"item": "minecraft:book", "chancePerSlot": 0.4},
+        {"item": "immersiveenchanting:music_disc_arcane_memories", "chancePerSlot": 0.001},
+        {"item": "immersiveenchanting:music_disc_biblioclasm", "chancePerSlot": 0.001}
+      ]
+    }
+  ]
+}

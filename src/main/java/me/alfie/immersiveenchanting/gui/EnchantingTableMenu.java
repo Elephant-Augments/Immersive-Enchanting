@@ -289,4 +289,8 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
     public List<Holder<Enchantment>> getAvailableEnchantments() {
         return availableEnchantments;
     }
+
+    public boolean isEnchantmentAvailable(Holder<Enchantment> enchantmentHolder) {
+        return getAvailableEnchantments().contains(enchantmentHolder);
+    }
 }

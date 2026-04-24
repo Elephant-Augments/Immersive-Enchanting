@@ -116,6 +116,11 @@
       "volume": 0.3,
       "pitch": 1.0
     },
+    "minecraft:lunge": {
+      "sound": "minecraft:item.spear.lunge_1",
+      "volume": 0.3,
+      "pitch": 1.0
+    },
     "minecraft:mending": {
       "sound": "minecraft:block.anvil.place",
       "volume": 0.5,

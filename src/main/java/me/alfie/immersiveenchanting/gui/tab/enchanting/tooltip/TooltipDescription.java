@@ -17,6 +17,8 @@ public class TooltipDescription extends TooltipComponent {
         super(NineSliceSprite.TOOLTIP_DESCRIPTION.id());
         this.tooltip = tooltip;
         this.layout = new DescriptionLayout(this);
+
+        TooltipDescriptionExtensions.rebuild(tooltip, layout); //Prevents flicker
     }
 
     public void render(GuiGraphicsExtractor graphics, double mouseX, double mouseY) {

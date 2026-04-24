@@ -1,6 +1,7 @@
 package me.alfie.immersiveenchanting.networking;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
+import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
@@ -38,6 +39,7 @@ public record RemoveEnchantmentPacket(Holder<Enchantment> enchantmentHolder, int
 
     @Override
     public void exec(RemoveEnchantmentPacket packet, IPayloadContext context) {
+        if(!ServerConfig.isEnchantmentRemovalAllowed()) return;
         if (!(context.player().containerMenu instanceof EnchantingTableMenu menu)) return;
 
         ItemStack stack = menu.getToolSlot().getItem();

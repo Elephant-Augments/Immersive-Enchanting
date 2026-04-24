@@ -2,10 +2,38 @@ package me.alfie.immersiveenchanting.structure;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
+import me.alfie.immersiveenchanting.item.ModItems;
+import me.alfie.immersiveenchanting.util.EnchantmentUtil;
+import net.minecraft.commands.arguments.CompoundTagArgument;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.RegistryOps;
+import net.minecraft.util.ProblemReporter;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.ChiseledBookShelfBlock;
+import net.minecraft.world.level.block.entity.ChiseledBookShelfBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraft.world.level.storage.TagValueOutput;
+import net.neoforged.neoforge.common.Tags;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class FillChiseledBookshelfProcessor extends StructureProcessor {
@@ -21,7 +49,78 @@ public class FillChiseledBookshelfProcessor extends StructureProcessor {
         this.simpleLootTable = simpleLootTable;
     }
 
+    @Override
+    public @NotNull List<StructureTemplate.StructureBlockInfo> finalizeProcessing(@NotNull ServerLevelAccessor level,
+                                                                                  @NotNull BlockPos position,
+                                                                                  @NotNull BlockPos referencePos,
+                                                                                  @NotNull List<StructureTemplate.StructureBlockInfo> originalBlockInfoList,
+                                                                                  @NotNull List<StructureTemplate.StructureBlockInfo> processedBlockInfoList,
+                                                                                  @NotNull StructurePlaceSettings settings) {
+        List<StructureTemplate.StructureBlockInfo> processedBlocks = new ArrayList<>();
+        for(StructureTemplate.StructureBlockInfo block : processedBlockInfoList) {
 
+            if(block.state().is(Blocks.CHISELED_BOOKSHELF)) {
+                final int slots = 6;
+                for (int slot = 0; slot < slots; slot++) {
+                    ItemStack stack = rollLootForSlot(level.getRandom());
+                    block = setBookshelfItem(slot, stack, block, level.registryAccess());
+                }
+            }
+
+            processedBlocks.add(block);
+        }
+
+        return super.finalizeProcessing(level, position, referencePos, originalBlockInfoList, processedBlocks, settings);
+    }
+
+    private StructureTemplate.StructureBlockInfo setBookshelfItem(int slot, ItemStack stack,
+                                  StructureTemplate.StructureBlockInfo block, RegistryAccess registryAccess) {
+        CompoundTag blockTag = block.nbt() != null ? block.nbt().copy() : new CompoundTag();
+
+        final String itemTag = "Items";
+        final String slotTag = "Slot";
+
+        ListTag blockItemsTag = blockTag.getList(itemTag).orElse(new ListTag());
+
+        if(!stack.isEmpty()) {
+            CompoundTag stackTag = stackToTag(stack, registryAccess);
+            stackTag.putByte(slotTag, (byte) slot);
+
+            blockItemsTag.add(stackTag);
+            blockTag.put(itemTag, blockItemsTag);
+        }
+
+        BlockState state = block.state();
+        state = state.setValue(ChiseledBookShelfBlock.SLOT_OCCUPIED_PROPERTIES.get(slot), !stack.isEmpty());
+
+
+        return new StructureTemplate.StructureBlockInfo(block.pos(), state, blockTag);
+    }
+
+    private CompoundTag stackToTag(ItemStack stack, RegistryAccess registryAccess) {
+        TagValueOutput out = TagValueOutput.createWithContext(new ProblemReporter.Collector(), registryAccess);
+        out.storeNullable("item", ItemStack.CODEC, stack);
+        return out.buildResult().getCompoundOrEmpty("item");
+    }
+
+    private ItemStack rollLootForSlot(RandomSource random) {
+        SimpleLootEntry lootEntry = simpleLootTable.get(random.nextInt(simpleLootTable.size()));
+
+        float chance = lootEntry.chancePerSlot();
+        float roll = random.nextFloat();
+
+        if(roll < chance) {
+            List<ItemStack> itemStacks = lootEntry.itemOrTag().getItemStacks(1);
+            int randomIndex = random.nextInt(itemStacks.size());
+
+            ItemStack randomStack = itemStacks.get(randomIndex);
+            if(randomStack.is(ModItems.ANCIENT_BOOK.get())) EnchantmentUtil.setStoredEnchantment(randomStack,
+                    CostRegistry.server().getRandomEnchantment(random));
+
+            return randomStack;
+        }
+        return ItemStack.EMPTY;
+    }
 
     protected static MapCodec<FillChiseledBookshelfProcessor> codec() {
         return CODEC;

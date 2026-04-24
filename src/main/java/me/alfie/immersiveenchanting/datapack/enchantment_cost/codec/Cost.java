@@ -32,27 +32,11 @@ public record Cost(ItemOrTag itemOrTag, int amount, int xpLevels) {
             Cost::new);
 
     /**
-     * Returns all items found in ItemOrTag.
+     * Returns all items found in ItemOrTag with this amount.
      * @return
      */
     public List<ItemStack> getItemStacks() {
-        if(itemOrTag().tag().isPresent()) {
-            List<Item> itemsInTag = BuiltInRegistries.ITEM.get(itemOrTag().tag().get())
-                    .map(tagSet -> tagSet.stream()
-                            .map(Holder::value)
-                            .collect(Collectors.toList())).orElse(List.of());
-
-            List<ItemStack> itemStacks = new ArrayList<>();
-            for(Item item : itemsInTag) {
-                itemStacks.add(new ItemStack(item, amount()));
-            }
-            return itemStacks;
-
-        } else {
-            Identifier id = itemOrTag.item().get();
-            Item item = BuiltInRegistries.ITEM.get(id).get().value();
-            return List.of(new ItemStack(item, amount()));
-        }
+        return itemOrTag().getItemStacks(amount());
     }
 
 }

@@ -3,13 +3,13 @@
     "1": [
       {
         "item": "minecraft:piston",
-        "amount": 8
+        "amount": 1
       }
     ],
     "2": [
       {
         "item": "minecraft:wind_charge",
-        "amount": 16
+        "amount": 1
       }
     ]
   }

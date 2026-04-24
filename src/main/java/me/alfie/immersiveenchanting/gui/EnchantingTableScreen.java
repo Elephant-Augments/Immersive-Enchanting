@@ -1,5 +1,9 @@
 package me.alfie.immersiveenchanting.gui;
 
+import com.mojang.blaze3d.platform.InputConstants;
+import me.alfie.immersiveenchanting.gui.tab.TabButton;
+import me.alfie.immersiveenchanting.gui.tab.book.BookTab;
+import me.alfie.immersiveenchanting.gui.tab.book.FilterCheckbox;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.TooltipManager;
 import me.alfie.immersiveenchanting.util.FxHelper;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
@@ -12,6 +16,8 @@ import me.alfie.immersiveenchanting.gui.tab.enchanting.EnchantingTab;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.RegistryAccess;
@@ -26,7 +32,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTableMenu> {
+public class EnchantingTableScreen extends AbstractContainerScreen<@NotNull EnchantingTableMenu> {
 
     private static final Logger log = LogManager.getLogger(EnchantingTableScreen.class);
     private CanvasCamera camera;
@@ -34,12 +40,13 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
     private ScreenState screenState;
 
     private final EnchantingTab enchantingTab;
+    private final BookTab bookTab;
+    private final TabButton tabButton;
 
     private ItemStack lastToolSlotStack = ItemStack.EMPTY;
 
     private final RegistryAccess registryAccess;
 
-    private List<Node> renderedNodes = new ArrayList<>();
     private final CostRenderer enchantmentCostRenderer;
     private final TooltipManager tooltipManager;
 
@@ -54,6 +61,8 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         setState(ScreenState.ENCHANTING);
 
         enchantingTab = new EnchantingTab(this);
+        bookTab = new BookTab(this);
+        tabButton = new TabButton(this);
 
         this.enchantmentCostRenderer = new CostRenderer(CostRegistry.client());
         this.tooltipManager = new TooltipManager(this);
@@ -69,7 +78,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
     }
 
     @Override
-    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+    public void extractBackground(@NotNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
         super.extractBackground(graphics, mouseX, mouseY, a);
 
 
@@ -83,9 +92,16 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         graphics.pose().translate(-camera.x(), -camera.y());
 
         canvas().render(graphics);
-        enchantingTab.render(graphics, mouseX, mouseY);
+
+        if(isState(ScreenState.ENCHANTING)) {
+            enchantingTab.render(graphics, mouseX, mouseY);
+        }
 
         graphics.pose().popMatrix();
+
+        if(isState(ScreenState.BOOKS)) {
+            bookTab.render(graphics);
+        }
 
         if(!canvas().DEBUG_DISABLE_CULLING) graphics.disableScissor();
 
@@ -96,6 +112,8 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
                 imageWidth, imageHeight,
                 Sprite.ENCHANTING_TABLE_GUI.width(), Sprite.ENCHANTING_TABLE_GUI.height());
 
+        tabButton.render(graphics, mouseX, mouseY);
+
     }
 
     @Override
@@ -104,7 +122,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
         this.extractCarriedItem(graphics, mouseX, mouseY);
         this.extractSnapbackItem(graphics);
 
-        renderedNodes = enchantingTab.branchManager().getAllNodes();
+        List<Node> renderedNodes = enchantingTab.branchManager().getAllNodes();
 
         if(tooltipManager.hasActiveTooltip() && !renderedNodes.contains(tooltipManager.getActiveTooltipNode()))
             tooltipManager.clearActiveTooltip();
@@ -127,39 +145,79 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
     }
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent mouse, boolean doubleClick) {
+    public boolean mouseClicked(@NotNull MouseButtonEvent mouse, boolean doubleClick) {
+        if(tabButton.onMouseClick(mouse)) return true;
+
         if(isState(ScreenState.ENCHANTING)) {
             if(enchantingTab.centralSlot().onMouseClick(mouse)) return true;
 
             if(tooltipManager.hasActiveTooltip() && tooltipManager.getActiveTooltip().onMouseClick(mouse)) return true;
 
             if(camera.onMouseClick(mouse)) return true;
+        } else if(isState(ScreenState.BOOKS)) {
+            if(bookTab.scrollbar().onMouseClick(mouse)) return true;
+
+            for(FilterCheckbox checkbox : bookTab.filterCheckboxes()) if(checkbox.onMouseClick(mouse)) return true;
         }
 
         return super.mouseClicked(mouse, doubleClick);
     }
 
     @Override
-    public boolean mouseDragged(MouseButtonEvent mouse, double dx, double dy) {
+    public boolean mouseDragged(@NotNull MouseButtonEvent mouse, double dx, double dy) {
         if(camera.onMouseDrag(mouse, dx / camera().zoom(), dy / camera().zoom())) return true;
+
+        if(bookTab.scrollbar().onMouseDrag(mouse, dx, dy)) return true;
 
         return super.mouseDragged(mouse, dx, dy);
     }
 
     @Override
-    public boolean mouseReleased(MouseButtonEvent mouse) {
+    public boolean mouseReleased(@NotNull MouseButtonEvent mouse) {
         if(tooltipManager().hasActiveTooltip() && tooltipManager().getActiveTooltip().onMouseRelease(mouse)) return true;
 
         if(camera.onMouseRelease(mouse)) return true;
+
+        if(bookTab.scrollbar().onMouseRelease(mouse)) return true;
 
         return super.mouseReleased(mouse);
     }
 
     @Override
     public boolean mouseScrolled(double x, double y, double scrollX, double scrollY) {
-        if(camera.onMouseScrolled(x, y, scrollY)) return true;
+        if(isState(ScreenState.ENCHANTING)) {
+            if(camera.onMouseScrolled(x, y, scrollY)) return true;
+        } else if(isState(ScreenState.BOOKS)) {
+            if(bookTab.scrollbar().onMouseScrolled(x, y, scrollY)) return true;
+        }
 
         return super.mouseScrolled(x, y, scrollX, scrollY);
+    }
+
+    @Override
+    public boolean keyPressed(@NotNull KeyEvent event) {
+        if(isState(ScreenState.BOOKS)) {
+            if(event.key() == InputConstants.KEY_BACKSPACE) {
+                bookTab.searchbar().removeCharFromSearch();
+            }
+
+            if(event.key() == InputConstants.KEY_ESCAPE) {
+                return super.keyPressed(event);
+            } else {
+                return true;
+            }
+        }
+
+        return super.keyPressed(event);
+    }
+
+    @Override
+    public boolean charTyped(@NotNull CharacterEvent event) {
+        if(isState(ScreenState.BOOKS)) {
+            bookTab.searchbar().addCharToSearch((char) event.codepoint());
+        }
+
+        return super.charTyped(event);
     }
 
     /**
@@ -173,7 +231,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
      * @param mouseY current mouse y
      * @return true if mouse is inside the rectangle
      */
-    public boolean isMouseOver(float x, float y, int width, int height, double mouseX, double mouseY) {
+    public boolean isMouseOver(double x, double y, int width, int height, double mouseX, double mouseY) {
         return mouseX >= x && mouseX < x + width
                 && mouseY >= y && mouseY < y + height;
     }
@@ -236,5 +294,9 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
 
     public TooltipManager tooltipManager() {
         return tooltipManager;
+    }
+
+    public BookTab bookTab() {
+        return bookTab;
     }
 }

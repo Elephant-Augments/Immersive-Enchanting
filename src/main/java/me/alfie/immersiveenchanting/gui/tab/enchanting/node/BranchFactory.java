@@ -1,5 +1,6 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.node;
 
+import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
@@ -32,8 +33,8 @@ public class BranchFactory {
         List<NodeBranch> result = new ArrayList<>();
         List<Float> angles = generateBranchAngles(2);
 
-        result.add(buildTransmuteBranch(stack, angles.getFirst(), canvas));
-        result.add(buildReplicateBranch(angles.get(1), canvas));
+        if(ServerConfig.isAllowTransmute()) result.add(buildTransmuteBranch(stack, angles.getFirst(), canvas));
+        if(ServerConfig.isAllowReplicate()) result.add(buildReplicateBranch(angles.get(1), canvas));
 
         return result;
     }
@@ -44,8 +45,8 @@ public class BranchFactory {
         NodeState state = NodeState.UNOBTAINED;
         NodeTier tier = NodeTier.ADVANCED;
 
-        if(!canvas.screen().getMenu()
-                .getAvailableEnchantments().contains(EnchantmentUtil.getStoredEnchantment(stack))) state = NodeState.LOCKED;
+        if(!canvas.screen().getMenu().isEnchantmentAvailable(EnchantmentUtil.getStoredEnchantment(stack)))
+            state = NodeState.LOCKED;
 
         if(EnchantmentUtil.isReplicated(stack)) state = NodeState.ALERT;
 
@@ -106,7 +107,7 @@ public class BranchFactory {
             NodeState state = equippedLevel > enchantmentLevel ? NodeState.OBTAINED : NodeState.UNOBTAINED;
             NodeTier tier = enchantmentLevel+1 == maxLevel ? NodeTier.ELITE : NodeTier.BASIC;
 
-            if(!canvas.screen().getMenu().getAvailableEnchantments().contains(enchantment)) state = NodeState.LOCKED;
+            if(!canvas.screen().getMenu().isEnchantmentAvailable(enchantment)) state = NodeState.LOCKED;
 
             nodes.add(new Node(EnchantmentUtil.toId(enchantment), enchantmentLevel+1, canvas, state, tier));
 

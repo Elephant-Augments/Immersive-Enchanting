@@ -1,14 +1,20 @@
 package me.alfie.immersiveenchanting.datapack.enchantment_cost.codec;
 
 import com.mojang.serialization.Codec;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public record ItemOrTag(Optional<Identifier> item,
                         Optional<TagKey<Item>> tag) {
@@ -64,4 +70,28 @@ public record ItemOrTag(Optional<Identifier> item,
                 }
             }
     );
+
+    /**
+     * Returns all items found in ItemOrTag.
+     * @return
+     */
+    public List<ItemStack> getItemStacks(int amount) {
+        if(tag().isPresent()) {
+            List<Item> itemsInTag = BuiltInRegistries.ITEM.get(tag().get())
+                    .map(tagSet -> tagSet.stream()
+                            .map(Holder::value)
+                            .collect(Collectors.toList())).orElse(List.of());
+
+            List<ItemStack> itemStacks = new ArrayList<>();
+            for(Item item : itemsInTag) {
+                itemStacks.add(new ItemStack(item, amount));
+            }
+            return itemStacks;
+
+        } else {
+            Identifier id = item().get();
+            Item item = BuiltInRegistries.ITEM.get(id).get().value();
+            return List.of(new ItemStack(item, amount));
+        }
+    }
 }

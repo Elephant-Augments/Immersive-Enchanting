@@ -20,14 +20,14 @@ public enum Sprite {
     MOUSE_HINT_ON("textures/gui/sprites/tooltip/mouse_hint_on.png", 8, 8),
 
     //Book Tab
-    SCROLLBAR("textures/gui/sprites/booktab/scrollbar.png", 12, 117),
+    SCROLLBAR("textures/gui/sprites/booktab/scrollbar.png", 14, 114),
     SCROLLER("textures/gui/sprites/booktab/scroller.png", 12, 15),
-    SEARCH("textures/gui/sprites/booktab/search.png", 16, 16),
+    SEARCH("textures/gui/sprites/booktab/search.png", 100, 20),
     CHECKBOX_ON("textures/gui/sprites/booktab/checkbox_on.png", 16, 16),
     CHECKBOX_OFF("textures/gui/sprites/booktab/checkbox_off.png", 16, 16),
-    ENCHANTMENT_BOX_UNLOCKED("textures/gui/sprites/booktab/enchantment_box_unlocked.png", 32, 32),
-    ENCHANTMENT_BOX_LOCKED("textures/gui/sprites/booktab/enchantment_box_locked.png", 32, 32),
-    LOCKED_ENCHANTMENT("textures/gui/sprites/booktab/locked_enchantment.png", 32, 32),
+    ENCHANTMENT_BOX_UNLOCKED("textures/gui/sprites/booktab/enchantment_box_unlocked.png", 108, 19),
+    ENCHANTMENT_BOX_LOCKED("textures/gui/sprites/booktab/enchantment_box_locked.png", 108, 19),
+    LOCKED_ENCHANTMENT("textures/gui/sprites/booktab/locked_enchantment.png", 19, 19),
 
     //Enchanting Tab Nodes
     BASIC_NODE_UNOBTAINED("textures/gui/sprites/node/basic_node_unobtained.png", 26, 26),

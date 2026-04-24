@@ -9,13 +9,13 @@
     "2": [
       {
         "item": "minecraft:redstone_block",
-        "amount": 8
+        "amount": 1
       }
     ],
     "3": [
       {
         "item": "minecraft:glistering_melon_slice",
-        "amount": 16
+        "amount": 1
       }
     ],
     "4": [
@@ -27,7 +27,7 @@
     "5": [
       {
         "item": "minecraft:dragon_breath",
-        "amount": 8
+        "amount": 1
       }
     ]
   }

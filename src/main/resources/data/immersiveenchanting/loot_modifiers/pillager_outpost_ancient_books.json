@@ -1,0 +1,28 @@
+{
+  "type": "immersiveenchanting:ancient_book_loot_modifier",
+  "mode": "random_enchantment_from_list",
+  "enchantments": [
+    "minecraft:knockback",
+    "minecraft:multishot",
+    "minecraft:piercing",
+    "minecraft:power",
+    "minecraft:punch",
+    "minecraft:quick_charge"
+  ],
+  "min_rolls": 1,
+  "max_rolls": 1,
+  "conditions": [
+    {
+      "condition": "minecraft:any_of",
+      "terms": [
+        {
+          "condition": "minecraft:all_of",
+          "terms": [
+            {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/pillager_outpost"},
+            {"condition": "minecraft:random_chance", "chance": 0.25}
+          ]
+        }
+      ]
+    }
+  ]
+}

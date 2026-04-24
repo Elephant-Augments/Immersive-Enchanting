@@ -3,13 +3,13 @@
     "1": [
       {
         "item": "minecraft:fire_charge",
-        "amount": 12
+        "amount": 3
       }
     ],
     "2": [
       {
         "item": "minecraft:magma_cream",
-        "amount": 8
+        "amount": 1
       }
     ]
   }

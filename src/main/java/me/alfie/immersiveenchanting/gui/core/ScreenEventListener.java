@@ -8,7 +8,7 @@ public interface ScreenEventListener {
         return false;
     }
 
-    default boolean onMouseDrag(MouseButtonEvent event, double dx, double dy) {
+    default boolean onMouseDrag(MouseButtonEvent mouse, double dx, double dy) {
         return false;
     }
 

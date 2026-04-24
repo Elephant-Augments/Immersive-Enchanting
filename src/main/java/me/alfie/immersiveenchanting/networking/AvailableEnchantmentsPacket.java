@@ -1,6 +1,8 @@
 package me.alfie.immersiveenchanting.networking;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
+import me.alfie.immersiveenchanting.config.ServerConfig;
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import net.minecraft.client.Minecraft;
@@ -57,7 +59,14 @@ public record AvailableEnchantmentsPacket(List<Holder<Enchantment>> availableEnc
     @Override
     public void exec(AvailableEnchantmentsPacket packet, IPayloadContext context) {
         if(context.player().containerMenu instanceof EnchantingTableMenu menu) {
-            menu.setAvailableEnchantments(packet.availableEnchantments());
+
+            if(ServerConfig.areAncientBooksRequired()) {
+                menu.setAvailableEnchantments(packet.availableEnchantments());
+            } else {
+                menu.setAvailableEnchantments(CostRegistry.server().getAllEnchantmentHolders());
+            }
+
+
         }
     }
 

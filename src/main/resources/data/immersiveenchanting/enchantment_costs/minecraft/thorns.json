@@ -9,13 +9,13 @@
     "2": [
       {
         "item": "minecraft:cactus",
-        "amount": 16
+        "amount": 8
       }
     ],
     "3": [
       {
         "item": "minecraft:amethyst_shard",
-        "amount": 16
+        "amount": 1
       }
     ]
   }

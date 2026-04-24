@@ -3,31 +3,31 @@
     "1": [
       {
         "item": "minecraft:pointed_dripstone",
-        "amount": 16
+        "amount": 1
       }
     ],
     "2": [
       {
         "item": "minecraft:lightning_rod",
-        "amount": 4
+        "amount": 1
       }
     ],
     "3": [
       {
         "item": "minecraft:glistering_melon_slice",
-        "amount": 8
+        "amount": 1
       }
     ],
     "4": [
       {
         "item": "minecraft:glowstone",
-        "amount": 16
+        "amount": 1
       }
     ],
     "5": [
       {
         "item": "minecraft:ghast_tear",
-        "amount": 8
+        "amount": 1
       }
     ]
   }

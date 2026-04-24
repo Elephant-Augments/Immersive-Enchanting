@@ -158,7 +158,7 @@ public class CanvasCamera implements ScreenEventListener {
      * Drag direction is inverted to simulate "grabbing" the canvas.
      */
     @Override
-    public boolean onMouseDrag(MouseButtonEvent event, double dx, double dy) {
+    public boolean onMouseDrag(MouseButtonEvent mouse, double dx, double dy) {
         if(dragging) {
             move((float) -dx, (float) -dy);
             clampPosition();
@@ -166,7 +166,7 @@ public class CanvasCamera implements ScreenEventListener {
             return true;
         }
 
-        return ScreenEventListener.super.onMouseDrag(event, dx, dy);
+        return ScreenEventListener.super.onMouseDrag(mouse, dx, dy);
     }
 
     /**
@@ -187,7 +187,7 @@ public class CanvasCamera implements ScreenEventListener {
     @Override
     public boolean onMouseRelease(MouseButtonEvent mouse) {
         dragging = false;
-        return false;
+        return ScreenEventListener.super.onMouseRelease(mouse);
     }
 
     /**

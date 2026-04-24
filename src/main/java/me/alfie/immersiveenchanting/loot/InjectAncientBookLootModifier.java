@@ -82,8 +82,7 @@ public class InjectAncientBookLootModifier extends LootModifier {
 
             if(mode.equals(Mode.RANDOMLY_ENCHANT_FROM_ENABLED.getString())) {
                 EnchantmentUtil.setStoredEnchantment(ancientBook,
-                        CostRegistry.server().getRandomEnchantment(context.getRandom()),
-                        context.getLevel());
+                        CostRegistry.server().getRandomEnchantment(context.getRandom()));
 
             } else if(mode.equals(Mode.RANDOMLY_ENCHANT_FROM_ENABLED_EXCEPT.getString())) {
                 List<Holder<Enchantment>> applicableEnchantments = CostRegistry.server().getAllEnchantmentHolders();
@@ -91,15 +90,13 @@ public class InjectAncientBookLootModifier extends LootModifier {
                 int randomIndex = context.getRandom().nextInt(applicableEnchantments.size());
 
                 EnchantmentUtil.setStoredEnchantment(ancientBook,
-                        applicableEnchantments.get(randomIndex),
-                        context.getLevel());
+                        applicableEnchantments.get(randomIndex));
 
             } else if (mode.equals(Mode.RANDOMLY_ENCHANT_FROM_LIST.getString())) {
                 int randomIndex = context.getRandom().nextInt(enchantments.size());
 
                 EnchantmentUtil.setStoredEnchantment(ancientBook,
-                        enchantments.get(randomIndex),
-                        context.getLevel());
+                        enchantments.get(randomIndex));
             }
 
             generatedLoot.add(ancientBook);

@@ -2,6 +2,7 @@ package me.alfie.immersiveenchanting.util;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.block.ModBlocks;
+import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.networking.AvailableEnchantmentsPacket;
@@ -29,6 +30,7 @@ public class BookshelfChecker {
 
     public static List<Holder<Enchantment>> getEnchantmentsInBookshelves(BlockPos blockPos, Level level) {
         if(isCreativeBookshelfNearby(blockPos, level)) return CostRegistry.server().getAllEnchantmentHolders();
+        if(!ServerConfig.areAncientBooksRequired()) return CostRegistry.server().getAllEnchantmentHolders();
 
         List<ChiseledBookShelfBlockEntity> bookshelves = getNearbyBookshelves(blockPos, level);
         List<Holder<Enchantment>> result = new ArrayList<>();
@@ -58,7 +60,11 @@ public class BookshelfChecker {
     private static List<ChiseledBookShelfBlockEntity> getNearbyBookshelves(BlockPos pos, Level level) {
         List<ChiseledBookShelfBlockEntity> result = new ArrayList<>();
 
-        forEachRingPos(pos, 2, 3, 2, checkPos -> {
+        forEachRingPos(pos,
+                ServerConfig.getBookshelfSearchRadius().x(),
+                ServerConfig.getBookshelfSearchRadius().y(),
+                ServerConfig.getBookshelfSearchRadius().z(),
+                checkPos -> {
             BlockEntity be = level.getBlockEntity(checkPos);
 
             if (be instanceof ChiseledBookShelfBlockEntity shelf) {
@@ -120,7 +126,11 @@ public class BookshelfChecker {
      * @return
      */
     private static boolean isCreativeBookshelfNearby(BlockPos pos, Level level) {
-        return anyInRing(pos, 2, 3, 2, checkPos ->
+        return anyInRing(pos,
+                ServerConfig.getBookshelfSearchRadius().x(),
+                ServerConfig.getBookshelfSearchRadius().y(),
+                ServerConfig.getBookshelfSearchRadius().z(),
+                checkPos ->
                 level.getBlockState(checkPos).getBlock()
                         .equals(ModBlocks.CREATIVE_BOOKSHELF_BLOCK.get())
         );

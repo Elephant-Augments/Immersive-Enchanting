@@ -1,5 +1,6 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip;
 
+import me.alfie.immersiveenchanting.config.ClientConfig;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.codec.Cost;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.codec.CostHolder;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
@@ -17,8 +18,6 @@ public class CostRenderer {
 
     private List<RenderedCost> renderedCosts;
     private List<RenderedCost> renderedFuelCosts;
-
-    public static long CAROUSEL_SPEED = 700;
 
     private final CostRegistry costRegistry;
 
@@ -64,6 +63,8 @@ public class CostRenderer {
      */
     public static <T> T getCycledElement(List<T> list) {
         if (list == null || list.isEmpty()) return null;
+
+        final int CAROUSEL_SPEED = ClientConfig.getItemCarouselSpeed();
 
         long currentTime = System.currentTimeMillis();
         int index = (int)((currentTime / CAROUSEL_SPEED) % list.size());

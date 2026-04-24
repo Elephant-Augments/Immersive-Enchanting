@@ -1,6 +1,7 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
+import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.gui.core.NineSliceSprite;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeState;
@@ -54,7 +55,9 @@ public class TooltipTitle extends TooltipComponent {
     private void setTitleText(Component component) {
         component = component.copy().withStyle(ChatFormatting.WHITE);
 
-        if(tooltip.node().isState(NodeState.LOCKED)) component = ImmersiveEnchanting.styleWithAltFont(component);
+        if(tooltip.node().isState(NodeState.LOCKED) && ServerConfig.isObfuscateLockedEnchantments())
+            component = ImmersiveEnchanting.styleWithAltFont(component);
+
         this.titleText = component;
     }
 

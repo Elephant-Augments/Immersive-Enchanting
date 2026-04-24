@@ -3,23 +3,20 @@
   "levels": {
     "1": [
       {
-        "item": "minecraft:air",
-        "amount": 0,
-        "xp_levels": 0
+        "item": "minecraft:slime_ball",
+        "amount": 1
       }
     ],
     "2": [
       {
-        "item": "minecraft:air",
-        "amount": 0,
-        "xp_levels": 0
+        "item": "minecraft:rabbit_foot",
+        "amount": 1
       }
     ],
     "3": [
       {
-        "item": "minecraft:air",
-        "amount": 0,
-        "xp_levels": 0
+        "item": "minecraft:ochre_froglight",
+        "amount": 1
       }
     ]
   }

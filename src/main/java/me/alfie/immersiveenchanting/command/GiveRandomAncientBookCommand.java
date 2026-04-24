@@ -34,8 +34,7 @@ public enum GiveRandomAncientBookCommand implements ModCommand {
                                 ItemStack ancientBook = new ItemStack(ModItems.ANCIENT_BOOK.get(), 1);
                                 EnchantmentUtil.setStoredEnchantment(
                                         ancientBook,
-                                        CostRegistry.server().getRandomEnchantment(context.getSource().getLevel().getRandom()),
-                                        context.getSource().getLevel());
+                                        CostRegistry.server().getRandomEnchantment(context.getSource().getLevel().getRandom()));
                                 player.getInventory().add(ancientBook);
                             }
 

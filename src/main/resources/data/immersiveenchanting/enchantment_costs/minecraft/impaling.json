@@ -2,26 +2,26 @@
   "levels": {
     "1": [
       {
-        "item": "minecraft:horn_coral",
-        "amount": 8
+        "item": "minecraft:pufferfish_bucket",
+        "amount": 1
       }
     ],
     "2": [
       {
-        "item": "minecraft:pufferfish_bucket",
-        "amount": 1
+        "item": "minecraft:horn_coral",
+        "amount": 8
       }
     ],
     "3": [
       {
         "item": "minecraft:prismarine_shard",
-        "amount": 16
+        "amount": 8
       }
     ],
     "4": [
       {
         "item": "minecraft:diamond",
-        "amount": 2
+        "amount": 1
       }
     ],
     "5": [

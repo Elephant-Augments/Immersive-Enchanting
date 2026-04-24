@@ -1,6 +1,7 @@
 package me.alfie.immersiveenchanting.networking;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
+import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
@@ -42,6 +43,8 @@ public record TransmutePacket() implements ModNetworkPacket<TransmutePacket> {
 
     @Override
     public void exec(TransmutePacket packet, IPayloadContext context) {
+        if(!ServerConfig.isAllowTransmute()) return;
+
         Player player = context.player();
         Level level = player.level();
         if(!(player.containerMenu instanceof EnchantingTableMenu menu)) return;
@@ -62,7 +65,7 @@ public record TransmutePacket() implements ModNetworkPacket<TransmutePacket> {
         if(EnchantmentUtil.canTransmute(menu, oldEnchantment, context)) {
             EnchantmentUtil.deductValidCost(menu, CostRegistry.TRANSMUTE, 1, player, CostRegistry.server());
 
-            EnchantmentUtil.setStoredEnchantment(ancientBookStack, newEnchantment, level);
+            EnchantmentUtil.setStoredEnchantment(ancientBookStack, newEnchantment);
             BlockPos tablePos = menu.getBlockPos();
 
             ItemStack newBookStack = menu.getToolSlot().getItem().copyAndClear();

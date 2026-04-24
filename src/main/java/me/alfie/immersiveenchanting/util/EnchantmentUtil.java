@@ -79,14 +79,11 @@ public class EnchantmentUtil {
      *
      * @param ancientBook        the item stack to modify
      * @param enchantmentHolder  the enchantment to store
-     * @param level              the level context, or {@code null} when unavailable
      */
-    public static void setStoredEnchantment(ItemStack ancientBook, Holder<Enchantment> enchantmentHolder, @Nullable Level level) {
-        if(level == null || !level.isClientSide()) {
-            ItemEnchantments.Mutable itemEnchantments = new ItemEnchantments.Mutable(ItemEnchantments.EMPTY);
-            itemEnchantments.set(enchantmentHolder, 1);
-            ancientBook.set(DataComponents.STORED_ENCHANTMENTS, itemEnchantments.toImmutable());
-        }
+    public static void setStoredEnchantment(ItemStack ancientBook, Holder<Enchantment> enchantmentHolder) {
+        ItemEnchantments.Mutable itemEnchantments = new ItemEnchantments.Mutable(ItemEnchantments.EMPTY);
+        itemEnchantments.set(enchantmentHolder, 1);
+        ancientBook.set(DataComponents.STORED_ENCHANTMENTS, itemEnchantments.toImmutable());
     }
 
     /**

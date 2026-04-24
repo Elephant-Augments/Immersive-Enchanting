@@ -2,19 +2,19 @@
   "levels": {
     "1": [
       {
-        "item": "minecraft:anvil",
+        "item": "minecraft:obsidian",
         "amount": 1
       }
     ],
     "2": [
       {
-        "item": "minecraft:obsidian",
-        "amount": 16
+        "item": "minecraft:anvil",
+        "amount": 1
       }
     ],
     "3": [
       {
-        "item": "minecraft:netherite_ingot",
+        "item": "minecraft:ancient_debris",
         "amount": 1
       }
     ],

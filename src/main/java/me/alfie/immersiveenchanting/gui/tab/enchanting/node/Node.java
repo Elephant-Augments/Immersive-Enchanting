@@ -1,6 +1,7 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.node;
 
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
+import me.alfie.immersiveenchanting.util.EnchantmentTextureHelper;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import me.alfie.immersiveenchanting.gui.canvas.CanvasRenderable;
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
@@ -141,15 +142,7 @@ public class Node extends CanvasRenderable {
      * in which case no icon is rendered.</p>
      */
     private void setIconTexture() {
-        String directory = "textures/gui/enchantment_icons/" + id().getNamespace() + '/' + id().getPath() + ".png";
-        Identifier iconId = Identifier.fromNamespaceAndPath("immersiveenchanting", directory);
-
-        if(Minecraft.getInstance().getResourceManager().getResource(iconId).isPresent()) {
-            iconTexture = iconId;
-        } else {
-            //Default to ancient book texture
-            iconTexture = Identifier.fromNamespaceAndPath("immersiveenchanting", "textures/item/ancient_book.png");
-        }
+        iconTexture = EnchantmentTextureHelper.getTexture(id());
 
         if(isState(NodeState.LOCKED) || isState(NodeState.ALERT)) iconTexture = null;
     }

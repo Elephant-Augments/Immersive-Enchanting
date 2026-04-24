@@ -2,6 +2,7 @@ package me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.cursor.CursorTypes;
+import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeState;
 import me.alfie.immersiveenchanting.networking.ReplicatePacket;
@@ -141,6 +142,7 @@ public class NodeTooltip implements ScreenEventListener {
                     ClientPacketDistributor.sendToServer(new ReplicatePacket());
                 }
 
+                screen().tooltipManager().unlockTooltip();
                 return true;
             }
         }
@@ -188,6 +190,7 @@ public class NodeTooltip implements ScreenEventListener {
                 .getMenu()
                 .getToolSlot()
                 .getItem()
-                .getEnchantmentLevel(EnchantmentUtil.toHolder(node().id(), screen().registryAccess()));
+                .getEnchantmentLevel(EnchantmentUtil.toHolder(node().id(), screen().registryAccess()))
+                && ServerConfig.isEnchantmentRemovalAllowed();
     }
 }

@@ -40,9 +40,12 @@ public class ModCreativeTab {
 
             for(Holder<Enchantment> enchantmentHolder : EnchantmentUtil.getAllRegisteredEnchantments(event.getParameters().holders())) {
                 ItemStack stack = new ItemStack(ModItems.ANCIENT_BOOK.get());
-                EnchantmentUtil.setStoredEnchantment(stack, enchantmentHolder, null);
+                EnchantmentUtil.setStoredEnchantment(stack, enchantmentHolder);
                 event.accept(stack);
             }
+
+            event.accept(new ItemStack(ModItems.ARCANE_MEMORIES_MUSIC_DISC.get()));
+            event.accept(new ItemStack(ModItems.BIBLIOCLASM_MUSIC_DISC.get()));
         }
     }
 }

@@ -1,0 +1,11 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "immersiveenchanting:item/music_disc_arcane_memories"
+  },
+  "properties": {
+    "hand_animation_on_swap": true,
+    "oversized_in_gui": false,
+    "swap_animation_scale": 1.0
+  }
+}

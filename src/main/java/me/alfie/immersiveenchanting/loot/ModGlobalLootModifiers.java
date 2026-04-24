@@ -16,6 +16,10 @@ public class ModGlobalLootModifiers {
     public static final Supplier<MapCodec<InjectAncientBookLootModifier>> ANCIENT_BOOK_LOOT_MODIFIER =
             GLOBAL_LOOT_MODIFIERS.register("ancient_book_loot_modifier", () -> InjectAncientBookLootModifier.CODEC);
 
+    public static final Supplier<MapCodec<RemoveEnchantedBooksModifier>> REMOVE_ENCHANTED_BOOKS_MODIFIER =
+            GLOBAL_LOOT_MODIFIERS.register("remove_enchanted_books", () -> RemoveEnchantedBooksModifier.CODEC);
+
+
     public static void register(IEventBus eventBus) {
         GLOBAL_LOOT_MODIFIERS.register(eventBus);
     }

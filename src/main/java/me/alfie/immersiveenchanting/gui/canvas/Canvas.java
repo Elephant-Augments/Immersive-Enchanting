@@ -2,6 +2,7 @@ package me.alfie.immersiveenchanting.gui.canvas;
 
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.core.ScreenEventListener;
+import me.alfie.immersiveenchanting.gui.core.ScreenState;
 import me.alfie.immersiveenchanting.gui.core.Sprite;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.BranchManager;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -37,6 +38,7 @@ public class Canvas implements ScreenEventListener {
     public void render(GuiGraphicsExtractor graphics) {
         updateBrightness(screen().tooltipManager().hasActiveTooltip(),
                 0.02f);
+        if(screen.isState(ScreenState.BOOKS)) currentBrightness = FULL_BRIGHTNESS;
 
         float viewportLeft = screen().camera().VIEWPORT_X;
         float viewportTop = screen().camera().VIEWPORT_Y;

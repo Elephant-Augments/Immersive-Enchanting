@@ -1,5 +1,6 @@
 package me.alfie.immersiveenchanting.mixin;
 
+import me.alfie.immersiveenchanting.config.ClientConfig;
 import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import net.minecraft.ChatFormatting;
@@ -14,6 +15,9 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.loading.moddiscovery.ModInfo;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -22,7 +26,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.function.Consumer;
 
 @Mixin(ItemStack.class)
-public class ItemStackMixin {
+public abstract class ItemStackMixin {
 
     /**
      * Injects into the ItemStack tooltip building pipeline to customize how stored enchantments
@@ -62,8 +66,23 @@ public class ItemStackMixin {
                             .append(Component.translatable("item.immersiveenchanting.ancient_book.desc.enchantment"))
                             .append(" ")
                             .append(enchantmentHolder.value().description());
+                    consumer.accept(component.withStyle(ChatFormatting.GOLD));
+
+                    if(ClientConfig.isShowAddedByTooltipEnabled()) {
+                        String modNamespace = enchantmentHolder.getKey().identifier().getNamespace();
+
+                        ModInfo modInfo = (ModInfo) ModList.get().getModContainerById(modNamespace)
+                                .map(ModContainer::getModInfo)
+                                .orElse(null);
+
+                        String modName = modInfo != null ? modInfo.getDisplayName() : modNamespace;
+
+                        consumer.accept(
+                                Component.translatable("item.immersiveenchanting.ancient_book.desc.enchantment_added_by", modName)
+                                        .withStyle(ChatFormatting.BLUE)
+                        );
+                    }
                 }
-                consumer.accept(component.withStyle(ChatFormatting.GOLD));
             }
 
             if(EnchantmentUtil.isReplicated(self)) consumer.accept(

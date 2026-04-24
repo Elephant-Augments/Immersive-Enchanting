@@ -3,19 +3,19 @@
     "1": [
       {
         "item": "minecraft:iron_block",
-        "amount": 3
+        "amount": 1
       }
     ],
     "2": [
       {
         "item": "minecraft:armadillo_scute",
-        "amount": 8
+        "amount": 1
       }
     ],
     "3": [
       {
-        "item": "minecraft:crying_obsidian",
-        "amount": 8
+        "item": "minecraft:resin_bricks",
+        "amount": 1
       }
     ]
   }

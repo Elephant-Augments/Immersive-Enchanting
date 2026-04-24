@@ -1,5 +1,6 @@
 package me.alfie.immersiveenchanting.util;
 
+import me.alfie.immersiveenchanting.config.ClientConfig;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.datapack.node_sounds.NodeSound;
 import me.alfie.immersiveenchanting.datapack.node_sounds.NodeSoundsDatapack;
@@ -29,6 +30,8 @@ public class FxHelper {
     }
 
     public static void playNodeHover(Level level, Node node) {
+        if(!ClientConfig.areNodeHoverSoundsEnabled()) return;
+
         if(node.isState(NodeState.LOCKED) || node.isState(NodeState.ALERT)) {
             playGenericNodeHover(level);
             return;
@@ -161,5 +164,9 @@ public class FxHelper {
 
     public static void playEnchantmentRemove(Level level, BlockPos tablePos) {
         level.playSound(null, tablePos, SoundEvents.ZOMBIE_VILLAGER_CONVERTED, SoundSource.MASTER, 0.5F, 1.2F);
+    }
+
+    public static void playGenericUISound(Player player) {
+        playClientUISound(player.level(), SoundEvents.UI_BUTTON_CLICK.value(), 0.3f, 1f);
     }
 }
