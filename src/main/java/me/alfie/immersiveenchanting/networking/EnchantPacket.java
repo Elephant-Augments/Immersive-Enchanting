@@ -18,6 +18,20 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+/**
+ * Client-to-server packet requesting an enchantment to be applied.
+ *
+ * <p>Validates the request against server-side rules before applying:
+ * <ul>
+ *     <li>Enchantment compatibility</li>
+ *     <li>Level progression rules</li>
+ *     <li>Bookshelf availability</li>
+ *     <li>Cost and fuel requirements</li>
+ * </ul>
+ *
+ * <p>If valid, the enchantment is applied to the item and resources are consumed.
+ * On success, visual and audio feedback is triggered on the client.</p>
+ */
 public record EnchantPacket(Holder<Enchantment> enchantmentHolder, int level) implements ModNetworkPacket<EnchantPacket> {
 
     public static final Type<@NotNull EnchantPacket> TYPE = new Type<>(Identifier.fromNamespaceAndPath(ImmersiveEnchanting.MODID, "enchant_item"));

@@ -6,7 +6,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.enchantment.Enchantment;
 
 public class EnchantmentTextureHelper {
-
     public static Identifier getTexture(Identifier enchantmentId) {
         String directory = "textures/enchantment/" + enchantmentId.getNamespace() + '/' + enchantmentId.getPath() + ".png";
         Identifier iconId = Identifier.fromNamespaceAndPath("immersiveenchanting", directory);

@@ -21,6 +21,20 @@ import net.minecraft.world.level.Level;
 
 import java.util.Optional;
 
+/**
+ * Handles client and server-side sound + particle effects for the enchanting UI.
+ * <p>
+ * Centralizes all feedback (UI sounds, node interactions, enchanting events, etc.)
+ * so behavior stays consistent and easy to tweak.
+ * <p>
+ * Includes:
+ * - UI interaction sounds (hover, clicks, errors)
+ * - Node-specific sounds (datapack-driven)
+ * - Enchanting event effects (success, transmute, replicate, remove)
+ * - Lightweight progression feedback (e.g. removal progress ticks)
+ * <p>
+ * Most methods are fire-and-forget helpers and assume valid inputs.
+ */
 public class FxHelper {
 
     private static float lastRemoveSoundStep;

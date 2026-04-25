@@ -12,6 +12,15 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Client-to-server packet for synchronizing tool slot interactions in the enchanting table.
+ *
+ * <p>Handles manual item transfer between the tool slot and the player cursor,
+ * supporting both taking and placing items.</p>
+ *
+ * <p>Used to keep custom enchanting UI behavior in sync with server-side inventory state
+ * when standard container interactions are bypassed or extended.</p>
+ */
 public record UpdateToolSlotPacket(int mode) implements ModNetworkPacket<UpdateToolSlotPacket> {
 
     public enum Mode {

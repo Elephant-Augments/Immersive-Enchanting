@@ -25,6 +25,13 @@ public class BookTab {
 
     public final int MAX_BOXES_RENDERED = 6;
 
+    /**
+     * Creates a new book tab instance for the enchanting screen.
+     <P>
+     * <p>Initializes filter checkboxes, scrollbar, and search bar components.</p>
+     <P>
+     * @param screen the parent {@link EnchantingTableScreen}
+     */
     public BookTab(EnchantingTableScreen screen) {
         this.screen = screen;
 
@@ -34,16 +41,31 @@ public class BookTab {
         searchbar = new Searchbar(this);
     }
 
+    /**
+     * Initializes the book tab state.
+     <P>
+     * <p>Resets all filters, scroll position, and search input.</p>
+     */
     public void init() {
         resetFilters();
         scrollbar().resetScrollIndex();
         searchbar.clearSearch();
     }
 
+    /**
+     * Gets the parent enchanting table screen.
+     <P>
+     * @return the {@link EnchantingTableScreen} associated with this tab
+     */
     public EnchantingTableScreen screen() {
         return screen;
     }
 
+    /**
+     * Retrieves all currently enabled filters.
+     <P>
+     * @return a list of active {@link BookFilters}
+     */
     public List<BookFilters> getEnabledFilters() {
         List<BookFilters> bookFilters = new ArrayList<>();
         for(FilterCheckbox checkbox : filterCheckboxes) {
@@ -52,6 +74,19 @@ public class BookTab {
         return bookFilters;
     }
 
+    /**
+     * Applies active filters and search criteria to determine which enchantments are rendered.
+     <P>
+     * <p>This method:</p>
+     <P>
+     * <ul>
+     *     <li>Clears the current rendered enchantment list</li>
+     *     <li>Adds unlocked enchantments if enabled</li>
+     *     <li>Adds locked enchantments if enabled</li>
+     *     <li>Applies search filtering</li>
+     *     <li>Sorts the results alphabetically</li>
+     * </ul>
+     */
     private void applyFilters() {
         renderedEnchantments.clear();
         List<BookFilters> enabledFilters = getEnabledFilters();
@@ -75,12 +110,26 @@ public class BookTab {
         renderedEnchantments.sort(Comparator.comparing(e -> e.value().description().getString()));
     }
 
+    /**
+     * Resets all filters to their default enabled state.
+     <P>
+     * <p>All filter checkboxes are set to enabled.</p>
+     */
     private void resetFilters() {
         for(FilterCheckbox filterCheckbox : filterCheckboxes) {
             filterCheckbox.setEnabled(true);
         }
     }
 
+    /**
+     * Renders the entire book tab UI.
+     <P>
+     * <p>Includes filter checkboxes, enchantment list, scrollbar, and search bar.</p>
+     <P>
+     * @param graphics the GUI rendering context
+     * @param mouseX the current mouse X position
+     * @param mouseY the current mouse Y position
+     */
     public void render(GuiGraphicsExtractor graphics, double mouseX, double mouseY) {
         renderFilterCheckboxes(graphics, mouseX, mouseY);
         renderEnchantmentBoxes(graphics);
@@ -88,6 +137,15 @@ public class BookTab {
         searchbar.render(graphics);
     }
 
+    /**
+     * Renders the list of enchantment boxes.
+     <P>
+     * <p>Displays up to {@code MAX_BOXES_RENDERED} entries based on the current scroll position.</p>
+     <P>
+     * <p>Empty boxes are rendered when there are fewer enchantments than available slots.</p>
+     <P>
+     * @param graphics the GUI rendering context
+     */
     private void renderEnchantmentBoxes(GuiGraphicsExtractor graphics) {
         int x = screen.getGuiLeft() + 13;
         int y = screen.getGuiTop() + 6;
@@ -108,6 +166,15 @@ public class BookTab {
         }
     }
 
+    /**
+     * Renders filter checkboxes and the total enchantment count label.
+     <P>
+     * <p>Checkbox positions are dynamically calculated based on index.</p>
+     <P>
+     * @param graphics the GUI rendering context
+     * @param mouseX the current mouse X position
+     * @param mouseY the current mouse Y position
+     */
     private void renderFilterCheckboxes(GuiGraphicsExtractor graphics, double mouseX, double mouseY) {
         int count = 0;
         final int spacing = 18;
@@ -126,18 +193,38 @@ public class BookTab {
                 xPos, yPos, Color.WHITE.getRGB());
     }
 
+    /**
+     * Gets the list of filter checkbox components.
+     <P>
+     * @return the list of {@link FilterCheckbox} instances
+     */
     public List<FilterCheckbox> filterCheckboxes() {
         return filterCheckboxes;
     }
 
+    /**
+     * Gets the scrollbar component for this tab.
+     <P>
+     * @return the {@link Scrollbar}
+     */
     public Scrollbar scrollbar() {
         return scrollbar;
     }
 
+    /**
+     * Gets the search bar component.
+     <P>
+     * @return the {@link Searchbar}
+     */
     public Searchbar searchbar() {
         return searchbar;
     }
 
+    /**
+     * Gets the list of enchantments currently being rendered.
+     <P>
+     * @return the filtered and sorted list of {@link Enchantment} holders
+     */
     public List<Holder<Enchantment>> getRenderedEnchantments() {
         return renderedEnchantments;
     }

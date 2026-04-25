@@ -15,6 +15,15 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Server-to-client packet that synchronizes datapack-driven client state.
+ *
+ * <p>Updates the client-side {@link CostRegistry} and {@link NodeSoundMap} so that
+ * enchantment costs and node sound mappings match the server configuration.</p>
+ *
+ * <p>This packet is typically sent on login or datapack reload to ensure the client
+ * has an up-to-date view of gameplay rules and effects.</p>
+ */
 public record SyncClientDatapackManagerPacket(CostRegistry costRegistry,
                                               NodeSoundMap nodeSoundMap) implements ModNetworkPacket<SyncClientDatapackManagerPacket> {
 

@@ -13,6 +13,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
+
 public class TabButton implements ScreenEventListener {
 
     public final EnchantingTableScreen screen;
@@ -25,10 +26,29 @@ public class TabButton implements ScreenEventListener {
     private ItemStack icon = new ItemStack(ModItems.ANCIENT_BOOK.get(), 1);
     private Component label = Component.empty();
 
+    /**
+     * Creates a new tab button tied to the given screen.
+     <P>
+     * @param screen the parent {@link EnchantingTableScreen} this button belongs to
+     */
     public TabButton(EnchantingTableScreen screen) {
         this.screen = screen;
     }
 
+    /**
+     * Renders the tab button, including its icon and hover tooltip.
+     <P>
+     * <p>The displayed icon and label depend on the current {@link ScreenState}:</p>
+     <P>
+     * <ul>
+     *     <li>ENCHANTING → shows book icon (switch to books view)</li>
+     *     <li>BOOKS → shows enchanting table icon (switch to enchanting view)</li>
+     * </ul>
+     <P>
+     * @param graphics the GUI graphics context used for rendering
+     * @param mouseX the current mouse X position
+     * @param mouseY the current mouse Y position
+     */
     public void render(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         if(screen.isState(ScreenState.ENCHANTING)) {
             label = Component.translatable("immersiveenchanting.tab.book");
@@ -42,6 +62,15 @@ public class TabButton implements ScreenEventListener {
         renderHoverTooltip(graphics, mouseX, mouseY);
     }
 
+    /**
+     * Renders the hover tooltip and updates the cursor when the mouse is over the button.
+     <P>
+     * <p>Displays the current label and changes the cursor to a pointing hand.</p>
+     <P>
+     * @param graphics the GUI graphics context
+     * @param mouseX the current mouse X position
+     * @param mouseY the current mouse Y position
+     */
     private void renderHoverTooltip(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         if(this.isMouseOver(mouseX, mouseY)) {
             graphics.requestCursor(CursorTypes.POINTING_HAND);
@@ -50,10 +79,31 @@ public class TabButton implements ScreenEventListener {
 
     }
 
+    /**
+     * Checks whether the mouse is currently hovering over the tab button.
+     <P>
+     * @param mouseX the current mouse X position
+     * @param mouseY the current mouse Y position
+     * @return {@code true} if the mouse is within the button bounds
+     */
     private boolean isMouseOver(double mouseX, double mouseY) {
         return screen.isMouseOver(screen.getGuiLeft() + x, screen.getGuiTop() + y, width, height, mouseX, mouseY);
     }
 
+    /**
+     * Handles mouse click interactions for the tab button.
+     <P>
+     * <p>If the button is clicked:</p>
+     <P>
+     * <ul>
+     *     <li>Plays a UI sound</li>
+     *     <li>Switches between ENCHANTING and BOOKS screen states</li>
+     *     <li>Initializes the book tab when entering BOOKS state</li>
+     * </ul>
+     <P>
+     * @param mouse the mouse click event
+     * @return {@code true} if the click was handled, otherwise falls back to default handling
+     */
     @Override
     public boolean onMouseClick(MouseButtonEvent mouse) {
         if(this.isMouseOver(mouse.x(), mouse.y())) {

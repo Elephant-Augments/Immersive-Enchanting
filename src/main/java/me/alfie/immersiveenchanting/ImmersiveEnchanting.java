@@ -42,6 +42,9 @@ public class ImmersiveEnchanting {
         modContainer.registerConfig(ModConfig.Type.SERVER, ServerConfig.CONFIG_SPEC);
     }
 
+    /**
+     * Returns a copy of the component styled with the galactic alphabet font.
+     */
     public static Component styleWithAltFont(Component component) {
         FontDescription altFont = new FontDescription.Resource(Identifier.withDefaultNamespace("alt"));
         return component.copy().withStyle(Style.EMPTY.withFont(altFont));

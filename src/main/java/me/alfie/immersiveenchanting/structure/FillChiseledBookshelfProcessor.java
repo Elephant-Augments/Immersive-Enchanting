@@ -36,6 +36,12 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Structure processor that fills chiseled bookshelves with loot-defined items.
+ *
+ * <p>Each bookshelf slot is rolled independently using a weighted loot table.
+ * Supports enchanted ancient book generation.
+ */
 public class FillChiseledBookshelfProcessor extends StructureProcessor {
 
     private static final MapCodec<FillChiseledBookshelfProcessor> CODEC =
@@ -49,6 +55,20 @@ public class FillChiseledBookshelfProcessor extends StructureProcessor {
         this.simpleLootTable = simpleLootTable;
     }
 
+    /**
+     * Post-processes structure generation by filling chiseled bookshelves with loot.
+     *
+     * <p>Each bookshelf block has its 6 slots independently rolled using the loot table.
+     * Existing structure data is preserved and extended with generated items.</p>
+     *
+     * @param level world access during structure generation
+     * @param position origin position of the structure
+     * @param referencePos reference offset position
+     * @param originalBlockInfoList original unmodified structure blocks
+     * @param processedBlockInfoList blocks after initial structure processing
+     * @param settings structure placement settings
+     * @return modified block list with filled bookshelves
+     */
     @Override
     public @NotNull List<StructureTemplate.StructureBlockInfo> finalizeProcessing(@NotNull ServerLevelAccessor level,
                                                                                   @NotNull BlockPos position,
@@ -73,6 +93,17 @@ public class FillChiseledBookshelfProcessor extends StructureProcessor {
         return super.finalizeProcessing(level, position, referencePos, originalBlockInfoList, processedBlocks, settings);
     }
 
+    /**
+     * Inserts an item into a specific slot of a chiseled bookshelf structure block.
+     *
+     * <p>Updates both the block entity NBT data and the visual slot occupancy state.</p>
+     *
+     * @param slot bookshelf slot index (0–5)
+     * @param stack item to insert (empty = clears slot)
+     * @param block structure block being modified
+     * @param registryAccess registry access for encoding item data
+     * @return updated structure block info
+     */
     private StructureTemplate.StructureBlockInfo setBookshelfItem(int slot, ItemStack stack,
                                   StructureTemplate.StructureBlockInfo block, RegistryAccess registryAccess) {
         CompoundTag blockTag = block.nbt() != null ? block.nbt().copy() : new CompoundTag();
@@ -97,12 +128,28 @@ public class FillChiseledBookshelfProcessor extends StructureProcessor {
         return new StructureTemplate.StructureBlockInfo(block.pos(), state, blockTag);
     }
 
+    /**
+     * Serializes an ItemStack into a raw NBT tag using registry-aware encoding.
+     *
+     * @param stack item stack to serialize
+     * @param registryAccess registry access for proper codec resolution
+     * @return NBT compound representing the item stack
+     */
     private CompoundTag stackToTag(ItemStack stack, RegistryAccess registryAccess) {
         TagValueOutput out = TagValueOutput.createWithContext(new ProblemReporter.Collector(), registryAccess);
         out.storeNullable("item", ItemStack.CODEC, stack);
         return out.buildResult().getCompoundOrEmpty("item");
     }
 
+    /**
+     * Rolls a random item for a bookshelf slot based on the loot table.
+     *
+     * <p>Each entry is selected randomly, then tested against its per-slot chance.
+     * Ancient books may receive a randomly assigned enchantment.</p>
+     *
+     * @param random random source for loot generation
+     * @return generated item stack, or empty if roll fails
+     */
     private ItemStack rollLootForSlot(RandomSource random) {
         SimpleLootEntry lootEntry = simpleLootTable.get(random.nextInt(simpleLootTable.size()));
 

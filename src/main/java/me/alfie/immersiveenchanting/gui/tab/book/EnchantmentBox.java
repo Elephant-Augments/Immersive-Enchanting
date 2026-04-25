@@ -16,16 +16,50 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import javax.annotation.Nullable;
 import java.awt.*;
 
+/**
+ * Represents a single enchantment entry in the book tab UI.
+ <P>
+ * <p>Each box displays:</p>
+ <P>
+ * <ul>
+ *     <li>A background indicating locked/unlocked state</li>
+ *     <li>The enchantment name (optionally obfuscated)</li>
+ *     <li>An icon or locked indicator</li>
+ * </ul>
+ <P>
+ * <p>If the enchantment holder is {@code null}, an empty placeholder box is rendered.</p>
+ */
 public class EnchantmentBox {
 
     public final BookTab bookTab;
     private final Holder<Enchantment> enchantmentHolder;
 
+    /**
+     * Creates a new enchantment box for rendering.
+     <P>
+     * @param bookTab the parent {@link BookTab}
+     * @param enchantmentHolder the enchantment to display, or {@code null} for an empty slot
+     */
     public EnchantmentBox(BookTab bookTab, @Nullable Holder<Enchantment> enchantmentHolder) {
         this.bookTab = bookTab;
         this.enchantmentHolder = enchantmentHolder;
     }
 
+    /**
+     * Renders the enchantment box at the given position.
+     <P>
+     * <p>This includes:</p>
+     <P>
+     * <ul>
+     *     <li>Background sprite (locked or unlocked)</li>
+     *     <li>Enchantment text (if present)</li>
+     *     <li>Icon or locked indicator</li>
+     * </ul>
+     <P>
+     * @param graphics the GUI rendering context
+     * @param x the X position of the box
+     * @param y the Y position of the box
+     */
     public void render(GuiGraphicsExtractor graphics, int x, int y) {
         Sprite boxSprite = bookTab.screen().getMenu().isEnchantmentAvailable(enchantmentHolder) ?
                 Sprite.ENCHANTMENT_BOX_UNLOCKED : Sprite.ENCHANTMENT_BOX_LOCKED;
@@ -46,6 +80,18 @@ public class EnchantmentBox {
         }
     }
 
+    /**
+     * Renders the enchantment name text inside the box.
+     <P>
+     * <p>Text is scaled down if it exceeds a certain length.</p>
+     <P>
+     * <p>If the enchantment is locked and obfuscation is enabled,
+     * the text is styled with an alternate font.</p>
+     <P>
+     * @param graphics the GUI rendering context
+     * @param x the X position of the box
+     * @param y the Y position of the box
+     */
     private void renderText(GuiGraphicsExtractor graphics, int x, int y) {
         final int padding = 4;
         graphics.pose().pushMatrix();
@@ -74,6 +120,17 @@ public class EnchantmentBox {
         graphics.pose().popMatrix();
     }
 
+    /**
+     * Renders the icon associated with the enchantment.
+     <P>
+     * <p>If the enchantment is unlocked, a custom texture is displayed.</p>
+     <P>
+     * <p>If locked, a default locked icon is rendered instead.</p>
+     <P>
+     * @param graphics the GUI rendering context
+     * @param x the X position of the box
+     * @param y the Y position of the box
+     */
     private void renderIcon(GuiGraphicsExtractor graphics, int x, int y) {
 
         if(bookTab.screen().getMenu().isEnchantmentAvailable(enchantmentHolder)) {

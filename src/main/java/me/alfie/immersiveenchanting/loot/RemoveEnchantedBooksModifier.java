@@ -11,7 +11,9 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.neoforged.neoforge.common.loot.IGlobalLootModifier;
 import net.neoforged.neoforge.common.loot.LootModifier;
 
-
+/**
+ * Loot modifier that removes enchanted books from loot when disabled in config.
+ */
 public class RemoveEnchantedBooksModifier extends LootModifier {
 
     public static final MapCodec<RemoveEnchantedBooksModifier> CODEC = RecordCodecBuilder

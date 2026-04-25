@@ -103,22 +103,29 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
         buildSlots(playerInventory);
     }
 
+    /**
+     * Gets the block position of the enchanting table associated with this menu.
+     <P>
+     * @return the {@link BlockPos} of the enchanting table
+     */
     public BlockPos getBlockPos() {
         return blockPos;
     }
 
     /**
-     * Builds and registers all menu slots.
-     *
-     * <p>Includes:
+     * Builds and registers all menu slots, including internal container slots and player inventory.
+     <P>
+     * <p>Slot layout includes:</p>
+     <P>
      * <ul>
-     *     <li>Tool slot (1 item max)</li>
+     *     <li>Tool slot (max stack size 1)</li>
      *     <li>Enchanting fuel slot</li>
      *     <li>Cost slot</li>
-     *     <li>Player inventory and hotbar</li>
+     *     <li>Player inventory (3 rows)</li>
+     *     <li>Hotbar (1 row)</li>
      * </ul>
-     *
-     * @param playerInventory The player's inventory
+     <P>
+     * @param playerInventory the player's inventory used to populate inventory slots
      */
     private void buildSlots(Inventory playerInventory) {
         //Tool slot
@@ -153,18 +160,20 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
     }
 
     /**
-     * Handles shift-click item transfers between the menu and player inventory.
-     *
-     * <p>Rules:
+     * Handles shift-click (quick move) logic for transferring items between slots.
+     <P>
+     * <p>Behaviour:</p>
+     <P>
      * <ul>
-     *     <li>Tools go into the tool slot</li>
-     *     <li>Valid enchanting fuels go into the fuel slot</li>
-     *     <li>All other items go into the cost slot</li>
+     *     <li>Items in menu slots are moved to player inventory</li>
+     *     <li>Enchantable items and ancient books go to the tool slot</li>
+     *     <li>Valid enchanting fuels go to the fuel slot</li>
+     *     <li>All other items go to the cost slot</li>
      * </ul>
-     *
-     * @param player The player interacting with the menu
-     * @param i      The slot index
-     * @return The moved {@link ItemStack}, or {@link ItemStack#EMPTY} if transfer failed
+     <P>
+     * @param player the player performing the action
+     * @param i the index of the clicked slot
+     * @return the moved {@link ItemStack}, or {@link ItemStack#EMPTY} if the move failed
      */
     @Override
     public @NotNull ItemStack quickMoveStack(@NotNull Player player, int i) {
@@ -213,12 +222,12 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
     }
 
     /**
-     * Checks whether the player can still interact with this menu.
-     *
-     * <p>Ensures the player is within range of the enchanting table block.</p>
-     *
-     * @param player The player
-     * @return {@code true} if the menu is still valid
+     * Determines whether the player can continue interacting with this menu.
+     <P>
+     * <p>This checks that the player is still within usable distance of the enchanting table.</p>
+     <P>
+     * @param player the player interacting with the menu
+     * @return {@code true} if the menu is still valid and usable
      */
     @Override
     public boolean stillValid(@NotNull Player player) {
@@ -227,14 +236,11 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
 
     /**
      * Called when the menu is closed.
-     *
-     * <p>On the server:
-     * <ul>
-     *     <li>All items in the internal container are returned to the player</li>
-     *     <li>If the inventory is full, items are dropped</li>
-     * </ul>
-     *
-     * @param player The player closing the menu
+     <P>
+     * <p>On the server side, all items in the internal container are returned to the player.
+     * If the player's inventory is full, the items are dropped into the world.</p>
+     <P>
+     * @param player the player closing the menu
      */
     @Override
     public void removed(@NotNull Player player) {
@@ -251,45 +257,70 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
     }
 
     /**
-     * Gets a slot by enum type.
-     *
-     * @param slot The slot enum
-     * @return The corresponding {@link Slot}
+     * Retrieves a slot by its enum type.
+     <P>
+     * @param slot the {@link Slots} enum representing the desired slot
+     * @return the corresponding {@link Slot}
      */
     public Slot getSlot(Slots slot) {
         return this.getSlot(slot.id());
     }
 
     /**
-     * @return The tool slot
+     * Gets the tool slot used for placing the item to be enchanted.
+     <P>
+     * @return the tool {@link Slot}
      */
     public Slot getToolSlot() {
         return this.getSlot(Slots.TOOL.id());
     }
 
     /**
-     * @return The enchanting fuel slot
+     * Gets the slot used for enchanting fuel items.
+     <P>
+     * @return the fuel {@link Slot}
      */
     public Slot getFuelSlot() {
         return this.getSlot(Slots.ENCHANTING_FUEL.id());
     }
 
     /**
-     * @return The cost slot
+     * Gets the slot used for cost payment items.
+     <P>
+     * @return the cost {@link Slot}
      */
     public Slot getCostSlot() {
         return this.getSlot(Slots.COST.id());
     }
 
+    /**
+     * Replaces the current list of available enchantments.
+     <P>
+     * <p>This is typically called when the server determines available enchantments
+     * based on nearby bookshelves or configuration rules.</p>
+     <P>
+     * @param availableEnchantments the new list of available enchantments
+     */
     public void setAvailableEnchantments(List<Holder<Enchantment>> availableEnchantments) {
         this.availableEnchantments.clear();
         this.availableEnchantments.addAll(availableEnchantments);
     }
 
+    /**
+     * Retrieves the list of enchantments currently available for use.
+     <P>
+     * @return a list of available {@link Enchantment} holders
+     */
     public List<Holder<Enchantment>> getAvailableEnchantments() {
         return availableEnchantments;
     }
 
+    /**
+     * Checks whether a specific enchantment is available in this menu.
+     <P>
+     * @param enchantmentHolder the enchantment to check
+     * @return {@code true} if the enchantment is available
+     */
     public boolean isEnchantmentAvailable(Holder<Enchantment> enchantmentHolder) {
         return getAvailableEnchantments().contains(enchantmentHolder);
     }

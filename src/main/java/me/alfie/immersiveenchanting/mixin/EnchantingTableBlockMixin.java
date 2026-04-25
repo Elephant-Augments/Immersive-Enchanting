@@ -20,24 +20,31 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+/**
+ * Mixin that overrides and extends the vanilla {@link EnchantingTableBlock} behavior.
+ *
+ * <p>Replaces the default menu provider with a custom {@link EnchantingTableMenu}
+ * and injects additional server-side logic when the enchanting table is used.</p>
+ *
+ * <p>Also triggers bookshelf scanning after the GUI is opened to update
+ * available enchantments based on the surrounding environment.</p>
+ */
 @Mixin(EnchantingTableBlock.class)
 public abstract class EnchantingTableBlockMixin {
 
     /**
-     * Replaces the vanilla enchanting table MenuProvider with a custom implementation
-     * that opens a modded EnchantingTableMenu.
+     * Replaces the vanilla enchanting table menu provider with the modded implementation.
      *
-     * This injection runs at the start of getMenuProvider and overrides the returned
-     * MenuProvider to ensure that interacting with the enchanting table opens the
-     * custom GUI instead of the vanilla enchanting screen.
+     * <p>This ensures that interacting with the enchanting table opens {@link EnchantingTableMenu}
+     * instead of the vanilla enchanting screen.</p>
      *
-     * If the block entity at the given position is not a valid EnchantingTableBlockEntityMixin,
-     * the return value is explicitly set to null to prevent further processing.
+     * <p>If the block entity is invalid, the return value is set to {@code null} to prevent
+     * further processing.</p>
      *
-     * @param state the current block state of the enchanting table
-     * @param level the world containing the block
-     * @param pos   the position of the block in the world
-     * @param cir   callback used to override the return value of the method
+     * @param state block state of the enchanting table
+     * @param level world containing the block
+     * @param pos block position
+     * @param cir callback used to override the return value
      */
     @Inject(
             method = "getMenuProvider(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/MenuProvider;",
@@ -62,23 +69,19 @@ public abstract class EnchantingTableBlockMixin {
     }
 
     /**
-     * Executes additional logic after the player opens the enchanting table menu.
+     * Runs after the player successfully opens the enchanting table menu.
      *
-     * This injection runs immediately after the vanilla call to Player.openMenu,
-     * allowing post-processing once the GUI has been successfully opened.
+     * <p>On the server, triggers a bookshelf scan to determine available enchantments
+     * based on surrounding chiseled bookshelves and configuration rules.</p>
      *
-     * On the server side, this triggers a bookshelf validation check around the
-     * enchanting table to determine the current enchanting power setup.
+     * <p>This is only executed for {@link ServerPlayer} instances on the server side.</p>
      *
-     * This logic only runs on the server and only for ServerPlayer instances
-     * to avoid unnecessary client-side execution.
-     *
-     * @param state     the block state of the enchanting table
-     * @param level     the world containing the block
-     * @param pos       the position of the block being interacted with
-     * @param player    the player interacting with the block
-     * @param hitResult the exact hit result of the interaction
-     * @param cir       callback returning the interaction result
+     * @param state block state of the enchanting table
+     * @param level world containing the block
+     * @param pos interaction position
+     * @param player interacting player
+     * @param hitResult interaction hit result
+     * @param cir callback for interaction result
      */
     @Inject(
             method = "useWithoutItem",

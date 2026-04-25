@@ -26,6 +26,22 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+/**
+ * Client-to-server packet requesting enchantment transmutation.
+ *
+ * <p>Replaces the stored enchantment on an ancient book with a new randomly selected one,
+ * excluding currently available bookshelf enchantments where applicable.</p>
+ *
+ * <p>The operation is validated server-side and requires:
+ * <ul>
+ *     <li>Transmutation to be enabled in configuration</li>
+ *     <li>Valid cost and fuel requirements</li>
+ *     <li>A valid target enchantment selection</li>
+ * </ul>
+ *
+ * <p>On success, the item is updated, feedback is shown to the player, and
+ * visual/audio effects are played at the enchanting table.</p>
+ */
 public record TransmutePacket() implements ModNetworkPacket<TransmutePacket> {
 
     public static final Type<@NotNull TransmutePacket> TYPE = new Type<>(Identifier.fromNamespaceAndPath(ImmersiveEnchanting.MODID, "transmute"));

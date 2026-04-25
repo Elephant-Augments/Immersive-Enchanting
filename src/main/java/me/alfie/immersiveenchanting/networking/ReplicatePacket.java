@@ -19,6 +19,17 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Client-to-server packet requesting item replication.
+ *
+ * <p>If allowed by configuration and cost validation, the currently held item is duplicated.
+ * The original item is consumed and replaced by two dropped item entities:
+ * one normal copy and one marked as "replicated".</p>
+ *
+ * <p>Visual and audio feedback is played on success, and the container is closed.</p>
+ *
+ * <p>This operation is server-authoritative and cannot be performed client-side.</p>
+ */
 public record ReplicatePacket() implements ModNetworkPacket<ReplicatePacket> {
 
     public static final Type<@NotNull ReplicatePacket> TYPE = new Type<>(Identifier.fromNamespaceAndPath(ImmersiveEnchanting.MODID, "replicate"));

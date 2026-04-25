@@ -18,6 +18,17 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Clientbound packet that syncs available enchantments from nearby bookshelves.
+ *
+ * <p>This packet is sent from the server to update the client-side enchanting
+ * table UI with the enchantments currently accessible in the world.</p>
+ *
+ * <p>If ancient books are disabled in configuration, the client is instead
+ * given the full enchantment list.</p>
+ *
+ * <p>Used to keep the enchanting screen in sync with server-side bookshelf state.</p>
+ */
 public record AvailableEnchantmentsPacket(List<Holder<Enchantment>> availableEnchantments) implements ModNetworkPacket<AvailableEnchantmentsPacket> {
 
     public static final Type<@NotNull AvailableEnchantmentsPacket> TYPE = new Type<>(Identifier.fromNamespaceAndPath(ImmersiveEnchanting.MODID, "available_enchantments"));

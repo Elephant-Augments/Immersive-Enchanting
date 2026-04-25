@@ -32,6 +32,17 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Custom enchanting table screen handling both the enchanting and book browsing interfaces.
+ *
+ * <p>Manages rendering, input handling, and state switching between multiple UI modes,
+ * including the enchantment tree view and the book library view.</p>
+ *
+ * <p>Also coordinates camera movement, tool slot updates, tooltip management,
+ * and canvas-based node rendering for the enchanting system.</p>
+ *
+ * <p>This screen acts as the central controller for all client-side enchanting UI logic.</p>
+ */
 public class EnchantingTableScreen extends AbstractContainerScreen<@NotNull EnchantingTableMenu> {
 
     private static final Logger log = LogManager.getLogger(EnchantingTableScreen.class);
@@ -70,6 +81,9 @@ public class EnchantingTableScreen extends AbstractContainerScreen<@NotNull Ench
         onToolSlotUpdate(ItemStack.EMPTY);
     }
 
+    /**
+     * Initializes the screen camera and centers it on the canvas.
+     */
     @Override
     protected void init() {
         super.init();
@@ -77,6 +91,13 @@ public class EnchantingTableScreen extends AbstractContainerScreen<@NotNull Ench
         camera.centerCameraOnCanvas();
     }
 
+    /**
+     * Renders the main background layer including the canvas, active tab content,
+     * and GUI texture.
+     *
+     * <p>Applies scissoring for canvas clipping and handles camera transforms
+     * during rendering.</p>
+     */
     @Override
     public void extractBackground(@NotNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
         super.extractBackground(graphics, mouseX, mouseY, a);
@@ -116,6 +137,12 @@ public class EnchantingTableScreen extends AbstractContainerScreen<@NotNull Ench
 
     }
 
+    /**
+     * Handles dynamic rendering state including tooltips, carried items,
+     * and snapback animations.
+     *
+     * <p>Also manages tooltip lifecycle updates and clears invalid or stale tooltips.</p>
+     */
     @Override
     public void extractRenderState(@NotNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
         this.extractContents(graphics, mouseX, mouseY, a);
@@ -138,12 +165,22 @@ public class EnchantingTableScreen extends AbstractContainerScreen<@NotNull Ench
         tooltipManager.resetFrameState();
     }
 
+    /**
+     * Renders inventory labels and adjusts label positioning.
+     */
     @Override
     protected void extractLabels(GuiGraphicsExtractor graphics, int xm, int ym) {
         this.inventoryLabelX = 16;
         graphics.text(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, -12566464, false);
     }
 
+    /**
+     * Handles mouse click input for all UI components depending on active screen state.
+     *
+     * <p>Delegates clicks to tabs, camera, tool slots, and interactive widgets.</p>
+     *
+     * @return true if the event was consumed
+     */
     @Override
     public boolean mouseClicked(@NotNull MouseButtonEvent mouse, boolean doubleClick) {
         if(tabButton.onMouseClick(mouse)) return true;
@@ -163,6 +200,11 @@ public class EnchantingTableScreen extends AbstractContainerScreen<@NotNull Ench
         return super.mouseClicked(mouse, doubleClick);
     }
 
+    /**
+     * Handles mouse drag input for camera movement and scrollable UI elements.
+     *
+     * @return true if the event was consumed
+     */
     @Override
     public boolean mouseDragged(@NotNull MouseButtonEvent mouse, double dx, double dy) {
         if(camera.onMouseDrag(mouse, dx / camera().zoom(), dy / camera().zoom())) return true;
@@ -172,6 +214,11 @@ public class EnchantingTableScreen extends AbstractContainerScreen<@NotNull Ench
         return super.mouseDragged(mouse, dx, dy);
     }
 
+    /**
+     * Handles mouse release events for camera, tooltips, and UI components.
+     *
+     * @return true if the event was consumed
+     */
     @Override
     public boolean mouseReleased(@NotNull MouseButtonEvent mouse) {
         if(tooltipManager().hasActiveTooltip() && tooltipManager().getActiveTooltip().onMouseRelease(mouse)) return true;
@@ -183,6 +230,12 @@ public class EnchantingTableScreen extends AbstractContainerScreen<@NotNull Ench
         return super.mouseReleased(mouse);
     }
 
+    /**
+     * Handles scroll input for either camera zoom or book tab scrolling,
+     * depending on the active screen state.
+     *
+     * @return true if the event was consumed
+     */
     @Override
     public boolean mouseScrolled(double x, double y, double scrollX, double scrollY) {
         if(isState(ScreenState.ENCHANTING)) {
@@ -194,6 +247,13 @@ public class EnchantingTableScreen extends AbstractContainerScreen<@NotNull Ench
         return super.mouseScrolled(x, y, scrollX, scrollY);
     }
 
+    /**
+     * Handles keyboard input for the screen.
+     *
+     * <p>In book mode, supports search input and backspace handling.</p>
+     *
+     * @return true if the event was consumed
+     */
     @Override
     public boolean keyPressed(@NotNull KeyEvent event) {
         if(isState(ScreenState.BOOKS)) {
@@ -211,6 +271,11 @@ public class EnchantingTableScreen extends AbstractContainerScreen<@NotNull Ench
         return super.keyPressed(event);
     }
 
+    /**
+     * Handles character input for text entry in book search mode.
+     *
+     * @return true if the event was consumed
+     */
     @Override
     public boolean charTyped(@NotNull CharacterEvent event) {
         if(isState(ScreenState.BOOKS)) {
@@ -221,25 +286,25 @@ public class EnchantingTableScreen extends AbstractContainerScreen<@NotNull Ench
     }
 
     /**
-     * Checks if the mouse is over a rectangle.
+     * Checks whether the mouse is inside a given rectangular area.
      *
-     * @param x      top-left x of the rectangle
-     * @param y      top-left y of the rectangle
-     * @param width  width of the rectangle
-     * @param height height of the rectangle
+     * @param x top-left x position
+     * @param y top-left y position
+     * @param width rectangle width
+     * @param height rectangle height
      * @param mouseX current mouse x
      * @param mouseY current mouse y
-     * @return true if mouse is inside the rectangle
+     * @return true if the mouse is within bounds
      */
     public boolean isMouseOver(double x, double y, int width, int height, double mouseX, double mouseY) {
         return mouseX >= x && mouseX < x + width
                 && mouseY >= y && mouseY < y + height;
     }
 
-
-
-
-
+    /**
+     * Periodically checks for changes in the tool slot and triggers updates
+     * when the item changes.
+     */
     @Override
     protected void containerTick() {
         ItemStack stack = getMenu().getToolSlot().getItem();
@@ -249,6 +314,14 @@ public class EnchantingTableScreen extends AbstractContainerScreen<@NotNull Ench
         }
     }
 
+    /**
+     * Handles updates to the tool slot item.
+     *
+     * <p>Rebuilds enchantment branches, updates canvas layout, plays UI feedback,
+     * and adjusts camera behavior based on the new item state.</p>
+     *
+     * @param newStack the new item in the tool slot
+     */
     private void onToolSlotUpdate(ItemStack newStack) {
         enchantingTab.branchManager().buildBranches(newStack);
         canvas().setSizeToFitNodes(CostRegistry.client().getHighestLevel());
@@ -263,39 +336,56 @@ public class EnchantingTableScreen extends AbstractContainerScreen<@NotNull Ench
         camera().centerCameraOnCanvas();
     }
 
-
+    /**
+     * Sets the current screen state (e.g. enchanting or books view).
+     *
+     * @param state new screen state
+     */
     public void setState(ScreenState state) {
         this.screenState = state;
     }
 
+    /**
+     * Checks whether the screen is currently in the given state.
+     *
+     * @param state state to check
+     * @return true if active
+     */
     public boolean isState(ScreenState state) {
         return this.screenState == state;
     }
 
+    /** @return the main canvas used for node rendering */
     public Canvas canvas() {
         return scrollableCanvas;
     }
 
+    /** @return the UI camera controller */
     public CanvasCamera camera() {
         return camera;
     }
 
+    /** @return registry access for game data lookups */
     public RegistryAccess registryAccess() {
         return registryAccess;
     }
 
+    /** @return the local player */
     public Player player() {
         return player;
     }
 
+    /** @return renderer for enchantment costs */
     public CostRenderer enchantmentCostRenderer() {
         return enchantmentCostRenderer;
     }
 
+    /** @return tooltip manager for interactive UI elements */
     public TooltipManager tooltipManager() {
         return tooltipManager;
     }
 
+    /** @return book tab UI controller */
     public BookTab bookTab() {
         return bookTab;
     }

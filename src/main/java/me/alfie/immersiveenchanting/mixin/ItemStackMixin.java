@@ -25,28 +25,39 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.function.Consumer;
 
+/**
+ * Mixin that customizes tooltip rendering for {@link ItemStack}.
+ *
+ * <p>Overrides how stored enchantments are displayed for specific modded items,
+ * particularly {@link ModItems#ANCIENT_BOOK}.</p>
+ *
+ * <p>Replaces vanilla enchantment tooltip formatting with a custom presentation
+ * and optionally appends mod attribution and replication status.</p>
+ *
+ * <p>This is purely client-side presentation logic and does not modify item data.</p>
+ */
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin {
 
     /**
-     * Injects into the ItemStack tooltip building pipeline to customize how stored enchantments
-     * are displayed for specific modded items.
+     * Overrides tooltip rendering for stored enchantments on ancient books.
      *
-     * This hook targets the STORED_ENCHANTMENTS data component during tooltip construction and
-     * replaces the default enchantment formatting when the ItemStack matches the
-     * ModItems.ANCIENT_BOOK item.
+     * <p>When the item is an ancient book, the vanilla {@code STORED_ENCHANTMENTS}
+     * tooltip is replaced with a custom formatted display.</p>
      *
-     * Instead of the vanilla enchantment list, a single formatted component is produced that
-     * combines a custom translation key with each enchantment's description, styled in gold.
+     * <p>Each enchantment is rendered with a custom label and styled output.
+     * Optionally appends the originating mod name if enabled in client config.</p>
      *
-     * This injection is purely presentational and does not modify underlying item data or
-     * gameplay behavior.
+     * <p>Also displays replication status when applicable.</p>
      *
-     * @param type      The DataComponentType currently being processed for tooltip rendering
-     * @param context   The tooltip context (client-side formatting information)
-     * @param display   Controls which tooltip elements are allowed to render
-     * @param consumer  Output sink for tooltip components
-     * @param flag      Tooltip visibility flags (advanced/shift toggles)
+     * <p>This injection cancels vanilla tooltip processing for stored enchantments
+     * on affected items.</p>
+     *
+     * @param type data component type being processed
+     * @param context tooltip rendering context
+     * @param display tooltip display configuration
+     * @param consumer output consumer for tooltip lines
+     * @param flag tooltip visibility flags
      */
     @Inject(
             method = "addToTooltip(Lnet/minecraft/core/component/DataComponentType;Lnet/minecraft/world/item/Item$TooltipContext;Lnet/minecraft/world/item/component/TooltipDisplay;Ljava/util/function/Consumer;Lnet/minecraft/world/item/TooltipFlag;)V",
