@@ -1,8 +1,8 @@
 package me.alfie.immersiveenchanting.gui;
 
-import me.alfie.immersiveenchanting.datapack.EnchantmentCostRegistry;
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.codec.Cost;
 import me.alfie.immersiveenchanting.item.ModItems;
-import me.alfie.immersiveenchanting.util.CostHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.network.FriendlyByteBuf;
@@ -18,45 +18,109 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.neoforged.neoforge.common.Tags;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.awt.*;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Server-authoritative menu for the custom enchanting table.
+ *
+ * <p>This menu handles:
+ * <ul>
+ *     <li>Inventory slot layout (tool, fuel, cost, and player inventory)</li>
+ *     <li>Detection of nearby chiseled bookshelves</li>
+ *     <li>Extraction of "ancient book" enchantments from those shelves</li>
+ *     <li>Maintaining a list of available enchantments based on environment</li>
+ * </ul>
+ *
+ * <p><b>Client/Server Notes:</b>
+ * <ul>
+ *     <li>Enchantment discovery logic runs only on the server</li>
+ * </ul>
+ */
 public class EnchantingTableMenu extends AbstractContainerMenu {
+
+    public enum Slots {
+        TOOL(0),
+        ENCHANTING_FUEL(1),
+        COST(2);
+
+        private final int id;
+
+        Slots(int id) {
+            this.id = id;
+        }
+
+        public int id() {
+            return id;
+        }
+    }
 
     private final BlockPos blockPos;
     private final ContainerLevelAccess access;
     private final Container container;
+    private final Level level;
 
-    private Set<String> unlockedEnchantmentResourceIds;
+    private List<Holder<Enchantment>> availableEnchantments = new ArrayList<>();
 
-    private Set<Holder<Enchantment>> unlockedEnchantments = new HashSet<>();
-
-    // --------------------
-    // Game constructor
-    // --------------------
+    /**
+     * Client-side constructor used when the menu is opened.
+     *
+     * <p>Reads the {@link BlockPos} from the network buffer and resolves the level
+     * from the player instance.</p>
+     *
+     * @param containerId     The container ID assigned by Minecraft
+     * @param playerInventory The player's inventory
+     * @param buf             Network buffer containing synced data (block position)
+     */
     public EnchantingTableMenu(int containerId, Inventory playerInventory, FriendlyByteBuf buf) {
         this(containerId, playerInventory, playerInventory.player.level(), buf.readBlockPos());
     }
 
-    // --------------------
-    // My constructor
-    // --------------------
-    public EnchantingTableMenu(int containerId, Inventory playerInventory, Level level, BlockPos pos) {
+    /**
+     * Primary constructor for the enchanting table menu.
+     *
+     * <p>Initializes the container, slot layout, and scans for available enchantments
+     * if running on the server.</p>
+     *
+     * @param containerId     The container ID
+     * @param playerInventory The player's inventory
+     * @param level           The level the menu is operating in
+     * @param pos             The position of the enchanting table block
+     */
+    public EnchantingTableMenu(int containerId, Inventory playerInventory, @Nullable Level level, @Nullable BlockPos pos) {
         super(ModMenus.ENCHANTING_TABLE_MENU.get(), containerId);
         this.container = new SimpleContainer(3);
         this.blockPos = pos;
+        this.level = level;
         this.access = ContainerLevelAccess.create(level, pos);
-        setupSlots(playerInventory);
+        buildSlots(playerInventory);
     }
 
-    //Helper methods
-    public void setupSlots(Inventory playerInventory) {
+    public BlockPos getBlockPos() {
+        return blockPos;
+    }
+
+    /**
+     * Builds and registers all menu slots.
+     *
+     * <p>Includes:
+     * <ul>
+     *     <li>Tool slot (1 item max)</li>
+     *     <li>Enchanting fuel slot</li>
+     *     <li>Cost slot</li>
+     *     <li>Player inventory and hotbar</li>
+     * </ul>
+     *
+     * @param playerInventory The player's inventory
+     */
+    private void buildSlots(Inventory playerInventory) {
         //Tool slot
-        this.addSlot(new Slot(this.container, 0, 233, 141) {
+        this.addSlot(new Slot(this.container, Slots.TOOL.id(), 233, 141) {
             @Override
             public int getMaxStackSize() {
                 return 1;
@@ -64,16 +128,16 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
         });
 
         //Enchanting fuel slot
-        this.addSlot(new Slot(this.container, 1, 233, 199));
+        this.addSlot(new Slot(this.container, Slots.ENCHANTING_FUEL.id(), 233, 199));
 
         //Cost slot
-        this.addSlot(new Slot(this.container, 2, 233, 170));
+        this.addSlot(new Slot(this.container, Slots.COST.id(), 233, 170));
 
         //Add player inventory slots
         int startX = 17;
         int startY = 140;
 
-        //Player inventory 3 rows of 9
+        //Player inventory
         for (int row = 0; row < 3; ++row) {
             for (int col = 0; col < 9; ++col) {
                 this.addSlot(new Slot(playerInventory, col + row * 9 + 9, startX + col * 18, startY + row * 18));
@@ -84,137 +148,147 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
         for (int col = 0; col < 9; ++col) {
             this.addSlot(new Slot(playerInventory, col, startX + col * 18, startY + 58));
         }
-
-
     }
 
+    /**
+     * Handles shift-click item transfers between the menu and player inventory.
+     *
+     * <p>Rules:
+     * <ul>
+     *     <li>Tools go into the tool slot</li>
+     *     <li>Valid enchanting fuels go into the fuel slot</li>
+     *     <li>All other items go into the cost slot</li>
+     * </ul>
+     *
+     * @param player The player interacting with the menu
+     * @param i      The slot index
+     * @return The moved {@link ItemStack}, or {@link ItemStack#EMPTY} if transfer failed
+     */
     @Override
-    public ItemStack quickMoveStack(Player player, int index) {
-        ItemStack originalStack = ItemStack.EMPTY;
-        Slot slot = this.slots.get(index);
+    public @NotNull ItemStack quickMoveStack(@NotNull Player player, int i) {
+        ItemStack stack = ItemStack.EMPTY;
+        if(level == null) return stack;
 
-        if (slot != null && slot.hasItem()) {
-            ItemStack stackInSlot = slot.getItem();
-            originalStack = stackInSlot.copy();
+        Slot slot = getSlot(i);
 
-            // ---- TOOL SLOT ----
-            if (index == SLOTS.TOOL.ordinal()) {
-                // Move tool back to player inventory
-                if (!this.moveItemStackTo(stackInSlot, 3, 39, true)) {
-                    return ItemStack.EMPTY;
-                }
-            }
-            // ---- ENCHANTING FUEL SLOT ----
-            else if (index == SLOTS.ENCHANTING_FUEL.ordinal()) {
-                // Move enchanting fuel back to player inventory
-                if (!this.moveItemStackTo(stackInSlot, 3, 39, true)) {
-                    return ItemStack.EMPTY;
-                }
-            }
-            // ---- COST SLOT ----
-            else if (index == SLOTS.COST.ordinal()) {
-                // Move cost item back to player inventory
-                if (!this.moveItemStackTo(stackInSlot, 3, 39, true)) {
-                    return ItemStack.EMPTY;
-                }
-            }
-            // ---- PLAYER INVENTORY ----
-            else {
-                List<Item> enchantingFuels = CostHelper.getItems(EnchantmentCostRegistry
-                        .getRegistry(player.level())
-                        .getEnchantingFuels().levels.values().stream().toList());
+        if(!slot.hasItem()) return stack;
+        stack = slot.getItem();
 
-                // Try tool → slot 0
-                if (stackInSlot.getItem().isEnchantable(stackInSlot) || stackInSlot.is(ModItems.ANCIENT_BOOK.get())) {
-                    if (!this.moveItemStackTo(stackInSlot, 0, 1, false)) return ItemStack.EMPTY;
-                }
-                // Try enchanting fuel → slot 1 (Uses #neoforge:enchanting_fuels tag)
-                else if (enchantingFuels.contains(stackInSlot.getItem())) {
-                    if (!this.moveItemStackTo(stackInSlot, 1, 2, false)) return ItemStack.EMPTY;
-                }
-                // Everything else → cost slot (slot 2)
-                else {
-                    if (!this.moveItemStackTo(stackInSlot, 2, 3, false)) return ItemStack.EMPTY;
+        //Quick move into inventory
+        if(i == Slots.TOOL.id()) {
+            if(!this.moveItemStackTo(stack, 3, 39, true)) return ItemStack.EMPTY;
+        } else if (i == Slots.ENCHANTING_FUEL.id()) {
+            if (!this.moveItemStackTo(stack, 3, 39, true)) return ItemStack.EMPTY;
+        } else if (i == Slots.COST.id()) {
+            if (!this.moveItemStackTo(stack, 3, 39, true)) return ItemStack.EMPTY;
+        } else {
+            List<Cost> enchantingFuels = CostRegistry.server().get(CostRegistry.ENCHANTING_FUELS)
+                    .levelCosts().getAllLevels();
+
+            Set<Item> enchantingFuelItems = new HashSet<>();
+            for(Cost enchantmentCost : enchantingFuels) {
+                for(ItemStack fuelStack : enchantmentCost.getItemStacks()) {
+                    enchantingFuelItems.add(fuelStack.getItem());
                 }
             }
 
-            // Update slot
-            if (stackInSlot.isEmpty()) {
+            //Quick move into menu
+            if(stack.isEnchantable() || stack.is(ModItems.ANCIENT_BOOK.get())) {
+                if (!this.moveItemStackTo(stack, 0, 1, false)) return ItemStack.EMPTY;
+            } else if(enchantingFuelItems.contains(stack.getItem())) {
+                if (!this.moveItemStackTo(stack, 1, 2, false)) return ItemStack.EMPTY;
+            } else {
+                if (!this.moveItemStackTo(stack, 2, 3, false)) return ItemStack.EMPTY;
+            }
+
+            if(stack.isEmpty()) {
                 slot.set(ItemStack.EMPTY);
             } else {
                 slot.setChanged();
             }
         }
-
-        return originalStack;
+        return stack;
     }
 
+    /**
+     * Checks whether the player can still interact with this menu.
+     *
+     * <p>Ensures the player is within range of the enchanting table block.</p>
+     *
+     * @param player The player
+     * @return {@code true} if the menu is still valid
+     */
     @Override
-    public void removed(Player player) {
+    public boolean stillValid(@NotNull Player player) {
+        return AbstractContainerMenu.stillValid(this.access, player, Blocks.ENCHANTING_TABLE);
+    }
+
+    /**
+     * Called when the menu is closed.
+     *
+     * <p>On the server:
+     * <ul>
+     *     <li>All items in the internal container are returned to the player</li>
+     *     <li>If the inventory is full, items are dropped</li>
+     * </ul>
+     *
+     * @param player The player closing the menu
+     */
+    @Override
+    public void removed(@NotNull Player player) {
         super.removed(player);
 
-        if (!player.level().isClientSide) {
-            // Loop through your container slots
+        if (!player.level().isClientSide()) {
             for (int i = 0; i < this.container.getContainerSize(); i++) {
-                ItemStack stack = this.container.removeItemNoUpdate(i); // removes without triggering slot updates
+                ItemStack stack = this.container.removeItemNoUpdate(i); //remove without triggering slot update
                 if (!stack.isEmpty()) {
-                    player.getInventory().placeItemBackInInventory(stack); // tries to return to inventory, drops if full
+                    player.getInventory().placeItemBackInInventory(stack); //return to inventory, drop if full
                 }
             }
         }
     }
 
-    @Override
-    public boolean stillValid(Player player) {
-        return AbstractContainerMenu.stillValid(this.access, player, Blocks.ENCHANTING_TABLE);
-    }
-
-    public BlockPos getBlockPos() {
-        return blockPos;
-    }
-
-    public Set<Holder<Enchantment>> getUnlockedEnchantments() {
-        return unlockedEnchantments;
-    }
-
-    public void setUnlockedEnchantments(Set<Holder<Enchantment>> unlockedEnchantments) {
-        this.unlockedEnchantments = unlockedEnchantments;
-    }
-
-    public boolean isToolSlotEmpty() {
-        return getToolSlotItem().isEmpty();
-    }
-
-    public ItemStack getToolSlotItem() {
-        return getItemInSlot(SLOTS.TOOL);
-    }
-
-    public ItemStack getCostSlotItem() {
-        return getItemInSlot(SLOTS.COST);
-    }
-
-    public ItemStack getEnchantingFuelSlotItem() {
-        return getItemInSlot(SLOTS.ENCHANTING_FUEL);
+    /**
+     * Gets a slot by enum type.
+     *
+     * @param slot The slot enum
+     * @return The corresponding {@link Slot}
+     */
+    public Slot getSlot(Slots slot) {
+        return this.getSlot(slot.id());
     }
 
     /**
-     * Helper to get item in slot using SLOTS enum.
-     *
-     * @param slot
-     * @return
+     * @return The tool slot
      */
-    private ItemStack getItemInSlot(SLOTS slot) {
-        return getSlot(slot.ordinal()).getItem();
+    public Slot getToolSlot() {
+        return this.getSlot(Slots.TOOL.id());
     }
 
-    public enum SLOTS {
-        TOOL,
-        ENCHANTING_FUEL, //Any item in the #neoforge:enchanting_fuels tag.
-        COST
+    /**
+     * @return The enchanting fuel slot
+     */
+    public Slot getFuelSlot() {
+        return this.getSlot(Slots.ENCHANTING_FUEL.id());
     }
 
-    public boolean isEnchantmentUnlocked(Holder<Enchantment> enchantmentHolder) {
-        return unlockedEnchantments.contains(enchantmentHolder);
+    /**
+     * @return The cost slot
+     */
+    public Slot getCostSlot() {
+        return this.getSlot(Slots.COST.id());
     }
 
+    public void setAvailableEnchantments(List<Holder<Enchantment>> availableEnchantments) {
+        this.availableEnchantments.clear();
+        this.availableEnchantments.addAll(availableEnchantments);
+    }
+
+    public List<Holder<Enchantment>> getAvailableEnchantments() {
+        return availableEnchantments;
+    }
+
+    public boolean isEnchantmentAvailable(Holder<Enchantment> enchantmentHolder) {
+        return getAvailableEnchantments().contains(enchantmentHolder);
+    }
 }

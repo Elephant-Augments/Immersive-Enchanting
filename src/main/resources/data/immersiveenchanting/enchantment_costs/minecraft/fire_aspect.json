@@ -1,12 +1,16 @@
 {
   "levels": {
-    "1": {
-      "item": "minecraft:fire_charge",
-      "amount": 12
-    },
-    "2": {
-      "item": "minecraft:magma_cream",
-      "amount": 8
-    }
+    "1": [
+      {
+        "item": "minecraft:fire_charge",
+        "amount": 3
+      }
+    ],
+    "2": [
+      {
+        "item": "minecraft:magma_cream",
+        "amount": 1
+      }
+    ]
   }
 }

@@ -1,0 +1,220 @@
+{
+  "enchantments": {
+    "immersiveenchanting:replicate": {
+      "sound": "minecraft:entity.illusioner.mirror_move",
+      "volume": 0.5,
+      "pitch": 1.2
+    },
+    "immersiveenchanting:transmute": {
+      "sound": "minecraft:entity.firework_rocket.blast_far",
+      "volume": 0.5,
+      "pitch": 1.0
+    },
+
+    "minecraft:aqua_affinity": {
+      "sound": "minecraft:entity.axolotl.attack",
+      "volume": 0.5,
+      "pitch": 1.0
+    },
+    "minecraft:bane_of_arthropods": {
+      "sound": "minecraft:entity.silverfish.ambient",
+      "volume": 0.5,
+      "pitch": 1.0
+    },
+    "minecraft:blast_protection": {
+      "sound": "minecraft:block.anvil.place",
+      "volume": 0.5,
+      "pitch": 1.0
+    },
+    "minecraft:breach": {
+      "sound": "minecraft:item.mace.smash_air",
+      "volume": 0.5,
+      "pitch": 1.0
+    },
+    "minecraft:channeling": {
+      "sound": "minecraft:entity.elder_guardian.curse",
+      "volume": 0.5,
+      "pitch": 2.0
+    },
+    "minecraft:density": {
+      "sound": "minecraft:item.mace.smash_ground",
+      "volume": 0.5,
+      "pitch": 1.0
+    },
+    "minecraft:depth_strider": {
+      "sound": "minecraft:entity.fish.swim",
+      "volume": 0.5,
+      "pitch": 1.0
+    },
+    "minecraft:efficiency": {
+      "sound": "minecraft:block.iron.break",
+      "volume": 0.5,
+      "pitch": 1.0
+    },
+    "minecraft:feather_falling": {
+      "sound": "minecraft:block.wool.fall",
+      "volume": 0.5,
+      "pitch": 1.0
+    },
+    "minecraft:fire_aspect": {
+      "sound": "minecraft:item.flintandsteel.use",
+      "volume": 0.5,
+      "pitch": 1.0
+    },
+    "minecraft:fire_protection": {
+      "sound": "minecraft:entity.player.hurt_on_fire",
+      "volume": 0.5,
+      "pitch": 1.0
+    },
+    "minecraft:flame": {
+      "sound": "minecraft:item.flintandsteel.use",
+      "volume": 0.5,
+      "pitch": 1.0
+    },
+    "minecraft:fortune": {
+      "sound": "minecraft:entity.allay.item_given",
+      "volume": 0.5,
+      "pitch": 1.5
+    },
+    "minecraft:frost_walker": {
+      "sound": "minecraft:block.powder_snow.step",
+      "volume": 0.5,
+      "pitch": 1.0
+    },
+    "minecraft:impaling": {
+      "sound": "minecraft:entity.puffer_fish.sting",
+      "volume": 0.5,
+      "pitch": 1.0
+    },
+    "minecraft:infinity": {
+      "sound": "minecraft:item.bottle.fill_dragonbreath",
+      "volume": 0.5,
+      "pitch": 1.0
+    },
+    "minecraft:knockback": {
+      "sound": "minecraft:entity.player.attack.knockback",
+      "volume": 0.5,
+      "pitch": 1.0
+    },
+    "minecraft:looting": {
+      "sound": "minecraft:entity.experience_orb.pickup",
+      "volume": 0.5,
+      "pitch": 1.5
+    },
+    "minecraft:loyalty": {
+      "sound": "minecraft:item.trident.return",
+      "volume": 0.5,
+      "pitch": 1.0
+    },
+    "minecraft:luck_of_the_sea": {
+      "sound": "minecraft:entity.dolphin.play",
+      "volume": 0.5,
+      "pitch": 1.0
+    },
+    "minecraft:lure": {
+      "sound": "minecraft:entity.fishing_bobber.splash",
+      "volume": 0.3,
+      "pitch": 1.0
+    },
+    "minecraft:lunge": {
+      "sound": "minecraft:item.spear.lunge_1",
+      "volume": 0.3,
+      "pitch": 1.0
+    },
+    "minecraft:mending": {
+      "sound": "minecraft:block.anvil.place",
+      "volume": 0.5,
+      "pitch": 1.0
+    },
+    "minecraft:multishot": {
+      "sound": "minecraft:item.trident.hit_ground",
+      "volume": 0.5,
+      "pitch": 1.0
+    },
+    "minecraft:piercing": {
+      "sound": "minecraft:entity.firework_rocket.launch",
+      "volume": 0.5,
+      "pitch": 1.0
+    },
+    "minecraft:power": {
+      "sound": "minecraft:entity.arrow.hit",
+      "volume": 0.5,
+      "pitch": 1.0
+    },
+    "minecraft:projectile_protection": {
+      "sound": "minecraft:entity.arrow.hit",
+      "volume": 0.5,
+      "pitch": 1.0
+    },
+    "minecraft:protection": {
+      "sound": "minecraft:entity.shulker.hurt_closed",
+      "volume": 0.5,
+      "pitch": 1.0
+    },
+    "minecraft:punch": {
+      "sound": "minecraft:entity.player.attack.knockback",
+      "volume": 0.5,
+      "pitch": 1.0
+    },
+    "minecraft:quick_charge": {
+      "sound": "minecraft:item.crossbow.quick_charge_3",
+      "volume": 0.5,
+      "pitch": 1.0
+    },
+    "minecraft:respiration": {
+      "sound": "minecraft:ambient.underwater.enter",
+      "volume": 0.5,
+      "pitch": 1.0
+    },
+    "minecraft:riptide": {
+      "sound": "minecraft:item.trident.riptide_1",
+      "volume": 0.5,
+      "pitch": 1.0
+    },
+    "minecraft:sharpness": {
+      "sound": "minecraft:item.spear.attack",
+      "volume": 0.5,
+      "pitch": 1.0
+    },
+    "minecraft:silk_touch": {
+      "sound": "minecraft:item.brush.brushing.sand.complete",
+      "volume": 0.5,
+      "pitch": 1.0
+    },
+    "minecraft:smite": {
+      "sound": "minecraft:entity.zombie.infect",
+      "volume": 0.5,
+      "pitch": 1.0
+    },
+    "minecraft:soul_speed": {
+      "sound": "minecraft:block.soul_soil.step",
+      "volume": 0.5,
+      "pitch": 1.0
+    },
+    "minecraft:sweeping_edge": {
+      "sound": "minecraft:entity.player.attack.sweep",
+      "volume": 0.5,
+      "pitch": 1.0
+    },
+    "minecraft:swift_sneak": {
+      "sound": "minecraft:block.sculk.step",
+      "volume": 0.5,
+      "pitch": 1.0
+    },
+    "minecraft:thorns": {
+      "sound": "minecraft:block.cactus_flower.break",
+      "volume": 0.5,
+      "pitch": 1.0
+    },
+    "minecraft:unbreaking": {
+      "sound": "minecraft:item.shield.block",
+      "volume": 0.5,
+      "pitch": 1.0
+    },
+    "minecraft:wind_burst": {
+      "sound": "minecraft:entity.wind_charge.wind_burst",
+      "volume": 0.5,
+      "pitch": 1.0
+    }
+  }
+}

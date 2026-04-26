@@ -1,0 +1,99 @@
+package me.alfie.immersiveenchanting.mixin;
+
+import me.alfie.immersiveenchanting.config.ClientConfig;
+import me.alfie.immersiveenchanting.item.ModItems;
+import me.alfie.immersiveenchanting.util.EnchantmentUtil;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipProvider;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.loading.moddiscovery.ModInfo;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.function.Consumer;
+
+@Mixin(ItemStack.class)
+public abstract class ItemStackMixin {
+
+    /**
+     * Injects into the ItemStack tooltip building pipeline to customize how stored enchantments
+     * are displayed for specific modded items.
+     *
+     * This hook targets the STORED_ENCHANTMENTS data component during tooltip construction and
+     * replaces the default enchantment formatting when the ItemStack matches the
+     * ModItems.ANCIENT_BOOK item.
+     *
+     * Instead of the vanilla enchantment list, a single formatted component is produced that
+     * combines a custom translation key with each enchantment's description, styled in gold.
+     *
+     * This injection is purely presentational and does not modify underlying item data or
+     * gameplay behavior.
+     *
+     * @param type      The DataComponentType currently being processed for tooltip rendering
+     * @param context   The tooltip context (client-side formatting information)
+     * @param consumer  Output sink for tooltip components
+     * @param flag      Tooltip visibility flags (advanced/shift toggles)
+     */
+    @Inject(
+            method = "addToTooltip(Lnet/minecraft/core/component/DataComponentType;Lnet/minecraft/world/item/Item$TooltipContext;Ljava/util/function/Consumer;Lnet/minecraft/world/item/TooltipFlag;)V",
+            at = @At("HEAD"),
+            cancellable = true
+    )
+    private <T extends TooltipProvider>
+    void immersiveenchanting$addToTooltip(DataComponentType<T> type,
+                                          Item.TooltipContext context,
+                                          Consumer<Component> consumer,
+                                          TooltipFlag flag,
+                                          CallbackInfo ci) {
+        ItemStack self = (ItemStack)(Object)this;
+        if (type == DataComponents.STORED_ENCHANTMENTS && self.is(ModItems.ANCIENT_BOOK.get())) {
+            ItemEnchantments enchantments = self.get(DataComponents.STORED_ENCHANTMENTS);
+
+            MutableComponent component = Component.empty();
+            if (enchantments != null) {
+                for(Holder<Enchantment> enchantmentHolder : enchantments.keySet()) {
+                    component
+                            .append(Component.translatable("item.immersiveenchanting.ancient_book.desc.enchantment"))
+                            .append(" ")
+                            .append(enchantmentHolder.value().description());
+                    consumer.accept(component.withStyle(ChatFormatting.GOLD));
+
+                    if(ClientConfig.isShowAddedByTooltipEnabled()) {
+                        String modNamespace = enchantmentHolder.getKey().location().getNamespace();
+
+                        ModInfo modInfo = (ModInfo) ModList.get().getModContainerById(modNamespace)
+                                .map(ModContainer::getModInfo)
+                                .orElse(null);
+
+                        String modName = modInfo != null ? modInfo.getDisplayName() : modNamespace;
+
+                        consumer.accept(
+                                Component.translatable("item.immersiveenchanting.ancient_book.desc.enchantment_added_by", modName)
+                                        .withStyle(ChatFormatting.BLUE)
+                        );
+                    }
+                }
+            }
+
+            if(EnchantmentUtil.isReplicated(self)) consumer.accept(
+                    Component.translatable("item.immersiveenchanting.ancient_book.desc.replicated")
+                            .withStyle(ChatFormatting.GRAY)
+            );
+
+            ci.cancel(); //Prevent DataComponents.STORED_ENCHANTMENTS being applied normally to ancient books.
+        }
+    }
+}

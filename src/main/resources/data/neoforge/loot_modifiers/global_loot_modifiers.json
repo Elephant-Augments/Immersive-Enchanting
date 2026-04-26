@@ -1,7 +1,29 @@
 {
   "replace": false,
   "entries": [
-    "immersiveenchanting:ancient_books_loot",
-    "immersiveenchanting:remove_enchanted_books"
+    "immersiveenchanting:remove_enchanted_books",
+    "immersiveenchanting:all_tables_ancient_books",
+
+    "immersiveenchanting:abandoned_mineshaft_ancient_books",
+    "immersiveenchanting:ancient_city_ancient_books",
+    "immersiveenchanting:bastion_bridge_ancient_books",
+    "immersiveenchanting:bastion_other_ancient_books",
+    "immersiveenchanting:bastion_treasure_ancient_books",
+    "immersiveenchanting:buried_treasure_ancient_books",
+    "immersiveenchanting:desert_pyramid_ancient_books",
+    "immersiveenchanting:end_city_ancient_books",
+    "immersiveenchanting:igloo_chest_ancient_books",
+    "immersiveenchanting:jungle_temple_ancient_books",
+    "immersiveenchanting:nether_bridge_ancient_books",
+    "immersiveenchanting:pillager_outpost_ancient_books",
+    "immersiveenchanting:ruined_portal_ancient_books",
+    "immersiveenchanting:shipwreck_treasure_ancient_books",
+    "immersiveenchanting:simple_dungeon_ancient_books",
+    "immersiveenchanting:stronghold_corridor_ancient_books",
+    "immersiveenchanting:stronghold_library_ancient_books",
+    "immersiveenchanting:trial_chambers_reward_ancient_books",
+    "immersiveenchanting:underwater_ruin_big_ancient_books",
+    "immersiveenchanting:underwater_ruin_small_ancient_books",
+    "immersiveenchanting:woodland_mansion_ancient_books"
   ]
 }

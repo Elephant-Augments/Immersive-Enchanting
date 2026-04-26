@@ -1,196 +1,211 @@
 package me.alfie.immersiveenchanting.gui;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
-import me.alfie.immersiveenchanting.gui.core.*;
-import me.alfie.immersiveenchanting.gui.core.tab.book.BookTab;
-import me.alfie.immersiveenchanting.gui.core.tab.book.FilterCheckbox;
-import me.alfie.immersiveenchanting.gui.core.tab.TabButton;
-import me.alfie.immersiveenchanting.gui.core.tab.enchanting.EnchantingTab;
-import net.minecraft.advancements.AdvancementTree;
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
+import me.alfie.immersiveenchanting.gui.canvas.Canvas;
+import me.alfie.immersiveenchanting.gui.canvas.CanvasCamera;
+import me.alfie.immersiveenchanting.gui.core.ScreenState;
+import me.alfie.immersiveenchanting.gui.core.Sprite;
+import me.alfie.immersiveenchanting.gui.tab.TabButton;
+import me.alfie.immersiveenchanting.gui.tab.book.BookTab;
+import me.alfie.immersiveenchanting.gui.tab.book.FilterCheckbox;
+import me.alfie.immersiveenchanting.gui.tab.enchanting.EnchantingTab;
+import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
+import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.CostRenderer;
+import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.TooltipManager;
+import me.alfie.immersiveenchanting.util.FxHelper;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.advancements.AdvancementWidget;
-import net.minecraft.client.gui.screens.advancements.AdvancementsScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import org.lwjgl.glfw.GLFW;
+import net.minecraft.world.item.ItemStack;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
-public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTableMenu> {
-    public final Player player;
-    ScrollableCanvas canvas;
+import java.util.List;
 
-    private long holdStartTime;
-    public final long HOLD_THRESHOLD = 1000;
+public class EnchantingTableScreen extends AbstractContainerScreen<@NotNull EnchantingTableMenu> {
 
+    private static final Logger log = LogManager.getLogger(EnchantingTableScreen.class);
+    private CanvasCamera camera;
+    private final Canvas scrollableCanvas;
+    private ScreenState screenState;
+
+    private final EnchantingTab enchantingTab;
+    private final BookTab bookTab;
     private final TabButton tabButton;
-    public final BookTab bookTab;
-    public final EnchantingTab enchantingTab;
-    private ScreenState screenState = ScreenState.ENCHANTING;
+
+    private ItemStack lastToolSlotStack = ItemStack.EMPTY;
+
+    private final RegistryAccess registryAccess;
+
+    private final CostRenderer enchantmentCostRenderer;
+    private final TooltipManager tooltipManager;
 
 
-    public EnchantingTableScreen(EnchantingTableMenu menu, Inventory playerInventory, Component title) {
-        super(menu, playerInventory, title);
-        canvas = new ScrollableCanvas(this);
+    private final Player player;
 
-        this.titleLabelX = 10;
-        this.inventoryLabelX = 10;
+    public EnchantingTableScreen(EnchantingTableMenu menu, Inventory inventory, Component title) {
+        super(menu, inventory, title);
         this.imageHeight = 222;
         this.imageWidth = 256;
 
-        // Center the canvas inside the viewport at start
-        canvas.setScrollX((canvas.getWidth() / 2.0) - (canvas.VIEWPORT_WIDTH / 2.0));
-        canvas.setScrollY((canvas.getHeight() / 2.0) - (canvas.VIEWPORT_HEIGHT / 2.0));
-
-        //No branch shenanigans here, do it in init() pls <3
-        this.player = playerInventory.player;
+        registryAccess = inventory.player.registryAccess();
+        this.player = inventory.player;
+        this.scrollableCanvas = new Canvas(this);
+        setState(ScreenState.ENCHANTING);
 
         enchantingTab = new EnchantingTab(this);
         bookTab = new BookTab(this);
         tabButton = new TabButton(this);
+
+        this.enchantmentCostRenderer = new CostRenderer(CostRegistry.client());
+        this.tooltipManager = new TooltipManager(this);
+
+        onToolSlotUpdate(ItemStack.EMPTY);
     }
 
-    public ScrollableCanvas getCanvas() {
-        return this.canvas;
-    }
-
-    @Override //Init code when GUI is created.
-    public void init() {
+    @Override
+    protected void init() {
         super.init();
-
-        enchantingTab.init();
-        enchantingTab.onToolSlotUpdate(); //Updates if screen size is changed
-    }
-
-
-    /**
-     * Returns true if mouse is over the bounds given. Note: this should only be used for static elements on the screen.
-     * <br>For scrollable canvas elements, use ScrollableCanvas.isMouseOverBoundingBox
-     * @param mouseX
-     * @param mouseY
-     * @param x
-     * @param y
-     * @param width
-     * @param height
-     * @return
-     */
-    public boolean isMouseOver(int mouseX, int mouseY, int x, int y, int width, int height) {
-        return mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height;
+        this.camera = new CanvasCamera(this,getGuiLeft()+4, getGuiTop()+4);
+        camera.centerCameraOnCanvas();
     }
 
     @Override
-    protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY) {
-    }
+    protected void renderBg(@NotNull GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
+        if(!canvas().DEBUG_DISABLE_CULLING) graphics.enableScissor(
+                camera.VIEWPORT_X, camera.VIEWPORT_Y,
+                camera.VIEWPORT_X + camera.VIEWPORT_WIDTH, camera.VIEWPORT_Y + camera.VIEWPORT_HEIGHT);
 
-    /**
-     * Main render code.
-     * @param guiGraphics
-     * @param partialTick
-     * @param mouseX
-     * @param mouseY
-     */
-    @Override
-    protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY) {
-        if(getState().equals(ScreenState.ENCHANTING)) {
-            enchantingTab.render(guiGraphics, mouseX, mouseY);
-        } else if(getState().equals(ScreenState.BOOKS)) {
-            bookTab.render(guiGraphics);
+        graphics.pose().pushPose();
+        graphics.pose().translate(camera.VIEWPORT_X, camera.VIEWPORT_Y, 1);
+        graphics.pose().scale(camera.zoom(), camera.zoom(), 1);
+        graphics.pose().translate(-camera.x(), -camera.y(), 1);
+
+        canvas().render(graphics);
+
+        if(isState(ScreenState.ENCHANTING)) {
+            enchantingTab.render(graphics, mouseX, mouseY);
+            //Scissor is disabled during CentralSlot render for hover tooltip!
         }
 
-        //Disable scissor after drawing
-        RenderSystem.disableScissor();
+        graphics.pose().popPose();
+
+        graphics.pose().pushPose();
+        graphics.pose().translate(0, 0, 2);
+        if(isState(ScreenState.BOOKS)) {
+            bookTab.render(graphics, mouseX, mouseY);
+        }
+        graphics.pose().popPose();
+
+
+        if(!canvas().DEBUG_DISABLE_CULLING) graphics.disableScissor();
+
         RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        guiGraphics.blit(Sprite.ENCHANTING_TABLE_GUI.get(), this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
+        graphics.blit(
+                Sprite.ENCHANTING_TABLE_GUI.id(),
+                getGuiLeft(), getGuiTop(),
+                0f,0f,
+                imageWidth, imageHeight,
+                Sprite.ENCHANTING_TABLE_GUI.width(), Sprite.ENCHANTING_TABLE_GUI.height());
         RenderSystem.disableBlend();
 
-        //Draw tab icon after scissor
-        tabButton.render(guiGraphics, mouseX, mouseY);
+        tabButton.render(graphics, mouseX, mouseY);
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
+    public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        super.render(graphics, mouseX, mouseY, partialTick);
 
-        if(getState().equals(ScreenState.ENCHANTING)) {
-            enchantingTab.renderTooltipItemStackCost(guiGraphics, mouseX, mouseY);
-            enchantingTab.centralSlot.renderTooltip(guiGraphics, mouseX, mouseY);
-        }
+        List<Node> renderedNodes = enchantingTab.branchManager().getAllNodes();
 
+        graphics.pose().pushPose();
+        graphics.pose().translate(0, 0, 400);
+        if(tooltipManager.hasActiveTooltip() && !renderedNodes.contains(tooltipManager.getActiveTooltipNode()))
+            tooltipManager.clearActiveTooltip();
 
-        super.renderTooltip(guiGraphics, mouseX, mouseY);
+        if(tooltipManager.hasActiveTooltip())
+            tooltipManager.getActiveTooltip().render(graphics, mouseX, mouseY);
+
+        if(!tooltipManager.isTooltipLocked()) this.renderTooltip(graphics, mouseX, mouseY);
+
+        if(!tooltipManager.isTooltipRequestedThisFrame() && !tooltipManager.isTooltipLocked())
+            tooltipManager.clearActiveTooltip();
+
+        tooltipManager.resetFrameState();
+        graphics.pose().popPose();
+    }
+
+    @Override
+    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
+        this.inventoryLabelX = 16;
+        this.inventoryLabelY = 128;
+        graphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, -12566464, false);
     }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == 0) {
-            if(tabButton.onMouseClick((int) mouseX, (int) mouseY)) return true;
+        if(tabButton.onMouseClick(mouseX, mouseY, button)) return true;
 
-            if(getState().equals(ScreenState.BOOKS)) {
-                for(FilterCheckbox filterCheckbox : bookTab.filterCheckboxes) {
-                    if(filterCheckbox.onMouseClick((int) mouseX, (int) mouseY)) return true;
-                }
+        if(isState(ScreenState.ENCHANTING)) {
+            if(enchantingTab.centralSlot().onMouseClick(mouseX, mouseY, button)) return true;
 
-                if(bookTab.scrollbar.onMouseClick((int) mouseX, (int) mouseY)) return true;
-            } else if(getState().equals(ScreenState.ENCHANTING)) {
-                //Node clicked
-                if (enchantingTab.getHoveredNode() != null) {
-                    if (enchantingTab.getHoveredNode().isMouseOver(canvas, mouseX, mouseY)) {
-                        if(enchantingTab.getHoveredNode().onClicked((int) mouseX, (int) mouseY)) return true;
-                    }
-                }
+            if(tooltipManager.hasActiveTooltip() && tooltipManager.getActiveTooltip().onMouseClick(mouseX, mouseY, button)) return true;
 
-                if(enchantingTab.centralSlot.onMouseClick((int) mouseX, (int) mouseY)) return true;
+            if(camera.onMouseClick(mouseX, mouseY, button)) return true;
+        } else if(isState(ScreenState.BOOKS)) {
+            if(bookTab.scrollbar().onMouseClick(mouseX, mouseY, button)) return true;
 
-                if(canvas.isDraggingEnabled() && canvas.startDrag(mouseX, mouseY)) return true;
-            }
+            for(FilterCheckbox checkbox : bookTab.filterCheckboxes()) if(checkbox.onMouseClick(mouseX, mouseY, button)) return true;
         }
-
-        if (button == 1) if(enchantingTab.onRightClick((int) mouseX, (int) mouseY)) return true;
 
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if(getState().equals(ScreenState.ENCHANTING)) {
-            if(canvas.drag(mouseX, mouseY, button)) return true;
-        } else if(getState().equals(ScreenState.BOOKS)) {
-            if(bookTab.scrollbar.updateScrollFromMouse((int) mouseY)) return true;
-        }
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        if(camera.onMouseDrag(mouseX, mouseY, button, dragX / camera().zoom(), dragY / camera().zoom())) return true;
 
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+        if(bookTab.scrollbar().onMouseDrag(mouseX, mouseY, button, dragX, dragY)) return true;
+
+        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
     }
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        enchantingTab.setHeldNode(null);
-        bookTab.scrollbar.isMouseDraggingScroller = false;
-        holdStartTime = 0;
-        canvas.stopDrag(button);
+        if(tooltipManager().hasActiveTooltip() && tooltipManager().getActiveTooltip().onMouseRelease(mouseX, mouseY, button)) return true;
+
+        if(camera.onMouseRelease(mouseX, mouseY, button)) return true;
+
+        if(bookTab.scrollbar().onMouseRelease(mouseX, mouseY, button)) return true;
 
         return super.mouseReleased(mouseX, mouseY, button);
-
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        bookTab.scrollbar.incrementScrollIndex((int) -scrollY);
-        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
-    }
+    public boolean mouseScrolled(double x, double y, double scrollX, double scrollY) {
+        if(isState(ScreenState.ENCHANTING)) {
+            if(camera.onMouseScrolled(x, y, scrollY)) return true;
+        } else if(isState(ScreenState.BOOKS)) {
+            if(bookTab.scrollbar().onMouseScrolled(x, y, scrollY)) return true;
+        }
 
-    public void mouseHeld() {
-        enchantingTab.onNodeHeld();
+        return super.mouseScrolled(x, y, scrollX, scrollY);
     }
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if(getState().equals(ScreenState.BOOKS)) {
-            if(keyCode == GLFW.GLFW_KEY_BACKSPACE) {
-                bookTab.searchbar.removeCharFromSearch();
+        if(isState(ScreenState.BOOKS)) {
+            if(keyCode == InputConstants.KEY_BACKSPACE) {
+                bookTab.searchbar().removeCharFromSearch();
             }
 
-            if(keyCode == GLFW.GLFW_KEY_ESCAPE) {
+            if(keyCode == InputConstants.KEY_ESCAPE) {
                 return super.keyPressed(keyCode, scanCode, modifiers);
             } else {
                 return true;
@@ -202,48 +217,85 @@ public class EnchantingTableScreen extends AbstractContainerScreen<EnchantingTab
 
     @Override
     public boolean charTyped(char codePoint, int modifiers) {
-        if(getState().equals(ScreenState.BOOKS)) {
-            bookTab.searchbar.addCharToSearch(codePoint);
+        if(isState(ScreenState.BOOKS)) {
+            bookTab.searchbar().addCharToSearch(codePoint);
         }
 
         return super.charTyped(codePoint, modifiers);
     }
 
     /**
-     * Detect if item changes in tool slot.
+     * Checks if the mouse is over a rectangle.
+     *
+     * @param x      top-left x of the rectangle
+     * @param y      top-left y of the rectangle
+     * @param width  width of the rectangle
+     * @param height height of the rectangle
+     * @param mouseX current mouse x
+     * @param mouseY current mouse y
+     * @return true if mouse is inside the rectangle
      */
+    public boolean isMouseOver(double x, double y, int width, int height, double mouseX, double mouseY) {
+        return mouseX >= x && mouseX < x + width
+                && mouseY >= y && mouseY < y + height;
+    }
+
     @Override
-    public void containerTick() {
-        super.containerTick();
-        enchantingTab.checkToolSlotUpdated();
+    protected void containerTick() {
+        ItemStack stack = getMenu().getToolSlot().getItem();
+        if(!ItemStack.isSameItemSameComponents(stack, lastToolSlotStack)) {
+            onToolSlotUpdate(stack);
+            lastToolSlotStack = stack.copy();
+        }
     }
 
+    private void onToolSlotUpdate(ItemStack newStack) {
+        enchantingTab.branchManager().buildBranches(newStack);
+        canvas().setSizeToFitNodes(CostRegistry.client().getHighestLevel());
+        enchantingTab.branchManager().positionBranches();
 
-    public void setHoldStartTime(long time) {
-        this.holdStartTime = time;
-    }
+        FxHelper.playToolSlotChanged(player());
 
-    public long getHoldStartTime() {
-        return this.holdStartTime;
+        if(camera() == null) return;
+        if(newStack.getItem().equals(lastToolSlotStack.getItem())) return;
+        camera().setDraggingEnabled(!newStack.isEmpty());
+        camera().setZoom(1f);
+        camera().centerCameraOnCanvas();
     }
 
     public void setState(ScreenState state) {
         this.screenState = state;
-
-        if(this.screenState.equals(ScreenState.BOOKS)) {
-            canvas.setDraggingEnabled(false);
-            bookTab.searchbar.clearSearch();
-            bookTab.scrollbar.resetScrollIndex();
-            bookTab.resetFilterBoxes();
-        } else if (this.screenState.equals(ScreenState.ENCHANTING)) {
-            if(!getMenu().isToolSlotEmpty()) {
-                canvas.setDraggingEnabled(true);
-            }
-        }
     }
 
-    public ScreenState getState() {
-        return screenState;
+    public boolean isState(ScreenState state) {
+        return this.screenState == state;
+    }
+
+    public Canvas canvas() {
+        return scrollableCanvas;
+    }
+
+    public CanvasCamera camera() {
+        return camera;
+    }
+
+    public RegistryAccess registryAccess() {
+        return registryAccess;
+    }
+
+    public Player player() {
+        return player;
+    }
+
+    public CostRenderer enchantmentCostRenderer() {
+        return enchantmentCostRenderer;
+    }
+
+    public TooltipManager tooltipManager() {
+        return tooltipManager;
+    }
+
+    public BookTab bookTab() {
+        return bookTab;
     }
 }
-

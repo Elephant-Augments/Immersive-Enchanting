@@ -6,17 +6,19 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProc
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import org.jetbrains.annotations.NotNull;
 
 public class ModStructureProcessors {
 
     public static final DeferredRegister<StructureProcessorType<?>> STRUCTURE_PROCESSOR_TYPE_DEFERRED_REGISTER =
             DeferredRegister.create(BuiltInRegistries.STRUCTURE_PROCESSOR, ImmersiveEnchanting.MODID);
 
-    public static final DeferredHolder<StructureProcessorType<?>, StructureProcessorType<FillChiseledBookshelfProcessor>>
-    FILL_CHISELED_BOOKSHELF = STRUCTURE_PROCESSOR_TYPE_DEFERRED_REGISTER.register("fill_chiseled_bookshelf",
+    public static final DeferredHolder<StructureProcessorType<?>, @NotNull StructureProcessorType<FillChiseledBookshelfProcessor>>
+            FILL_CHISELED_BOOKSHELF = STRUCTURE_PROCESSOR_TYPE_DEFERRED_REGISTER.register("fill_chiseled_bookshelf",
             () -> FillChiseledBookshelfProcessor::codec);
 
     public static void register(IEventBus eventBus) {
         STRUCTURE_PROCESSOR_TYPE_DEFERRED_REGISTER.register(eventBus);
     }
+
 }

@@ -1,0 +1,43 @@
+package me.alfie.immersiveenchanting.event;
+
+import me.alfie.immersiveenchanting.ImmersiveEnchanting;
+import me.alfie.immersiveenchanting.api.description.TooltipDescriptionExtensions;
+import me.alfie.immersiveenchanting.command.ModCommands;
+import me.alfie.immersiveenchanting.creativetab.ModCreativeTab;
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostDatapack;
+import me.alfie.immersiveenchanting.datapack.manager.ClientDatapackManager;
+import me.alfie.immersiveenchanting.datapack.manager.ServerDatapackManager;
+import me.alfie.immersiveenchanting.datapack.node_sounds.NodeSoundsDatapack;
+import me.alfie.immersiveenchanting.gui.ModMenus;
+import me.alfie.immersiveenchanting.networking.ModPackets;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.common.NeoForge;
+
+public class ModEvents {
+
+    public static void register(IEventBus modEventBus) {
+        NeoForge.EVENT_BUS.addListener(CostDatapack::registerServerDatapack);
+
+        NeoForge.EVENT_BUS.addListener(ServerDatapackManager::onServerStart);
+        NeoForge.EVENT_BUS.addListener(ServerDatapackManager::onServerFinished);
+        NeoForge.EVENT_BUS.addListener(ServerDatapackManager::onServerReload);
+        NeoForge.EVENT_BUS.addListener(ServerDatapackManager::onServerStop);
+
+        NeoForge.EVENT_BUS.addListener(ServerDatapackManager::resolveEnchantmentHolders);
+        NeoForge.EVENT_BUS.addListener(ClientDatapackManager::resolveEnchantmentHolders);
+
+        NeoForge.EVENT_BUS.addListener(NodeSoundsDatapack::registerServerDatapack);
+
+        NeoForge.EVENT_BUS.addListener(ModCommands::registerCommands);
+
+        NeoForge.EVENT_BUS.addListener(ImmersiveEnchanting::disableEnchantedBookVillagerTrades);
+        modEventBus.addListener(ModMenus::registerScreens);
+
+        modEventBus.addListener(ModPackets::registerServer);
+
+        modEventBus.addListener(TooltipDescriptionExtensions::registerInternalTooltipDescriptions);
+
+        modEventBus.addListener(ModCreativeTab::buildCreativeTab);
+    }
+
+}

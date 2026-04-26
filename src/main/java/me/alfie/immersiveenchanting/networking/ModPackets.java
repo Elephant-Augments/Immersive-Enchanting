@@ -1,82 +1,45 @@
 package me.alfie.immersiveenchanting.networking;
 
-import me.alfie.immersiveenchanting.networking.packet.PayloadHandler;
-import me.alfie.immersiveenchanting.networking.packet.enchantitem.EnchantItemPacket;
-import me.alfie.immersiveenchanting.networking.packet.enchantitem.EnchantItemPayload;
-import me.alfie.immersiveenchanting.networking.packet.enchantmentcostregistrysync.EnchantmentCostRegistrySyncPacket;
-import me.alfie.immersiveenchanting.networking.packet.enchantmentcostregistrysync.EnchantmentCostRegistrySyncPayload;
-import me.alfie.immersiveenchanting.networking.packet.removeenchantment.RemoveEnchantmentPacket;
-import me.alfie.immersiveenchanting.networking.packet.removeenchantment.RemoveEnchantmentPayload;
-import me.alfie.immersiveenchanting.networking.packet.replicatebookpacket.ReplicateBookPacket;
-import me.alfie.immersiveenchanting.networking.packet.replicatebookpacket.ReplicateBookPayload;
-import me.alfie.immersiveenchanting.networking.packet.transmutebookpacket.TransmuteBookPacket;
-import me.alfie.immersiveenchanting.networking.packet.transmutebookpacket.TransmuteBookPayload;
-import me.alfie.immersiveenchanting.networking.packet.unlockedenchantments.UnlockedEnchantmentsPacket;
-import me.alfie.immersiveenchanting.networking.packet.unlockedenchantments.UnlockedEnchantmentsPayload;
-import me.alfie.immersiveenchanting.networking.packet.updatetoolslot.UpdateToolSlotPacket;
-import me.alfie.immersiveenchanting.networking.packet.updatetoolslot.UpdateToolSlotPayload;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
-import net.neoforged.neoforge.network.handling.DirectionalPayloadHandler;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 public class ModPackets {
 
+    public static final StreamCodec<RegistryFriendlyByteBuf, Holder<Enchantment>> ENCHANTMENT_HOLDER_CODEC = ByteBufCodecs.holderRegistry(Registries.ENCHANTMENT);
 
-    public static void register(RegisterPayloadHandlersEvent event) {
-        register(event,
-                EnchantItemPacket.TYPE,
-                EnchantItemPacket.STREAM_CODEC,
-                new EnchantItemPayload());
+    /**
+     * Register payloads inbound to server.
+     * @param event
+     */
+    public static void registerServer(RegisterPayloadHandlersEvent event) {
+        final PayloadRegistrar registrar = event.registrar("1");
 
-        register(event,
-                EnchantmentCostRegistrySyncPacket.TYPE,
-                EnchantmentCostRegistrySyncPacket.STREAM_CODEC,
-                new EnchantmentCostRegistrySyncPayload());
+        registrar.playToServer(UpdateToolSlotPacket.TYPE, UpdateToolSlotPacket.STREAM_CODEC,
+                (packet, context) -> packet.exec(packet, context));
 
-        register(event,
-                RemoveEnchantmentPacket.TYPE,
-                RemoveEnchantmentPacket.STREAM_CODEC,
-                new RemoveEnchantmentPayload());
+        registrar.playToServer(EnchantPacket.TYPE, EnchantPacket.STREAM_CODEC,
+                (packet, context) -> packet.exec(packet, context));
 
-        register(event,
-                ReplicateBookPacket.TYPE,
-                ReplicateBookPacket.STREAM_CODEC,
-                new ReplicateBookPayload());
+        registrar.playToServer(TransmutePacket.TYPE, TransmutePacket.STREAM_CODEC,
+                (packet, context) -> packet.exec(packet, context));
 
-        register(event,
-                TransmuteBookPacket.TYPE,
-                TransmuteBookPacket.STREAM_CODEC,
-                new TransmuteBookPayload());
+        registrar.playToServer(ReplicatePacket.TYPE, ReplicatePacket.STREAM_CODEC,
+                (packet, context) -> packet.exec(packet, context));
 
-        register(event,
-                UnlockedEnchantmentsPacket.TYPE,
-                UnlockedEnchantmentsPacket.STREAM_CODEC,
-                new UnlockedEnchantmentsPayload());
+        registrar.playToServer(RemoveEnchantmentPacket.TYPE, RemoveEnchantmentPacket.STREAM_CODEC,
+                (packet, context) -> packet.exec(packet, context));
 
-        register(event,
-                UpdateToolSlotPacket.TYPE,
-                UpdateToolSlotPacket.STREAM_CODEC,
-                new UpdateToolSlotPayload());
-    }
+        registrar.playToClient(AvailableEnchantmentsPacket.TYPE, AvailableEnchantmentsPacket.STREAM_CODEC,
+                (packet, context) -> packet.exec(packet, context));
 
-    private static <T extends CustomPacketPayload> void register(
-            RegisterPayloadHandlersEvent event,
-            CustomPacketPayload.Type<T> type,
-            StreamCodec<RegistryFriendlyByteBuf, T> codec,
-            PayloadHandler<T> handler
-    ) {
-        PayloadRegistrar registrar = event.registrar("1");
+        registrar.playToClient(SyncClientDatapackManagerPacket.TYPE, SyncClientDatapackManagerPacket.STREAM_CODEC,
+                (packet, context) -> packet.exec(packet, context));
 
-        registrar.playBidirectional(
-                type,
-                codec,
-                new DirectionalPayloadHandler<>(
-                        handler::execOnClient,
-                        handler::execOnServer
-                )
-        );
     }
 }

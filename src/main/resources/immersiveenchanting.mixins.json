@@ -1,18 +1,13 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "me.alfie.immersiveenchanting.mixins",
+  "package": "me.alfie.immersiveenchanting.mixin",
   "compatibilityLevel": "JAVA_21",
-  "plugin": "me.alfie.immersiveenchanting.mixins.ApplyMixinPlugin",
   "mixins": [
-    "jade.ChiseledBookshelfProviderMixin"
-  ],
-  "client": [
+    "EnchantingTableBlockMixin",
+    "ItemStackMixin"
   ],
   "injectors": {
     "defaultRequire": 1
-  },
-  "overwrites": {
-    "requireAnnotations": true
   }
 }

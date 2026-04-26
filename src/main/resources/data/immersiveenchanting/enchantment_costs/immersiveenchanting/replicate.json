@@ -1,9 +1,11 @@
 {
   "levels": {
-    "1": {
-      "item": "minecraft:writable_book",
-      "amount": 1,
-      "xp_levels": 10
-    }
+    "1": [
+      {
+        "item": "minecraft:writable_book",
+        "amount": 1,
+        "xp_levels": 10
+      }
+    ]
   }
 }
