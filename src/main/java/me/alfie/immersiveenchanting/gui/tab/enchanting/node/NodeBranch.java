@@ -13,12 +13,20 @@ public class NodeBranch extends CanvasRenderable {
     private float angle;
     private BranchTexture texture;
 
-    public NodeBranch(Canvas canvas, List<Node> nodes, float angle) {
+    /**
+     * Constructor for API users - angles are automatically calculated by ImmersiveEnchanting.
+     * @param canvas
+     * @param nodes
+     */
+    public NodeBranch(Canvas canvas, List<Node> nodes) {
         super(canvas);
         this.nodes = nodes;
-        this.angle = angle;
 
         texture = new BranchTexture(this, canvas);
+    }
+
+    public void setAngle(float angle) {
+        this.angle = angle;
     }
 
     public List<Node> nodes() {

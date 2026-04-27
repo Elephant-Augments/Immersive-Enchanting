@@ -41,6 +41,7 @@ public class Node extends CanvasRenderable {
 
     private NodeState state;
     private NodeTier tier;
+    private NodeType type;
 
     private final Identifier id;
     private final int enchantmentLevel;
@@ -64,12 +65,14 @@ public class Node extends CanvasRenderable {
                 int enchantmentLevel,
                 Canvas canvas,
                 NodeState state,
-                NodeTier tier) {
+                NodeTier tier,
+                NodeType type) {
         super(canvas);
         this.id = enchantmentId;
         this.enchantmentLevel = enchantmentLevel;
         this.state = state;
         this.tier = tier;
+        this.type = type;
 
         setIconTexture();
     }
@@ -197,7 +200,7 @@ public class Node extends CanvasRenderable {
      * @return {@code true} if this is an enchantment node, {@code false} if it is a special node
      */
     public boolean isEnchantment() {
-        return id != CostRegistry.TRANSMUTE && id != CostRegistry.REPLICATE;
+        return type == NodeType.ENCHANTMENT;
     }
 
     /**

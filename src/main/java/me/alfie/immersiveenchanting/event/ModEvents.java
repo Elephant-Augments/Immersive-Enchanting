@@ -1,5 +1,7 @@
 package me.alfie.immersiveenchanting.event;
 
+import me.alfie.immersiveenchanting.api.ApiPostEvents;
+import me.alfie.immersiveenchanting.api.enchanting_tab.NodeClickHandlerRegistry;
 import me.alfie.immersiveenchanting.command.ModCommands;
 import me.alfie.immersiveenchanting.datapack.manager.ClientDatapackManager;
 import me.alfie.immersiveenchanting.datapack.manager.ServerDatapackManager;
@@ -33,9 +35,20 @@ public class ModEvents {
         modEventBus.addListener(ModPackets::registerClient);
         modEventBus.addListener(ModPackets::registerServer);
 
-        modEventBus.addListener(TooltipDescriptionExtensions::registerInternalTooltipDescriptions);
-
         modEventBus.addListener(ModCreativeTab::buildCreativeTab);
+
+        registerPostEvents(modEventBus);
+        registerInternalApiEvents();
+    }
+
+    private static void registerPostEvents(IEventBus modEventBus) {
+        modEventBus.addListener(ApiPostEvents::postRegisterTooltipDescriptionsEvent);
+        modEventBus.addListener(ApiPostEvents::postRegisterNodeClickHandlersEvent);
+    }
+
+    private static void registerInternalApiEvents() {
+        NeoForge.EVENT_BUS.addListener(TooltipDescriptionExtensions::registerInternalTooltipDescriptions);
+        NeoForge.EVENT_BUS.addListener(NodeClickHandlerRegistry::registerInternalNodeInteractions);
     }
 
 }

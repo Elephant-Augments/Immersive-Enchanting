@@ -23,6 +23,8 @@ public record CostHolder(List<Cost> costs) {
             CostHolder::costs,
             CostHolder::new);
 
+    public static final CostHolder EMPTY = new CostHolder(List.of());
+
     public List<ItemStack> getAllItemStacks() {
         List<ItemStack> result = new ArrayList<>();
         for(Cost cost : costs()) {

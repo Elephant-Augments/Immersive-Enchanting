@@ -6,6 +6,8 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
+import java.util.HashMap;
+
 public record CostData(boolean enabled, CostLevels levelCosts) {
 
     public static final Codec<CostData> CODEC = RecordCodecBuilder.create(
@@ -19,4 +21,7 @@ public record CostData(boolean enabled, CostLevels levelCosts) {
             CostLevels.STREAM_CODEC, CostData::levelCosts,
             CostData::new
     );
+
+    public static final CostData EMPTY = new CostData(true, new CostLevels(
+            new HashMap<>()));
 }
