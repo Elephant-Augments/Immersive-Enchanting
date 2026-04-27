@@ -193,7 +193,12 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
         } else if (i == Slots.COST.id()) {
             if (!this.moveItemStackTo(stack, 3, 39, true)) return ItemStack.EMPTY;
         } else {
-            List<Cost> enchantingFuels = CostRegistry.server().get(CostRegistry.ENCHANTING_FUELS)
+            CostRegistry registry = CostRegistry.client();
+            if(level != null && !level.isClientSide()) {
+                registry = CostRegistry.server();
+            }
+
+            List<Cost> enchantingFuels = registry.get(CostRegistry.ENCHANTING_FUELS)
                     .levelCosts().getAllLevels();
 
             Set<Item> enchantingFuelItems = new HashSet<>();
