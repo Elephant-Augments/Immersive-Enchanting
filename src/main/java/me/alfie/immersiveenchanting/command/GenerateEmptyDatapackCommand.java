@@ -27,7 +27,7 @@ import java.util.List;
 public enum GenerateEmptyDatapackCommand implements ModCommand {
     COMMAND;
 
-    public static final double PACK_FORMAT = 101.1;
+    public static final double PACK_FORMAT = 48;
 
     @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {

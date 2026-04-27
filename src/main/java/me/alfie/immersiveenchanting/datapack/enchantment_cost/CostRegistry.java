@@ -70,12 +70,15 @@ public class CostRegistry {
     }
 
     public void resolveEnchantmentHolders(HolderLookup.Provider lookup) {
-        for (ResourceLocation id : getAllEnchantmentIds()) {
-            Holder<Enchantment> enchantmentHolder = lookup.lookupOrThrow(Registries.ENCHANTMENT)
-                    .get(ResourceKey.create(Registries.ENCHANTMENT, id))
-                    .orElseThrow();
+        HolderLookup.RegistryLookup<Enchantment> registry = lookup.lookupOrThrow(Registries.ENCHANTMENT);
 
-            register(enchantmentHolder);
+        for (ResourceLocation id : getAllEnchantmentIds()) {
+            ResourceKey<Enchantment> key = ResourceKey.create(Registries.ENCHANTMENT, id);
+
+            registry.get(key).ifPresentOrElse(
+                    this::register,
+                    () -> ImmersiveEnchanting.LOGGER.warn("Datapack contains {} but couldn't find enchantment with this id.", id)
+            );
         }
 
         //Debug
