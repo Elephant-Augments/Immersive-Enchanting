@@ -1,8 +1,10 @@
 {
   "levels": {
-    "1": {
-      "item": "minecraft:chorus_fruit",
-      "amount": 16
-    }
+    "1": [
+      {
+        "item": "minecraft:chorus_fruit",
+        "amount": 16
+      }
+    ]
   }
 }

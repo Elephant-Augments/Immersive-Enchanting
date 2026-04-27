@@ -11,4 +11,3 @@ public class BiblioclasmDisc extends RecordItem {
                 new Properties().stacksTo(1).rarity(Rarity.RARE), 127*20);
     }
 }
-

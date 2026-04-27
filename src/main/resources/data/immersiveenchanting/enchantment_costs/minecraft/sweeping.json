@@ -1,16 +1,22 @@
 {
   "levels": {
-    "1": {
-      "item": "minecraft:bamboo",
-      "amount": 64
-    },
-    "2": {
-      "item": "minecraft:prismarine_shard",
-      "amount": 8
-    },
-    "3": {
-      "item": "minecraft:lightning_rod",
-      "amount": 8
-    }
+    "1": [
+      {
+        "item": "minecraft:bamboo",
+        "amount": 1
+      }
+    ],
+    "2": [
+      {
+        "item": "minecraft:prismarine_shard",
+        "amount": 1
+      }
+    ],
+    "3": [
+      {
+        "item": "minecraft:lightning_rod",
+        "amount": 1
+      }
+    ]
   }
 }

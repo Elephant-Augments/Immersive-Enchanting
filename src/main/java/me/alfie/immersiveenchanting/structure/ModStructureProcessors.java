@@ -13,10 +13,12 @@ public class ModStructureProcessors {
             DeferredRegister.create(Registries.STRUCTURE_PROCESSOR, ImmersiveEnchanting.MODID);
 
     public static final RegistryObject<StructureProcessorType<FillChiseledBookshelfProcessor>>
-    FILL_CHISELED_BOOKSHELF = STRUCTURE_PROCESSOR_TYPE_DEFERRED_REGISTER.register("fill_chiseled_bookshelf",
+            FILL_CHISELED_BOOKSHELF = STRUCTURE_PROCESSOR_TYPE_DEFERRED_REGISTER.register("fill_chiseled_bookshelf",
             () -> StructureProcessorType.register("fill_chiseled_bookshelf", FillChiseledBookshelfProcessor.CODEC));
+
 
     public static void register(IEventBus eventBus) {
         STRUCTURE_PROCESSOR_TYPE_DEFERRED_REGISTER.register(eventBus);
     }
+
 }

@@ -8,10 +8,9 @@ public class ClientConfig {
     public static final ClientConfig CONFIG;
     public static final ForgeConfigSpec CONFIG_SPEC;
 
-    // Store the config properties as public finals
-    public final ForgeConfigSpec.ConfigValue<Boolean> showAddedByTooltip;
-
-    public final ForgeConfigSpec.ConfigValue<Integer> itemCarouselSpeed;
+    public final ForgeConfigSpec.ConfigValue<Boolean> SHOW_ADDED_BY_TOOLTIP;
+    public final ForgeConfigSpec.ConfigValue<Integer> ITEM_CAROUSEL_SPEED;
+    public final ForgeConfigSpec.ConfigValue<Boolean> PLAY_NODE_HOVER_SOUNDS;
 
     static {
         Pair<ClientConfig, ForgeConfigSpec> pair =
@@ -26,25 +25,32 @@ public class ClientConfig {
         builder.push("general"); // optional grouping
 
         // Define the config value here
-        showAddedByTooltip = builder
+        SHOW_ADDED_BY_TOOLTIP = builder
                 .comment("Display which mod adds the enchantment on ancient books.")
                 .translation("immersiveenchanting.config.show_added_by_tooltip")
                 .define("showAddedByTooltip", false);
 
-        itemCarouselSpeed = builder
+        ITEM_CAROUSEL_SPEED = builder
                 .comment("How fast items will switch in the enchanting table tooltip (in milliseconds).")
                 .translation("immersiveenchanting.config.item_carousel_speed")
                 .define("itemCarouselSpeed", 700);
+
+        PLAY_NODE_HOVER_SOUNDS = builder
+                .comment("Play node hover sounds in the enchanting table GUI.")
+                .translation("immersiveenchanting.config.play_node_hover_sounds")
+                .define("playNodeHoverSounds", true);
 
 
         builder.pop();
     }
 
     public static boolean isShowAddedByTooltipEnabled() {
-        return ClientConfig.CONFIG.showAddedByTooltip.get();
+        return ClientConfig.CONFIG.SHOW_ADDED_BY_TOOLTIP.get();
     }
 
+    public static boolean areNodeHoverSoundsEnabled() {return ClientConfig.CONFIG.PLAY_NODE_HOVER_SOUNDS.get();}
+
     public static int getItemCarouselSpeed() {
-        return ClientConfig.CONFIG.itemCarouselSpeed.get();
+        return ClientConfig.CONFIG.ITEM_CAROUSEL_SPEED.get();
     }
 }

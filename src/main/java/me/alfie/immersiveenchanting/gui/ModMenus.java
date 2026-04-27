@@ -1,14 +1,19 @@
 package me.alfie.immersiveenchanting.gui;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
+import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
+
+
 public class ModMenus {
+
     public static final DeferredRegister<MenuType<?>> MENU_REGISTER = DeferredRegister.create(ForgeRegistries.MENU_TYPES, ImmersiveEnchanting.MODID);
 
     public static final RegistryObject<MenuType<EnchantingTableMenu>> ENCHANTING_TABLE_MENU =
@@ -17,5 +22,11 @@ public class ModMenus {
 
     public static void register(IEventBus eventBus) {
         MENU_REGISTER.register(eventBus);
+    }
+
+    public static void registerScreens(FMLClientSetupEvent event) {
+        event.enqueueWork(
+                () -> MenuScreens.register(ModMenus.ENCHANTING_TABLE_MENU.get(), EnchantingTableScreen::new)
+        );
     }
 }

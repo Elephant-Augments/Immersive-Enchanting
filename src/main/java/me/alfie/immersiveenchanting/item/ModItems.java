@@ -31,8 +31,8 @@ public class ModItems {
             ITEMS.register("creative_bookshelf",
                     () -> new BlockItem(ModBlocks.CREATIVE_BOOKSHELF.get(), new Item.Properties().rarity(Rarity.EPIC)));
 
+
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);
     }
-
 }

@@ -1,8 +1,10 @@
 {
   "levels": {
-    "1": {
-      "item": "minecraft:nether_star",
-      "amount": 1
-    }
+    "1": [
+      {
+        "item": "minecraft:nether_star",
+        "amount": 1
+      }
+    ]
   }
 }

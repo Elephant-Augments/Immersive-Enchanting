@@ -2,29 +2,29 @@ package me.alfie.immersiveenchanting.config;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 import org.apache.commons.lang3.tuple.Pair;
+import org.joml.Vector3i;
 
 public class ServerConfig {
 
     public static final ServerConfig CONFIG;
     public static final ForgeConfigSpec CONFIG_SPEC;
 
-    // Store the config properties as public finals
     public final ForgeConfigSpec.ConfigValue<Boolean> disableAncientBookRequirement;
 
-    public final ForgeConfigSpec.ConfigValue<Integer> bookshelfSearchX;
-    public final ForgeConfigSpec.ConfigValue<Integer> bookshelfSearchY;
-    public final ForgeConfigSpec.ConfigValue<Integer> bookshelfSearchZ;
+    public final ForgeConfigSpec.ConfigValue<Integer> BOOKSHELF_SEARCH_X;
+    public final ForgeConfigSpec.ConfigValue<Integer> BOOKSHELF_SEARCH_Y;
+    public final ForgeConfigSpec.ConfigValue<Integer> BOOKSHELF_SEARCH_Z;
 
+    public final ForgeConfigSpec.ConfigValue<Boolean> ALLOW_REPLICATE;
+    public final ForgeConfigSpec.ConfigValue<Boolean> ALLOW_TRANSMUTE;
 
-    public final ForgeConfigSpec.ConfigValue<Boolean> allowReplicate;
-    public final ForgeConfigSpec.ConfigValue<Boolean> allowTransmute;
+    public final ForgeConfigSpec.ConfigValue<Boolean> ALLOW_ENCHANTMENT_REMOVAL;
 
-    public final ForgeConfigSpec.ConfigValue<Boolean> allowEnchantmentRemoval;
+    /**OLDER VERSIONS ONLY (1.20.1)*/
+    public final ForgeConfigSpec.ConfigValue<Boolean> ENABLE_ENCHANTED_BOOK_TRADES;
+    public final ForgeConfigSpec.ConfigValue<Boolean> ENABLE_ENCHANTED_BOOK_LOOT_TABLES;
 
-    public final ForgeConfigSpec.ConfigValue<Boolean> enableEnchantedBookTrades;
-    public final ForgeConfigSpec.ConfigValue<Boolean> enableEnchantedBookLootTables;
-
-    public final ForgeConfigSpec.ConfigValue<Boolean> obfuscateLockedEnchantments;
+    public final ForgeConfigSpec.ConfigValue<Boolean> OBFUSCATE_LOCKED_ENCHANTMENTS;
 
 
     static {
@@ -38,15 +38,15 @@ public class ServerConfig {
     // Constructor takes only the builder
     public ServerConfig(ForgeConfigSpec.Builder builder) {
         builder.push("bookshelves");
-        bookshelfSearchX = builder
+        BOOKSHELF_SEARCH_X = builder
                 .comment("The number of blocks in the X-level that the enchanting table can detect chiseled bookshelves. Each 'row' can hold up to 96 books. If you have many enchantments, you may need to increase this value to provide more space.") // translatable comment
                 .translation("immersiveenchanting.config.bookshelf_search_x") // translatable label
                 .defineInRange("bookshelfSearchX", 2, 1, 8);
-        bookshelfSearchY = builder
+        BOOKSHELF_SEARCH_Y = builder
                 .comment("The number of blocks in the Y-level that the enchanting table can detect chiseled bookshelves. Each 'row' can hold up to 96 books. If you have many enchantments, you may need to increase this value to provide more space.") // translatable comment
                 .translation("immersiveenchanting.config.bookshelf_search_y") // translatable label
                 .defineInRange("bookshelfSearchY", 3, 1, 8);
-        bookshelfSearchZ = builder
+        BOOKSHELF_SEARCH_Z = builder
                 .comment("The number of blocks in the Z-level that the enchanting table can detect chiseled bookshelves. Each 'row' can hold up to 96 books. If you have many enchantments, you may need to increase this value to provide more space.") // translatable comment
                 .translation("immersiveenchanting.config.bookshelf_search_z") // translatable label
                 .defineInRange("bookshelfSearchZ", 2, 1, 8);
@@ -60,88 +60,76 @@ public class ServerConfig {
         builder.pop();
 
         builder.push("enchantingtable");
-        allowReplicate = builder
+        ALLOW_REPLICATE = builder
                 .comment("Allow ancient books to be replicated in the enchanting table.")
                 .translation("immersiveenchanting.config.allow_replicate")
                 .define("allowReplicate", true);
 
-        allowTransmute = builder
+        ALLOW_TRANSMUTE = builder
                 .comment("Allow ancient books to be transmuted in the enchanting table.")
                 .translation("immersiveenchanting.config.allow_transmute")
                 .define("allowTransmute", true);
 
-        allowEnchantmentRemoval = builder
+        ALLOW_ENCHANTMENT_REMOVAL = builder
                 .comment("Allow enchantments to be removed in the enchanting table.")
                 .translation("immersiveenchanting.config.allow_enchantment_removal")
                 .define("allowEnchantmentRemoval", true);
 
-        obfuscateLockedEnchantments = builder
+        OBFUSCATE_LOCKED_ENCHANTMENTS = builder
                 .comment("If enabled, enchantments that have not been found will have be obfuscated in the enchanting table.")
                 .translation("immersiveenchanting.config.obfuscate_locked_enchantments")
                 .define("obfuscateLockedEnchantments", true);
         builder.pop();
 
         builder.push("enchantedbooks");
-        enableEnchantedBookLootTables = builder
+        ENABLE_ENCHANTED_BOOK_LOOT_TABLES = builder
                 .comment("If enabled, vanilla enchanted books will spawn normally in loot tables such as chests.")
                 .translation("immersiveenchanting.config.enable_enchanted_book_loot_tables")
                 .define("enableEnchantedBookLootTables", false);
 
-        enableEnchantedBookTrades = builder
+        ENABLE_ENCHANTED_BOOK_TRADES = builder
                 .comment("If enabled, vanilla enchanted books will appear in villager trades.")
                 .comment("Note: You must /reload for changes to take effect for this option!")
                 .translation("immersiveenchanting.config.enable_enchanted_book_trades")
                 .define("enableEnchantedBookTrades", false);
-        builder.pop();
     }
 
-    /**
-     * Returns true if ancient books are required, false if the disabled option is true.
-     * @return
-     */
     public static boolean areAncientBooksRequired() {
         return !ServerConfig.CONFIG.disableAncientBookRequirement.get();
     }
 
-    public static int getBookshelfSearchX() {
-        return ServerConfig.CONFIG.bookshelfSearchX.get();
+    public static Vector3i getBookshelfSearchRadius() {
+        return new Vector3i(ServerConfig.CONFIG.BOOKSHELF_SEARCH_X.get(),
+                ServerConfig.CONFIG.BOOKSHELF_SEARCH_Y.get(),
+                ServerConfig.CONFIG.BOOKSHELF_SEARCH_Z.get());
     }
-
-    public static int getBookshelfSearchY() {
-        return ServerConfig.CONFIG.bookshelfSearchY.get();
-    }
-
-    public static int getBookshelfSearchZ() {
-        return ServerConfig.CONFIG.bookshelfSearchZ.get();
-    }
-
-
 
     public static boolean isAllowReplicate() {
-        return ServerConfig.CONFIG.allowReplicate.get();
+        return ServerConfig.CONFIG.ALLOW_REPLICATE.get();
     }
 
     public static boolean isAllowTransmute() {
-        return ServerConfig.CONFIG.allowTransmute.get();
+        return ServerConfig.CONFIG.ALLOW_TRANSMUTE.get();
     }
 
     public static boolean isEnchantmentRemovalAllowed() {
-        return ServerConfig.CONFIG.allowEnchantmentRemoval.get();
+        return ServerConfig.CONFIG.ALLOW_ENCHANTMENT_REMOVAL.get();
     }
 
     public static boolean isAllowEnchantedBookLootTables() {
-        return ServerConfig.CONFIG.enableEnchantedBookLootTables.get();
-    }
-
-    public static boolean isAllowEnchantedBookTrades() {
-        try{
-            return ServerConfig.CONFIG.enableEnchantedBookTrades.get();
-        } catch (IllegalStateException e) { //Catch java.lang.IllegalStateException: Cannot get config value before config is loaded.
-            return false;
-        }
+        return ServerConfig.CONFIG.ENABLE_ENCHANTED_BOOK_LOOT_TABLES.get();
     }
 
     public static boolean isObfuscateLockedEnchantments() {
-        return ServerConfig.CONFIG.obfuscateLockedEnchantments.get();
+        return ServerConfig.CONFIG.OBFUSCATE_LOCKED_ENCHANTMENTS.get();
+    }
+
+    /**OLDER VERSIONS ONLY (1.21.1)*/
+    public static boolean isAllowEnchantedBookTrades() {
+        try{
+            return ServerConfig.CONFIG.ENABLE_ENCHANTED_BOOK_TRADES.get();
+        } catch (IllegalStateException e) { //Catch Cannot get config value before config is loaded.
+            return false;
+        }
     }
 }
