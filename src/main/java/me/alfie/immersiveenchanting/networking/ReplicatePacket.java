@@ -41,7 +41,7 @@ public record ReplicatePacket() implements ModNetworkPacket {
         if(!(player.containerMenu instanceof EnchantingTableMenu menu)) return;
 
         if(EnchantmentUtil.canReplicate(menu, context)) {
-            EnchantmentUtil.deductValidCost(menu, CostRegistry.TRANSMUTE, 1, player, CostRegistry.server());
+            EnchantmentUtil.deductValidCost(menu, CostRegistry.REPLICATE, 1, player, CostRegistry.server());
 
             ItemStack oldStack = menu.getToolSlot().getItem().copyAndClear();
             ItemStack newStack = oldStack.copy();
