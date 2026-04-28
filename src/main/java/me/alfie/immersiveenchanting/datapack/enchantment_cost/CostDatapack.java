@@ -3,7 +3,7 @@ package me.alfie.immersiveenchanting.datapack.enchantment_cost;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.api.datapack.*;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.codec.CostData;
-import me.alfie.immersiveenchanting.datapack.manager.ServerDatapackManager;
+import me.alfie.immersiveenchanting.api.datapack.manager.ServerDatapackManager;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.packs.resources.ResourceManager;
