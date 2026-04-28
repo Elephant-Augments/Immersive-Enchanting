@@ -1,6 +1,7 @@
 package me.alfie.immersiveenchanting.datapack.enchantment_cost;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
+import me.alfie.immersiveenchanting.api.datapack.DatapackKeys;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.codec.CostData;
 import me.alfie.immersiveenchanting.datapack.manager.ClientDatapackManager;
 import me.alfie.immersiveenchanting.datapack.manager.ServerDatapackManager;
@@ -62,11 +63,11 @@ public class CostRegistry {
     }
 
     public static CostRegistry client() {
-        return ClientDatapackManager.costRegistry();
+        return ServerDatapackManager.get(DatapackKeys.COST);
     }
 
     public static CostRegistry server() {
-        return ServerDatapackManager.costRegistry();
+        return ServerDatapackManager.get(DatapackKeys.COST);
     }
 
     public void resolveEnchantmentHolders(HolderLookup.Provider lookup) {

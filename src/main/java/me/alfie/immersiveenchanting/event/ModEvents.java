@@ -17,7 +17,9 @@ import net.neoforged.neoforge.common.NeoForge;
 public class ModEvents {
 
     public static void register(IEventBus modEventBus) {
-        NeoForge.EVENT_BUS.addListener(CostDatapack::registerServerDatapack);
+        NeoForge.EVENT_BUS.addListener(CostDatapack::register);
+        NeoForge.EVENT_BUS.addListener(NodeSoundsDatapack::register);
+
 
         NeoForge.EVENT_BUS.addListener(ServerDatapackManager::onServerStart);
         NeoForge.EVENT_BUS.addListener(ServerDatapackManager::onServerFinished);
@@ -27,7 +29,6 @@ public class ModEvents {
         NeoForge.EVENT_BUS.addListener(ServerDatapackManager::resolveEnchantmentHolders);
         NeoForge.EVENT_BUS.addListener(ClientDatapackManager::resolveEnchantmentHolders);
 
-        NeoForge.EVENT_BUS.addListener(NodeSoundsDatapack::registerServerDatapack);
 
         NeoForge.EVENT_BUS.addListener(ModCommands::registerCommands);
         modEventBus.addListener(ModMenus::registerScreens);

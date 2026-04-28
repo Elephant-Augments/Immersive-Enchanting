@@ -2,6 +2,8 @@ package me.alfie.immersiveenchanting.datapack.node_sounds;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import me.alfie.immersiveenchanting.api.datapack.DatapackKeys;
+import me.alfie.immersiveenchanting.datapack.manager.ClientDatapackManager;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
@@ -10,6 +12,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public record NodeSoundMap(Map<Identifier, NodeSound> enchantments) {
+
+    public static NodeSoundMap client() {
+        return ClientDatapackManager.get(DatapackKeys.NODE_SOUNDS);
+    }
 
     public static final Codec<NodeSoundMap> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.unboundedMap(Identifier.CODEC, NodeSound.CODEC).fieldOf("enchantments").forGetter(NodeSoundMap::enchantments)
