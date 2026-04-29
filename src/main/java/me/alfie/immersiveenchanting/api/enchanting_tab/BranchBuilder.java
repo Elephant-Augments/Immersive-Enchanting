@@ -12,7 +12,7 @@ public class BranchBuilder {
 
     private final Canvas canvas;
     private final Identifier id;
-    private final List<Node> nodes = new ArrayList<>();
+    private final List<NodeTemplate> nodes = new ArrayList<>();
 
     private BranchBuilder(Canvas canvas, Identifier id) {
         this.canvas = canvas;
@@ -24,27 +24,12 @@ public class BranchBuilder {
     }
 
     public NodeBranch build() {
-        return new NodeBranch(canvas, new ArrayList<>(nodes));
+        return new NodeBranch(canvas, id, new ArrayList<>(nodes));
     }
 
     public BranchBuilder node(NodeTemplate template) {
-        nodes.add(new Node(
-                id,
-                template.level(),
-                canvas,
-                template.state(),
-                template.tier(),
-                template.type()
-        ));
+        nodes.add(template);
         return this;
     }
-
-    public BranchBuilder nodes(List<NodeTemplate> templates) {
-        for(NodeTemplate template : templates) {
-            node(template);
-        }
-        return this;
-    }
-
 
 }
