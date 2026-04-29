@@ -41,7 +41,7 @@ public class ServerConfig {
         BOOKSHELF_SEARCH_X = builder
                 .comment("The number of blocks in the X-level that the enchanting table can detect chiseled bookshelves. Each 'row' can hold up to 96 books. If you have many enchantments, you may need to increase this value to provide more space.") // translatable comment
                 .translation("immersiveenchanting.config.bookshelf_search_x") // translatable label
-                .defineInRange("bookshelfSearchX", 2, 1, 8);
+                .defineInRange("bookshelfSearchX", 2, 2, 8);
         BOOKSHELF_SEARCH_Y = builder
                 .comment("The number of blocks in the Y-level that the enchanting table can detect chiseled bookshelves. Each 'row' can hold up to 96 books. If you have many enchantments, you may need to increase this value to provide more space.") // translatable comment
                 .translation("immersiveenchanting.config.bookshelf_search_y") // translatable label
@@ -49,7 +49,7 @@ public class ServerConfig {
         BOOKSHELF_SEARCH_Z = builder
                 .comment("The number of blocks in the Z-level that the enchanting table can detect chiseled bookshelves. Each 'row' can hold up to 96 books. If you have many enchantments, you may need to increase this value to provide more space.") // translatable comment
                 .translation("immersiveenchanting.config.bookshelf_search_z") // translatable label
-                .defineInRange("bookshelfSearchZ", 2, 1, 8);
+                .defineInRange("bookshelfSearchZ", 2, 2, 8);
         builder.pop();
 
         builder.push("ancientbooks");
