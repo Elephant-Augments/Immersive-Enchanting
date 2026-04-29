@@ -60,9 +60,9 @@ public class BookshelfChecker {
         List<ChiseledBookShelfBlockEntity> result = new ArrayList<>();
 
         forEachRingPos(pos,
-                ServerConfig.getBookshelfSearchRadius().x(),
-                ServerConfig.getBookshelfSearchRadius().y(),
-                ServerConfig.getBookshelfSearchRadius().z(),
+                2, ServerConfig.getBookshelfSearchRadius().x(),
+                0, ServerConfig.getBookshelfSearchRadius().y(),
+                2, ServerConfig.getBookshelfSearchRadius().z(),
                 checkPos -> {
             BlockEntity be = level.getBlockEntity(checkPos);
 
@@ -90,11 +90,25 @@ public class BookshelfChecker {
         return result;
     }
 
-    private static void forEachRingPos(BlockPos center, int radiusX, int radiusY, int radiusZ, Consumer<BlockPos> consumer) {
-        for (int dy = 0; dy < radiusY; dy++) {
-            for (int dx = -radiusX; dx <= radiusX; dx++) {
-                for (int dz = -radiusZ; dz <= radiusZ; dz++) {
-                    if (Math.abs(dx) < radiusX && Math.abs(dz) < radiusZ) continue;
+    private static void forEachRingPos(
+            BlockPos center,
+            int minRadiusX, int maxRadiusX,
+            int minRadiusY, int maxRadiusY,
+            int minRadiusZ, int maxRadiusZ,
+            Consumer<BlockPos> consumer
+    ) {
+        for (int dy = minRadiusY; dy <= maxRadiusY; dy++) {
+            for (int dx = -maxRadiusX; dx <= maxRadiusX; dx++) {
+                for (int dz = -maxRadiusZ; dz <= maxRadiusZ; dz++) {
+
+                    int absX = Math.abs(dx);
+                    int absZ = Math.abs(dz);
+
+                    //skip inside inner ring
+                    if (absX < minRadiusX && absZ < minRadiusZ) continue;
+
+                    //skip max bounds
+                    if (absX > maxRadiusX || absZ > maxRadiusZ) continue;
 
                     consumer.accept(center.offset(dx, dy, dz));
                 }
@@ -102,12 +116,25 @@ public class BookshelfChecker {
         }
     }
 
-    private static boolean anyInRing(BlockPos center, int radiusX, int radiusY, int radiusZ, Predicate<BlockPos> predicate) {
-        for (int dy = 0; dy < radiusY; dy++) {
-            for (int dx = -radiusX; dx <= radiusX; dx++) {
-                for (int dz = -radiusZ; dz <= radiusZ; dz++) {
+    private static boolean anyInRing(
+            BlockPos center,
+            int minRadiusX, int maxRadiusX,
+            int minRadiusY, int maxRadiusY,
+            int minRadiusZ, int maxRadiusZ,
+            Predicate<BlockPos> predicate
+    ) {
+        for (int dy = minRadiusY; dy <= maxRadiusY-1; dy++) {
+            for (int dx = -maxRadiusX; dx <= maxRadiusX; dx++) {
+                for (int dz = -maxRadiusZ; dz <= maxRadiusZ; dz++) {
 
-                    if (Math.abs(dx) < radiusX && Math.abs(dz) < radiusZ) continue;
+                    int absX = Math.abs(dx);
+                    int absZ = Math.abs(dz);
+
+                    //skip inside inner ring
+                    if (absX < minRadiusX && absZ < minRadiusZ) continue;
+
+                    //skip max bounds
+                    if (absX > maxRadiusX || absZ > maxRadiusZ) continue;
 
                     if (predicate.test(center.offset(dx, dy, dz))) {
                         return true;
@@ -115,6 +142,7 @@ public class BookshelfChecker {
                 }
             }
         }
+
         return false;
     }
 
@@ -126,9 +154,9 @@ public class BookshelfChecker {
      */
     private static boolean isCreativeBookshelfNearby(BlockPos pos, Level level) {
         return anyInRing(pos,
-                ServerConfig.getBookshelfSearchRadius().x(),
-                ServerConfig.getBookshelfSearchRadius().y(),
-                ServerConfig.getBookshelfSearchRadius().z(),
+                2, ServerConfig.getBookshelfSearchRadius().x(),
+                0, ServerConfig.getBookshelfSearchRadius().y(),
+                2, ServerConfig.getBookshelfSearchRadius().z(),
                 checkPos ->
                 level.getBlockState(checkPos).getBlock()
                         .equals(ModBlocks.CREATIVE_BOOKSHELF_BLOCK.get())
