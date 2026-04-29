@@ -1,6 +1,5 @@
 package me.alfie.immersiveenchanting.util;
 
-import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.block.ModBlocks;
 import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
@@ -21,40 +20,13 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-/**
- * Utility for scanning and resolving enchantments from nearby bookshelves.
- *
- * <p>This class is responsible for determining which enchantments are
- * available to the enchanting system based on the surrounding environment,
- * including chiseled bookshelves and special creative blocks.</p>
- *
- * <p>It also handles server-side syncing of available enchantments to players.</p>
- */
 public class BookshelfChecker {
-
-    /**
-     * Scans nearby bookshelves and sends available enchantments to the player.
-     *
-     * @param blockPos center position of the enchanting table
-     * @param level world level
-     * @param serverPlayer player to send results to
-     */
     public static void checkBookshelves(BlockPos blockPos, Level level, ServerPlayer serverPlayer) {
         List<Holder<Enchantment>> availableEnchantments = getEnchantmentsInBookshelves(blockPos, level);
 
         PacketDistributor.sendToPlayer(serverPlayer, new AvailableEnchantmentsPacket(availableEnchantments));
     }
 
-    /**
-     * Gets all enchantments available from nearby bookshelves.
-     *
-     * <p>If a creative bookshelf is present, or ancient books are not required,
-     * all enchantments are returned.</p>
-     *
-     * @param blockPos center position of the scan
-     * @param level world level
-     * @return list of available enchantments
-     */
     public static List<Holder<Enchantment>> getEnchantmentsInBookshelves(BlockPos blockPos, Level level) {
         if(isCreativeBookshelfNearby(blockPos, level)) return CostRegistry.server().getAllEnchantmentHolders();
         if(!ServerConfig.areAncientBooksRequired()) return CostRegistry.server().getAllEnchantmentHolders();
@@ -77,21 +49,20 @@ public class BookshelfChecker {
     }
 
     /**
-     * Scans for chiseled bookshelves within a configured rectangular ring volume.
+     * Searches for nearby chiseled bookshelves within a predefined radius.
      *
-     * <p>The scan mimics a hollow prism around the enchanting table rather than a full cube.</p>
+     * <p>The scan forms a hollow rectangular prism around the enchanting table,
+     * similar to vanilla enchanting mechanics.</p>
      *
-     * @param pos center position
-     * @param level world level
-     * @return nearby chiseled bookshelf block entities
+     * @return A list of nearby {@link ChiseledBookShelfBlockEntity} instances
      */
     private static List<ChiseledBookShelfBlockEntity> getNearbyBookshelves(BlockPos pos, Level level) {
         List<ChiseledBookShelfBlockEntity> result = new ArrayList<>();
 
         forEachRingPos(pos,
-                ServerConfig.getBookshelfSearchRadius().x(),
-                ServerConfig.getBookshelfSearchRadius().y(),
-                ServerConfig.getBookshelfSearchRadius().z(),
+                2, ServerConfig.getBookshelfSearchRadius().x(),
+                0, ServerConfig.getBookshelfSearchRadius().y(),
+                2, ServerConfig.getBookshelfSearchRadius().z(),
                 checkPos -> {
             BlockEntity be = level.getBlockEntity(checkPos);
 
@@ -104,10 +75,10 @@ public class BookshelfChecker {
     }
 
     /**
-     * Retrieves all item stacks stored inside a chiseled bookshelf.
+     * Retrieves all item stacks stored within a chiseled bookshelf.
      *
-     * @param bookshelf bookshelf block entity
-     * @return list of all 6 item slots
+     * @param bookshelf The bookshelf block entity
+     * @return A list of all 6 item slots contained in the bookshelf
      */
     private static List<ItemStack> getBooks(ChiseledBookShelfBlockEntity bookshelf) {
         List<ItemStack> result = new ArrayList<>();
@@ -119,20 +90,25 @@ public class BookshelfChecker {
         return result;
     }
 
-    /**
-     * Iterates over all positions in a hollow ring-shaped prism and applies a consumer.
-     *
-     * @param center center position
-     * @param radiusX horizontal X radius
-     * @param radiusY vertical height
-     * @param radiusZ horizontal Z radius
-     * @param consumer position consumer
-     */
-    private static void forEachRingPos(BlockPos center, int radiusX, int radiusY, int radiusZ, Consumer<BlockPos> consumer) {
-        for (int dy = 0; dy < radiusY; dy++) {
-            for (int dx = -radiusX; dx <= radiusX; dx++) {
-                for (int dz = -radiusZ; dz <= radiusZ; dz++) {
-                    if (Math.abs(dx) < radiusX && Math.abs(dz) < radiusZ) continue;
+    private static void forEachRingPos(
+            BlockPos center,
+            int minRadiusX, int maxRadiusX,
+            int minRadiusY, int maxRadiusY,
+            int minRadiusZ, int maxRadiusZ,
+            Consumer<BlockPos> consumer
+    ) {
+        for (int dy = minRadiusY; dy <= maxRadiusY; dy++) {
+            for (int dx = -maxRadiusX; dx <= maxRadiusX; dx++) {
+                for (int dz = -maxRadiusZ; dz <= maxRadiusZ; dz++) {
+
+                    int absX = Math.abs(dx);
+                    int absZ = Math.abs(dz);
+
+                    //skip inside inner ring
+                    if (absX < minRadiusX && absZ < minRadiusZ) continue;
+
+                    //skip max bounds
+                    if (absX > maxRadiusX || absZ > maxRadiusZ) continue;
 
                     consumer.accept(center.offset(dx, dy, dz));
                 }
@@ -140,22 +116,25 @@ public class BookshelfChecker {
         }
     }
 
-    /**
-     * Checks if any block position in a hollow ring matches a condition.
-     *
-     * @param center center position
-     * @param radiusX X radius
-     * @param radiusY Y height
-     * @param radiusZ Z radius
-     * @param predicate condition to test positions
-     * @return true if any position matches
-     */
-    private static boolean anyInRing(BlockPos center, int radiusX, int radiusY, int radiusZ, Predicate<BlockPos> predicate) {
-        for (int dy = 0; dy < radiusY; dy++) {
-            for (int dx = -radiusX; dx <= radiusX; dx++) {
-                for (int dz = -radiusZ; dz <= radiusZ; dz++) {
+    private static boolean anyInRing(
+            BlockPos center,
+            int minRadiusX, int maxRadiusX,
+            int minRadiusY, int maxRadiusY,
+            int minRadiusZ, int maxRadiusZ,
+            Predicate<BlockPos> predicate
+    ) {
+        for (int dy = minRadiusY; dy <= maxRadiusY-1; dy++) {
+            for (int dx = -maxRadiusX; dx <= maxRadiusX; dx++) {
+                for (int dz = -maxRadiusZ; dz <= maxRadiusZ; dz++) {
 
-                    if (Math.abs(dx) < radiusX && Math.abs(dz) < radiusZ) continue;
+                    int absX = Math.abs(dx);
+                    int absZ = Math.abs(dz);
+
+                    //skip inside inner ring
+                    if (absX < minRadiusX && absZ < minRadiusZ) continue;
+
+                    //skip max bounds
+                    if (absX > maxRadiusX || absZ > maxRadiusZ) continue;
 
                     if (predicate.test(center.offset(dx, dy, dz))) {
                         return true;
@@ -163,21 +142,21 @@ public class BookshelfChecker {
                 }
             }
         }
+
         return false;
     }
 
     /**
-     * Checks if a creative bookshelf exists within range.
-     *
-     * @param pos center position
-     * @param level world level
-     * @return true if a creative bookshelf is nearby
+     * Returns true if a creative bookshelf is within the 5x5 ring.
+     * @param pos
+     * @param level
+     * @return
      */
     private static boolean isCreativeBookshelfNearby(BlockPos pos, Level level) {
         return anyInRing(pos,
-                ServerConfig.getBookshelfSearchRadius().x(),
-                ServerConfig.getBookshelfSearchRadius().y(),
-                ServerConfig.getBookshelfSearchRadius().z(),
+                2, ServerConfig.getBookshelfSearchRadius().x(),
+                0, ServerConfig.getBookshelfSearchRadius().y(),
+                2, ServerConfig.getBookshelfSearchRadius().z(),
                 checkPos ->
                 level.getBlockState(checkPos).getBlock()
                         .equals(ModBlocks.CREATIVE_BOOKSHELF_BLOCK.get())
