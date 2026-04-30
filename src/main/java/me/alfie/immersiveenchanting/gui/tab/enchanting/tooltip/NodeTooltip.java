@@ -2,11 +2,10 @@ package me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.cursor.CursorTypes;
+import me.alfie.immersiveenchanting.api.enchanting_tab.NodeClickContext;
+import me.alfie.immersiveenchanting.api.enchanting_tab.NodeClickHandlerRegistry;
 import me.alfie.immersiveenchanting.config.ServerConfig;
-import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeState;
-import me.alfie.immersiveenchanting.networking.ReplicatePacket;
-import me.alfie.immersiveenchanting.networking.TransmutePacket;
 import me.alfie.immersiveenchanting.util.FxHelper;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
@@ -128,7 +127,7 @@ public class NodeTooltip implements ScreenEventListener {
             if(mouse.button() == InputConstants.MOUSE_BUTTON_LEFT) {
                 if(node().isEnchantment()) {
 
-                    if(node().isState(NodeState.OBTAINED) && canRemove()) {
+                    if (node().isState(NodeState.OBTAINED) && canRemove()) {
                         screen().tooltipManager().startHold(node());
                     } else {
                         ClientPacketDistributor.sendToServer(new EnchantPacket(
@@ -136,10 +135,8 @@ public class NodeTooltip implements ScreenEventListener {
                                 node().getEnchantmentLevel()));
                     }
 
-                } else if (node.id().equals(CostRegistry.TRANSMUTE)) {
-                    ClientPacketDistributor.sendToServer(new TransmutePacket());
-                } else if (node.id().equals(CostRegistry.REPLICATE)) {
-                    ClientPacketDistributor.sendToServer(new ReplicatePacket());
+                } else {
+                    NodeClickHandlerRegistry.handle(new NodeClickContext(node(), screen()));
                 }
 
                 screen().tooltipManager().unlockTooltip();

@@ -1,8 +1,10 @@
 package me.alfie.immersiveenchanting.event;
 
+import me.alfie.immersiveenchanting.api.ApiPostEvents;
+import me.alfie.immersiveenchanting.api.enchanting_tab.NodeClickHandlerRegistry;
 import me.alfie.immersiveenchanting.command.ModCommands;
-import me.alfie.immersiveenchanting.datapack.manager.ClientDatapackManager;
-import me.alfie.immersiveenchanting.datapack.manager.ServerDatapackManager;
+import me.alfie.immersiveenchanting.api.datapack.manager.ClientDatapackManager;
+import me.alfie.immersiveenchanting.api.datapack.manager.ServerDatapackManager;
 import me.alfie.immersiveenchanting.creativetab.ModCreativeTab;
 import me.alfie.immersiveenchanting.api.description.TooltipDescriptionExtensions;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostDatapack;
@@ -15,7 +17,9 @@ import net.neoforged.neoforge.common.NeoForge;
 public class ModEvents {
 
     public static void register(IEventBus modEventBus) {
-        NeoForge.EVENT_BUS.addListener(CostDatapack::registerServerDatapack);
+        NeoForge.EVENT_BUS.addListener(CostDatapack::register);
+        NeoForge.EVENT_BUS.addListener(NodeSoundsDatapack::register);
+
 
         NeoForge.EVENT_BUS.addListener(ServerDatapackManager::onServerStart);
         NeoForge.EVENT_BUS.addListener(ServerDatapackManager::onServerFinished);
@@ -25,7 +29,6 @@ public class ModEvents {
         NeoForge.EVENT_BUS.addListener(ServerDatapackManager::resolveEnchantmentHolders);
         NeoForge.EVENT_BUS.addListener(ClientDatapackManager::resolveEnchantmentHolders);
 
-        NeoForge.EVENT_BUS.addListener(NodeSoundsDatapack::registerServerDatapack);
 
         NeoForge.EVENT_BUS.addListener(ModCommands::registerCommands);
         modEventBus.addListener(ModMenus::registerScreens);
@@ -33,9 +36,20 @@ public class ModEvents {
         modEventBus.addListener(ModPackets::registerClient);
         modEventBus.addListener(ModPackets::registerServer);
 
-        modEventBus.addListener(TooltipDescriptionExtensions::registerInternalTooltipDescriptions);
-
         modEventBus.addListener(ModCreativeTab::buildCreativeTab);
+
+        registerPostEvents(modEventBus);
+        registerInternalApiEvents();
+    }
+
+    private static void registerPostEvents(IEventBus modEventBus) {
+        modEventBus.addListener(ApiPostEvents::postRegisterTooltipDescriptionsEvent);
+        modEventBus.addListener(ApiPostEvents::postRegisterNodeClickHandlersEvent);
+    }
+
+    private static void registerInternalApiEvents() {
+        NeoForge.EVENT_BUS.addListener(TooltipDescriptionExtensions::registerInternalTooltipDescriptions);
+        NeoForge.EVENT_BUS.addListener(NodeClickHandlerRegistry::registerInternalNodeInteractions);
     }
 
 }

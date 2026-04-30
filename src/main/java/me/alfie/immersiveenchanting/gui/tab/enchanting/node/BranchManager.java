@@ -1,6 +1,6 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.node;
 
-import me.alfie.immersiveenchanting.datapack.manager.ClientDatapackManager;
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import net.minecraft.world.item.ItemStack;
 
@@ -41,7 +41,7 @@ public class BranchManager {
      */
     public void buildBranches(ItemStack stack) {
         cachedBranches.clear();
-        cachedBranches.addAll(BranchFactory.buildBranches(stack, ClientDatapackManager.costRegistry(), screen.canvas()));
+        cachedBranches.addAll(BranchFactory.buildBranches(stack, CostRegistry.client(), screen.canvas()));
         calculateNodeAnglesAndStep();
     }
 

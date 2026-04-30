@@ -1,10 +1,12 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.node;
 
+import me.alfie.immersiveenchanting.api.enchanting_tab.NodeTemplate;
 import me.alfie.immersiveenchanting.gui.canvas.CanvasRenderable;
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.Identifier;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class NodeBranch extends CanvasRenderable {
@@ -12,13 +14,32 @@ public class NodeBranch extends CanvasRenderable {
     private List<Node> nodes;
     private float angle;
     private BranchTexture texture;
+    private final Identifier id;
 
-    public NodeBranch(Canvas canvas, List<Node> nodes, float angle) {
+    /**
+     * Constructor for API users - angles are automatically calculated by ImmersiveEnchanting.
+     * @param canvas
+     * @param nodes
+     */
+    public NodeBranch(Canvas canvas, Identifier id, List<NodeTemplate> nodeTemplates) {
         super(canvas);
-        this.nodes = nodes;
-        this.angle = angle;
+        this.id = id;
+
+        for(NodeTemplate nodeTemplate : nodeTemplates) {
+            this.nodes.add(new Node(
+                    nodeTemplate.level(),
+                    canvas,
+                    nodeTemplate.state(),
+                    nodeTemplate.tier(),
+                    nodeTemplate.type()
+            ));
+        }
 
         texture = new BranchTexture(this, canvas);
+    }
+
+    public void setAngle(float angle) {
+        this.angle = angle;
     }
 
     public List<Node> nodes() {
@@ -56,4 +77,7 @@ public class NodeBranch extends CanvasRenderable {
     }
 
 
+    public Identifier id() {
+        return id;
+    }
 }

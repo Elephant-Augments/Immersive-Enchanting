@@ -1,38 +1,33 @@
 package me.alfie.immersiveenchanting.datapack.enchantment_cost;
 
-import com.mojang.serialization.Codec;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
+import me.alfie.immersiveenchanting.api.datapack.*;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.codec.CostData;
-import net.minecraft.resources.FileToIdConverter;
+import me.alfie.immersiveenchanting.api.datapack.manager.ServerDatapackManager;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
 
 import java.util.Map;
 
-public class CostDatapack extends SimpleJsonResourceReloadListener<CostData> {
+public class CostDatapack extends ModDatapack<CostData, CostRegistry> {
 
-    private static CostDatapack INSTANCE;
-    private static final String DIRECTORY = "enchantment_costs";
-    private final CostRegistry TEMP = new CostRegistry();
+    private final CostRegistry DATA = new CostRegistry();
 
-    protected CostDatapack(Codec<CostData> codec, FileToIdConverter lister) {
-        super(codec, lister);
+    protected CostDatapack() {
+        super(CostData.CODEC, DatapackKeys.COST, CostRegistry.STREAM_CODEC);
     }
 
-    public static CostDatapack getInstance() {
-        return INSTANCE;
-    }
-
-    public CostRegistry getBuilt() {
-        return TEMP;
+    @Override
+    public CostRegistry getData() {
+        return DATA;
     }
 
     @Override
     protected void apply(Map<Identifier, CostData> identifierEnchantmentDataMap, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
-        TEMP.clear();
+        getData().clear();
 
         int count = 0;
         for(Map.Entry<Identifier, CostData> entry : identifierEnchantmentDataMap.entrySet()) {
@@ -40,7 +35,7 @@ public class CostDatapack extends SimpleJsonResourceReloadListener<CostData> {
             CostData data = entry.getValue();
 
             if(data.enabled()) {
-                TEMP.register(id, data);
+                getData().register(id, data);
                 count++;
             }
         }
@@ -54,10 +49,12 @@ public class CostDatapack extends SimpleJsonResourceReloadListener<CostData> {
         return Identifier.parse(path);
     }
 
-    public static void registerServerDatapack(AddServerReloadListenersEvent event) {
-        CostDatapack datapack = new CostDatapack(CostData.CODEC, FileToIdConverter.json(DIRECTORY));
-        INSTANCE = datapack;
+    @Override
+    public void afterPull(MinecraftServer server) {
+        ServerDatapackManager.get(DatapackKeys.COST).resolveEnchantmentHolders(server.registryAccess());
+    }
 
-        event.addListener(Identifier.fromNamespaceAndPath(ImmersiveEnchanting.MODID, DIRECTORY), datapack);
+    public static void register(AddServerReloadListenersEvent event) {
+        DatapackRegistry.register(event, CostDatapack::new);
     }
 }

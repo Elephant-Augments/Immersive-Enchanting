@@ -41,64 +41,44 @@ public class Node extends CanvasRenderable {
 
     private NodeState state;
     private NodeTier tier;
+    private NodeType type;
 
-    private final Identifier id;
+    private NodeBranch parentBranch;
     private final int enchantmentLevel;
 
     @Nullable
     private Identifier iconTexture;
 
-    /**
+     /**
      * Constructs a node that represents a real enchantment with a specific level.
      *
      * <p>This constructor should be used for standard enchantment nodes that
      * correspond to a valid enchantment ID and level.</p>
      *
-     * @param enchantmentId The identifier of the enchantment
      * @param enchantmentLevel The level of the enchantment (must be > 0)
      * @param canvas The canvas this node belongs to
      * @param state The current state of the node (e.g. locked, unlocked)
      * @param tier The visual tier of the node
+     * @param parentBranch The branch this node belongs to
      */
-    public Node(@NotNull Identifier enchantmentId,
-                int enchantmentLevel,
+    public Node(int enchantmentLevel,
                 Canvas canvas,
                 NodeState state,
-                NodeTier tier) {
+                NodeTier tier,
+                NodeType type,
+                NodeBranch parentBranch) {
         super(canvas);
-        this.id = enchantmentId;
         this.enchantmentLevel = enchantmentLevel;
         this.state = state;
         this.tier = tier;
+        this.type = type;
+        this.parentBranch = parentBranch;
 
         setIconTexture();
     }
 
-    /**
-     * Constructs a node that does not represent a traditional enchantment.
-     *
-     * <p>This is used for special-purpose nodes such as actions (e.g. transmute,
-     * replicate) that do not have an enchantment level.</p>
-     *
-     * <p>Calling {@link #getEnchantmentLevel()} on instances created with this
-     * constructor will throw an {@link IllegalStateException}.</p>
-     *
-     * @param id The identifier of the special node
-     * @param canvas The canvas this node belongs to
-     * @param state The current state of the node
-     * @param tier The visual tier of the node
-     */
-    public Node(@NotNull Identifier id,
-                Canvas canvas,
-                NodeState state,
-                NodeTier tier) {
-        super(canvas);
-        this.id = id;
-        this.enchantmentLevel = 1;
-        this.state = state;
-        this.tier = tier;
-
-        setIconTexture();
+    public NodeBranch getParentBranch() {
+        return parentBranch;
     }
 
     /**
@@ -172,7 +152,7 @@ public class Node extends CanvasRenderable {
      * @return The identifier associated with this node
      */
     public Identifier id() {
-        return id;
+        return getParentBranch().id();
     }
 
     /**
@@ -185,7 +165,7 @@ public class Node extends CanvasRenderable {
      */
     public Component getTitle() {
         if(isEnchantment()) {
-            return Enchantment.getFullname(EnchantmentUtil.toHolder(id, canvas().screen().registryAccess()), enchantmentLevel);
+            return Enchantment.getFullname(EnchantmentUtil.toHolder(id(), canvas().screen().registryAccess()), enchantmentLevel);
         } else {
             return Component.translatable("immersiveenchanting.tooltip.title." + id().getPath());
         }
@@ -197,7 +177,7 @@ public class Node extends CanvasRenderable {
      * @return {@code true} if this is an enchantment node, {@code false} if it is a special node
      */
     public boolean isEnchantment() {
-        return id != CostRegistry.TRANSMUTE && id != CostRegistry.REPLICATE;
+        return type == NodeType.ENCHANTMENT;
     }
 
     /**

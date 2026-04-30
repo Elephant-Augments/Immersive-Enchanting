@@ -9,6 +9,7 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 
 public class CostRenderer {
@@ -26,7 +27,10 @@ public class CostRenderer {
     }
 
     public void setCostToRender(Identifier id, int level) {
-        holder = costRegistry.get(id).levelCosts().getLevel(level);
+        holder = Optional.ofNullable(costRegistry.get(id))
+                .map(entry -> entry.levelCosts().getLevel(level))
+                .orElse(CostHolder.EMPTY);
+
         this.renderedCosts = getRenderedCosts(holder);
 
         fuelHolder = costRegistry.get(CostRegistry.ENCHANTING_FUELS).levelCosts().getLevel(level);

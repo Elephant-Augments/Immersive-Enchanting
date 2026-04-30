@@ -6,6 +6,7 @@ import me.alfie.immersiveenchanting.api.description.internal.ReplicateLayoutExte
 import me.alfie.immersiveenchanting.api.description.internal.TransmuteLayoutExtension;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.NodeTooltip;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
+import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +20,7 @@ public final class TooltipDescriptionExtensions {
      */
     public static void register(DescriptionLayoutExtension extension) {
         EXTENSIONS.add(extension);
+        ImmersiveEnchanting.LOGGER.debug("Successfully registered DescriptionLayoutExtension {}", extension);
     }
 
     /**
@@ -43,9 +45,9 @@ public final class TooltipDescriptionExtensions {
         apply(parentTooltip, descriptionLayout);
     }
 
-    public static void registerInternalTooltipDescriptions(FMLLoadCompleteEvent event) {
-        TooltipDescriptionExtensions.register(new EnchantLayoutExtension());
-        TooltipDescriptionExtensions.register(new TransmuteLayoutExtension());
-        TooltipDescriptionExtensions.register(new ReplicateLayoutExtension());
+    public static void registerInternalTooltipDescriptions(RegisterDescriptionLayoutEvent event) {
+        event.register(new EnchantLayoutExtension());
+        event.register(new TransmuteLayoutExtension());
+        event.register(new ReplicateLayoutExtension());
     }
 }
