@@ -1,7 +1,6 @@
 package me.alfie.immersiveenchanting.api.enchanting_tab;
 
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
-import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeBranch;
 import net.minecraft.resources.Identifier;
 
@@ -12,7 +11,7 @@ public class BranchBuilder {
 
     private final Canvas canvas;
     private final Identifier id;
-    private final List<NodeTemplate> nodes = new ArrayList<>();
+    private final List<NodeTemplate> nodeTemplates = new ArrayList<>();
 
     private BranchBuilder(Canvas canvas, Identifier id) {
         this.canvas = canvas;
@@ -24,11 +23,16 @@ public class BranchBuilder {
     }
 
     public NodeBranch build() {
-        return new NodeBranch(canvas, id, new ArrayList<>(nodes));
+        return new NodeBranch(canvas, id, new ArrayList<>(nodeTemplates));
     }
 
     public BranchBuilder node(NodeTemplate template) {
-        nodes.add(template);
+        nodeTemplates.add(template);
+        return this;
+    }
+
+    public BranchBuilder nodes(List<NodeTemplate> templates) {
+        nodeTemplates.addAll(templates);
         return this;
     }
 

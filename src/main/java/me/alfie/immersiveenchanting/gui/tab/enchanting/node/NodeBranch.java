@@ -11,7 +11,7 @@ import java.util.List;
 
 public class NodeBranch extends CanvasRenderable {
 
-    private List<Node> nodes;
+    private final List<Node> nodes;
     private float angle;
     private BranchTexture texture;
     private final Identifier id;
@@ -19,21 +19,24 @@ public class NodeBranch extends CanvasRenderable {
     /**
      * Constructor for API users - angles are automatically calculated by ImmersiveEnchanting.
      * @param canvas
-     * @param nodes
+     * @param nodeTemplates
      */
     public NodeBranch(Canvas canvas, Identifier id, List<NodeTemplate> nodeTemplates) {
         super(canvas);
         this.id = id;
 
+        List<Node> builtNodes = new ArrayList<>();
         for(NodeTemplate nodeTemplate : nodeTemplates) {
-            this.nodes.add(new Node(
+            builtNodes.add(new Node(
                     nodeTemplate.level(),
                     canvas,
                     nodeTemplate.state(),
                     nodeTemplate.tier(),
-                    nodeTemplate.type()
+                    nodeTemplate.type(),
+                    this
             ));
         }
+        nodes = builtNodes;
 
         texture = new BranchTexture(this, canvas);
     }

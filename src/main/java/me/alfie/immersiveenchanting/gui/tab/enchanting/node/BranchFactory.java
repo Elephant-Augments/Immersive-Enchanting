@@ -53,16 +53,6 @@ public class BranchFactory {
     private static void buildAncientBookBranches(BuildBranchesEvent event) {
         buildTransmuteBranch(event);
         buildReplicateBranch(event);
-
-        event.addBranch(
-                BranchBuilder.of(event.getCanvas(), Identifier.fromNamespaceAndPath("test", "test"))
-                        .node(new NodeTemplate(
-                                1,
-                                NodeState.OBTAINED,
-                                NodeTier.ELITE,
-                                NodeType.ACTION
-                        ))
-                        .build());
     }
 
     private static void buildEnchantingBranches(BuildBranchesEvent event) {
