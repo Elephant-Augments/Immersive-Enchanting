@@ -59,6 +59,7 @@ public record CostLevels(Map<Integer, CostHolder> levelCostMap) {
     );
 
     public CostHolder getLevel(int level) {
+        if(!levelCostMap.containsKey(level)) return CostHolder.EMPTY;
         return levelCostMap.get(level);
     }
 

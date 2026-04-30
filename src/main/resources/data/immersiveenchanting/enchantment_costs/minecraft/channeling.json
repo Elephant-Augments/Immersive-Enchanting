@@ -2,8 +2,10 @@
   "levels": {
     "1": [
       {
-        "item": "minecraft:lightning_rod",
-        "amount": 1
+        "item_stack": {
+          "item_or_tag_id": "minecraft:lightning_rod",
+          "count": 1
+        }
       }
     ]
   }

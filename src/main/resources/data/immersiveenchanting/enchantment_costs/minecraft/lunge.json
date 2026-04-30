@@ -3,20 +3,26 @@
   "levels": {
     "1": [
       {
-        "item": "minecraft:slime_ball",
-        "amount": 1
+        "item_stack": {
+          "item_or_tag_id": "minecraft:slime_ball",
+          "count": 1
+        }
       }
     ],
     "2": [
       {
-        "item": "minecraft:rabbit_foot",
-        "amount": 1
+        "item_stack": {
+          "item_or_tag_id": "minecraft:rabbit_foot",
+          "count": 1
+        }
       }
     ],
     "3": [
       {
-        "item": "minecraft:ochre_froglight",
-        "amount": 1
+        "item_stack": {
+          "item_or_tag_id": "minecraft:ochre_froglight",
+          "count": 1
+        }
       }
     ]
   }

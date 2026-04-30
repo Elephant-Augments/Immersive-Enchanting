@@ -10,6 +10,8 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
+import net.minecraft.world.item.Items;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,27 +73,21 @@ public record ItemOrTag(Optional<Identifier> item,
             }
     );
 
+    public static final ItemOrTag EMPTY = new ItemOrTag(Optional.of(Identifier.parse("minecraft:air")), Optional.empty());
+
     /**
      * Returns all items found in ItemOrTag.
      * @return
      */
-    public List<ItemStack> getItemStacks(int amount) {
-        if(tag().isPresent()) {
-            List<Item> itemsInTag = BuiltInRegistries.ITEM.get(tag().get())
-                    .map(tagSet -> tagSet.stream()
-                            .map(Holder::value)
-                            .collect(Collectors.toList())).orElse(List.of());
-
-            List<ItemStack> itemStacks = new ArrayList<>();
-            for(Item item : itemsInTag) {
-                itemStacks.add(new ItemStack(item, amount));
-            }
-            return itemStacks;
-
+    public List<Holder<Item>> getItems() {
+        if (tag().isPresent()) {
+            return BuiltInRegistries.ITEM.get(tag().get())
+                    .map(tagSet -> tagSet.stream().toList())
+                    .orElse(List.of());
         } else {
             Identifier id = item().get();
-            Item item = BuiltInRegistries.ITEM.get(id).get().value();
-            return List.of(new ItemStack(item, amount));
+            Holder.Reference<Item> item = BuiltInRegistries.ITEM.get(id).get();
+            return List.of(item);
         }
     }
 }

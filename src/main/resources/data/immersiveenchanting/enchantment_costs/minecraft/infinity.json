@@ -2,8 +2,10 @@
   "levels": {
     "1": [
       {
-        "item": "minecraft:nether_star",
-        "amount": 1
+        "item_stack": {
+          "item_or_tag_id": "minecraft:nether_star",
+          "count": 1
+        }
       }
     ]
   }

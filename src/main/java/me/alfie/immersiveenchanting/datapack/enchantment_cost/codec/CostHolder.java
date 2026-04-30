@@ -31,4 +31,7 @@ public record CostHolder(List<Cost> costs) {
 
         return result;
     }
+
+    public static final CostHolder EMPTY = new CostHolder(List.of(Cost.EMPTY));
+
 }

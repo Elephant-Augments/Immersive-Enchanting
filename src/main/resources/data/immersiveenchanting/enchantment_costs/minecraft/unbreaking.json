@@ -2,20 +2,26 @@
   "levels": {
     "1": [
       {
-        "item": "minecraft:iron_block",
-        "amount": 1
+        "item_stack": {
+          "item_or_tag_id": "minecraft:iron_block",
+          "count": 1
+        }
       }
     ],
     "2": [
       {
-        "item": "minecraft:armadillo_scute",
-        "amount": 1
+        "item_stack": {
+          "item_or_tag_id": "minecraft:armadillo_scute",
+          "count": 1
+        }
       }
     ],
     "3": [
       {
-        "item": "minecraft:resin_bricks",
-        "amount": 1
+        "item_stack": {
+          "item_or_tag_id": "minecraft:resin_bricks",
+          "count": 1
+        }
       }
     ]
   }

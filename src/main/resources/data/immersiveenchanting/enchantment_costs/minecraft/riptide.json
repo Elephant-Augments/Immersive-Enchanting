@@ -2,20 +2,26 @@
   "levels": {
     "1": [
       {
-        "item": "minecraft:water_bucket",
-        "amount": 1
+        "item_stack": {
+          "item_or_tag_id": "minecraft:water_bucket",
+          "count": 1
+        }
       }
     ],
     "2": [
       {
-        "item": "minecraft:slime_block",
-        "amount": 1
+        "item_stack": {
+          "item_or_tag_id": "minecraft:slime_block",
+          "count": 1
+        }
       }
     ],
     "3": [
       {
-        "item": "minecraft:heart_of_the_sea",
-        "amount": 1
+        "item_stack": {
+          "item_or_tag_id": "minecraft:heart_of_the_sea",
+          "count": 1
+        }
       }
     ]
   }

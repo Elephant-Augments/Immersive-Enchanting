@@ -5,33 +5,23 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
-import net.minecraft.commands.arguments.CompoundTagArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
-import net.minecraft.resources.RegistryOps;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ItemStackTemplate;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChiseledBookShelfBlock;
-import net.minecraft.world.level.block.entity.ChiseledBookShelfBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.storage.TagValueOutput;
-import net.neoforged.neoforge.common.Tags;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,12 +36,12 @@ public class FillChiseledBookshelfProcessor extends StructureProcessor {
 
     private static final MapCodec<FillChiseledBookshelfProcessor> CODEC =
             RecordCodecBuilder.mapCodec(instance -> instance.group(
-                    SimpleLootEntry.CODEC.listOf().fieldOf("items").forGetter(e -> e.simpleLootTable)
+                    ChiseledBookshelfLootEntry.CODEC.listOf().fieldOf("items").forGetter(e -> e.simpleLootTable)
             ).apply(instance, FillChiseledBookshelfProcessor::new));
 
-    private final List<SimpleLootEntry> simpleLootTable;
+    private final List<ChiseledBookshelfLootEntry> simpleLootTable;
 
-    public FillChiseledBookshelfProcessor(List<SimpleLootEntry> simpleLootTable) {
+    public FillChiseledBookshelfProcessor(List<ChiseledBookshelfLootEntry> simpleLootTable) {
         this.simpleLootTable = simpleLootTable;
     }
 
@@ -151,13 +141,13 @@ public class FillChiseledBookshelfProcessor extends StructureProcessor {
      * @return generated item stack, or empty if roll fails
      */
     private ItemStack rollLootForSlot(RandomSource random) {
-        SimpleLootEntry lootEntry = simpleLootTable.get(random.nextInt(simpleLootTable.size()));
+        ChiseledBookshelfLootEntry lootEntry = simpleLootTable.get(random.nextInt(simpleLootTable.size()));
 
         float chance = lootEntry.chancePerSlot();
         float roll = random.nextFloat();
 
         if(roll < chance) {
-            List<ItemStack> itemStacks = lootEntry.itemOrTag().getItemStacks(1);
+            List<ItemStack> itemStacks = lootEntry.getItemStacks();
             int randomIndex = random.nextInt(itemStacks.size());
 
             ItemStack randomStack = itemStacks.get(randomIndex);

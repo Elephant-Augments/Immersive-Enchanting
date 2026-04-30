@@ -342,8 +342,8 @@ public class EnchantmentUtil {
         Cost validCost = findValidCost(costStack, enchantmentId, level, player, costRegistry);
         Cost validFuel = findValidEnchantingFuel(fuelStack, level, costRegistry);
 
-        menu.getCostSlot().getItem().shrink(validCost.amount());
-        menu.getFuelSlot().getItem().shrink(validFuel.amount());
+        menu.getCostSlot().getItem().shrink(validCost.itemStackHolder().amount());
+        menu.getFuelSlot().getItem().shrink(validFuel.itemStackHolder().amount());
 
         player.giveExperienceLevels(-validCost.xpLevels());
     }

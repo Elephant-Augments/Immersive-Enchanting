@@ -2,26 +2,34 @@
   "levels": {
     "1": [
       {
-        "item": "minecraft:copper_block",
-        "amount": 1
+        "item_stack": {
+          "item_or_tag_id": "minecraft:copper_block",
+          "count": 1
+        }
       }
     ],
     "2": [
       {
-        "item": "minecraft:iron_block",
-        "amount": 1
+        "item_stack": {
+          "item_or_tag_id": "minecraft:iron_block",
+          "count": 1
+        }
       }
     ],
     "3": [
       {
-        "item": "minecraft:obsidian",
-        "amount": 1
+        "item_stack": {
+          "item_or_tag_id": "minecraft:obsidian",
+          "count": 1
+        }
       }
     ],
     "4": [
       {
-        "item": "minecraft:end_stone_bricks",
-        "amount": 8
+        "item_stack": {
+          "item_or_tag_id": "minecraft:end_stone_bricks",
+          "count": 8
+        }
       }
     ]
   }

@@ -2,8 +2,10 @@
   "levels": {
     "1": [
       {
-        "item": "minecraft:end_crystal",
-        "amount": 1
+        "item_stack": {
+          "item_or_tag_id": "minecraft:end_crystal",
+          "count": 1
+        }
       }
     ]
   }
