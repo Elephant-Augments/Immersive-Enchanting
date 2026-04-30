@@ -1,4 +1,4 @@
-package me.alfie.immersiveenchanting.api.enchanting_tab;
+package me.alfie.immersiveenchanting.api.node;
 
 @FunctionalInterface
 public interface NodeClickHandler {

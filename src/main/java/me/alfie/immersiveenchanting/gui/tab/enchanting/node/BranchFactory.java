@@ -1,15 +1,14 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.node;
 
-import me.alfie.immersiveenchanting.api.enchanting_tab.BranchBuilder;
-import me.alfie.immersiveenchanting.api.enchanting_tab.BuildBranchesEvent;
-import me.alfie.immersiveenchanting.api.enchanting_tab.NodeTemplate;
+import me.alfie.immersiveenchanting.api.node.BranchBuilder;
+import me.alfie.immersiveenchanting.api.node.BuildBranchesEvent;
+import me.alfie.immersiveenchanting.api.node.NodeTemplate;
 import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
 import net.minecraft.core.Holder;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;

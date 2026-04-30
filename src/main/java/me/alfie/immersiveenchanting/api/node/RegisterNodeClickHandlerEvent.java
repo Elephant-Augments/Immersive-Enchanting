@@ -1,4 +1,4 @@
-package me.alfie.immersiveenchanting.api.enchanting_tab;
+package me.alfie.immersiveenchanting.api.node;
 
 import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.Event;

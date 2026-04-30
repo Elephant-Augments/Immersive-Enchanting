@@ -1,6 +1,6 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.node;
 
-import me.alfie.immersiveenchanting.api.enchanting_tab.NodeTemplate;
+import me.alfie.immersiveenchanting.api.node.NodeTemplate;
 import me.alfie.immersiveenchanting.gui.canvas.CanvasRenderable;
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
 import net.minecraft.client.gui.GuiGraphicsExtractor;

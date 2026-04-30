@@ -2,8 +2,8 @@ package me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.cursor.CursorTypes;
-import me.alfie.immersiveenchanting.api.enchanting_tab.NodeClickContext;
-import me.alfie.immersiveenchanting.api.enchanting_tab.NodeClickHandlerRegistry;
+import me.alfie.immersiveenchanting.api.node.NodeClickContext;
+import me.alfie.immersiveenchanting.api.node.NodeClickHandlerRegistry;
 import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeState;
 import me.alfie.immersiveenchanting.util.FxHelper;

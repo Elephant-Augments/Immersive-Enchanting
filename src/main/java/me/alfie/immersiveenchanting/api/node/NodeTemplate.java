@@ -1,4 +1,4 @@
-package me.alfie.immersiveenchanting.api.enchanting_tab;
+package me.alfie.immersiveenchanting.api.node;
 
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeState;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeTier;

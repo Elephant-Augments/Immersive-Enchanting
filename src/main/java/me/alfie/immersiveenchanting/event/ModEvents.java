@@ -1,7 +1,7 @@
 package me.alfie.immersiveenchanting.event;
 
 import me.alfie.immersiveenchanting.api.ApiPostEvents;
-import me.alfie.immersiveenchanting.api.enchanting_tab.NodeClickHandlerRegistry;
+import me.alfie.immersiveenchanting.api.node.NodeClickHandlerRegistry;
 import me.alfie.immersiveenchanting.command.ModCommands;
 import me.alfie.immersiveenchanting.api.datapack.manager.ClientDatapackManager;
 import me.alfie.immersiveenchanting.api.datapack.manager.ServerDatapackManager;
