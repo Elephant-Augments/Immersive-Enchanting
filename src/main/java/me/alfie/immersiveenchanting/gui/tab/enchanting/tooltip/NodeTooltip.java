@@ -6,12 +6,14 @@ import me.alfie.immersiveenchanting.api.node.NodeClickContext;
 import me.alfie.immersiveenchanting.api.node.NodeClickHandlerRegistry;
 import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeState;
+import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeType;
 import me.alfie.immersiveenchanting.util.FxHelper;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.core.ScreenEventListener;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
 import me.alfie.immersiveenchanting.networking.EnchantPacket;
+import me.alfie.immersiveenchanting.util.ModFilterIds;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -45,6 +47,8 @@ public class NodeTooltip implements ScreenEventListener {
 
     private int hoverWidth;
     private int hoverHeight;
+
+    private boolean lockingAllowed = true;
 
     /**
      * Creates a tooltip for a specific node on the enchanting screen.
@@ -107,7 +111,7 @@ public class NodeTooltip implements ScreenEventListener {
         }
 
         if(screen().isMouseOver(screenPos.x(), screenPos.y(), hoverWidth, hoverHeight, mouseX, mouseY)) {
-            screen().tooltipManager().requestTooltip(node());
+            screen().tooltipManager().requestTooltip(node(), 0);
 
             if(screen().tooltipManager().isHoldingTooltip()) screen().tooltipManager().updateHold();
         } else {
@@ -125,7 +129,7 @@ public class NodeTooltip implements ScreenEventListener {
     public boolean onMouseClick(MouseButtonEvent mouse) {
         if(screen().isMouseOver(screenPos.x(), screenPos.y(), Node.WIDTH, Node.HEIGHT, mouse.x(), mouse.y())) {
             if(mouse.button() == InputConstants.MOUSE_BUTTON_LEFT) {
-                if(node().isEnchantment()) {
+                if(node().isType(NodeType.ENCHANTMENT)) {
 
                     if (node().isState(NodeState.OBTAINED) && canRemove()) {
                         screen().tooltipManager().startHold(node());
@@ -133,11 +137,19 @@ public class NodeTooltip implements ScreenEventListener {
                         ClientPacketDistributor.sendToServer(new EnchantPacket(
                                 EnchantmentUtil.toHolder(node().id(), screen().registryAccess()),
                                 node().getEnchantmentLevel()));
+                        return true;
                     }
+
+                } else if(node().isType(NodeType.MOD_FILTER)) {
+                    screen().enchantingTab().setFilteredModid(ModFilterIds.getModidFromFilterId(node().id()));
+                    screen().rebuildBranches();
 
                 } else {
                     NodeClickHandlerRegistry.handle(new NodeClickContext(node(), screen()));
+                    return true;
                 }
+
+
 
                 screen().tooltipManager().unlockTooltip();
                 return true;
@@ -146,7 +158,7 @@ public class NodeTooltip implements ScreenEventListener {
 
 
         if(screen().isMouseOver(screenPos.x(), screenPos.y(), hoverWidth, hoverHeight, mouse.x(), mouse.y())) {
-            if(mouse.button() == InputConstants.MOUSE_BUTTON_RIGHT) {
+            if(mouse.button() == InputConstants.MOUSE_BUTTON_RIGHT && isLockingAllowed()) {
                 if(screen().tooltipManager().isTooltipLockedFor(node())) {
                     screen().tooltipManager().unlockTooltip();
                 } else {
@@ -189,5 +201,13 @@ public class NodeTooltip implements ScreenEventListener {
                 .getItem()
                 .getEnchantmentLevel(EnchantmentUtil.toHolder(node().id(), screen().registryAccess()))
                 && ServerConfig.isEnchantmentRemovalAllowed();
+    }
+
+    public void setLockingAllowed(boolean allowed) {
+        lockingAllowed = allowed;
+    }
+
+    public boolean isLockingAllowed() {
+        return lockingAllowed;
     }
 }

@@ -8,6 +8,8 @@ import net.minecraft.resources.Identifier;
 public enum Sprite {
     ENCHANTING_TABLE_GUI("textures/gui/container/enchanting_table.png", 256, 256),
     BACKGROUND_TILE("textures/gui/sprites/background_tile.png", 16, 16),
+    ALT_BACKGROUND_TILE("textures/gui/sprites/alt_background_tile.png", 16, 16),
+
 
     //Enchanting tab
     BOOK_OPEN("textures/gui/sprites/enchantingtab/book_open.png", 32, 32),

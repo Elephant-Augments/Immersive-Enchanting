@@ -28,10 +28,12 @@ public class NodeBranch extends CanvasRenderable {
         List<Node> builtNodes = new ArrayList<>();
         for(NodeTemplate nodeTemplate : nodeTemplates) {
             builtNodes.add(new Node(
+                    nodeTemplate.title(),
                     nodeTemplate.level(),
                     canvas,
                     nodeTemplate.state(),
                     nodeTemplate.tier(),
+                    nodeTemplate.icon(),
                     nodeTemplate.type(),
                     this
             ));

@@ -202,14 +202,14 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
                     .levelCosts().getAllLevels();
 
             Set<Item> enchantingFuelItems = new HashSet<>();
-            for(Cost enchantmentCost : enchantingFuels) {
-                for(ItemStack fuelStack : enchantmentCost.getItemStacks()) {
+            for(Cost fuelCost : enchantingFuels) {
+                for(ItemStack fuelStack : fuelCost.getItemStacks()) {
                     enchantingFuelItems.add(fuelStack.getItem());
                 }
             }
 
             //Quick move into menu
-            if(stack.has(DataComponents.ENCHANTABLE) || stack.is(ModItems.ANCIENT_BOOK.get())) {
+            if(stack.has(DataComponents.ENCHANTABLE) || stack.is(ModItems.ANCIENT_BOOK.get()) || stack.is(ModItems.CREATIVE_BOOKSHELF_ITEM)) {
                 if (!this.moveItemStackTo(stack, 0, 1, false)) return ItemStack.EMPTY;
             } else if(enchantingFuelItems.contains(stack.getItem())) {
                 if (!this.moveItemStackTo(stack, 1, 2, false)) return ItemStack.EMPTY;

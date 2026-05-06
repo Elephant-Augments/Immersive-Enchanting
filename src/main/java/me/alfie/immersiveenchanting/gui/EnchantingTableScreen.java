@@ -61,8 +61,9 @@ public class EnchantingTableScreen extends AbstractContainerScreen<@NotNull Ench
     private final CostRenderer enchantmentCostRenderer;
     private final TooltipManager tooltipManager;
 
-
     private final Player player;
+
+    private boolean isTabKeyDown;
 
     public EnchantingTableScreen(EnchantingTableMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title, 256, 222);
@@ -268,7 +269,24 @@ public class EnchantingTableScreen extends AbstractContainerScreen<@NotNull Ench
             }
         }
 
+        if(isState(ScreenState.ENCHANTING)) {
+            if(event.key() == InputConstants.KEY_TAB) {
+                isTabKeyDown = true;
+                return true;
+            }
+        }
+
         return super.keyPressed(event);
+    }
+
+    @Override
+    public boolean keyReleased(KeyEvent event) {
+        if(event.key() == InputConstants.KEY_TAB) {
+            isTabKeyDown = false;
+            return true;
+        }
+
+        return super.keyReleased(event);
     }
 
     /**
@@ -308,10 +326,32 @@ public class EnchantingTableScreen extends AbstractContainerScreen<@NotNull Ench
     @Override
     protected void containerTick() {
         ItemStack stack = getMenu().getToolSlot().getItem();
+
         if(!ItemStack.isSameItemSameComponents(stack, lastToolSlotStack)) {
             onToolSlotUpdate(stack);
             lastToolSlotStack = stack.copy();
         }
+
+        if(isTabKeyDown) {
+            if (enchantingTab().isDisplay(EnchantingTab.Display.ENCHANTMENTS)
+            && getMenu().getToolSlot().hasItem()) {
+                enchantingTab.setDisplay(EnchantingTab.Display.MOD_FILTERS);
+                FxHelper.playTabDown(player());
+                rebuildBranches();
+                resetCamera();
+                tooltipManager().unlockTooltip();
+            }
+        } else {
+            if(enchantingTab().isDisplay(EnchantingTab.Display.MOD_FILTERS)) {
+                enchantingTab.setDisplay(EnchantingTab.Display.ENCHANTMENTS);
+                FxHelper.playTabUp(player());
+                rebuildBranches();
+                resetCamera();
+            }
+        }
+
+
+
     }
 
     /**
@@ -323,15 +363,31 @@ public class EnchantingTableScreen extends AbstractContainerScreen<@NotNull Ench
      * @param newStack the new item in the tool slot
      */
     private void onToolSlotUpdate(ItemStack newStack) {
-        enchantingTab.branchManager().buildBranches(newStack);
-        canvas().setSizeToFitNodes(CostRegistry.client().getHighestLevel());
-        enchantingTab.branchManager().positionBranches();
-
+        enchantingTab.setDisplay(EnchantingTab.Display.ENCHANTMENTS);
+        rebuildBranches(newStack);
         FxHelper.playToolSlotChanged(player().level());
 
         if(camera() == null) return;
         if(newStack.getItem().equals(lastToolSlotStack.getItem())) return;
         camera().setDraggingEnabled(!newStack.isEmpty());
+        resetCamera();
+    }
+
+    public void rebuildBranches() {
+        rebuildBranches(lastToolSlotStack);
+    }
+
+    private void rebuildBranches(ItemStack newStack) {
+        enchantingTab.branchManager().buildBranches(newStack);
+        canvas().setSizeToFitNodes(CostRegistry.client().getHighestLevel());
+        enchantingTab.branchManager().positionBranches();
+    }
+
+    /**
+     * Reset camera zoom and recenter
+     */
+    private void resetCamera() {
+        if(camera() == null) return;
         camera().setZoom(1f);
         camera().centerCameraOnCanvas();
     }
@@ -388,5 +444,9 @@ public class EnchantingTableScreen extends AbstractContainerScreen<@NotNull Ench
     /** @return book tab UI controller */
     public BookTab bookTab() {
         return bookTab;
+    }
+
+    public EnchantingTab enchantingTab() {
+        return enchantingTab;
     }
 }

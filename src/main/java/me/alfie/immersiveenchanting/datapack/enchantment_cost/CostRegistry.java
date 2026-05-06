@@ -114,7 +114,8 @@ public class CostRegistry {
     }
 
     public CostData get(Identifier id) {
-        return ID_REGISTRY.get(id);
+        CostData data = ID_REGISTRY.get(id);
+        return data != null ? data : CostData.EMPTY;
     }
 
     public void clear() {

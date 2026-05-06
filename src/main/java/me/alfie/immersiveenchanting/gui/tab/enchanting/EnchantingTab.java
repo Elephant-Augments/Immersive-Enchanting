@@ -6,6 +6,7 @@ import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.TooltipManager;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.item.ItemStack;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -26,10 +27,20 @@ import java.util.List;
  */
 public class EnchantingTab {
 
+    public enum Display {
+        ENCHANTMENTS,
+        MOD_FILTERS
+    }
+
     private final CentralSlot centralSlot;
 
     private final EnchantingTableScreen screen;
     private final BranchManager branchManager;
+    private Display currentDisplay = Display.ENCHANTMENTS;
+
+    @Nullable
+    private String filteredModid;
+
 
     /**
      * Constructs the enchanting tab and initializes its core components.
@@ -82,5 +93,30 @@ public class EnchantingTab {
      */
     public BranchManager branchManager() {
         return branchManager;
+    }
+
+    public void setDisplay(Display display) {
+        currentDisplay = display;
+    }
+
+    public Display getDisplay() {
+        return currentDisplay;
+    }
+
+    public boolean isDisplay(Display display) {
+        return currentDisplay == display;
+    }
+
+    /**
+     * Set to null for all enchantments.
+     * @param modid
+     */
+    public void setFilteredModid(@Nullable String modid) {
+        this.filteredModid = modid;
+    }
+
+    @Nullable
+    public String getFilteredModid() {
+        return filteredModid;
     }
 }

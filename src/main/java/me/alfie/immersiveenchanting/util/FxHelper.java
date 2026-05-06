@@ -6,6 +6,7 @@ import me.alfie.immersiveenchanting.datapack.node_sounds.NodeSoundMap;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeState;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeTier;
+import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
@@ -46,6 +47,11 @@ public class FxHelper {
     public static void playNodeHover(Level level, Node node) {
         if(!ClientConfig.areNodeHoverSoundsEnabled()) return;
 
+        if(node.isType(NodeType.MOD_FILTER)) {
+            playModFilterNodeHover(level);
+            return;
+        }
+
         if(node.isState(NodeState.LOCKED) || node.isState(NodeState.ALERT)) {
             playGenericNodeHover(level);
             return;
@@ -66,6 +72,11 @@ public class FxHelper {
         if(node.getTier().equals(NodeTier.ELITE)) {
             playClientUISound(level, SoundEvents.AMETHYST_BLOCK_RESONATE, 1f, 2);
         }
+    }
+
+    private static void playModFilterNodeHover(Level level) {
+        float randomPitch = level.getRandom().nextFloat() * 2;
+        playClientUISound(level, SoundEvents.DISPENSER_DISPENSE, 0.5f, randomPitch);
     }
 
     private static void playGenericNodeHover(Level level) {
@@ -183,5 +194,13 @@ public class FxHelper {
 
     public static void playGenericUISound(Player player) {
         playClientUISound(player.level(), SoundEvents.UI_BUTTON_CLICK.value(), 0.3f, 1f);
+    }
+
+    public static void playTabDown(Player player) {
+        playClientUISound(player.level(), SoundEvents.DISPENSER_DISPENSE, 0.5f, 0.8f);
+    }
+
+    public static void playTabUp(Player player) {
+        playClientUISound(player.level(), SoundEvents.DISPENSER_DISPENSE, 0.5f, 1.2f);
     }
 }

@@ -2,6 +2,7 @@ package me.alfie.immersiveenchanting.api.description;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.api.description.internal.EnchantLayoutExtension;
+import me.alfie.immersiveenchanting.api.description.internal.ModFilterLayoutExtension;
 import me.alfie.immersiveenchanting.api.description.internal.ReplicateLayoutExtension;
 import me.alfie.immersiveenchanting.api.description.internal.TransmuteLayoutExtension;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.NodeTooltip;
@@ -49,5 +50,6 @@ public final class TooltipDescriptionExtensions {
         event.register(new EnchantLayoutExtension());
         event.register(new TransmuteLayoutExtension());
         event.register(new ReplicateLayoutExtension());
+        event.register(new ModFilterLayoutExtension());
     }
 }

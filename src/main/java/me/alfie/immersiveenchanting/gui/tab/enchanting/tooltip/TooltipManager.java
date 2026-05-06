@@ -11,6 +11,7 @@ public class TooltipManager {
 
     private Node lockedTooltipNode;
     private NodeTooltip activeTooltip;
+    private int activeTooltipPriority;
     private boolean isTooltipRequestedThisFrame;
     private final EnchantingTableScreen screen;
 
@@ -54,20 +55,23 @@ public class TooltipManager {
         return activeTooltip != null && activeTooltip.node().equals(node);
     }
 
-    public void requestTooltip(Node node) {
+    public void requestTooltip(Node node, int priority) {
+        if(priority < activeTooltipPriority) return;
+
         isTooltipRequestedThisFrame = true;
-        setTooltip(node);
+        setTooltip(node, priority);
     }
 
     public boolean isTooltipRequestedThisFrame() {
         return isTooltipRequestedThisFrame;
     }
 
-    private void setTooltip(Node node) {
+    private void setTooltip(Node node, int priority) {
         if(isTooltipLocked()) return;
         if(hasActiveTooltip() && getActiveTooltipNode().equals(node)) return;
 
         activeTooltip = new NodeTooltip(screen, node);
+        activeTooltipPriority = priority;
         FxHelper.playNodeHover(screen.player().level(), node);
     }
 
@@ -77,6 +81,7 @@ public class TooltipManager {
 
     public void clearActiveTooltip() {
         activeTooltip = null;
+        activeTooltipPriority = 0;
     }
 
 

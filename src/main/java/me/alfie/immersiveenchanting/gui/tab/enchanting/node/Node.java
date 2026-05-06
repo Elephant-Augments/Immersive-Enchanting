@@ -1,16 +1,13 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.node;
 
-import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
-import me.alfie.immersiveenchanting.util.EnchantmentTextureHelper;
-import me.alfie.immersiveenchanting.util.EnchantmentUtil;
+import me.alfie.immersiveenchanting.api.node.ItemIcon;
+import me.alfie.immersiveenchanting.api.node.NodeIcon;
+import me.alfie.immersiveenchanting.api.node.SpriteIcon;
 import me.alfie.immersiveenchanting.gui.canvas.CanvasRenderable;
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.item.enchantment.Enchantment;
-import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 
@@ -43,11 +40,14 @@ public class Node extends CanvasRenderable {
     private NodeTier tier;
     private NodeType type;
 
+    @Nullable
+    private NodeIcon icon;
+    private Component title;
+
+    private CanvasRenderable renderableIcon;
+
     private NodeBranch parentBranch;
     private final int enchantmentLevel;
-
-    @Nullable
-    private Identifier iconTexture;
 
      /**
      * Constructs a node that represents a real enchantment with a specific level.
@@ -61,10 +61,12 @@ public class Node extends CanvasRenderable {
      * @param tier The visual tier of the node
      * @param parentBranch The branch this node belongs to
      */
-    public Node(int enchantmentLevel,
+    public Node(Component title,
+                int enchantmentLevel,
                 Canvas canvas,
                 NodeState state,
                 NodeTier tier,
+                @Nullable NodeIcon icon,
                 NodeType type,
                 NodeBranch parentBranch) {
         super(canvas);
@@ -73,8 +75,9 @@ public class Node extends CanvasRenderable {
         this.tier = tier;
         this.type = type;
         this.parentBranch = parentBranch;
+        this.title = title;
 
-        setIconTexture();
+        setIcon(icon);
     }
 
     public NodeBranch getParentBranch() {
@@ -105,13 +108,25 @@ public class Node extends CanvasRenderable {
                 getScaledLength(Node.WIDTH), getScaledLength(Node.HEIGHT),
                 mouseX, mouseY)) {
 
-            if(!canvas().screen().camera().isDragging()) canvas().screen().tooltipManager().requestTooltip(this);
+            if(!canvas().screen().camera().isDragging()) {
+                int priority = canvas().screen()
+                        .enchantingTab()
+                        .branchManager()
+                        .getAllNodes()
+                        .indexOf(this);
+
+                canvas().screen().tooltipManager().requestTooltip(this, priority);
+            }
+
         }
 
         if(canvas().screen().tooltipManager().isActiveTooltipFor(this)) return;
         blit(graphics, state.getSpriteForTier(tier), canvas().getCurrentBrightness());
-        if(iconTexture != null) {
-            blit(graphics, iconTexture, 16, 16, 4, 4, canvas().getCurrentBrightness());
+
+        if(getIcon() instanceof SpriteIcon sprite) {
+            blit(graphics, sprite.id(), 16, 16, 4, 4, canvas().getCurrentBrightness());
+        } else if(getIcon() instanceof ItemIcon item) {
+            item(graphics, item.stack(), 4, 4, canvas().getCurrentBrightness());
         }
     }
 
@@ -121,10 +136,10 @@ public class Node extends CanvasRenderable {
      * <p>Defaults to an "ancient book" texture unless the node is in a locked state,
      * in which case no icon is rendered.</p>
      */
-    private void setIconTexture() {
-        iconTexture = EnchantmentTextureHelper.getTexture(id());
+    private void setIcon(NodeIcon icon) {
+        this.icon = icon;
 
-        if(isState(NodeState.LOCKED) || isState(NodeState.ALERT)) iconTexture = null;
+        if(isState(NodeState.LOCKED) || isState(NodeState.ALERT)) this.icon = null;
     }
 
     /**
@@ -141,11 +156,15 @@ public class Node extends CanvasRenderable {
         return state;
     }
 
+    public NodeType getType() {
+        return type;
+    }
+
     /**
      * @return The icon texture
      */
-    public @Nullable Identifier getIconTexture() {
-        return iconTexture;
+    public @Nullable NodeIcon getIcon() {
+        return icon;
     }
 
     /**
@@ -164,20 +183,11 @@ public class Node extends CanvasRenderable {
      * @return A {@link Component} representing the node title
      */
     public Component getTitle() {
-        if(isEnchantment()) {
-            return Enchantment.getFullname(EnchantmentUtil.toHolder(id(), canvas().screen().registryAccess()), enchantmentLevel);
-        } else {
-            return Component.translatable("immersiveenchanting.tooltip.title." + id().getPath());
-        }
+        return title;
     }
 
-    /**
-     * Checks whether this node represents a real enchantment.
-     *
-     * @return {@code true} if this is an enchantment node, {@code false} if it is a special node
-     */
-    public boolean isEnchantment() {
-        return type == NodeType.ENCHANTMENT;
+    public boolean isType(NodeType type) {
+        return this.type == type;
     }
 
     /**

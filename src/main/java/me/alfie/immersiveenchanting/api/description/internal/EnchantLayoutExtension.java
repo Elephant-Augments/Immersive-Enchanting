@@ -5,6 +5,7 @@ import me.alfie.immersiveenchanting.api.description.internal.lines.*;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeState;
+import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeType;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.NodeTooltip;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 
@@ -12,7 +13,7 @@ public class EnchantLayoutExtension implements DescriptionLayoutExtension {
 
     @Override
     public void extendLayout(DescriptionLayout description, NodeTooltip tooltip) {
-        if(!tooltip.node().isEnchantment()) return;
+        if(!tooltip.node().isType(NodeType.ENCHANTMENT)) return;
 
         description.widthPadding = 16;
 

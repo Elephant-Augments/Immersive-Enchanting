@@ -4,6 +4,7 @@ import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.core.ScreenEventListener;
 import me.alfie.immersiveenchanting.gui.core.ScreenState;
 import me.alfie.immersiveenchanting.gui.core.Sprite;
+import me.alfie.immersiveenchanting.gui.tab.enchanting.EnchantingTab;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.BranchManager;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -62,13 +63,20 @@ public class Canvas implements ScreenEventListener {
                 if(right < viewportLeft || left > viewportRight
                         || bottom < viewportTop || top > viewportBottom) continue;
 
+                Sprite tile;
+                if(screen().enchantingTab().isDisplay(EnchantingTab.Display.ENCHANTMENTS)) {
+                    tile = Sprite.BACKGROUND_TILE;
+                } else {
+                    tile = Sprite.ALT_BACKGROUND_TILE;
+                }
+
                 graphics.blit(
                         RenderPipelines.GUI_TEXTURED,
-                        Sprite.BACKGROUND_TILE.id(),
+                        tile.id(),
                         x * TILE_SIZE, y * TILE_SIZE,
                         0, 0,
-                        Sprite.BACKGROUND_TILE.width(), Sprite.BACKGROUND_TILE.height(),
-                        Sprite.BACKGROUND_TILE.width(), Sprite.BACKGROUND_TILE.height(),
+                        tile.width(), tile.height(),
+                        tile.width(), tile.height(),
                         getCurrentBrightness()
                 );
 
@@ -77,6 +85,8 @@ public class Canvas implements ScreenEventListener {
     }
 
     public void setSizeToFitNodes(int highestEnchantmentLevel) {
+        highestEnchantmentLevel = Math.max(5, highestEnchantmentLevel); //Prevent canvas too small
+
         int tileCount = ((BranchManager.getNodeStep() * 2) * highestEnchantmentLevel + TILE_SIZE - 1) / TILE_SIZE;
         int tileMargin = 2;
         setSize(tileCount + tileMargin);

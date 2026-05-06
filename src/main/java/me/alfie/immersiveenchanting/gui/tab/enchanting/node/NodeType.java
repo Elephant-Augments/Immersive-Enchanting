@@ -5,5 +5,7 @@ public enum NodeType {
     ENCHANTMENT,
 
     /**Represents a node that is not an enchantment and has some other action*/
-    ACTION
+    ACTION,
+
+    MOD_FILTER
 }

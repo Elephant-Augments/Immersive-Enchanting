@@ -12,14 +12,17 @@ import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.loot.ModGlobalLootModifiers;
 import me.alfie.immersiveenchanting.sound.ModSounds;
 import me.alfie.immersiveenchanting.structure.ModStructureProcessors;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FontDescription;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.loading.moddiscovery.ModInfo;
 import org.slf4j.Logger;
 
 @Mod(ImmersiveEnchanting.MODID)
@@ -48,5 +51,16 @@ public class ImmersiveEnchanting {
     public static Component styleWithAltFont(Component component) {
         FontDescription altFont = new FontDescription.Resource(Identifier.withDefaultNamespace("alt"));
         return component.copy().withStyle(Style.EMPTY.withFont(altFont));
+    }
+
+    public static String getModName(String namespace) {
+        ModInfo modInfo = (ModInfo) ModList.get().getModContainerById(namespace)
+                .map(ModContainer::getModInfo)
+                .orElse(null);
+
+        String name = modInfo != null ? modInfo.getDisplayName() : namespace;
+
+        if (name == null || name.isEmpty()) return name;
+        return Character.toUpperCase(name.charAt(0)) + name.substring(1);
     }
 }

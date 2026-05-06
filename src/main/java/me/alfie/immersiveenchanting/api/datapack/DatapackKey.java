@@ -48,4 +48,8 @@ public record DatapackKey<T>(String modid, String directory) {
                     ByteBufCodecs.STRING_UTF8, DatapackKey::directory,
                     DatapackKey::new
             );
+
+    public Identifier identifier() {
+        return Identifier.fromNamespaceAndPath(modid, directory);
+    }
 }

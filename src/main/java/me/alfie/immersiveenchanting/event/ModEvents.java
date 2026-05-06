@@ -8,6 +8,7 @@ import me.alfie.immersiveenchanting.api.datapack.manager.ServerDatapackManager;
 import me.alfie.immersiveenchanting.creativetab.ModCreativeTab;
 import me.alfie.immersiveenchanting.api.description.TooltipDescriptionExtensions;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostDatapack;
+import me.alfie.immersiveenchanting.datapack.mod_icons.ModIconsDatapack;
 import me.alfie.immersiveenchanting.datapack.node_sounds.NodeSoundsDatapack;
 import me.alfie.immersiveenchanting.gui.ModMenus;
 import me.alfie.immersiveenchanting.networking.ModPackets;
@@ -19,7 +20,7 @@ public class ModEvents {
     public static void register(IEventBus modEventBus) {
         NeoForge.EVENT_BUS.addListener(CostDatapack::register);
         NeoForge.EVENT_BUS.addListener(NodeSoundsDatapack::register);
-
+        NeoForge.EVENT_BUS.addListener(ModIconsDatapack::register);
 
         NeoForge.EVENT_BUS.addListener(ServerDatapackManager::onServerStart);
         NeoForge.EVENT_BUS.addListener(ServerDatapackManager::onServerFinished);

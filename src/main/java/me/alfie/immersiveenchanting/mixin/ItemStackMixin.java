@@ -1,5 +1,6 @@
 package me.alfie.immersiveenchanting.mixin;
 
+import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.config.ClientConfig;
 import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
@@ -80,13 +81,9 @@ public abstract class ItemStackMixin {
                     consumer.accept(component.withStyle(ChatFormatting.GOLD));
 
                     if(ClientConfig.isShowAddedByTooltipEnabled()) {
-                        String modNamespace = enchantmentHolder.getKey().identifier().getNamespace();
-
-                        ModInfo modInfo = (ModInfo) ModList.get().getModContainerById(modNamespace)
-                                .map(ModContainer::getModInfo)
-                                .orElse(null);
-
-                        String modName = modInfo != null ? modInfo.getDisplayName() : modNamespace;
+                        String modName = ImmersiveEnchanting.getModName(enchantmentHolder.getKey()
+                                .identifier()
+                                .getNamespace());
 
                         consumer.accept(
                                 Component.translatable("item.immersiveenchanting.ancient_book.desc.enchantment_added_by", modName)

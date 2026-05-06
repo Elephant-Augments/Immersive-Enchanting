@@ -1,6 +1,9 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
+import me.alfie.immersiveenchanting.api.node.ItemIcon;
+import me.alfie.immersiveenchanting.api.node.NodeIcon;
+import me.alfie.immersiveenchanting.api.node.SpriteIcon;
 import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.gui.core.NineSliceSprite;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
@@ -95,16 +98,18 @@ public class TooltipTitle extends TooltipComponent {
                 Node.WIDTH, Node.HEIGHT
         );
 
-        Identifier iconTexture = node.getIconTexture();
-        if(iconTexture != null) {
+        NodeIcon icon = node.getIcon();
+        if(icon instanceof SpriteIcon sprite) {
             graphics.blit(
                     RenderPipelines.GUI_TEXTURED,
-                    iconTexture,
+                    sprite.id(),
                     x()+4, y()+4,
                     0, 0,
                     16, 16,
                     16, 16
             );
+        } else if (icon instanceof ItemIcon item) {
+            graphics.item(item.stack(), x()+4, y()+4);
         }
 
         int xo = Node.WIDTH;

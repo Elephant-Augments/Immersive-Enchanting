@@ -4,6 +4,7 @@ import me.alfie.immersiveenchanting.gui.core.Sprite;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * Base class for objects that can be rendered on a {@link Canvas} without
@@ -200,6 +201,19 @@ public abstract class CanvasRenderable {
                 width, height,
                 color
         );
+
+        graphics.pose().popMatrix();
+    }
+
+    public void item(GuiGraphicsExtractor graphics, ItemStack stack,
+                     int offsetX, int offsetY, int color) {
+        graphics.pose().pushMatrix();
+
+        graphics.pose().translate(canvasX(), canvasY());
+        graphics.pose().scale(scale());
+        graphics.pose().translate(-canvasX(), -canvasY());
+
+        graphics.item(stack, (int) canvasX() + offsetX, (int) canvasY() + offsetY);
 
         graphics.pose().popMatrix();
     }
