@@ -28,7 +28,7 @@ public record EnchantmentNodeData(Identifier enchantmentId, int level) {
                         screen.tooltipManager().startHold(node);
                     } else {
                         Holder<Enchantment> enchantmentHolder = EnchantmentUtil.toHolder(data.enchantmentId(), screen.registryAccess());
-                        ClientPacketDistributor.sendToServer(new EnchantPacket(enchantmentHolder, node.getPosition()));
+                        ClientPacketDistributor.sendToServer(new EnchantPacket(enchantmentHolder, data.level()));
                     }
 
                 }

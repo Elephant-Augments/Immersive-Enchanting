@@ -50,7 +50,7 @@ public class NodeTooltip implements ScreenEventListener {
     public NodeTooltip(EnchantingTableScreen screen, Node node) {
         this.node = node;
         this.screen = screen;
-        screen().enchantmentCostRenderer().setCostToRender(node().branchId(), node().getPosition());
+        screen().enchantmentCostRenderer().setCostToRender(node().branchId(), node().getPosition() + 1);
 
         this.title = new TooltipTitle(this);
         this.description = new TooltipDescription(this);

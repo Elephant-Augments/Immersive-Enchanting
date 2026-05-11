@@ -111,7 +111,7 @@ public class BranchFactory {
         event.addBranch(BranchBuilder.of(event.getCanvas(), createModFilterBranchId(ModFilterNodeData.ALL_MODS))
                 .node(new NodeTemplate(
                         Component.translatable("immersiveenchanting.mod_filter.all"),
-                        1,
+                        0,
                         state,
                         NodeTier.ELITE,
                         itemIcon,
@@ -133,7 +133,7 @@ public class BranchFactory {
         event.addBranch(BranchBuilder.of(event.getCanvas(), createModFilterBranchId(modid))
                 .node(new NodeTemplate(
                         modTitle,
-                        1,
+                        0,
                         state,
                         NodeTier.BASIC,
                         itemIcon,
@@ -155,7 +155,7 @@ public class BranchFactory {
             Identifier enchantmentId = enchantmentHolder.getKey().identifier();
             nodeTemplates.add(new NodeTemplate(
                     Enchantment.getFullname(enchantmentHolder, enchantmentLevel+1),
-                    enchantmentLevel+1,
+                    enchantmentLevel,
                     state,
                     tier,
                     new SpriteIcon(EnchantmentTextureHelper.getTexture(enchantmentId)),
@@ -177,7 +177,7 @@ public class BranchFactory {
 
         NodeTemplate transmuteNode = new NodeTemplate(
                 Component.translatable("immersiveenchanting.tooltip.title.transmute"),
-                1,
+                0,
                 state,
                 NodeTier.ADVANCED,
                 new SpriteIcon(EnchantmentTextureHelper.getTexture(CostRegistry.TRANSMUTE)),
@@ -193,7 +193,7 @@ public class BranchFactory {
     private static void buildReplicateBranch(BuildBranchesEvent event) {
         NodeTemplate replicateNode = new NodeTemplate(
                 Component.translatable("immersiveenchanting.tooltip.title.replicate"),
-                1,
+                0,
                 NodeState.UNOBTAINED,
                 NodeTier.ADVANCED,
                 new SpriteIcon(EnchantmentTextureHelper.getTexture(CostRegistry.REPLICATE)),

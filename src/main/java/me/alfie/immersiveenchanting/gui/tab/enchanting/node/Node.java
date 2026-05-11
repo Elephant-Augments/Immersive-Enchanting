@@ -70,6 +70,8 @@ public class Node extends CanvasRenderable {
                 NodeBranch parentBranch,
                 NodeData<?> data) {
         super(canvas);
+
+        if(position < 0) throw new IllegalStateException("Node position can't be less than 0!");
         this.position = position;
         this.state = state;
         this.tier = tier;
@@ -86,6 +88,10 @@ public class Node extends CanvasRenderable {
 
     public Identifier dataType() {
         return data.type();
+    }
+
+    public NodeData<?> data() {
+        return data;
     }
 
     public boolean isDataType(Identifier id) {
@@ -210,7 +216,6 @@ public class Node extends CanvasRenderable {
      * @throws IllegalStateException if this node does not represent an enchantment
      */
     public int getPosition() {
-        if(position == 0) throw new IllegalStateException("This node does not have an enchantment level!");
         return position;
     }
 

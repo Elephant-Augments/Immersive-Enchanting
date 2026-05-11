@@ -59,9 +59,9 @@ public class FxHelper {
 
         if(doesSoundExist(node.branchId())) {
             NodeSound nodeSound = NodeSoundMap.client().get(node.branchId());
-            int nodeLevel = node.getPosition();
+            int nodePosition = node.getPosition();
             float defaultPitch = nodeSound.pitch();
-            float newPitch = defaultPitch + (nodeLevel - 1) * 0.5f;
+            float newPitch = defaultPitch + (nodePosition) * 0.5f;
             newPitch = Math.min(newPitch, 2.0f);
 
             playClientUISound(level, node.branchId(), nodeSound.volume(), newPitch);

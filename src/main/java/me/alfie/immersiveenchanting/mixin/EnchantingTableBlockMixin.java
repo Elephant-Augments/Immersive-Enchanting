@@ -47,7 +47,7 @@ public abstract class EnchantingTableBlockMixin {
      * @param cir callback used to override the return value
      */
     @Inject(
-            method = "getMenuProvider(Lnet/minecraft/world/position/block/state/BlockState;Lnet/minecraft/world/position/Level;Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/MenuProvider;",
+            method = "getMenuProvider(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/MenuProvider;",
             at = @At("HEAD"),
             cancellable = true
     )
