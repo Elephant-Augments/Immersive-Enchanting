@@ -19,16 +19,16 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Client-to-server packet requesting removal of an enchantment level.
+ * Client-to-server packet requesting removal of an enchantment position.
  *
- * <p>If allowed by server configuration, reduces the specified enchantment by one level.
- * If the resulting level reaches zero, the enchantment is fully removed from the item.</p>
+ * <p>If allowed by server configuration, reduces the specified enchantment by one position.
+ * If the resulting position reaches zero, the enchantment is fully removed from the item.</p>
  *
  * <p>No action is taken if:
  * <ul>
  *     <li>Enchantment removal is disabled in config</li>
  *     <li>The item has no matching enchantment</li>
- *     <li>The enchantment level is already zero</li>
+ *     <li>The enchantment position is already zero</li>
  * </ul>
  *
  * <p>On success, the item is updated server-side and feedback effects are triggered.</p>

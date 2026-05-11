@@ -9,6 +9,20 @@ import net.minecraft.resources.Identifier;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents a branch of nodes within the enchanting UI.
+ * <p>
+ * A {@code NodeBranch} is a collection of {@link Node}s arranged in a radial layout
+ * on a {@link Canvas}. It is responsible for:
+ * <ul>
+ *     <li>Constructing nodes from {@link NodeTemplate}s</li>
+ *     <li>Positioning nodes along a calculated angle</li>
+ *     <li>Rendering node connections and contained nodes</li>
+ * </ul>
+ * <p>
+ * Branch layout (angle and spacing) is controlled internally by the system and
+ * automatically calculated by ImmersiveEnchanting.
+ */
 public class NodeBranch extends CanvasRenderable {
 
     private final List<Node> nodes;
@@ -17,9 +31,20 @@ public class NodeBranch extends CanvasRenderable {
     private final Identifier id;
 
     /**
-     * Constructor for API users - angles are automatically calculated by ImmersiveEnchanting.
-     * @param canvas
-     * @param nodeTemplates
+     * Creates a new node branch from a set of templates.
+     *
+     * <p>This constructor is intended for internal use and advanced API scenarios.</p>
+     *
+     * <p><b>Recommended usage:</b> External code should use {@link me.alfie.immersiveenchanting.api.node.BranchBuilder}
+     * instead of constructing {@code NodeBranch} directly.</p>
+     *
+     * Branches should be built during {@link me.alfie.immersiveenchanting.api.node.BuildBranchesEvent}
+     *
+     * <p>Node positioning and layout are handled automatically by the system.</p>
+     *
+     * @param canvas        the canvas this branch is rendered on
+     * @param id            unique identifier for this branch
+     * @param nodeTemplates list of node definitions used to construct the branch
      */
     public NodeBranch(Canvas canvas, Identifier id, List<NodeTemplate> nodeTemplates) {
         super(canvas);
@@ -28,13 +53,10 @@ public class NodeBranch extends CanvasRenderable {
         List<Node> builtNodes = new ArrayList<>();
         for(NodeTemplate nodeTemplate : nodeTemplates) {
             builtNodes.add(new Node(
-                    nodeTemplate.title(),
-                    nodeTemplate.level(),
-                    canvas,
+                    canvas, this, nodeTemplate.position(), nodeTemplate.title(),
                     nodeTemplate.state(),
                     nodeTemplate.tier(),
                     nodeTemplate.icon(),
-                    this,
                     nodeTemplate.data()
             ));
         }
@@ -43,18 +65,39 @@ public class NodeBranch extends CanvasRenderable {
         texture = new BranchTexture(this, canvas);
     }
 
+    /**
+     * Sets the branch angle used for layout calculation.
+     *
+     * @param angle angle in radians
+     */
     public void setAngle(float angle) {
         this.angle = angle;
     }
 
+    /**
+     * Returns all nodes contained in this branch.
+     *
+     * @return list of nodes
+     */
     public List<Node> nodes() {
         return nodes;
     }
 
+    /**
+     * Returns the current branch angle used for node layout.
+     *
+     * @return angle in radians
+     */
     public float angle() {
         return angle;
     }
 
+    /**
+     * Positions all nodes along a line based on the current branch angle.
+     * <p>
+     * Node spacing is determined by {@link BranchManager#getNodeStep()} and all
+     * nodes are centered relative to the canvas origin.
+     */
     public void placeNodesAlongLine() {
         double stepX = Math.cos(angle) * BranchManager.getNodeStep();
         double stepY = Math.sin(angle) * BranchManager.getNodeStep();
@@ -72,6 +115,9 @@ public class NodeBranch extends CanvasRenderable {
         texture.calculateNodeConnections();
     }
 
+    /**
+     * Renders the branch, including its connection texture and all contained nodes.
+     */
     @Override
     public void render(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         texture.render(graphics, mouseX, mouseY);
@@ -81,7 +127,11 @@ public class NodeBranch extends CanvasRenderable {
         }
     }
 
-
+    /**
+     * Returns the unique identifier of this branch.
+     *
+     * @return branch identifier
+     */
     public Identifier id() {
         return id;
     }

@@ -126,7 +126,7 @@ public class EnchantmentUtil {
      *
      * @param menu enchanting menu
      * @param enchantmentHolder enchantment to apply
-     * @param level target level
+     * @param level target position
      * @param context network context / player context
      * @return true if enchantment can be applied
      */
@@ -190,12 +190,12 @@ public class EnchantmentUtil {
     }
 
     /**
-     * Checks if the enchantment is the next valid level.
+     * Checks if the enchantment is the next valid position.
      *
      * @param stack item being enchanted
      * @param enchantmentHolder enchantment
-     * @param level target level
-     * @return true if next level
+     * @param level target position
+     * @return true if next position
      */
     private static boolean isNextLevel(ItemStack stack, Holder<Enchantment> enchantmentHolder, int level) {
         int equippedLevel = stack.getEnchantmentLevel(enchantmentHolder);
@@ -207,7 +207,7 @@ public class EnchantmentUtil {
      *
      * @param costStack item used for cost validation
      * @param enchantmentId enchantment being applied
-     * @param level target level
+     * @param level target position
      * @param player player performing the action
      * @param costRegistry cost registry used for lookup
      * @return true if a valid cost exists
@@ -219,10 +219,10 @@ public class EnchantmentUtil {
     }
 
     /**
-     * Checks if valid enchanting fuel exists for the given level.
+     * Checks if valid enchanting fuel exists for the given position.
      *
      * @param fuelStack fuel item stack
-     * @param level target level
+     * @param level target position
      * @param costRegistry cost registry used for lookup
      * @return true if valid fuel exists
      */
@@ -236,7 +236,7 @@ public class EnchantmentUtil {
      * @param costStack item used for cost
      * @param fuelStack item used for fuel
      * @param enchantmentId enchantment being applied
-     * @param level target level
+     * @param level target position
      * @param player player performing the action
      * @param costRegistry cost registry used for lookup
      * @return true if both cost and fuel are valid
@@ -249,11 +249,11 @@ public class EnchantmentUtil {
     }
 
     /**
-     * Finds a valid cost entry for the given enchantment and level.
+     * Finds a valid cost entry for the given enchantment and position.
      *
      * @param costStack item used for validation
      * @param enchantmentId enchantment being applied
-     * @param level target level
+     * @param level target position
      * @param player player performing the action
      * @param costRegistry cost registry used for lookup
      * @return matching cost, or null if none found
@@ -277,10 +277,10 @@ public class EnchantmentUtil {
     }
 
     /**
-     * Finds a valid fuel cost for the given level.
+     * Finds a valid fuel cost for the given position.
      *
      * @param fuelStack fuel item stack
-     * @param level target level
+     * @param level target position
      * @param costRegistry cost registry used for lookup
      * @return matching fuel cost, or null if none found
      */
@@ -325,7 +325,7 @@ public class EnchantmentUtil {
      *
      * @param menu enchanting menu
      * @param enchantmentId enchantment being applied
-     * @param level target level
+     * @param level target position
      * @param player player performing the action
      * @param costRegistry cost registry used for lookup
      * @throws IllegalStateException if no valid cost exists

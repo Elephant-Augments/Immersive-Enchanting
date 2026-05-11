@@ -68,7 +68,7 @@ public record CostLevels(Map<Integer, CostHolder> levelCostMap) {
     }
 
     /**
-     * Returns a list of all valid costs for this enchantment, ignoring the level.
+     * Returns a list of all valid costs for this enchantment, ignoring the position.
      * @return
      */
     public List<Cost> getAllLevels() {

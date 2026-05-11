@@ -75,7 +75,7 @@ public class CanvasCamera implements ScreenEventListener {
         return y;
     }
 
-    /** @return current zoom level */
+    /** @return current zoom position */
     public float zoom() {
         return zoom;
     }
@@ -103,13 +103,13 @@ public class CanvasCamera implements ScreenEventListener {
     }
 
     /**
-     * Sets the zoom level while keeping the viewport center fixed.
+     * Sets the zoom position while keeping the viewport center fixed.
      *
      * Without this adjustment, zooming would anchor at the top-left corner.
      * This method ensures the point at the center of the viewport remains
      * visually stable during zoom.
      *
-     * @param zoom New zoom level
+     * @param zoom New zoom position
      */
     public void setZoom(float zoom) {
         float centerX = VIEWPORT_WIDTH / 2f;

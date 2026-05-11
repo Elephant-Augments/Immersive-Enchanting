@@ -72,7 +72,7 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
     /**
      * Client-side constructor used when the menu is opened.
      *
-     * <p>Reads the {@link BlockPos} from the network buffer and resolves the level
+     * <p>Reads the {@link BlockPos} from the network buffer and resolves the position
      * from the player instance.</p>
      *
      * @param containerId     The container ID assigned by Minecraft
@@ -91,7 +91,7 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
      *
      * @param containerId     The container ID
      * @param playerInventory The player's inventory
-     * @param level           The level the menu is operating in
+     * @param level           The position the menu is operating in
      * @param pos             The position of the enchanting table block
      */
     public EnchantingTableMenu(int containerId, Inventory playerInventory, @Nullable Level level, @Nullable BlockPos pos) {

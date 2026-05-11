@@ -110,11 +110,8 @@ public class BranchFactory {
 
         event.addBranch(BranchBuilder.of(event.getCanvas(), createModFilterBranchId(ModFilterNodeData.ALL_MODS))
                 .node(new NodeTemplate(
-                        Component.translatable("immersiveenchanting.mod_filter.all"),
-                        1,
-                        state,
-                        NodeTier.ELITE,
-                        itemIcon,
+                        0, Component.translatable("immersiveenchanting.mod_filter.all"),
+                        itemIcon, NodeTier.ELITE, state,
                         ModFilterNodeData.create(ModFilterNodeData.ALL_MODS)
                 )).build());
     }
@@ -132,11 +129,8 @@ public class BranchFactory {
 
         event.addBranch(BranchBuilder.of(event.getCanvas(), createModFilterBranchId(modid))
                 .node(new NodeTemplate(
-                        modTitle,
-                        1,
-                        state,
-                        NodeTier.BASIC,
-                        itemIcon,
+                        0, modTitle,
+                        itemIcon, NodeTier.BASIC, state,
                         ModFilterNodeData.create(modid)
                 )).build());
     }
@@ -154,11 +148,8 @@ public class BranchFactory {
 
             Identifier enchantmentId = enchantmentHolder.getKey().identifier();
             nodeTemplates.add(new NodeTemplate(
-                    Enchantment.getFullname(enchantmentHolder, enchantmentLevel+1),
-                    enchantmentLevel+1,
-                    state,
-                    tier,
-                    new SpriteIcon(EnchantmentTextureHelper.getTexture(enchantmentId)),
+                    enchantmentLevel, Enchantment.getFullname(enchantmentHolder, enchantmentLevel+1),
+                    new SpriteIcon(EnchantmentTextureHelper.getTexture(enchantmentId)), tier, state,
                     EnchantmentNodeData.create(enchantmentId, enchantmentLevel+1)
             ));
 
@@ -176,11 +167,8 @@ public class BranchFactory {
                 NodeState.ALERT : NodeState.UNOBTAINED;
 
         NodeTemplate transmuteNode = new NodeTemplate(
-                Component.translatable("immersiveenchanting.tooltip.title.transmute"),
-                1,
-                state,
-                NodeTier.ADVANCED,
-                new SpriteIcon(EnchantmentTextureHelper.getTexture(CostRegistry.TRANSMUTE)),
+                0, Component.translatable("immersiveenchanting.tooltip.title.transmute"),
+                new SpriteIcon(EnchantmentTextureHelper.getTexture(CostRegistry.TRANSMUTE)), NodeTier.ADVANCED, state,
                 TransmuteNodeData.create()
         );
 
@@ -192,11 +180,8 @@ public class BranchFactory {
 
     private static void buildReplicateBranch(BuildBranchesEvent event) {
         NodeTemplate replicateNode = new NodeTemplate(
-                Component.translatable("immersiveenchanting.tooltip.title.replicate"),
-                1,
-                NodeState.UNOBTAINED,
-                NodeTier.ADVANCED,
-                new SpriteIcon(EnchantmentTextureHelper.getTexture(CostRegistry.REPLICATE)),
+                0, Component.translatable("immersiveenchanting.tooltip.title.replicate"),
+                new SpriteIcon(EnchantmentTextureHelper.getTexture(CostRegistry.REPLICATE)), NodeTier.ADVANCED, NodeState.UNOBTAINED,
                 ReplicateNodeData.create()
         );
 
