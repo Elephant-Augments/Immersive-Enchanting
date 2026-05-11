@@ -7,16 +7,18 @@ import me.alfie.immersiveenchanting.api.node.*;
 import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.EnchantingTab;
+import me.alfie.immersiveenchanting.api.node.internal.EnchantmentNodeData;
+import me.alfie.immersiveenchanting.api.node.internal.ModFilterNodeData;
+import me.alfie.immersiveenchanting.api.node.internal.ReplicateNodeData;
+import me.alfie.immersiveenchanting.api.node.internal.TransmuteNodeData;
 import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.util.EnchantmentTextureHelper;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
-import me.alfie.immersiveenchanting.util.ModFilterIds;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.neoforged.neoforge.common.NeoForge;
@@ -80,6 +82,11 @@ public class BranchFactory {
 
     }
 
+    private static Identifier createModFilterBranchId(String modid) {
+        final String modFilterStem = "mod_filter/";
+        return Identifier.fromNamespaceAndPath(ImmersiveEnchanting.MODID, modFilterStem + modFilterStem);
+    }
+
     private static void buildModFilterBranches(BuildBranchesEvent event, List<Holder<Enchantment>> applicableEnchantments) {
         Set<String> modids = new HashSet<>();
 
@@ -94,23 +101,25 @@ public class BranchFactory {
         }
 
         ItemIcon itemIcon = new ItemIcon(ClientDatapackManager.get(DatapackKeys.MOD_ICONS)
-                .getAsItemStack(ModFilterIds.ALL));
+                .getAsItemStack(ModFilterNodeData.ALL_MODS));
 
         NodeState state =
                 Objects.equals(event.getCanvas().screen().enchantingTab().getFilteredModid(), null)
                         ? NodeState.OBTAINED
                         : NodeState.UNOBTAINED;
 
-        event.addBranch(BranchBuilder.of(event.getCanvas(), ModFilterIds.createModFilterId(ModFilterIds.ALL))
+        event.addBranch(BranchBuilder.of(event.getCanvas(), createModFilterBranchId(ModFilterNodeData.ALL_MODS))
                 .node(new NodeTemplate(
                         Component.translatable("immersiveenchanting.mod_filter.all"),
                         1,
                         state,
                         NodeTier.ELITE,
                         itemIcon,
-                        NodeType.MOD_FILTER
+                        ModFilterNodeData.create(ModFilterNodeData.ALL_MODS)
                 )).build());
     }
+
+
 
     private static void buildModFilterBranch(BuildBranchesEvent event, Component modTitle, String modid) {
         ItemIcon itemIcon = new ItemIcon(ClientDatapackManager.get(DatapackKeys.MOD_ICONS)
@@ -121,14 +130,14 @@ public class BranchFactory {
                         ? NodeState.OBTAINED
                         : NodeState.UNOBTAINED;
 
-        event.addBranch(BranchBuilder.of(event.getCanvas(), ModFilterIds.createModFilterId(modid))
+        event.addBranch(BranchBuilder.of(event.getCanvas(), createModFilterBranchId(modid))
                 .node(new NodeTemplate(
                         modTitle,
                         1,
                         state,
                         NodeTier.BASIC,
                         itemIcon,
-                        NodeType.MOD_FILTER
+                        ModFilterNodeData.create(modid)
                 )).build());
     }
 
@@ -143,13 +152,16 @@ public class BranchFactory {
             if(!event.getCanvas().screen().getMenu().isEnchantmentAvailable(enchantmentHolder))
                 state = NodeState.LOCKED;
 
+            Identifier enchantmentId = enchantmentHolder.getKey().identifier();
             nodeTemplates.add(new NodeTemplate(
                     Enchantment.getFullname(enchantmentHolder, enchantmentLevel+1),
                     enchantmentLevel+1,
                     state,
                     tier,
-                    new SpriteIcon(EnchantmentTextureHelper.getTexture(enchantmentHolder.getKey().identifier())),
-                    NodeType.ENCHANTMENT));
+                    new SpriteIcon(EnchantmentTextureHelper.getTexture(enchantmentId)),
+                    EnchantmentNodeData.create(enchantmentId, enchantmentLevel+1)
+            ));
+
 
             if(equippedLevel < enchantmentLevel+1) break;
         }
@@ -169,7 +181,7 @@ public class BranchFactory {
                 state,
                 NodeTier.ADVANCED,
                 new SpriteIcon(EnchantmentTextureHelper.getTexture(CostRegistry.TRANSMUTE)),
-                NodeType.ACTION
+                TransmuteNodeData.create()
         );
 
         if(ServerConfig.isAllowTransmute())
@@ -185,7 +197,7 @@ public class BranchFactory {
                 NodeState.UNOBTAINED,
                 NodeTier.ADVANCED,
                 new SpriteIcon(EnchantmentTextureHelper.getTexture(CostRegistry.REPLICATE)),
-                NodeType.ACTION
+                ReplicateNodeData.create()
         );
 
         if(ServerConfig.isAllowReplicate())

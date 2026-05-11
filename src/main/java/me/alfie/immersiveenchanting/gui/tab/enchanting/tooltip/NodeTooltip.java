@@ -2,22 +2,13 @@ package me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.cursor.CursorTypes;
-import me.alfie.immersiveenchanting.api.node.NodeClickContext;
-import me.alfie.immersiveenchanting.api.node.NodeClickHandlerRegistry;
-import me.alfie.immersiveenchanting.config.ServerConfig;
-import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeState;
-import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeType;
 import me.alfie.immersiveenchanting.util.FxHelper;
-import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.core.ScreenEventListener;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
-import me.alfie.immersiveenchanting.networking.EnchantPacket;
-import me.alfie.immersiveenchanting.util.ModFilterIds;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.MouseButtonEvent;
-import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import org.joml.Vector2f;
 
 /**
@@ -59,7 +50,7 @@ public class NodeTooltip implements ScreenEventListener {
     public NodeTooltip(EnchantingTableScreen screen, Node node) {
         this.node = node;
         this.screen = screen;
-        screen().enchantmentCostRenderer().setCostToRender(node().id(), node().getEnchantmentLevel());
+        screen().enchantmentCostRenderer().setCostToRender(node().branchId(), node().getPosition());
 
         this.title = new TooltipTitle(this);
         this.description = new TooltipDescription(this);
@@ -129,28 +120,7 @@ public class NodeTooltip implements ScreenEventListener {
     public boolean onMouseClick(MouseButtonEvent mouse) {
         if(screen().isMouseOver(screenPos.x(), screenPos.y(), Node.WIDTH, Node.HEIGHT, mouse.x(), mouse.y())) {
             if(mouse.button() == InputConstants.MOUSE_BUTTON_LEFT) {
-                if(node().isType(NodeType.ENCHANTMENT)) {
-
-                    if (node().isState(NodeState.OBTAINED) && canRemove()) {
-                        screen().tooltipManager().startHold(node());
-                    } else {
-                        ClientPacketDistributor.sendToServer(new EnchantPacket(
-                                EnchantmentUtil.toHolder(node().id(), screen().registryAccess()),
-                                node().getEnchantmentLevel()));
-                        return true;
-                    }
-
-                } else if(node().isType(NodeType.MOD_FILTER)) {
-                    screen().enchantingTab().setFilteredModid(ModFilterIds.getModidFromFilterId(node().id()));
-                    screen().rebuildBranches();
-
-                } else {
-                    NodeClickHandlerRegistry.handle(new NodeClickContext(node(), screen()));
-                    return true;
-                }
-
-
-
+                node().click();
                 screen().tooltipManager().unlockTooltip();
                 return true;
             }
@@ -192,15 +162,6 @@ public class NodeTooltip implements ScreenEventListener {
      */
     public EnchantingTableScreen screen() {
         return screen;
-    }
-
-    public boolean canRemove() {
-        return node().getEnchantmentLevel() == screen()
-                .getMenu()
-                .getToolSlot()
-                .getItem()
-                .getEnchantmentLevel(EnchantmentUtil.toHolder(node().id(), screen().registryAccess()))
-                && ServerConfig.isEnchantmentRemovalAllowed();
     }
 
     public void setLockingAllowed(boolean allowed) {

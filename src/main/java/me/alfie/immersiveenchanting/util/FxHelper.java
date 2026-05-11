@@ -1,12 +1,12 @@
 package me.alfie.immersiveenchanting.util;
 
+import me.alfie.immersiveenchanting.api.node.internal.ModFilterNodeData;
 import me.alfie.immersiveenchanting.config.ClientConfig;
 import me.alfie.immersiveenchanting.datapack.node_sounds.NodeSound;
 import me.alfie.immersiveenchanting.datapack.node_sounds.NodeSoundMap;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeState;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeTier;
-import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
@@ -47,7 +47,7 @@ public class FxHelper {
     public static void playNodeHover(Level level, Node node) {
         if(!ClientConfig.areNodeHoverSoundsEnabled()) return;
 
-        if(node.isType(NodeType.MOD_FILTER)) {
+        if(node.isDataType(ModFilterNodeData.TYPE)) {
             playModFilterNodeHover(level);
             return;
         }
@@ -57,14 +57,14 @@ public class FxHelper {
             return;
         }
 
-        if(doesSoundExist(node.id())) {
-            NodeSound nodeSound = NodeSoundMap.client().get(node.id());
-            int nodeLevel = node.getEnchantmentLevel();
+        if(doesSoundExist(node.branchId())) {
+            NodeSound nodeSound = NodeSoundMap.client().get(node.branchId());
+            int nodeLevel = node.getPosition();
             float defaultPitch = nodeSound.pitch();
             float newPitch = defaultPitch + (nodeLevel - 1) * 0.5f;
             newPitch = Math.min(newPitch, 2.0f);
 
-            playClientUISound(level, node.id(), nodeSound.volume(), newPitch);
+            playClientUISound(level, node.branchId(), nodeSound.volume(), newPitch);
         } else {
             playGenericNodeHover(level);
         }

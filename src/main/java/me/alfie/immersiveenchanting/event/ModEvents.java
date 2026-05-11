@@ -1,7 +1,6 @@
 package me.alfie.immersiveenchanting.event;
 
 import me.alfie.immersiveenchanting.api.ApiPostEvents;
-import me.alfie.immersiveenchanting.api.node.NodeClickHandlerRegistry;
 import me.alfie.immersiveenchanting.command.ModCommands;
 import me.alfie.immersiveenchanting.api.datapack.manager.ClientDatapackManager;
 import me.alfie.immersiveenchanting.api.datapack.manager.ServerDatapackManager;
@@ -45,12 +44,10 @@ public class ModEvents {
 
     private static void registerPostEvents(IEventBus modEventBus) {
         modEventBus.addListener(ApiPostEvents::postRegisterTooltipDescriptionsEvent);
-        modEventBus.addListener(ApiPostEvents::postRegisterNodeClickHandlersEvent);
     }
 
     private static void registerInternalApiEvents() {
         NeoForge.EVENT_BUS.addListener(TooltipDescriptionExtensions::registerInternalTooltipDescriptions);
-        NeoForge.EVENT_BUS.addListener(NodeClickHandlerRegistry::registerInternalNodeInteractions);
     }
 
 }

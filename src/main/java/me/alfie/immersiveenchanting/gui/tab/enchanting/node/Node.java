@@ -1,10 +1,10 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.node;
 
-import me.alfie.immersiveenchanting.api.node.ItemIcon;
-import me.alfie.immersiveenchanting.api.node.NodeIcon;
-import me.alfie.immersiveenchanting.api.node.SpriteIcon;
+import me.alfie.immersiveenchanting.api.node.*;
+import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.gui.canvas.CanvasRenderable;
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
+import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -38,7 +38,6 @@ public class Node extends CanvasRenderable {
 
     private NodeState state;
     private NodeTier tier;
-    private NodeType type;
 
     @Nullable
     private NodeIcon icon;
@@ -47,7 +46,8 @@ public class Node extends CanvasRenderable {
     private CanvasRenderable renderableIcon;
 
     private NodeBranch parentBranch;
-    private final int enchantmentLevel;
+    private final int position;
+    private NodeData<?> data;
 
      /**
      * Constructs a node that represents a real enchantment with a specific level.
@@ -55,29 +55,50 @@ public class Node extends CanvasRenderable {
      * <p>This constructor should be used for standard enchantment nodes that
      * correspond to a valid enchantment ID and level.</p>
      *
-     * @param enchantmentLevel The level of the enchantment (must be > 0)
+     * @param position The level of the enchantment (must be > 0)
      * @param canvas The canvas this node belongs to
      * @param state The current state of the node (e.g. locked, unlocked)
      * @param tier The visual tier of the node
      * @param parentBranch The branch this node belongs to
      */
     public Node(Component title,
-                int enchantmentLevel,
+                int position,
                 Canvas canvas,
                 NodeState state,
                 NodeTier tier,
                 @Nullable NodeIcon icon,
-                NodeType type,
-                NodeBranch parentBranch) {
+                NodeBranch parentBranch,
+                NodeData<?> data) {
         super(canvas);
-        this.enchantmentLevel = enchantmentLevel;
+        this.position = position;
         this.state = state;
         this.tier = tier;
-        this.type = type;
         this.parentBranch = parentBranch;
         this.title = title;
+        this.data = data;
 
         setIcon(icon);
+    }
+
+    public void click() {
+        data.onClick(new NodeClickContext(canvas().screen(), this));
+    }
+
+    public Identifier dataType() {
+        return data.type();
+    }
+
+    public boolean isDataType(Identifier id) {
+        return data.type() == id;
+    }
+
+    public boolean canRemove() {
+        return getPosition() == canvas().screen()
+                .getMenu()
+                .getToolSlot()
+                .getItem()
+                .getEnchantmentLevel(EnchantmentUtil.toHolder(branchId(), canvas().screen().registryAccess()))
+                && ServerConfig.isEnchantmentRemovalAllowed();
     }
 
     public NodeBranch getParentBranch() {
@@ -156,10 +177,6 @@ public class Node extends CanvasRenderable {
         return state;
     }
 
-    public NodeType getType() {
-        return type;
-    }
-
     /**
      * @return The icon texture
      */
@@ -170,7 +187,7 @@ public class Node extends CanvasRenderable {
     /**
      * @return The identifier associated with this node
      */
-    public Identifier id() {
+    public Identifier branchId() {
         return getParentBranch().id();
     }
 
@@ -186,19 +203,15 @@ public class Node extends CanvasRenderable {
         return title;
     }
 
-    public boolean isType(NodeType type) {
-        return this.type == type;
-    }
-
     /**
      * Gets the enchantment level of this node.
      *
      * @return The enchantment level
      * @throws IllegalStateException if this node does not represent an enchantment
      */
-    public int getEnchantmentLevel() {
-        if(enchantmentLevel == 0) throw new IllegalStateException("This node does not have an enchantment level!");
-        return enchantmentLevel;
+    public int getPosition() {
+        if(position == 0) throw new IllegalStateException("This node does not have an enchantment level!");
+        return position;
     }
 
     /**

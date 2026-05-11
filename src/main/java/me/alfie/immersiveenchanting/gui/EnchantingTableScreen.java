@@ -1,10 +1,12 @@
 package me.alfie.immersiveenchanting.gui;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import me.alfie.immersiveenchanting.datapack.mod_icons.ModIconsMap;
 import me.alfie.immersiveenchanting.gui.tab.TabButton;
 import me.alfie.immersiveenchanting.gui.tab.book.BookTab;
 import me.alfie.immersiveenchanting.gui.tab.book.FilterCheckbox;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.TooltipManager;
+import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.util.FxHelper;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.CostRenderer;
@@ -334,7 +336,8 @@ public class EnchantingTableScreen extends AbstractContainerScreen<@NotNull Ench
 
         if(isTabKeyDown) {
             if (enchantingTab().isDisplay(EnchantingTab.Display.ENCHANTMENTS)
-            && getMenu().getToolSlot().hasItem()) {
+            && getMenu().getToolSlot().hasItem()
+            && !getMenu().getToolSlot().getItem().is(ModItems.ANCIENT_BOOK.get())) {
                 enchantingTab.setDisplay(EnchantingTab.Display.MOD_FILTERS);
                 FxHelper.playTabDown(player());
                 rebuildBranches();

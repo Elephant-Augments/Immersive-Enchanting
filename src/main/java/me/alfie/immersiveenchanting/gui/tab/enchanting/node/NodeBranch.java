@@ -34,8 +34,8 @@ public class NodeBranch extends CanvasRenderable {
                     nodeTemplate.state(),
                     nodeTemplate.tier(),
                     nodeTemplate.icon(),
-                    nodeTemplate.type(),
-                    this
+                    this,
+                    nodeTemplate.data()
             ));
         }
         nodes = builtNodes;

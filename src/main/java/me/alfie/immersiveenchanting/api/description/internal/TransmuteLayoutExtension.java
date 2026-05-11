@@ -12,7 +12,7 @@ import net.minecraft.network.chat.Component;
 public class TransmuteLayoutExtension implements DescriptionLayoutExtension {
     @Override
     public void extendLayout(DescriptionLayout description, NodeTooltip tooltip) {
-        if(!tooltip.node().id().equals(CostRegistry.TRANSMUTE)) return;
+        if(!tooltip.node().branchId().equals(CostRegistry.TRANSMUTE)) return;
 
         description.widthPadding = 16;
 

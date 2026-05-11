@@ -111,8 +111,8 @@ public class TooltipManager {
 
     private void triggerHeldTooltip() {
         ClientPacketDistributor.sendToServer(new RemoveEnchantmentPacket(
-                EnchantmentUtil.toHolder(heldTooltipNode.id(), screen.registryAccess()),
-                heldTooltipNode.getEnchantmentLevel()));
+                EnchantmentUtil.toHolder(heldTooltipNode.branchId(), screen.registryAccess()),
+                heldTooltipNode.getPosition()));
 
         resetHold();
     }
