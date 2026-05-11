@@ -12,22 +12,22 @@ import net.minecraft.resources.Identifier;
 import javax.annotation.Nullable;
 
 /**
- * A renderable interactive node within the enchanting tree UI.
- * <p>
- * A {@code Node} represents a single element in a {@link Canvas}, defined by a
- * {@link NodeTemplate} and instantiated at runtime. Nodes may represent enchantments
- * or special actions depending on their associated {@link NodeData}.
- * <p>
- * Each node has:
+ * Represents a single node in the enchanting tree UI.
+ *
+ * <p>A {@code Node} is a renderable element within the {@link Canvas} that can represent
+ * either a real enchantment or a special non-enchantment action (e.g. transmute, replicate).
+ * Each node has a {@link NodeState} (e.g. locked, available) and a {@link NodeTier}
+ * which determines its visual appearance.</p>
+ *
+ * <p>Nodes are rendered in canvas space and are responsible for:
  * <ul>
- *     <li>A visual {@link NodeState} (locked, available, obtained, etc.)</li>
- *     <li>A {@link NodeTier} controlling its appearance</li>
- *     <li>An optional {@link NodeIcon}</li>
- *     <li>Associated {@link NodeData} defining click behavior</li>
+ *     <li>Displaying their background sprite based on state and tier</li>
+ *     <li>Displaying an optional icon</li>
+ *     <li>Triggering tooltip rendering when hovered</li>
  * </ul>
- * <p>
- * Nodes are responsible only for rendering and interaction dispatch.
- * Game logic is handled via {@link NodeData}.
+ * </p>
+ *
+ * <p>Actual interaction (e.g. clicking) is typically handled at the screen level.</p>
  */
 public class Node extends CanvasRenderable {
 
@@ -36,39 +36,40 @@ public class Node extends CanvasRenderable {
     public static final float DEFAULT_SCALE = 0.8f;
     public static final float HOVER_SCALE = 1f;
 
-    private final NodeState state;
-    private final NodeTier tier;
+    private NodeState state;
+    private NodeTier tier;
 
     @Nullable
     private NodeIcon icon;
-    private final Component title;
+    private Component title;
 
     private CanvasRenderable renderableIcon;
 
-    private final NodeBranch parentBranch;
+    private NodeBranch parentBranch;
     private final int position;
-    private final NodeData<?> data;
+    private NodeData<?> data;
 
-    /**
-     * Constructs a node instance.
+     /**
+     * Constructs a node that represents a real enchantment with a specific level.
      *
-     * @param title         display name shown in the UI
-     * @param position      logical position within the branch (0 if non-enchantment node)
-     * @param canvas        owning canvas
-     * @param state        initial node state
-     * @param tier         visual tier of the node
-     * @param icon         optional visual icon
-     * @param parentBranch branch this node belongs to
-     * @param data         interaction and behavior data for this node
+     * <p>This constructor should be used for standard enchantment nodes that
+     * correspond to a valid enchantment ID and level.</p>
+     *
+     * @param position The level of the enchantment (must be > 0)
+     * @param canvas The canvas this node belongs to
+     * @param state The current state of the node (e.g. locked, unlocked)
+     * @param tier The visual tier of the node
+     * @param parentBranch The branch this node belongs to
      */
-    public Node(Canvas canvas, NodeBranch parentBranch, int position, Component title,
+    public Node(Component title,
+                int position,
+                Canvas canvas,
                 NodeState state,
                 NodeTier tier,
                 @Nullable NodeIcon icon,
+                NodeBranch parentBranch,
                 NodeData<?> data) {
         super(canvas);
-        if(position < 0) throw new IllegalStateException("Node position can't be less than 0!");
-
         this.position = position;
         this.state = state;
         this.tier = tier;
@@ -79,39 +80,18 @@ public class Node extends CanvasRenderable {
         setIcon(icon);
     }
 
-    /**
-     * Triggers this node's click behavior.
-     */
     public void click() {
         data.onClick(new NodeClickContext(canvas().screen(), this));
     }
 
-    /**
-     * Returns the type identifier of this node's data.
-     *
-     * @return node data type identifier
-     */
     public Identifier dataType() {
         return data.type();
     }
 
-    /**
-     * Checks whether this node's data type matches the given identifier.
-     *
-     * @param id type identifier to compare
-     * @return {@code true} if types match
-     */
     public boolean isDataType(Identifier id) {
         return data.type() == id;
     }
 
-    /**
-     * Used internally for enchantment removal.
-     * Determines whether this node can currently be removed based on its
-     * enchantment level and server configuration rules.
-     *
-     * @return {@code true} if removal is allowed
-     */
     public boolean canRemove() {
         return getPosition() == canvas().screen()
                 .getMenu()
@@ -121,17 +101,24 @@ public class Node extends CanvasRenderable {
                 && ServerConfig.isEnchantmentRemovalAllowed();
     }
 
-    /**
-     * @return parent branch of this node
-     */
     public NodeBranch getParentBranch() {
         return parentBranch;
     }
 
     /**
-     * Renders this node in the UI.
-     * <p>
-     * Handles scaling, hover detection, tooltip registration, and icon rendering.
+     * Renders this node on the screen.
+     *
+     * <p>This method first applies the node's current scale. If no other node has
+     * requested a tooltip for this frame, and the mouse is hovering over this node,
+     * it registers itself as the next node tooltip and skips rendering the node visuals.
+     * If this node is already the pending tooltip, rendering is also skipped.</p>
+     *
+     * <p>Otherwise, the node's background sprite is drawn, and if an icon texture is
+     * set, it is rendered on top of the background.</p>
+     *
+     * @param graphics The graphics context used for rendering
+     * @param mouseX The current mouse X position
+     * @param mouseY The current mouse Y position
      */
     @Override
     public void render(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
@@ -165,8 +152,10 @@ public class Node extends CanvasRenderable {
     }
 
     /**
-     * Assigns and validates the node icon.
-     * Locked or alert-state nodes will not display icons.
+     * Determines and assigns the icon texture for this node.
+     *
+     * <p>Defaults to an "ancient book" texture unless the node is in a locked state,
+     * in which case no icon is rendered.</p>
      */
     private void setIcon(NodeIcon icon) {
         this.icon = icon;
@@ -174,43 +163,62 @@ public class Node extends CanvasRenderable {
         if(isState(NodeState.LOCKED) || isState(NodeState.ALERT)) this.icon = null;
     }
 
-    /** @return visual tier of this node */
+    /**
+     * @return The visual tier of this node
+     */
     public NodeTier getTier() {
         return tier;
     }
 
-    /** @return current state of this node */
+    /**
+     * @return The current state of this node
+     */
     public NodeState getState() {
         return state;
     }
 
-    /** @return optional node icon */
+    /**
+     * @return The icon texture
+     */
     public @Nullable NodeIcon getIcon() {
         return icon;
     }
 
-    /** @return identifier of the parent branch */
+    /**
+     * @return The identifier associated with this node
+     */
     public Identifier branchId() {
         return getParentBranch().id();
     }
 
-    /** @return display title of this node */
+    /**
+     * Gets the localized display title for this node.
+     *
+     * <p>For enchantment nodes, this includes the enchantment name and level.
+     * For non-enchantment nodes, this resolves based on the node ID.</p>
+     *
+     * @return A {@link Component} representing the node title
+     */
     public Component getTitle() {
         return title;
     }
 
     /**
-     * Returns the node position within its branch.
+     * Gets the enchantment level of this node.
+     *
+     * @return The enchantment level
+     * @throws IllegalStateException if this node does not represent an enchantment
      */
     public int getPosition() {
+        if(position == 0) throw new IllegalStateException("This node does not have an enchantment level!");
         return position;
     }
 
     /**
-     * Checks whether this node is in the specified state.
+     * Checks if this node is in a given state.
      *
-     * @param state state to compare
-     * @return {@code true} if matching
+     * @param state The state to compare against
+     * @return {@code true} if the node is in the specified state
      */
     public boolean isState(NodeState state) {
         return this.state == state;
