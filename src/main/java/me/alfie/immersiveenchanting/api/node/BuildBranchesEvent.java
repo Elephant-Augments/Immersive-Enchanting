@@ -9,6 +9,16 @@ import net.neoforged.bus.api.Event;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * NeoForge event fired on the NeoForge event bus each time the enchanting tab builds its branch list.
+ *
+ * <p>Internal branches (enchantments, transmute, replicate, mod-filters) are added first by
+ * {@link me.alfie.immersiveenchanting.gui.tab.enchanting.node.BranchFactory}. Listeners can call
+ * {@link #addBranch} / {@link #addBranches} to inject additional custom branches.
+ *
+ * <p>The item in the tool slot, the server-side cost registry, and the canvas are available
+ * via the event getters so that listeners can tailor branches to the current context.
+ */
 public class BuildBranchesEvent extends Event {
     private final ItemStack stack;
     private final CostRegistry costRegistry;

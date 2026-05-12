@@ -13,6 +13,10 @@ import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
 public record FuelsLine(NodeTooltip tooltip) implements DescriptionLine {
+    /**
+     * Renders the "Fuel:" label and then draws the required fuel item stack
+     * immediately to the right of the label text.
+     */
     @Override
     public void render(GuiGraphicsExtractor graphics, int lineX, int lineY, double mouseX, double mouseY) {
         DescriptionHelper.text(graphics, getText(), lineX, lineY);

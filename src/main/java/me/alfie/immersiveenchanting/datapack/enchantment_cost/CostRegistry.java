@@ -69,6 +69,12 @@ public class CostRegistry {
         return ServerDatapackManager.get(DatapackKeys.COST);
     }
 
+    /**
+     * Populates the holder-keyed registry from the ID-keyed registry using the provided
+     * lookup. Must be called after the ID registry is fully populated (e.g. on server start
+     * or datapack reload) so that holder lookups work correctly.
+     * Logs a warning for any ID that cannot be resolved to a registered enchantment.
+     */
     public void resolveEnchantmentHolders(HolderLookup.Provider lookup) {
         HolderLookup.RegistryLookup<Enchantment> registry = lookup.lookupOrThrow(Registries.ENCHANTMENT);
 
@@ -93,10 +99,15 @@ public class CostRegistry {
         printRegistry();
     }
 
+    /** Registers raw cost data by ID. Used during datapack loading before holders are resolved. */
     public void register(Identifier id, CostData data) {
         ID_REGISTRY.put(id, data);
     }
 
+    /**
+     * Registers cost data by enchantment holder. Requires the same ID to already be present
+     * in the ID registry (i.e. {@link #register(Identifier, CostData)} must have been called first).
+     */
     public void register(Holder<Enchantment> enchantmentHolder) {
         Identifier id = Identifier.parse(enchantmentHolder.getRegisteredName());
         CostData data = get(id);
@@ -128,6 +139,10 @@ public class CostRegistry {
         ImmersiveEnchanting.LOGGER.debug(ENCHANTMENT_HOLDER_REGISTRY.toString());
     }
 
+    /**
+     * Returns all IDs in the ID registry that are not in this mod's namespace.
+     * Mod-internal entries (transmute, replicate, enchanting_fuels) are intentionally excluded.
+     */
     public List<Identifier> getAllEnchantmentIds() {
         List<Identifier> result = new ArrayList<>();
 
@@ -142,6 +157,10 @@ public class CostRegistry {
         return new ArrayList<>(ENCHANTMENT_HOLDER_REGISTRY.keySet());
     }
 
+    /**
+     * Returns the highest enchantment level defined across all registered enchantments.
+     * Used to size the canvas so the deepest branch is not clipped.
+     */
     public int getHighestLevel() {
         int highestLevel = 0;
         for (Identifier id : getAllEnchantmentIds()) {

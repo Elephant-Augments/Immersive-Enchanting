@@ -25,6 +25,11 @@ public class CostDatapack extends ModDatapack<CostData, CostRegistry> {
         return DATA;
     }
 
+    /**
+     * Called on every datapack reload. Clears and repopulates a temporary {@link CostRegistry}
+     * with enabled entries. The registry is not pushed to {@link me.alfie.immersiveenchanting.datapack.manager.ServerDatapackManager}
+     * yet — that happens when {@link #getBuilt()} is called by the server manager.
+     */
     @Override
     protected void apply(Map<Identifier, CostData> identifierEnchantmentDataMap, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
         getData().clear();
@@ -43,6 +48,11 @@ public class CostDatapack extends ModDatapack<CostData, CostRegistry> {
         ImmersiveEnchanting.LOGGER.debug("Populated temp cost registry with {} entries, ready to pull.", count);
     }
 
+    /**
+     * Converts the datapack file path identifier (e.g. {@code minecraft/sharpness})
+     * into the proper enchantment identifier form (e.g. {@code minecraft:sharpness})
+     * by replacing the first path separator with a colon.
+     */
     private static Identifier remapIdentifierPath(Identifier originalId) {
         String path = originalId.getPath();
         path = path.replace("/", ":");

@@ -22,6 +22,11 @@ public class DescriptionHelper {
         graphics.text(Minecraft.getInstance().font, component, x, y, Color.WHITE.getRGB());
     }
 
+    /**
+     * Inserts cost lines (materials, fuel, XP levels) into {@code description} starting at
+     * {@code lineStart}, skipping any cost component that is empty (AIR stack / 0 levels).
+     * Each item-stack cost occupies two slots to leave room for the rendered item icon.
+     */
     public static void insertCostLines(NodeTooltip tooltip, DescriptionLayout description, int lineStart){
         int lineNumber = lineStart;
         if(!tooltip.screen().enchantmentCostRenderer().getCurrentRenderedCost().stack().is(Items.AIR)) {
@@ -37,6 +42,12 @@ public class DescriptionHelper {
         if(tooltip.screen().enchantmentCostRenderer().getCurrentRenderedCost().xpLevels() > 0) description.insertLine(lineNumber, new LevelsLine(tooltip));
     }
 
+    /**
+     * Splits {@code component} into word-wrapped chunks of at most {@code lineSize} characters
+     * and inserts each chunk as a separate {@link DescriptionLine} starting at {@code lineStart}.
+     * The original component's style is preserved on every wrapped line.
+     * @return The number of lines inserted
+     */
     public static int lineWrapComponent(Component component, int lineSize, DescriptionLayout description, int lineStart) {
         List<String> textLines = chunkString(component.getString(), lineSize);
         int totalLines = 0;

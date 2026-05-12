@@ -40,12 +40,17 @@ public final class TooltipDescriptionExtensions {
         }
     }
 
+    /**
+     * Clear the layout and re-run all registered extensions. Use this when the node state
+     * has changed and the entire description needs to be regenerated from scratch.
+     */
     public static void rebuild(NodeTooltip parentTooltip,
                                DescriptionLayout descriptionLayout) {
         descriptionLayout.clear();
         apply(parentTooltip, descriptionLayout);
     }
 
+    /** Registers the built-in layout extensions via the {@link RegisterDescriptionLayoutEvent}. */
     public static void registerInternalTooltipDescriptions(RegisterDescriptionLayoutEvent event) {
         event.register(new EnchantLayoutExtension());
         event.register(new TransmuteLayoutExtension());

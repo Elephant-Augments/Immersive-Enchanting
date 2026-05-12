@@ -16,6 +16,16 @@ public record EnchantmentNodeData(Identifier enchantmentId, int level) {
 
     public static final Identifier TYPE = Identifier.fromNamespaceAndPath(ImmersiveEnchanting.MODID, "enchantment");
 
+    /**
+     * Creates a {@link NodeData} for an enchantment node.
+     *
+     * <p>On click:
+     * <ul>
+     *   <li>If the node is OBTAINED and {@link me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node#canRemove()}
+     *       is true, starts the hold-to-remove gesture.</li>
+     *   <li>Otherwise sends an {@link EnchantPacket} to apply the enchantment at the given level.</li>
+     * </ul>
+     */
     public static NodeData<EnchantmentNodeData> create(Identifier enchantmentId, int level) {
         return new NodeData<>(
                 TYPE,

@@ -69,6 +69,21 @@ public class ModCommands {
                 .executes(executor));
     }
 
+    /**
+     * Like {@link #simpleCommand} but adds a required {@code target} entity argument.
+     * If the command is run without providing a target, a translatable failure message is sent
+     * and the command returns {@code 0}.
+     *
+     * <p>The resulting command structure is:
+     * <pre>
+     * <code>/modid commandName [target]</code>
+     * </pre>
+     *
+     * @param commandName    the literal name of the subcommand
+     * @param permission     the {@link Permission} required to execute the command
+     * @param entityArgument the entity selector argument type (e.g. single player, multiple entities)
+     * @param executor       the command execution logic when a target is provided
+     */
     public static LiteralArgumentBuilder<CommandSourceStack> simpleEntityArgumentCommand(String commandName,
                                                                                    Permission permission,
                                                                                    EntityArgument entityArgument,

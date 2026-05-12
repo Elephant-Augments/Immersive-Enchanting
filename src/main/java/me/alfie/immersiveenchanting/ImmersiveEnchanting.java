@@ -53,6 +53,11 @@ public class ImmersiveEnchanting {
         return component.copy().withStyle(Style.EMPTY.withFont(altFont));
     }
 
+    /**
+     * Resolves a human-readable mod name from its namespace/mod ID.
+     * Falls back to the raw namespace if the mod is not loaded or has no display name,
+     * and capitalizes the first character of the result.
+     */
     public static String getModName(String namespace) {
         ModInfo modInfo = (ModInfo) ModList.get().getModContainerById(namespace)
                 .map(ModContainer::getModInfo)

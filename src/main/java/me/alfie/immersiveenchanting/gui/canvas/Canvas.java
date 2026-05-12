@@ -84,6 +84,12 @@ public class Canvas implements ScreenEventListener {
         }
     }
 
+    /**
+     * Resizes the canvas so that nodes at the furthest possible branch depth are not clipped.
+     *
+     * @param highestEnchantmentLevel the maximum enchantment level across all registered enchantments,
+     *                                used to determine how far branches can extend
+     */
     public void setSizeToFitNodes(int highestEnchantmentLevel) {
         highestEnchantmentLevel = Math.max(5, highestEnchantmentLevel); //Prevent canvas too small
 
@@ -106,6 +112,10 @@ public class Canvas implements ScreenEventListener {
         return new Vector2i(width / 2, height / 2);
     }
 
+    /**
+     * Converts a canvas-space position to a screen-space position, accounting for
+     * the camera's current scroll offset and zoom level.
+     */
     public Vector2f canvasToScreen(Vector2f pos) {
         return new Vector2f(
                 (pos.x() - screen().camera().x()) * screen().camera().zoom() + screen().camera().VIEWPORT_X,
@@ -117,6 +127,10 @@ public class Canvas implements ScreenEventListener {
         return canvasToScreen(new Vector2f(x, y));
     }
 
+    /**
+     * Converts a screen-space position back to canvas-space, the inverse of
+     * {@link #canvasToScreen(Vector2f)}.
+     */
     public Vector2f screenToCanvas(Vector2f pos) {
         return new Vector2f(
                 (pos.x() - screen().camera().VIEWPORT_X) / screen().camera().zoom() + screen().camera().x(),
@@ -132,6 +146,14 @@ public class Canvas implements ScreenEventListener {
         return length * screen().camera().zoom();
     }
 
+    /**
+     * Smoothly lerps the canvas tint color toward a target brightness.
+     * When a tooltip is active ({@code hovered = true}) the canvas dims to {@link #TINTED_BRIGHTNESS};
+     * otherwise it fades back to {@link #FULL_BRIGHTNESS}.
+     *
+     * @param hovered   whether a tooltip is currently being shown
+     * @param deltaTime time delta used to scale the interpolation speed
+     */
     public void updateBrightness(boolean hovered, float deltaTime) {
         int targetBrightness = hovered ? TINTED_BRIGHTNESS : FULL_BRIGHTNESS;
         if(screen().getMenu().getToolSlot().getItem().isEmpty()) targetBrightness = TINTED_BRIGHTNESS;

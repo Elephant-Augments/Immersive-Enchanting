@@ -24,6 +24,11 @@ public class DescriptionLayout {
         lineSpace = Minecraft.getInstance().font.lineHeight;
     }
 
+    /**
+     * Insert a line at the given index, shifting existing lines down.
+     * If {@code lineNumber} is beyond the current list size, empty no-op lines are appended
+     * until the list is long enough, then the new line is inserted at {@code lineNumber}.
+     */
     public void insertLine(int lineNumber, DescriptionLine line) {
         while(lines.size() < lineNumber) {
             lines.add(new DescriptionLine() {

@@ -55,6 +55,11 @@ public class TooltipManager {
         return activeTooltip != null && activeTooltip.node().equals(node);
     }
 
+    /**
+     * Marks this frame as having a tooltip request and sets the tooltip for {@code node}
+     * if the priority is high enough. Called by nodes and the active tooltip during rendering
+     * so the manager knows not to clear the tooltip at end-of-frame.
+     */
     public void requestTooltip(Node node, int priority) {
         if(priority < activeTooltipPriority) return;
 
@@ -66,6 +71,10 @@ public class TooltipManager {
         return isTooltipRequestedThisFrame;
     }
 
+    /**
+     * Changes the active tooltip to the given node, unless the tooltip is locked
+     * or the node is already the active tooltip. Also plays the node hover sound.
+     */
     private void setTooltip(Node node, int priority) {
         if(isTooltipLocked()) return;
         if(hasActiveTooltip() && getActiveTooltipNode().equals(node)) return;
@@ -75,6 +84,10 @@ public class TooltipManager {
         FxHelper.playNodeHover(screen.player().level(), node);
     }
 
+    /**
+     * Clears the per-frame tooltip request flag. Called at the end of every render frame
+     * so that the screen can detect when no node requested a tooltip and clear it.
+     */
     public void resetFrameState() {
         isTooltipRequestedThisFrame = false;
     }
@@ -99,6 +112,10 @@ public class TooltipManager {
         return heldTooltipNode != null;
     }
 
+    /**
+     * Checks whether the hold threshold has been reached and fires the remove action if so.
+     * Called each frame while a node is being held.
+     */
     public void updateHold() {
         if(heldTooltipNode == null) return;
 
@@ -109,6 +126,10 @@ public class TooltipManager {
         return System.currentTimeMillis() - holdStartTime;
     }
 
+    /**
+     * Sends the enchantment removal packet for the currently held node and resets the hold state.
+     * Called when the hold duration reaches {@link #HOLD_TRESHOLD_MILLIS}.
+     */
     private void triggerHeldTooltip() {
         ClientPacketDistributor.sendToServer(new RemoveEnchantmentPacket(
                 EnchantmentUtil.toHolder(heldTooltipNode.branchId(), screen.registryAccess()),

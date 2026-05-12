@@ -154,7 +154,8 @@ public class ServerDatapackManager {
     }
 
     /**
-     * Internal method
+     * Re-resolves enchantment holders when tag data is updated from a server data load.
+     * Guards against running before the server is ready.
      */
     public static void resolveEnchantmentHolders(TagsUpdatedEvent event) {
         if(event.getUpdateCause() == TagsUpdatedEvent.UpdateCause.SERVER_DATA_LOAD) {

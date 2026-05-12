@@ -54,6 +54,14 @@ public class BranchManager {
         }
     }
 
+    /**
+     * Calculates the node step (distance between nodes along a branch) and the per-branch
+     * scale so that no two branches overlap visually.
+     *
+     * <p>Works by finding the smallest angular gap between any two adjacent branches, then
+     * choosing the largest step size that keeps nodes at least one node-diameter apart.
+     * If even the maximum step size would cause overlap, nodes are scaled down instead.
+     */
     private void calculateNodeAnglesAndStep() {
         final int baseStep = 40;
         final int minStep = 40;

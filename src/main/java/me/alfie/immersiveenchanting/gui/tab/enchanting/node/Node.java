@@ -98,6 +98,11 @@ public class Node extends CanvasRenderable {
         return data.type() == id;
     }
 
+    /**
+     * Returns {@code true} if this node's enchantment can currently be removed.
+     * Removal is only permitted when the node's position matches the highest level on the item
+     * (i.e. it is the top-most equipped level) and removal is enabled in server config.
+     */
     public boolean canRemove() {
         return getPosition() == canvas().screen()
                 .getMenu()

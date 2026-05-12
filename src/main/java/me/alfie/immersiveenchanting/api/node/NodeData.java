@@ -5,6 +5,16 @@ import net.minecraft.resources.Identifier;
 
 import java.util.function.BiConsumer;
 
+/**
+ * Typed payload attached to a node, associating a type identifier, an arbitrary value,
+ * and a click handler.
+ *
+ * <p>When the node is clicked, {@link #onClick} is called with the resolved value
+ * and a {@link NodeClickContext} providing access to the screen and node.
+ * The type identifier is used to dispatch description-layout extensions.
+ *
+ * @param <T> the type of the payload value
+ */
 public class NodeData<T> {
 
     private final Identifier type;

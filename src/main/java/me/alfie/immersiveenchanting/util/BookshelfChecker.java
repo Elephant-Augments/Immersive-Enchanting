@@ -21,12 +21,24 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class BookshelfChecker {
+    /**
+     * Scans nearby bookshelves for available enchantments and sends the result to the player
+     * via {@link me.alfie.immersiveenchanting.networking.AvailableEnchantmentsPacket}.
+     * Called server-side when the enchanting table is opened.
+     */
     public static void checkBookshelves(BlockPos blockPos, Level level, ServerPlayer serverPlayer) {
         List<Holder<Enchantment>> availableEnchantments = getEnchantmentsInBookshelves(blockPos, level);
 
         PacketDistributor.sendToPlayer(serverPlayer, new AvailableEnchantmentsPacket(availableEnchantments));
     }
 
+    /**
+     * Returns all enchantments available from nearby bookshelves.
+     * Short-circuits to the full registry if a creative bookshelf is nearby or if
+     * ancient books are not required by config. Otherwise scans nearby chiseled bookshelves
+     * and collects enchantments from any {@link me.alfie.immersiveenchanting.item.ModItems#ANCIENT_BOOK}
+     * stacks found inside them.
+     */
     public static List<Holder<Enchantment>> getEnchantmentsInBookshelves(BlockPos blockPos, Level level) {
         if(isCreativeBookshelfNearby(blockPos, level)) return CostRegistry.server().getAllEnchantmentHolders();
         if(!ServerConfig.areAncientBooksRequired()) return CostRegistry.server().getAllEnchantmentHolders();
@@ -90,6 +102,13 @@ public class BookshelfChecker {
         return result;
     }
 
+    /**
+     * Iterates over every block position in a hollow rectangular prism shell around {@code center}.
+     * The shell spans {@code ±maxRadius} on each axis but skips any position where both
+     * {@code |dx| < minRadiusX} and {@code |dz| < minRadiusZ}, producing a ring rather than
+     * a solid box. The Y axis is not hollow: all offsets from {@code minRadiusY} to
+     * {@code maxRadiusY} (inclusive) are visited.
+     */
     private static void forEachRingPos(
             BlockPos center,
             int minRadiusX, int maxRadiusX,
@@ -116,6 +135,11 @@ public class BookshelfChecker {
         }
     }
 
+    /**
+     * Returns {@code true} as soon as {@code predicate} matches any block in the hollow ring,
+     * using the same ring geometry as {@link #forEachRingPos} but stopping early on the first
+     * match. Y range is {@code minRadiusY} to {@code maxRadiusY - 1} (exclusive upper bound).
+     */
     private static boolean anyInRing(
             BlockPos center,
             int minRadiusX, int maxRadiusX,

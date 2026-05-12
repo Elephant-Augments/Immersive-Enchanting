@@ -32,7 +32,9 @@ public class ClientDatapackManager {
     private static DataMap dataMap = new DataMap(new HashMap<>());
 
     /**
-     * Internal method
+     * Re-resolves enchantment holders after the client receives updated tags.
+     * Only runs on {@link TagsUpdatedEvent.UpdateCause#CLIENT_PACKET_RECEIVED} and
+     * no-ops if no sync packet has been received yet.
      */
     public static void resolveEnchantmentHolders(TagsUpdatedEvent event) {
         if(!isReady()) return;
@@ -42,12 +44,8 @@ public class ClientDatapackManager {
     }
 
     /**
-     * Re-resolves registry holders after client receives updated tags.
-     *
-     * <p>This is required because some datapack data references registry entries
-     * that are only fully available after tag synchronization.</p>
-     *
-     * <p>This will only run after a datapack sync packet has been received.</p>
+     * Replaces the client-side datapack data with the map received from the server.
+     * Called when a {@link me.alfie.immersiveenchanting.networking.SyncClientDatapackPacket} is processed.
      */
     public static void setDataMap(DataMap newDataMap) {
         dataMap = newDataMap;

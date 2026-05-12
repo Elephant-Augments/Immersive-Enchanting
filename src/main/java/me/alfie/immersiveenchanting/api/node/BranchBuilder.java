@@ -7,6 +7,13 @@ import net.minecraft.resources.Identifier;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Fluent builder for constructing a {@link me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeBranch}
+ * from a sequence of {@link NodeTemplate} descriptors.
+ *
+ * <p>Use {@link #of} to create an instance, chain {@link #node}/{@link #nodes} calls to add
+ * node templates in order, then call {@link #build} to produce the branch.
+ */
 public class BranchBuilder {
 
     private final Canvas canvas;

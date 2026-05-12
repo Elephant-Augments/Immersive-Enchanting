@@ -206,6 +206,10 @@ public class BranchFactory {
                     .build());
     }
 
+    /**
+     * Returns all enchantments from the cost registry that are compatible with {@code stack}
+     * (i.e. supported by the item and not conflicting with its other enchantments), sorted alphabetically.
+     */
     private static List<Holder<Enchantment>> getApplicableEnchantments(ItemStack stack, CostRegistry costRegistry) {
         List<Holder<Enchantment>> sortedEnchantments = EnchantmentUtil.sortByName(costRegistry.getAllEnchantmentHolders());
 
@@ -220,6 +224,10 @@ public class BranchFactory {
         return applicableEnchantments;
     }
 
+    /**
+     * Generates evenly-spaced angles (in radians) for {@code totalBranches} branches,
+     * spread uniformly around a full circle.
+     */
     private static ArrayList<Float> generateBranchAngles(int totalBranches) {
         // No more than 16 branches
         ArrayList<Float> angles = new ArrayList<>();

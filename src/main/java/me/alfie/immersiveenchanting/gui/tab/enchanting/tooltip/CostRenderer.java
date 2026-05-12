@@ -26,6 +26,10 @@ public class CostRenderer {
         this.costRegistry = costRegistry;
     }
 
+    /**
+     * Loads the cost and fuel data for the given enchantment ID and level so it can be
+     * cycled and displayed in the tooltip. Must be called whenever the active node changes.
+     */
     public void setCostToRender(Identifier id, int level) {
         holder = Optional.ofNullable(costRegistry.get(id))
                 .map(entry -> entry.levelCosts().getLevel(level))
@@ -37,6 +41,10 @@ public class CostRenderer {
         this.renderedFuelCosts = getRenderedCosts(fuelHolder);
     }
 
+    /**
+     * Flattens a {@link CostHolder} into a list of {@link RenderedCost} entries, one per
+     * item stack variant across all costs. Used to build the carousel list.
+     */
     private List<RenderedCost> getRenderedCosts(CostHolder holder) {
         List<RenderedCost> entries = new ArrayList<>();
 

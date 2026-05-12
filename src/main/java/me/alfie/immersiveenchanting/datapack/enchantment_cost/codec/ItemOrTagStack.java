@@ -34,6 +34,10 @@ public record ItemOrTagStack(ItemOrTag itemOrTag,
 
     public static final ItemOrTagStack EMPTY = new ItemOrTagStack(ItemOrTag.EMPTY, DataComponentPatch.EMPTY, 0);
 
+    /**
+     * Expands the {@link ItemOrTag} to a list of {@link ItemStack}s, each with the
+     * configured {@link #amount} and {@link DataComponentPatch} applied.
+     */
     public List<ItemStack> getItemStacks() {
         List<ItemStack> result = new ArrayList<>(itemOrTag().getItems().size());
         for (Holder<Item> item : itemOrTag().getItems()) {

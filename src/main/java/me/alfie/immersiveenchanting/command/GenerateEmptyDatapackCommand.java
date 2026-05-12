@@ -78,6 +78,7 @@ public enum GenerateEmptyDatapackCommand implements ModCommand {
 
     }
 
+    /** Writes {@code pack.mcmeta} into the datapack root with a fixed pack format and description. */
     private static void createPackMcMeta(File rootDir) {
         JsonObject pack = new JsonObject();
         pack.addProperty("description", "Datapack generated from /immersiveenchanting generateEmptyDatapack.");
@@ -92,6 +93,11 @@ public enum GenerateEmptyDatapackCommand implements ModCommand {
         writeJsonFile(packmcmeta, root);
     }
 
+    /**
+     * Creates stub JSON files for the three mod-internal cost entries: {@code transmute},
+     * {@code replicate}, and {@code enchanting_fuels}. Each file contains one empty cost slot
+     * per level (1 level for transmute/replicate, 5 for fuels).
+     */
     private static void createInternalJsonFiles(File enchantmentCostsDir) {
         File modNamespaceDir = new File(enchantmentCostsDir, ImmersiveEnchanting.MODID);
         modNamespaceDir.mkdirs();
@@ -107,6 +113,11 @@ public enum GenerateEmptyDatapackCommand implements ModCommand {
         writeJsonFile(enchantingFuelsFile, enchantingFuelsJson);
     }
 
+    /**
+     * Iterates every registered enchantment and writes an empty cost JSON file for each one,
+     * one level slot per max level of that enchantment. Files are placed under
+     * {@code enchantment_costs/<namespace>/<enchantment_name>.json}.
+     */
     private static void createEnchantmentJsonFiles(RegistryAccess registryAccess, File enchantmentCostsDir) {
         List<Holder.Reference<Enchantment>> enchantments = EnchantmentUtil.getAllRegisteredEnchantments(registryAccess);
         for(Holder<Enchantment> enchantmentHolder : enchantments) {
@@ -119,6 +130,11 @@ public enum GenerateEmptyDatapackCommand implements ModCommand {
         }
     }
 
+    /**
+     * Resolves the output {@link File} path for an enchantment's JSON, splitting the registered
+     * name on {@code :} to derive {@code <enchantmentCostsDir>/<namespace>/<name>.json}.
+     * Creates the namespace subdirectory if it does not already exist.
+     */
     private static @NotNull File getOrCreateFile(Holder<Enchantment> enchantmentHolder, File enchantmentCostsDir) {
         String id = enchantmentHolder.getRegisteredName();
 
@@ -134,6 +150,11 @@ public enum GenerateEmptyDatapackCommand implements ModCommand {
         return jsonFile;
     }
 
+    /**
+     * Builds a cost JSON object with {@code maxLevel} level entries, each containing a single
+     * no-op cost (air × 0, 0 XP levels). The resulting structure matches the schema expected
+     * by {@link me.alfie.immersiveenchanting.datapack.enchantment_cost.CostDatapack}.
+     */
     private static JsonObject buildEmptyCostJson(int maxLevel) {
         JsonObject levels = new JsonObject();
 
@@ -157,6 +178,7 @@ public enum GenerateEmptyDatapackCommand implements ModCommand {
         return root;
     }
 
+    /** Serializes {@code json} to {@code file} with pretty-printing, silently printing the stack trace on failure. */
     private static void writeJsonFile(File file, JsonObject json) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         try(FileWriter writer = new FileWriter(file)) {

@@ -10,6 +10,12 @@ public record ModFilterNodeData(String modid) {
     public static final String ALL_MODS = "all";
     public static final Identifier TYPE = Identifier.fromNamespaceAndPath(ImmersiveEnchanting.MODID, "mod_filter");
 
+    /**
+     * Creates a {@link NodeData} for a mod-filter node.
+     *
+     * <p>On click, sets the enchanting tab's active mod filter to {@code modid}
+     * (or clears it when {@code modid} is {@link #ALL_MODS}) and rebuilds the branch list.
+     */
     public static NodeData<ModFilterNodeData> create(String modid) {
         return new NodeData<>(
                 TYPE,

@@ -14,6 +14,10 @@ import org.jetbrains.annotations.NotNull;
 
 public record MaterialsLine(NodeTooltip tooltip) implements DescriptionLine {
 
+    /**
+     * Renders the "Materials:" label and then draws the required material item stack
+     * immediately to the right of the label text.
+     */
     @Override
     public void render(GuiGraphicsExtractor graphics, int lineX, int lineY, double mouseX, double mouseY) {
         DescriptionHelper.text(graphics, getText(), lineX, lineY);

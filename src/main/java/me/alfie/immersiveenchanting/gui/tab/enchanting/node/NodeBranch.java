@@ -55,6 +55,10 @@ public class NodeBranch extends CanvasRenderable {
         return angle;
     }
 
+    /**
+     * Positions each node along the branch's angle at equal step intervals from the canvas center,
+     * then recalculates the connector line textures between them.
+     */
     public void placeNodesAlongLine() {
         double stepX = Math.cos(angle) * BranchManager.getNodeStep();
         double stepY = Math.sin(angle) * BranchManager.getNodeStep();

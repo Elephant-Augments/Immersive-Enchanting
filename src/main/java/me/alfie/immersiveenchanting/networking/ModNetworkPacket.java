@@ -18,5 +18,12 @@ public interface ModNetworkPacket<T extends CustomPacketPayload> extends CustomP
         return typeId();
     }
 
+    /**
+     * Executes the packet logic on the receiving side.
+     * Called on the game thread after the packet is received and decoded.
+     *
+     * @param packet  the decoded packet instance
+     * @param context payload context providing the player and other execution helpers
+     */
     void exec(T packet, IPayloadContext context);
 }
