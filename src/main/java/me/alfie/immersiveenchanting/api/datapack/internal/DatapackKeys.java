@@ -1,4 +1,4 @@
-package me.alfie.immersiveenchanting.datapack;
+package me.alfie.immersiveenchanting.api.datapack.internal;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.api.datapack.DatapackKey;

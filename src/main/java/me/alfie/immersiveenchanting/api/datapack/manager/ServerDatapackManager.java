@@ -2,7 +2,7 @@ package me.alfie.immersiveenchanting.api.datapack.manager;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.api.datapack.*;
-import me.alfie.immersiveenchanting.datapack.DatapackKeys;
+import me.alfie.immersiveenchanting.api.datapack.internal.DatapackKeys;
 import me.alfie.immersiveenchanting.networking.SyncClientDatapackPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;

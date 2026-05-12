@@ -15,7 +15,7 @@ import java.util.function.BiConsumer;
  *
  * @param <T> the type of the payload value
  */
-public class NodeData<T> {
+public class NodeData<T extends NodePayload> {
 
     private final Identifier type;
     private final T value;
@@ -28,7 +28,7 @@ public class NodeData<T> {
     }
 
     public Identifier type() {
-        return type;
+        return value.type();
     }
 
     public T value() {

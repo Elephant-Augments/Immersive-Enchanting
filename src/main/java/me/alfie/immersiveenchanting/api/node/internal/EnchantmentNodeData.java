@@ -1,6 +1,7 @@
 package me.alfie.immersiveenchanting.api.node.internal;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
+import me.alfie.immersiveenchanting.api.node.NodePayload;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
 import me.alfie.immersiveenchanting.api.node.NodeData;
@@ -12,7 +13,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
-public record EnchantmentNodeData(Identifier enchantmentId, int level) {
+public record EnchantmentNodeData(Identifier enchantmentId, int level) implements NodePayload {
 
     public static final Identifier TYPE = Identifier.fromNamespaceAndPath(ImmersiveEnchanting.MODID, "enchantment");
 
@@ -45,4 +46,8 @@ public record EnchantmentNodeData(Identifier enchantmentId, int level) {
         );
     }
 
+    @Override
+    public Identifier type() {
+        return TYPE;
+    }
 }

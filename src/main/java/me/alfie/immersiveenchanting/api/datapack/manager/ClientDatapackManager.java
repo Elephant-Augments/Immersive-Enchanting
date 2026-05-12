@@ -2,7 +2,7 @@ package me.alfie.immersiveenchanting.api.datapack.manager;
 
 import me.alfie.immersiveenchanting.api.datapack.DataMap;
 import me.alfie.immersiveenchanting.api.datapack.DatapackKey;
-import me.alfie.immersiveenchanting.datapack.DatapackKeys;
+import me.alfie.immersiveenchanting.api.datapack.internal.DatapackKeys;
 import net.neoforged.neoforge.event.TagsUpdatedEvent;
 
 import java.util.HashMap;

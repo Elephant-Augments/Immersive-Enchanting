@@ -1,7 +1,7 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.node;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
-import me.alfie.immersiveenchanting.datapack.DatapackKeys;
+import me.alfie.immersiveenchanting.api.datapack.internal.DatapackKeys;
 import me.alfie.immersiveenchanting.api.datapack.manager.ClientDatapackManager;
 import me.alfie.immersiveenchanting.api.node.*;
 import me.alfie.immersiveenchanting.config.ServerConfig;

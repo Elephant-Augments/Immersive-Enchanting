@@ -1,7 +1,7 @@
 package me.alfie.immersiveenchanting.datapack.mod_icons;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
-import me.alfie.immersiveenchanting.datapack.DatapackKeys;
+import me.alfie.immersiveenchanting.api.datapack.internal.DatapackKeys;
 import me.alfie.immersiveenchanting.api.datapack.DatapackRegistry;
 import me.alfie.immersiveenchanting.api.datapack.ModDatapack;
 import net.minecraft.resources.Identifier;

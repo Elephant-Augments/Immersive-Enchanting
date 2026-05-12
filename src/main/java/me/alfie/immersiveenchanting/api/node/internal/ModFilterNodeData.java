@@ -1,11 +1,12 @@
 package me.alfie.immersiveenchanting.api.node.internal;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
+import me.alfie.immersiveenchanting.api.node.NodePayload;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.api.node.NodeData;
 import net.minecraft.resources.Identifier;
 
-public record ModFilterNodeData(String modid) {
+public record ModFilterNodeData(String modid) implements NodePayload {
 
     public static final String ALL_MODS = "all";
     public static final Identifier TYPE = Identifier.fromNamespaceAndPath(ImmersiveEnchanting.MODID, "mod_filter");
@@ -31,4 +32,8 @@ public record ModFilterNodeData(String modid) {
         );
     }
 
+    @Override
+    public Identifier type() {
+        return TYPE;
+    }
 }
