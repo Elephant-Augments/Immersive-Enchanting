@@ -137,17 +137,18 @@ public enum GenerateEmptyDatapackCommand implements ModCommand {
      */
     private static @NotNull File getOrCreateFile(Holder<Enchantment> enchantmentHolder, File enchantmentCostsDir) {
         String id = enchantmentHolder.getRegisteredName();
-
         String[] parts = id.split(":", 2);
 
         String namespace = parts[0];
         String enchantName = parts[1];
 
         File namespaceDir = new File(enchantmentCostsDir, namespace);
-        if(!namespaceDir.exists()) namespaceDir.mkdirs();
+        File enchantmentFile = new File(namespaceDir, enchantName + ".json");
 
-        File jsonFile = new File(namespaceDir, enchantName + ".json");
-        return jsonFile;
+        File parent = enchantmentFile.getParentFile();
+        if(!parent.exists()) parent.mkdirs();
+
+        return enchantmentFile;
     }
 
     /**
@@ -159,16 +160,19 @@ public enum GenerateEmptyDatapackCommand implements ModCommand {
         JsonObject levels = new JsonObject();
 
         for (int i = 1; i <= maxLevel; i++) {
-            JsonArray costHolder = new JsonArray();
+            JsonArray costArray = new JsonArray();
 
-            JsonObject cost = new JsonObject();
-            cost.addProperty("item", "minecraft:air");
-            cost.addProperty("amount", 0);
-            cost.addProperty("xp_levels", 0);
+            JsonObject itemStack = new JsonObject();
+            itemStack.addProperty("item_or_tag_id", "minecraft:air");
+            itemStack.addProperty("count", 0);
+            itemStack.addProperty("xp_levels", 0);
 
-            costHolder.add(cost);
+            JsonObject wrapper = new JsonObject();
+            wrapper.add("item_stack", itemStack);
 
-            levels.add(String.valueOf(i), costHolder);
+            costArray.add(wrapper);
+
+            levels.add(String.valueOf(i), costArray);
         }
 
         JsonObject root = new JsonObject();

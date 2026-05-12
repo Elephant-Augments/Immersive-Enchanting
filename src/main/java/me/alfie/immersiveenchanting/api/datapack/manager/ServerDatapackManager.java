@@ -174,6 +174,11 @@ public class ServerDatapackManager {
         ImmersiveEnchanting.LOGGER.debug("Sending sync packet to {}...", player);
 
         PacketDistributor.sendToPlayer(player, new SyncClientDatapackPacket(getInstance().dataMap));
+
+        for (Map.Entry<DatapackKey<?>, ModDatapack<?, ?>> entry : DATAPACKS.entrySet()) {
+            ModDatapack<?, ?> datapack = entry.getValue();
+            datapack.afterSync(player);
+        }
     }
 
     /**

@@ -2,6 +2,8 @@ package me.alfie.immersiveenchanting.networking;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.api.datapack.DataMap;
+import me.alfie.immersiveenchanting.api.datapack.DatapackKey;
+import me.alfie.immersiveenchanting.api.datapack.ModDatapack;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.api.datapack.manager.ClientDatapackManager;
 import me.alfie.immersiveenchanting.datapack.node_sounds.NodeSoundMap;
@@ -10,6 +12,8 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Map;
 
 /**
  * Server-to-client packet that synchronizes datapack-driven client state.

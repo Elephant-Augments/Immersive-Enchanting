@@ -6,6 +6,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -122,4 +123,6 @@ public abstract class ModDatapack<A, B> extends SimpleJsonResourceReloadListener
      * @param server the current server instance
      */
     public void afterPull(MinecraftServer server) {}
+
+    public void afterSync(ServerPlayer player) {}
 }
