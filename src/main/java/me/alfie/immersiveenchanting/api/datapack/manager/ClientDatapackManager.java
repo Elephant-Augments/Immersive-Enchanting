@@ -1,16 +1,11 @@
 package me.alfie.immersiveenchanting.api.datapack.manager;
 
 import me.alfie.immersiveenchanting.api.datapack.DataMap;
-import me.alfie.immersiveenchanting.api.datapack.DatapackInstances;
 import me.alfie.immersiveenchanting.api.datapack.DatapackKey;
-import me.alfie.immersiveenchanting.api.datapack.DatapackKeys;
-import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
-import me.alfie.immersiveenchanting.datapack.node_sounds.NodeSoundMap;
-import net.minecraft.core.HolderLookup;
+import me.alfie.immersiveenchanting.datapack.DatapackKeys;
 import net.neoforged.neoforge.event.TagsUpdatedEvent;
 
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Client-side manager for synced datapack data.
@@ -32,6 +27,7 @@ public class ClientDatapackManager {
     private static DataMap dataMap = new DataMap(new HashMap<>());
 
     /**
+     * Internal method for CostDatapack
      * Re-resolves enchantment holders after the client receives updated tags.
      * Only runs on {@link TagsUpdatedEvent.UpdateCause#CLIENT_PACKET_RECEIVED} and
      * no-ops if no sync packet has been received yet.

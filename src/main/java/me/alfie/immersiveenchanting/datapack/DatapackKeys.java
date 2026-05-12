@@ -1,12 +1,10 @@
-package me.alfie.immersiveenchanting.api.datapack;
+package me.alfie.immersiveenchanting.datapack;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
+import me.alfie.immersiveenchanting.api.datapack.DatapackKey;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.datapack.mod_icons.ModIconsMap;
 import me.alfie.immersiveenchanting.datapack.node_sounds.NodeSoundMap;
-import net.minecraft.resources.Identifier;
-
-import java.lang.invoke.CallSite;
 
 /**Internal DatapackKeys*/
 public final class DatapackKeys {

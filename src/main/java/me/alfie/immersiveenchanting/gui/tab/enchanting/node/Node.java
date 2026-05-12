@@ -34,20 +34,17 @@ public class Node extends CanvasRenderable {
     public static final int WIDTH = 26;
     public static final int HEIGHT = 26;
     public static final float DEFAULT_SCALE = 0.8f;
-    public static final float HOVER_SCALE = 1f;
 
-    private NodeState state;
-    private NodeTier tier;
+    private final NodeState state;
+    private final NodeTier tier;
 
     @Nullable
     private NodeIcon icon;
-    private Component title;
+    private final Component title;
 
-    private CanvasRenderable renderableIcon;
-
-    private NodeBranch parentBranch;
+    private final NodeBranch parentBranch;
     private final int position;
-    private NodeData<?> data;
+    private final NodeData<?> data;
 
      /**
      * Constructs a node that represents a real enchantment with a specific level.

@@ -1,13 +1,9 @@
 package me.alfie.immersiveenchanting.datapack.node_sounds;
 
-import com.mojang.serialization.Codec;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
-import me.alfie.immersiveenchanting.api.datapack.DatapackKey;
-import me.alfie.immersiveenchanting.api.datapack.DatapackKeys;
+import me.alfie.immersiveenchanting.datapack.DatapackKeys;
 import me.alfie.immersiveenchanting.api.datapack.DatapackRegistry;
 import me.alfie.immersiveenchanting.api.datapack.ModDatapack;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
