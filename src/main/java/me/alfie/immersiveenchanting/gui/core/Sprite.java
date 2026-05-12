@@ -39,7 +39,8 @@ public enum Sprite {
     ELITE_NODE_UNOBTAINED("textures/gui/sprites/node/elite_node_unobtained.png", 26, 26),
     ELITE_NODE_OBTAINED("textures/gui/sprites/node/elite_node_obtained.png", 26, 26),
     LOCKED_NODE("textures/gui/sprites/node/locked_node.png", 26, 26),
-    ALERT_NODE("textures/gui/sprites/node/alert_node.png", 26, 26);
+    ALERT_NODE("textures/gui/sprites/node/alert_node.png", 26, 26),
+    ERROR_NODE("textures/gui/sprites/node/error_node.png", 26, 26);
 
     private final Identifier identifier;
     private final int width;

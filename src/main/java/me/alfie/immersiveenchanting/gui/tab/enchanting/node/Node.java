@@ -1,13 +1,18 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.node;
 
 import me.alfie.immersiveenchanting.api.node.*;
+import me.alfie.immersiveenchanting.api.node.internal.EnchantmentNodeData;
 import me.alfie.immersiveenchanting.config.ServerConfig;
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.gui.canvas.CanvasRenderable;
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
+import me.alfie.immersiveenchanting.gui.core.Sprite;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.enchantment.Enchantment;
 
 import javax.annotation.Nullable;
 
@@ -101,7 +106,7 @@ public class Node extends CanvasRenderable {
      * (i.e. it is the top-most equipped level) and removal is enabled in server config.
      */
     public boolean canRemove() {
-        return getPosition() == canvas().screen()
+        return getPosition() + 1 == canvas().screen()
                 .getMenu()
                 .getToolSlot()
                 .getItem()
@@ -150,7 +155,18 @@ public class Node extends CanvasRenderable {
         }
 
         if(canvas().screen().tooltipManager().isActiveTooltipFor(this)) return;
+
         blit(graphics, state.getSpriteForTier(tier), canvas().getCurrentBrightness());
+
+        if(data().value() instanceof EnchantmentNodeData enchantmentData) {
+            Holder<Enchantment> enchantmentHolder = EnchantmentUtil.toHolder(enchantmentData.enchantmentId(), canvas().screen().registryAccess());
+            if(!CostRegistry.client().isRegistered(enchantmentHolder)) {
+                //Red error node for enchantments that failed to load costs
+                blit(graphics, Sprite.ERROR_NODE, canvas().getCurrentBrightness());
+            }
+
+        }
+
 
         if(getIcon() instanceof SpriteIcon sprite) {
             blit(graphics, sprite.id(), 16, 16, 4, 4, canvas().getCurrentBrightness());

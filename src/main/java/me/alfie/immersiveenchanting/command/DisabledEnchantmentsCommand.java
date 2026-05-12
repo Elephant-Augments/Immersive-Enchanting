@@ -25,7 +25,7 @@ public enum DisabledEnchantmentsCommand implements ModCommand {
                         "disabledEnchantments",
                         Permissions.COMMANDS_ADMIN,
                         context -> {
-                            List<Holder.Reference<Enchantment>> registeredEnchantments =
+                            List<Holder<Enchantment>> registeredEnchantments =
                                     EnchantmentUtil.getAllRegisteredEnchantments(context.getSource().registryAccess());
 
                             List<Holder<Enchantment>> datapackEnchantments =

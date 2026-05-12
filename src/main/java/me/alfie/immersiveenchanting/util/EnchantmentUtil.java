@@ -133,6 +133,8 @@ public class EnchantmentUtil {
     public static boolean canEnchant(EnchantingTableMenu menu,
                                      Holder<Enchantment> enchantmentHolder, int level,
                                      IPayloadContext context) {
+        if(!CostRegistry.server().isRegistered(enchantmentHolder)) return false;
+
         ItemStack stackToEnchant = menu.getToolSlot().getItem();
         if(!isNextLevel(stackToEnchant, enchantmentHolder, level)) return false;
         if(!stackToEnchant.supportsEnchantment(enchantmentHolder)) return false;
@@ -354,7 +356,7 @@ public class EnchantmentUtil {
      * @param lookup registry lookup provider
      * @return list of all enchantments
      */
-    public static List<Holder.Reference<Enchantment>> getAllRegisteredEnchantments(HolderLookup.Provider lookup) {
-        return lookup.lookupOrThrow(Registries.ENCHANTMENT).listElements().toList();
+    public static List<Holder<Enchantment>> getAllRegisteredEnchantments(HolderLookup.Provider lookup) {
+        return lookup.lookupOrThrow(Registries.ENCHANTMENT).listElements().map(holder -> (Holder<Enchantment>) holder).toList();
     }
 }

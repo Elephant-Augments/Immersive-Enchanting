@@ -23,6 +23,8 @@
   "immersiveenchanting.tooltip.desc.transmute_hint": "You must first add an Ancient Book of the same enchantment to the bookshelf.",
   "immersiveenchanting.tooltip.desc.not_transmutable": "Replicated books cannot be transmuted!",
 
+  "immersiveenchanting.tooltip.desc.cost_load_error": "%s has no enchantment cost file!",
+
   "immersiveenchanting.tooltip.title.unavailable_enchantment": "???",
   "immersiveenchanting.tooltip.title.replicate": "Replicate",
   "immersiveenchanting.tooltip.title.transmute": "Transmute",
@@ -49,6 +51,9 @@
   "immersiveenchanting.command.generate_empty_datapack": "Success! Click to copy the generated folder path.",
   "immersiveenchanting.command.give_random_ancient_book": "Gave random Ancient Book to the selected player(s)!",
   "immersiveenchanting.command.no_target": "No target given!",
+
+  "immersiveenchanting.warn.cost_files_missing": "There are enchantment cost files missing for enchantment(s). Check the log to see which enchantments are missing. To supress this warning, please add cost files.",
+  "immersiveenchanting.warn.too_many_cost_files": "There are enchantment cost files for enchantment(s) that are not recognised. Check the log to see which enchantments are unknown. To supress this warning, please remove these cost files.",
 
 
   "immersiveenchanting.configuration.general": "General",

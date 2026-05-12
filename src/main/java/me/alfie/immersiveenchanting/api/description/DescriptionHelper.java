@@ -4,6 +4,7 @@ import me.alfie.immersiveenchanting.api.description.internal.lines.FuelsLine;
 import me.alfie.immersiveenchanting.api.description.internal.lines.LevelsLine;
 import me.alfie.immersiveenchanting.api.description.internal.lines.MaterialsLine;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.NodeTooltip;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
@@ -29,6 +30,13 @@ public class DescriptionHelper {
      */
     public static void insertCostLines(NodeTooltip tooltip, DescriptionLayout description, int lineStart){
         int lineNumber = lineStart;
+
+        //Display error message in tooltip if cost failed to load, otherwise insert cost lines as normal
+        if(tooltip.screen().enchantmentCostRenderer().getCurrentRenderedCost() == null) {
+            lineWrapComponent(Component.translatable("immersiveenchanting.tooltip.desc.cost_load_error", tooltip.node().branchId().toString()).withStyle(ChatFormatting.RED), DEFAULT_LINE_WIDTH, description, lineNumber);
+            return;
+        }
+
         if(!tooltip.screen().enchantmentCostRenderer().getCurrentRenderedCost().stack().is(Items.AIR)) {
             description.insertLine(lineNumber, new MaterialsLine(tooltip));
             lineNumber += 2;

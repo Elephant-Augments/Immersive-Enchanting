@@ -120,6 +120,10 @@ public class CostRegistry {
         ENCHANTMENT_HOLDER_REGISTRY.put(enchantmentHolder, data);
     }
 
+    public boolean isRegistered(Holder<Enchantment> enchantmentHolder) {
+        return ENCHANTMENT_HOLDER_REGISTRY.containsKey(enchantmentHolder);
+    }
+
     public CostData get(Holder<Enchantment> enchantmentHolder) {
         return ENCHANTMENT_HOLDER_REGISTRY.get(enchantmentHolder);
     }

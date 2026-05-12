@@ -61,9 +61,11 @@ public class BranchFactory {
     }
 
     private static void buildEnchantingBranches(BuildBranchesEvent event) {
-        List<Holder<Enchantment>> applicableEnchantments = getApplicableEnchantments(event.getStack(), event.costRegistry());
+        List<Holder<Enchantment>> allEnchantments = EnchantmentUtil.getAllRegisteredEnchantments(event.getCanvas().screen().registryAccess());
+        List<Holder<Enchantment>> applicableEnchantments = getApplicableEnchantments(event.getStack(), allEnchantments);
+
         if(event.getStack().is(ModItems.CREATIVE_BOOKSHELF_ITEM)) {
-            applicableEnchantments = EnchantmentUtil.sortByName(event.costRegistry().getAllEnchantmentHolders());
+            applicableEnchantments = allEnchantments;
         }
 
         if(event.getCanvas().screen().enchantingTab().isDisplay(EnchantingTab.Display.ENCHANTMENTS)) {
@@ -143,7 +145,16 @@ public class BranchFactory {
 
     private static void buildEnchantingBranch(BuildBranchesEvent event, Holder<Enchantment> enchantmentHolder) {
         List<NodeTemplate> nodeTemplates = new ArrayList<>();
-        int maxLevel = event.costRegistry().get(enchantmentHolder).levelCosts().maxLevel();
+
+        int maxLevel;
+        if(event.costRegistry().get(enchantmentHolder) != null) {
+            //Use the max level from the cost registry, which may be higher than the enchantment's inherent max level if the datapack adds extra levels.
+            maxLevel = event.costRegistry().get(enchantmentHolder).levelCosts().maxLevel();
+        } else {
+            //Use the max level from the enchantment itself as a fallback if it's not in the cost registry. This allows enchantments added by datapacks to still show up.
+            maxLevel = enchantmentHolder.value().getMaxLevel();
+        }
+
         for (int enchantmentLevel = 0; enchantmentLevel < maxLevel; enchantmentLevel++) {
             int equippedLevel = event.getStack().getEnchantmentLevel(enchantmentHolder);
             NodeState state = equippedLevel > enchantmentLevel ? NodeState.OBTAINED : NodeState.UNOBTAINED;
@@ -210,12 +221,32 @@ public class BranchFactory {
      * Returns all enchantments from the cost registry that are compatible with {@code stack}
      * (i.e. supported by the item and not conflicting with its other enchantments), sorted alphabetically.
      */
+    @Deprecated
     private static List<Holder<Enchantment>> getApplicableEnchantments(ItemStack stack, CostRegistry costRegistry) {
         List<Holder<Enchantment>> sortedEnchantments = EnchantmentUtil.sortByName(costRegistry.getAllEnchantmentHolders());
 
         List<Holder<Enchantment>> applicableEnchantments = new ArrayList<>();
 
         for(Holder<Enchantment> enchantment : sortedEnchantments) {
+            Set<Holder<Enchantment>> itemEnchantments = new HashSet<>(stack.getTagEnchantments().keySet());
+            itemEnchantments.remove(enchantment);
+            if(!EnchantmentHelper.isEnchantmentCompatible(itemEnchantments, enchantment)) continue;
+            if(stack.supportsEnchantment(enchantment)) applicableEnchantments.add(enchantment);
+        }
+        return applicableEnchantments;
+    }
+
+    /**
+     * Returns all enchantments from {@code allEnchantments} that are compatible with {@code stack}
+     * (i.e. supported by the item and not conflicting with its other enchantments), sorted alphabetically.
+     * @param stack The item stack for which to find applicable enchantments.
+     * @param allEnchantments A list of enchantments to filter, typically all enchantments in the cost registry or all enchantments in the game.
+     * @return A list of enchantments from {@code allEnchantments} that are compatible with {@code stack}, sorted alphabetically.
+     */
+    private static List<Holder<Enchantment>> getApplicableEnchantments(ItemStack stack, List<Holder<Enchantment>> allEnchantments) {
+        List<Holder<Enchantment>> applicableEnchantments = new ArrayList<>();
+
+        for(Holder<Enchantment> enchantment : allEnchantments) {
             Set<Holder<Enchantment>> itemEnchantments = new HashSet<>(stack.getTagEnchantments().keySet());
             itemEnchantments.remove(enchantment);
             if(!EnchantmentHelper.isEnchantmentCompatible(itemEnchantments, enchantment)) continue;

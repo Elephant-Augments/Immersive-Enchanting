@@ -40,8 +40,8 @@ public class BookshelfChecker {
      * stacks found inside them.
      */
     public static List<Holder<Enchantment>> getEnchantmentsInBookshelves(BlockPos blockPos, Level level) {
-        if(isCreativeBookshelfNearby(blockPos, level)) return CostRegistry.server().getAllEnchantmentHolders();
-        if(!ServerConfig.areAncientBooksRequired()) return CostRegistry.server().getAllEnchantmentHolders();
+        if(isCreativeBookshelfNearby(blockPos, level)) return EnchantmentUtil.getAllRegisteredEnchantments(level.registryAccess());
+        if(!ServerConfig.areAncientBooksRequired()) return EnchantmentUtil.getAllRegisteredEnchantments(level.registryAccess());
 
         List<ChiseledBookShelfBlockEntity> bookshelves = getNearbyBookshelves(blockPos, level);
         List<Holder<Enchantment>> result = new ArrayList<>();

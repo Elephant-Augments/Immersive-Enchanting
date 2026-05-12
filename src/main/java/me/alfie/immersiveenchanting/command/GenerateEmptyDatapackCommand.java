@@ -119,7 +119,7 @@ public enum GenerateEmptyDatapackCommand implements ModCommand {
      * {@code enchantment_costs/<namespace>/<enchantment_name>.json}.
      */
     private static void createEnchantmentJsonFiles(RegistryAccess registryAccess, File enchantmentCostsDir) {
-        List<Holder.Reference<Enchantment>> enchantments = EnchantmentUtil.getAllRegisteredEnchantments(registryAccess);
+        List<Holder<Enchantment>> enchantments = EnchantmentUtil.getAllRegisteredEnchantments(registryAccess);
         for(Holder<Enchantment> enchantmentHolder : enchantments) {
             File jsonFile = getOrCreateFile(enchantmentHolder, enchantmentCostsDir);
 
