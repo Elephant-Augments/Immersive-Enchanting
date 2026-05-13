@@ -95,6 +95,8 @@ public class EnchantingTableItemRenderer extends EnchantTableRenderer {
                 null,
                 0);
 
+        itemState.newLayer().setFoilType(ItemStackRenderState.FoilType.STANDARD);
+
         clock = blockEntity.time + partialTicks;
         openness = Mth.lerp(partialTicks, blockEntity.oOpen, blockEntity.open);
     }

@@ -187,8 +187,9 @@ public class BranchFactory {
     }
 
     private static void buildTransmuteBranch(BuildBranchesEvent event) {
-        NodeState state = EnchantmentUtil.isReplicated(event.getStack()) ?
-                NodeState.ALERT : NodeState.UNOBTAINED;
+        NodeState state = event.getCanvas().screen().getMenu().isEnchantmentAvailable(EnchantmentUtil.getStoredEnchantment(event.getStack())) ?
+                NodeState.UNOBTAINED : NodeState.LOCKED;
+        if(EnchantmentUtil.isReplicated(event.getStack())) state = NodeState.ALERT;
 
         NodeTemplate transmuteNode = new NodeTemplate(
                 Component.translatable("immersiveenchanting.tooltip.title.transmute"),

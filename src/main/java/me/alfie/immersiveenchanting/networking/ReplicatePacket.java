@@ -56,7 +56,7 @@ public record ReplicatePacket() implements ModNetworkPacket<ReplicatePacket> {
 
             ItemStack oldStack = menu.getToolSlot().getItem().copyAndClear();
             menu.getToolSlot().setChanged();
-            
+
             ItemStack newStack = oldStack.copy();
             EnchantmentUtil.setReplicated(newStack);
 
