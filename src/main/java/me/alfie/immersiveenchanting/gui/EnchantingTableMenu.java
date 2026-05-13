@@ -3,6 +3,7 @@ package me.alfie.immersiveenchanting.gui;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.codec.Cost;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.item.ModItems;
+import me.alfie.immersiveenchanting.util.EnchantingTableContainer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
@@ -20,6 +21,8 @@ import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.EnchantingTableBlockEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -96,10 +99,19 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
      */
     public EnchantingTableMenu(int containerId, Inventory playerInventory, @Nullable Level level, @Nullable BlockPos pos) {
         super(ModMenus.ENCHANTING_TABLE_MENU.get(), containerId);
-        this.container = new SimpleContainer(3);
         this.blockPos = pos;
         this.level = level;
         this.access = ContainerLevelAccess.create(level, pos);
+
+        Container chosenContainer = null;
+        if (level != null && !level.isClientSide() && pos != null) {
+            BlockEntity be = level.getBlockEntity(pos);
+            if (be instanceof EnchantingTableBlockEntity enchantingBE) {
+                chosenContainer = new EnchantingTableContainer(enchantingBE);
+            }
+        }
+        this.container = chosenContainer != null ? chosenContainer : new SimpleContainer(3);
+
         buildSlots(playerInventory);
     }
 
@@ -188,10 +200,13 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
         //Quick move into inventory
         if(i == Slots.TOOL.id()) {
             if(!this.moveItemStackTo(stack, 3, 39, true)) return ItemStack.EMPTY;
+            slot.setChanged(); // notify the BE-backed container so the renderer updates
         } else if (i == Slots.ENCHANTING_FUEL.id()) {
             if (!this.moveItemStackTo(stack, 3, 39, true)) return ItemStack.EMPTY;
+            slot.setChanged();
         } else if (i == Slots.COST.id()) {
             if (!this.moveItemStackTo(stack, 3, 39, true)) return ItemStack.EMPTY;
+            slot.setChanged();
         } else {
             CostRegistry registry;
             if(level != null && !level.isClientSide()) {
@@ -253,13 +268,16 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
     public void removed(@NotNull Player player) {
         super.removed(player);
 
-        if (!player.level().isClientSide()) {
-            for (int i = 0; i < this.container.getContainerSize(); i++) {
-                ItemStack stack = this.container.removeItemNoUpdate(i); //remove without triggering slot update
-                if (!stack.isEmpty()) {
-                    player.getInventory().placeItemBackInInventory(stack); //return to inventory, drop if full
-                }
-            }
+        if (player.level().isClientSide()) return;
+
+        // BE-backed container: leave the items in the block. They persist in
+        // NBT and will be visible to the next player who opens the table.
+        if (this.container instanceof EnchantingTableContainer) return;
+
+        // Fallback path: return items to the player so they aren't lost.
+        for (int i = 0; i < this.container.getContainerSize(); i++) {
+            ItemStack stack = this.container.removeItemNoUpdate(i);
+            if (!stack.isEmpty()) player.getInventory().placeItemBackInInventory(stack);
         }
     }
 

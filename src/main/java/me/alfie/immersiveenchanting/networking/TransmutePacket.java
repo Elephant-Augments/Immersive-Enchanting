@@ -83,6 +83,8 @@ public record TransmutePacket() implements ModNetworkPacket<TransmutePacket> {
             BlockPos tablePos = menu.getBlockPos();
 
             ItemStack newBookStack = menu.getToolSlot().getItem().copyAndClear();
+            menu.getToolSlot().setChanged();
+
             ItemEntity itemEntity = new ItemEntity(
                     level,
                     tablePos.getX() + 0.5,

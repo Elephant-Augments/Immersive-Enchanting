@@ -1,33 +1,18 @@
 package me.alfie.immersiveenchanting.event;
 
-import me.alfie.immersiveenchanting.ImmersiveEnchanting;
+import me.alfie.immersiveenchanting.ImmersiveEnchantingClient;
 import me.alfie.immersiveenchanting.api.ApiPostEvents;
 import me.alfie.immersiveenchanting.command.ModCommands;
-import me.alfie.immersiveenchanting.api.datapack.manager.ClientDatapackManager;
 import me.alfie.immersiveenchanting.api.datapack.manager.ServerDatapackManager;
 import me.alfie.immersiveenchanting.creativetab.ModCreativeTab;
 import me.alfie.immersiveenchanting.api.description.TooltipDescriptionExtensions;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostDatapack;
-import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.datapack.mod_icons.ModIconsDatapack;
 import me.alfie.immersiveenchanting.datapack.node_sounds.NodeSoundsDatapack;
 import me.alfie.immersiveenchanting.gui.ModMenus;
 import me.alfie.immersiveenchanting.networking.ModPackets;
-import me.alfie.immersiveenchanting.util.EnchantmentUtil;
-import net.minecraft.ChatFormatting;
-import net.minecraft.core.Holder;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.Identifier;
-import net.minecraft.world.item.enchantment.Enchantment;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class ModEvents {
 
@@ -62,6 +47,10 @@ public class ModEvents {
 
 
         NeoForge.EVENT_BUS.addListener(ModCommands::registerCommands);
+
+        modEventBus.addListener(ImmersiveEnchantingClient::registerBlockEntityRenderers);
+        NeoForge.EVENT_BUS.addListener(EnchantingTableBreakHandler::onBlockBreak);
+
         modEventBus.addListener(ModMenus::registerScreens);
 
         modEventBus.addListener(ModPackets::registerClient);
