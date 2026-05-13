@@ -135,6 +135,7 @@ public class EnchantmentUtil {
                                      IPayloadContext context) {
         if(!CostRegistry.server().isRegistered(enchantmentHolder) ||
             !CostRegistry.server().isRegistered(CostRegistry.ENCHANTING_FUELS)) return false;
+        if(!CostRegistry.server().get(enchantmentHolder).enabled()) return false;
 
 
         ItemStack stackToEnchant = menu.getToolSlot().getItem();
@@ -158,6 +159,7 @@ public class EnchantmentUtil {
      */
     public static boolean canTransmute(EnchantingTableMenu menu, Holder<Enchantment> newEnchantment, IPayloadContext context) {
         if(!CostRegistry.server().isRegistered(CostRegistry.TRANSMUTE)) return false;
+        if(!CostRegistry.server().get(CostRegistry.TRANSMUTE).enabled()) return false;
 
         if(!isEnchantmentAvailableInBookshelves(newEnchantment, menu, context)) return false;
         if(EnchantmentUtil.isReplicated(menu.getToolSlot().getItem())) return false;
@@ -177,6 +179,8 @@ public class EnchantmentUtil {
      */
     public static boolean canReplicate(EnchantingTableMenu menu, IPayloadContext context) {
         if(!CostRegistry.server().isRegistered(CostRegistry.REPLICATE)) return false;
+        if(!CostRegistry.server().get(CostRegistry.REPLICATE).enabled()) return false;
+
 
         if(context.player().hasInfiniteMaterials()) return true;
         if(!hasValidCostAndFuel(menu.getCostSlot().getItem(), menu.getFuelSlot().getItem(), CostRegistry.REPLICATE, 1, context.player(), CostRegistry.server())) return false;

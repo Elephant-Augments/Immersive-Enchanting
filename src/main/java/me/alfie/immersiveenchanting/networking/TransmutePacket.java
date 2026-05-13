@@ -59,8 +59,6 @@ public record TransmutePacket() implements ModNetworkPacket<TransmutePacket> {
 
     @Override
     public void exec(TransmutePacket packet, IPayloadContext context) {
-        if(!ServerConfig.isAllowTransmute()) return;
-
         Player player = context.player();
         Level level = player.level();
         if(!(player.containerMenu instanceof EnchantingTableMenu menu)) return;

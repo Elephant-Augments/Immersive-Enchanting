@@ -15,9 +15,6 @@ public class ServerConfig {
     public final ModConfigSpec.ConfigValue<Integer> BOOKSHELF_SEARCH_Y;
     public final ModConfigSpec.ConfigValue<Integer> BOOKSHELF_SEARCH_Z;
 
-    public final ModConfigSpec.ConfigValue<Boolean> ALLOW_REPLICATE;
-    public final ModConfigSpec.ConfigValue<Boolean> ALLOW_TRANSMUTE;
-
     public final ModConfigSpec.ConfigValue<Boolean> ALLOW_ENCHANTMENT_REMOVAL;
 
     //public final ModConfigSpec.ConfigValue<Boolean> enableEnchantedBookTrades;
@@ -59,16 +56,6 @@ public class ServerConfig {
         builder.pop();
 
         builder.push("enchantingtable");
-        ALLOW_REPLICATE = builder
-                .comment("Allow ancient books to be replicated in the enchanting table.")
-                .translation("immersiveenchanting.config.allow_replicate")
-                .define("allowReplicate", true);
-
-        ALLOW_TRANSMUTE = builder
-                .comment("Allow ancient books to be transmuted in the enchanting table.")
-                .translation("immersiveenchanting.config.allow_transmute")
-                .define("allowTransmute", true);
-
         ALLOW_ENCHANTMENT_REMOVAL = builder
                 .comment("Allow enchantments to be removed in the enchanting table.")
                 .translation("immersiveenchanting.config.allow_enchantment_removal")
@@ -95,14 +82,6 @@ public class ServerConfig {
         return new Vector3i(ServerConfig.CONFIG.BOOKSHELF_SEARCH_X.get(),
                 ServerConfig.CONFIG.BOOKSHELF_SEARCH_Y.get(),
                 ServerConfig.CONFIG.BOOKSHELF_SEARCH_Z.get());
-    }
-
-    public static boolean isAllowReplicate() {
-        return ServerConfig.CONFIG.ALLOW_REPLICATE.get();
-    }
-
-    public static boolean isAllowTransmute() {
-        return ServerConfig.CONFIG.ALLOW_TRANSMUTE.get();
     }
 
     public static boolean isEnchantmentRemovalAllowed() {

@@ -47,8 +47,6 @@ public record ReplicatePacket() implements ModNetworkPacket<ReplicatePacket> {
 
     @Override
     public void exec(ReplicatePacket packet, IPayloadContext context) {
-        if(!ServerConfig.isAllowReplicate()) return;
-
         Player player = context.player();
         Level level = player.level();
         if(!(player.containerMenu instanceof EnchantingTableMenu menu)) return;

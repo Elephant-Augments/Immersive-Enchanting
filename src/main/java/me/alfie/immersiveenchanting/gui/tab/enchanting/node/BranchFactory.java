@@ -199,10 +199,12 @@ public class BranchFactory {
                 TransmuteNodeData.create()
         );
 
-        if(ServerConfig.isAllowTransmute())
+        if(!event.costRegistry().isRegistered(CostRegistry.TRANSMUTE)
+            || event.costRegistry().get(CostRegistry.TRANSMUTE).enabled())
             event.addBranch(BranchBuilder.of(event.getCanvas(), CostRegistry.TRANSMUTE)
                     .node(transmuteNode)
                     .build());
+
     }
 
     private static void buildReplicateBranch(BuildBranchesEvent event) {
@@ -215,7 +217,8 @@ public class BranchFactory {
                 ReplicateNodeData.create()
         );
 
-        if(ServerConfig.isAllowReplicate())
+        if(!event.costRegistry().isRegistered(CostRegistry.REPLICATE)
+            || event.costRegistry().get(CostRegistry.REPLICATE).enabled())
             event.addBranch(BranchBuilder.of(event.getCanvas(), CostRegistry.REPLICATE)
                     .node(replicateNode)
                     .build());
