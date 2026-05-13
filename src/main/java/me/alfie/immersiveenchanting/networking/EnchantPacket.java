@@ -61,6 +61,7 @@ public record EnchantPacket(Holder<Enchantment> enchantmentHolder, int level) im
                         context.player(), CostRegistry.server());
 
             stackToEnchant.enchant(packet.enchantmentHolder(), packet.level());
+            menu.getToolSlot().setChanged();
             boolean isHighestTier = packet.level() == CostRegistry.server()
                     .get(packet.enchantmentHolder())
                     .levelCosts()
