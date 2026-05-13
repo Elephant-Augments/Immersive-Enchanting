@@ -6,6 +6,7 @@ import me.alfie.immersiveenchanting.api.datapack.internal.DatapackKeys;
 import me.alfie.immersiveenchanting.networking.SyncClientDatapackPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.TagsUpdatedEvent;
 import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
@@ -38,13 +39,7 @@ public class ServerDatapackManager {
     /**Reference to the active Minecraft server.*/
     private static MinecraftServer SERVER;
 
-    /**
-     * All registered datapack instances.
-     *
-     * <p>This is populated during datapack registration and contains the raw datapack objects
-     * (not their processed data).</p>
-     */
-    public static final DatapackInstances DATAPACKS = new DatapackInstances();
+
 
     /**
      * Stores processed datapack data mapped by {@link DatapackKey}.
@@ -129,7 +124,6 @@ public class ServerDatapackManager {
      * <p>This performs two stages:
      * <ol>
      *     <li>Collect raw processed data from each datapack</li>
-     *     <li>Call {@link ModDatapack#afterPull(MinecraftServer)} for post-processing</li>
      * </ol>
      *
      * <p>This separation ensures all datapack data is available before any cross-datapack logic runs.</p>
@@ -137,7 +131,7 @@ public class ServerDatapackManager {
     private static void pullData() {
         Map<DatapackKey<?>, Object> result = new HashMap<>();
 
-        for (Map.Entry<DatapackKey<?>, ModDatapack<?, ?>> entry : DATAPACKS.entrySet()) {
+        for (Map.Entry<DatapackKey<?>, ModDatapack<?, ?>> entry : DatapackRegistry.getDatapacks().entrySet()) {
             ModDatapack<?, ?> datapack = entry.getValue();
 
             result.put(entry.getKey(), datapack.getData());
@@ -146,23 +140,7 @@ public class ServerDatapackManager {
         }
 
         getInstance().dataMap = new DataMap(result); //Populate map
-
-        for (Map.Entry<DatapackKey<?>, ModDatapack<?, ?>> entry : DATAPACKS.entrySet()) {
-            ModDatapack<?, ?> datapack = entry.getValue();
-            datapack.afterPull(getInstance().getServer()); //Process after
-        }
-
-    }
-
-    /**
-     * Re-resolves enchantment holders when tag data is updated from a server data load.
-     * Guards against running before the server is ready.
-     */
-    public static void resolveEnchantmentHolders(TagsUpdatedEvent event) {
-        if(event.getUpdateCause() == TagsUpdatedEvent.UpdateCause.SERVER_DATA_LOAD) {
-            if(SERVER == null) return; //Prevent tags updating before server is ready.
-            get(DatapackKeys.COST).resolveEnchantmentHolders(event.getLookupProvider());
-        }
+        NeoForge.EVENT_BUS.post(new ServerDatapackUpdatedEvent(getInstance().getServer()));
     }
 
     /**
@@ -174,11 +152,6 @@ public class ServerDatapackManager {
         ImmersiveEnchanting.LOGGER.debug("Sending sync packet to {}...", player);
 
         PacketDistributor.sendToPlayer(player, new SyncClientDatapackPacket(getInstance().dataMap));
-
-        for (Map.Entry<DatapackKey<?>, ModDatapack<?, ?>> entry : DATAPACKS.entrySet()) {
-            ModDatapack<?, ?> datapack = entry.getValue();
-            datapack.afterSync(player);
-        }
     }
 
     /**

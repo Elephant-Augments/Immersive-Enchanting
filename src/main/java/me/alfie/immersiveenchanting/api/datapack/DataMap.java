@@ -82,7 +82,7 @@ public record DataMap(Map<DatapackKey<?>, Object> map) {
             T value = (T) entry.getValue();
 
             DatapackKey.STREAM_CODEC.encode(buf, key);
-            ModDatapack<?, T> datapack = ServerDatapackManager.DATAPACKS.get(key);
+            ModDatapack<?, T> datapack = DatapackRegistry.getDatapacks().get(key);
 
             StreamCodec<RegistryFriendlyByteBuf, T> codec = datapack.codec();
             codec.encode(buf, value);
@@ -108,7 +108,7 @@ public record DataMap(Map<DatapackKey<?>, Object> map) {
 
         for (int i = 0; i < size; i++) {
             DatapackKey<?> datapackKey = DatapackKey.STREAM_CODEC.decode(buf);
-            ModDatapack<?, ?> datapack = ServerDatapackManager.DATAPACKS.get(datapackKey);
+            ModDatapack<?, ?> datapack = DatapackRegistry.getDatapacks().get(datapackKey);
 
             StreamCodec<RegistryFriendlyByteBuf, ?> codec = datapack.codec();
             Object value = codec.decode(buf);

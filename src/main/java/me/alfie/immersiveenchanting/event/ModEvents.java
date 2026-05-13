@@ -57,8 +57,8 @@ public class ModEvents {
         NeoForge.EVENT_BUS.addListener(ServerDatapackManager::onServerReload);
         NeoForge.EVENT_BUS.addListener(ServerDatapackManager::onServerStop);
 
-        NeoForge.EVENT_BUS.addListener(ServerDatapackManager::resolveEnchantmentHolders);
-        NeoForge.EVENT_BUS.addListener(ClientDatapackManager::resolveEnchantmentHolders);
+        NeoForge.EVENT_BUS.addListener(CostDatapack::resolveClientRegistry);
+        NeoForge.EVENT_BUS.addListener(CostDatapack::resolveServerRegistry);
 
 
         NeoForge.EVENT_BUS.addListener(ModCommands::registerCommands);

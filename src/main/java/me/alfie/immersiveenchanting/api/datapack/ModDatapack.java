@@ -102,27 +102,4 @@ public abstract class ModDatapack<A, B> extends SimpleJsonResourceReloadListener
     @Override
     protected void apply(Map<Identifier, A> input, ResourceManager resourceManager, ProfilerFiller profilerFiller) {}
 
-
-    /**
-     * Called after all datapacks have been processed and collected.
-     *
-     * <p>At this stage:
-     * <ul>
-     *     <li>All datapack data is available</li>
-     *     <li>{@link me.alfie.immersiveenchanting.api.datapack.manager.ServerDatapackManager#get(DatapackKey)}
-     *     can be safely used</li>
-     * </ul>
-     *
-     * <p>This is useful for:
-     * <ul>
-     *     <li>Resolving registry references</li>
-     *     <li>Linking data between multiple datapacks</li>
-     *     <li>Final validation</li>
-     * </ul>
-     *
-     * @param server the current server instance
-     */
-    public void afterPull(MinecraftServer server) {}
-
-    public void afterSync(ServerPlayer player) {}
 }

@@ -160,6 +160,8 @@ public class Node extends CanvasRenderable {
 
         if(data().value() instanceof EnchantmentNodeData enchantmentData) {
             Holder<Enchantment> enchantmentHolder = EnchantmentUtil.toHolder(enchantmentData.enchantmentId(), canvas().screen().registryAccess());
+
+            System.out.println(CostRegistry.client());
             if(!CostRegistry.client().isRegistered(enchantmentHolder)) {
                 //Red error node for enchantments that failed to load costs
                 blit(graphics, Sprite.ERROR_NODE, canvas().getCurrentBrightness());

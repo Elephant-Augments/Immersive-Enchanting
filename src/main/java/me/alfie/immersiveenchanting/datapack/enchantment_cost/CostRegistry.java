@@ -2,6 +2,7 @@ package me.alfie.immersiveenchanting.datapack.enchantment_cost;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.api.datapack.internal.DatapackKeys;
+import me.alfie.immersiveenchanting.api.datapack.manager.ClientDatapackManager;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.codec.CostData;
 import me.alfie.immersiveenchanting.api.datapack.manager.ServerDatapackManager;
 import net.minecraft.core.Holder;
@@ -11,6 +12,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.enchantment.Enchantment;
 
@@ -62,7 +64,7 @@ public class CostRegistry {
     }
 
     public static CostRegistry client() {
-        return ServerDatapackManager.get(DatapackKeys.COST);
+        return ClientDatapackManager.get(DatapackKeys.COST);
     }
 
     public static CostRegistry server() {
@@ -86,17 +88,6 @@ public class CostRegistry {
                     () -> ImmersiveEnchanting.LOGGER.warn("Datapack contains {} but couldn't find enchantment with this id.", id)
             );
         }
-
-        //Debug
-        String side;
-        if(this.equals(client())) {
-            side = "client";
-        } else {
-            side = "server";
-        }
-
-        ImmersiveEnchanting.LOGGER.debug("Resolved enchantment holders for {}", side);
-        printRegistry();
     }
 
     /** Registers raw cost data by ID. Used during datapack loading before holders are resolved. */
@@ -139,8 +130,8 @@ public class CostRegistry {
     }
 
     public void printRegistry() {
-        ImmersiveEnchanting.LOGGER.debug(ID_REGISTRY.toString());
-        ImmersiveEnchanting.LOGGER.debug(ENCHANTMENT_HOLDER_REGISTRY.toString());
+        ImmersiveEnchanting.LOGGER.debug("ID Registry: {}", ID_REGISTRY);
+        ImmersiveEnchanting.LOGGER.debug("Holder registry (resolved) {}: ", ENCHANTMENT_HOLDER_REGISTRY);
     }
 
     /**

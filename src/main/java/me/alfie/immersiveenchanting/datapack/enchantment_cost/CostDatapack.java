@@ -3,6 +3,8 @@ package me.alfie.immersiveenchanting.datapack.enchantment_cost;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.api.datapack.*;
 import me.alfie.immersiveenchanting.api.datapack.internal.DatapackKeys;
+import me.alfie.immersiveenchanting.api.datapack.manager.ClientDatapackUpdatedEvent;
+import me.alfie.immersiveenchanting.api.datapack.manager.ServerDatapackUpdatedEvent;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.codec.CostData;
 import me.alfie.immersiveenchanting.api.datapack.manager.ServerDatapackManager;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
@@ -15,6 +17,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
@@ -82,14 +85,18 @@ public class CostDatapack extends ModDatapack<CostData, CostRegistry> {
         return Identifier.fromNamespaceAndPath(namespace, subPath);
     }
 
-    @Override
-    public void afterPull(MinecraftServer server) {
-        ServerDatapackManager.get(DatapackKeys.COST).resolveEnchantmentHolders(server.registryAccess());
+    public static void resolveServerRegistry(ServerDatapackUpdatedEvent event) {
+        CostRegistry.server().resolveEnchantmentHolders(event.getServer().registryAccess());
+        ImmersiveEnchanting.LOGGER.debug("Resolved enchantment holders for server");
+        CostRegistry.server().printRegistry();
     }
 
-    @Override
-    public void afterSync(ServerPlayer player) {
-        sendWarningMessages(player);
+    public static void resolveClientRegistry(ClientDatapackUpdatedEvent event) {
+        CostRegistry.client().resolveEnchantmentHolders(event.getPlayer().registryAccess());
+        ImmersiveEnchanting.LOGGER.debug("Resolved enchantment holders for client");
+        CostRegistry.client().printRegistry();
+
+        sendWarningMessages(event.getPlayer());
     }
 
     public static void register(AddServerReloadListenersEvent event) {
@@ -98,7 +105,7 @@ public class CostDatapack extends ModDatapack<CostData, CostRegistry> {
 
 
     /**Send warnings if cost files are incorrectly setup*/
-    private static void sendWarningMessages(ServerPlayer player) {
+    private static void sendWarningMessages(Player player) {
         List<Holder<Enchantment>> costRegistryEnchantments = CostRegistry.client().getAllEnchantmentHolders();
         List<Holder<Enchantment>> allEnchantments = EnchantmentUtil.getAllRegisteredEnchantments(player.registryAccess());
 
@@ -132,9 +139,7 @@ public class CostDatapack extends ModDatapack<CostData, CostRegistry> {
             );
 
             ImmersiveEnchanting.LOGGER.error("The following enchantments are not recognised: {}", extraIds);
-
         }
-
     }
 
     private static Set<Identifier> getEnchantmentIds(Set<Holder<Enchantment>> enchantmentHolders) {

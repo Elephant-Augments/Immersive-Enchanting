@@ -20,6 +20,14 @@ import java.util.function.Supplier;
 public class DatapackRegistry {
 
     /**
+     * All registered datapack instances.
+     *
+     * <p>This is populated during datapack registration and contains the raw datapack objects
+     * (not their processed data).</p>
+     */
+    private static final DatapackInstances DATAPACKS = new DatapackInstances();
+
+    /**
      * Registers a {@link ModDatapack}.
      *
      * <p>This will:
@@ -45,6 +53,10 @@ public class DatapackRegistry {
                 Identifier.fromNamespaceAndPath(datapackKey.modid(), datapackKey.directory()),
                 datapack);
 
-        ServerDatapackManager.DATAPACKS.register(datapackKey, datapack);
+        DATAPACKS.register(datapackKey, datapack);
+    }
+
+    public static DatapackInstances getDatapacks() {
+        return DATAPACKS;
     }
 }
