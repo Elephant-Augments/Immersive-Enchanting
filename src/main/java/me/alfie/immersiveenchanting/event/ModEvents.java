@@ -28,6 +28,8 @@ public class ModEvents {
 
         NeoForge.EVENT_BUS.addListener(NodeSoundsDatapack::registerServerDatapack);
 
+        NeoForge.EVENT_BUS.addListener(EnchantingTableBreakHandler::onBlockBreak);
+
         NeoForge.EVENT_BUS.addListener(ModCommands::registerCommands);
 
         NeoForge.EVENT_BUS.addListener(ImmersiveEnchanting::disableEnchantedBookVillagerTrades);
