@@ -1,6 +1,7 @@
 package me.alfie.immersiveenchanting.datapack.enchantment_cost.codec;
 
 import com.mojang.serialization.Codec;
+import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -12,6 +13,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
+import net.neoforged.neoforge.common.Tags;
+import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +41,8 @@ public record ItemOrTag(Optional<Identifier> item,
             itemOrTag -> {
                 return itemOrTag.tag
                         .map(itemTagKey -> "#" + itemTagKey.location())
-                        .orElseGet(() -> itemOrTag.item.orElseThrow().toString());
+                        .orElse(itemOrTag.item.orElseThrow() //ID is always present. If not, the file will not have parsed.
+                                .toString());
             }
     );
 
@@ -85,9 +89,17 @@ public record ItemOrTag(Optional<Identifier> item,
                     .map(tagSet -> tagSet.stream().toList())
                     .orElse(List.of());
         } else {
-            Identifier id = item().get();
-            Holder.Reference<Item> item = BuiltInRegistries.ITEM.get(id).get();
-            return List.of(item);
+            Identifier id = item().get(); //ID at this point is always present, since either item or tag must be non-empty
+
+            return BuiltInRegistries.ITEM.get(id)
+                    .map(List::<Holder<Item>>of)
+                    .orElseGet(() -> {
+                        ImmersiveEnchanting.LOGGER.error("Could not find item with ID '{}' while resolving ItemOrTag. Defaulting to 'minecraft:air'.", id);
+
+                        return List.of(BuiltInRegistries.ITEM.wrapAsHolder(Items.AIR));
+                    }
+            );
+
         }
     }
 }

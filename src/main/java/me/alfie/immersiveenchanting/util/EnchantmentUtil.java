@@ -13,9 +13,9 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
-import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import javax.annotation.Nullable;
@@ -133,7 +133,9 @@ public class EnchantmentUtil {
     public static boolean canEnchant(EnchantingTableMenu menu,
                                      Holder<Enchantment> enchantmentHolder, int level,
                                      IPayloadContext context) {
-        if(!CostRegistry.server().isRegistered(enchantmentHolder)) return false;
+        if(!CostRegistry.server().isRegistered(enchantmentHolder) ||
+            !CostRegistry.server().isRegistered(CostRegistry.ENCHANTING_FUELS)) return false;
+
 
         ItemStack stackToEnchant = menu.getToolSlot().getItem();
         if(!isNextLevel(stackToEnchant, enchantmentHolder, level)) return false;
@@ -155,6 +157,8 @@ public class EnchantmentUtil {
      * @return true if transmutation is allowed
      */
     public static boolean canTransmute(EnchantingTableMenu menu, Holder<Enchantment> newEnchantment, IPayloadContext context) {
+        if(!CostRegistry.server().isRegistered(CostRegistry.TRANSMUTE)) return false;
+
         if(!isEnchantmentAvailableInBookshelves(newEnchantment, menu, context)) return false;
         if(EnchantmentUtil.isReplicated(menu.getToolSlot().getItem())) return false;
 
@@ -172,6 +176,8 @@ public class EnchantmentUtil {
      * @return true if replication is allowed
      */
     public static boolean canReplicate(EnchantingTableMenu menu, IPayloadContext context) {
+        if(!CostRegistry.server().isRegistered(CostRegistry.REPLICATE)) return false;
+
         if(context.player().hasInfiniteMaterials()) return true;
         if(!hasValidCostAndFuel(menu.getCostSlot().getItem(), menu.getFuelSlot().getItem(), CostRegistry.REPLICATE, 1, context.player(), CostRegistry.server())) return false;
 
@@ -306,8 +312,10 @@ public class EnchantmentUtil {
      * @return true if stack is valid
      */
     private static boolean isCostStackValid(ItemStack costStack, ItemStack validCostStack) {
-        return costStack.getItem().equals(validCostStack.getItem()) && costStack.count() >= validCostStack.count();
-    }
+        if (validCostStack.is(Items.AIR)) return true;
+
+        return ItemStack.isSameItemSameComponents(costStack, validCostStack)
+                && costStack.getCount() >= validCostStack.getCount();    }
 
     /**
      * Checks whether the player has enough XP levels for a cost.
@@ -344,8 +352,8 @@ public class EnchantmentUtil {
         Cost validCost = findValidCost(costStack, enchantmentId, level, player, costRegistry);
         Cost validFuel = findValidEnchantingFuel(fuelStack, level, costRegistry);
 
-        menu.getCostSlot().getItem().shrink(validCost.itemStackHolder().amount());
-        menu.getFuelSlot().getItem().shrink(validFuel.itemStackHolder().amount());
+        menu.getCostSlot().getItem().shrink(validCost.itemStackHolder().count());
+        menu.getFuelSlot().getItem().shrink(validFuel.itemStackHolder().count());
 
         player.giveExperienceLevels(-validCost.xpLevels());
     }

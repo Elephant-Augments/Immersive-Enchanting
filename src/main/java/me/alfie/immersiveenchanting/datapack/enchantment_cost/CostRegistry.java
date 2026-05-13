@@ -115,6 +115,10 @@ public class CostRegistry {
         return ENCHANTMENT_HOLDER_REGISTRY.containsKey(enchantmentHolder);
     }
 
+    public boolean isRegistered(Identifier id) {
+        return ID_REGISTRY.containsKey(id);
+    }
+
     public CostData get(Holder<Enchantment> enchantmentHolder) {
         return ENCHANTMENT_HOLDER_REGISTRY.get(enchantmentHolder);
     }

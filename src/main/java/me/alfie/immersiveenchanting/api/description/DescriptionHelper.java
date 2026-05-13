@@ -3,6 +3,8 @@ package me.alfie.immersiveenchanting.api.description;
 import me.alfie.immersiveenchanting.api.description.internal.lines.FuelsLine;
 import me.alfie.immersiveenchanting.api.description.internal.lines.LevelsLine;
 import me.alfie.immersiveenchanting.api.description.internal.lines.MaterialsLine;
+import me.alfie.immersiveenchanting.api.node.internal.EnchantmentNodeData;
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.NodeTooltip;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -31,11 +33,37 @@ public class DescriptionHelper {
     public static void insertCostLines(NodeTooltip tooltip, DescriptionLayout description, int lineStart){
         int lineNumber = lineStart;
 
-        //Display error message in tooltip if cost failed to load, otherwise insert cost lines as normal
-        if(tooltip.screen().enchantmentCostRenderer().getCurrentRenderedCost() == null) {
-            lineWrapComponent(Component.translatable("immersiveenchanting.tooltip.desc.cost_load_error", tooltip.node().branchId().toString()).withStyle(ChatFormatting.RED), DEFAULT_LINE_WIDTH, description, lineNumber);
+        //Error message if enchanting cost data is missing from the registry
+        if(!CostRegistry.client().isRegistered(tooltip.node().branchId())) {
+            lineWrapComponent(Component.translatable("immersiveenchanting.tooltip.desc.cost_load_error",
+                            tooltip.node().branchId().toString().replace(":", "/"))
+                    .withStyle(ChatFormatting.RED), DEFAULT_LINE_WIDTH, description, lineNumber);
             return;
         }
+
+        //Error message if enchanting_fuels is missing from the registry
+        if(!CostRegistry.client().isRegistered(CostRegistry.ENCHANTING_FUELS)) {
+            lineWrapComponent(Component.translatable("immersiveenchanting.tooltip.desc.fuels_load_error")
+                    .withStyle(ChatFormatting.RED), DEFAULT_LINE_WIDTH, description, lineNumber);
+            return;
+        }
+
+        //Error message if enchanting cost data is missing from the registry
+        if(tooltip.screen().enchantmentCostRenderer().getCurrentRenderedCost() == null) {
+            lineWrapComponent(Component.translatable("immersiveenchanting.tooltip.desc.no_cost_data",
+                            tooltip.node().branchId().toString().replace(":", "/"))
+                    .withStyle(ChatFormatting.RED), DEFAULT_LINE_WIDTH, description, lineNumber);
+            return;
+        }
+
+        //Error message if enchanting fuel data is missing for enchantment level
+        if(tooltip.screen().enchantmentCostRenderer().getCurrentRenderedFuel() == null) {
+            lineWrapComponent(Component.translatable("immersiveenchanting.tooltip.desc.no_fuel_data")
+                    .withStyle(ChatFormatting.RED), DEFAULT_LINE_WIDTH, description, lineNumber);
+            return;
+        }
+
+
 
         if(!tooltip.screen().enchantmentCostRenderer().getCurrentRenderedCost().stack().is(Items.AIR)) {
             description.insertLine(lineNumber, new MaterialsLine(tooltip));
@@ -60,10 +88,9 @@ public class DescriptionHelper {
         List<String> textLines = chunkString(component.getString(), lineSize);
         int totalLines = 0;
         for (int i = 0; i < textLines.size(); i++) {
-            i += lineStart;
             final int finalI = i;
 
-            description.insertLine(i, new DescriptionLine() {
+            description.insertLine(lineStart + i, new DescriptionLine() {
                 @Override
                 public void render(GuiGraphicsExtractor graphics, int lineX, int lineY, double mouseX, double mouseY) {
                     text(graphics, getText(), lineX, lineY);

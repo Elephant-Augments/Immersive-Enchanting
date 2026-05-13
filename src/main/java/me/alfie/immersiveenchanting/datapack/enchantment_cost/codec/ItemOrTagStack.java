@@ -15,20 +15,20 @@ import java.util.List;
 
 public record ItemOrTagStack(ItemOrTag itemOrTag,
                              DataComponentPatch components,
-                             int amount) {
+                             int count) {
 
     public static final Codec<ItemOrTagStack> CODEC = RecordCodecBuilder.create(
             instance -> instance.group(
                     ItemOrTag.CODEC.fieldOf("item_or_tag_id").forGetter(ItemOrTagStack::itemOrTag),
                     DataComponentPatch.CODEC.optionalFieldOf("components", DataComponentPatch.EMPTY).forGetter(ItemOrTagStack::components),
-                    Codec.INT.fieldOf("count").forGetter(ItemOrTagStack::amount)
+                    Codec.INT.fieldOf("count").forGetter(ItemOrTagStack::count)
             ).apply(instance, ItemOrTagStack::new)
     );
 
     public static final StreamCodec<RegistryFriendlyByteBuf, ItemOrTagStack> STREAM_CODEC = StreamCodec.composite(
             ItemOrTag.STREAM_CODEC, ItemOrTagStack::itemOrTag,
             DataComponentPatch.STREAM_CODEC, ItemOrTagStack::components,
-            ByteBufCodecs.VAR_INT, ItemOrTagStack::amount,
+            ByteBufCodecs.VAR_INT, ItemOrTagStack::count,
             ItemOrTagStack::new
     );
 
@@ -36,12 +36,12 @@ public record ItemOrTagStack(ItemOrTag itemOrTag,
 
     /**
      * Expands the {@link ItemOrTag} to a list of {@link ItemStack}s, each with the
-     * configured {@link #amount} and {@link DataComponentPatch} applied.
+     * configured {@link #count} and {@link DataComponentPatch} applied.
      */
     public List<ItemStack> getItemStacks() {
         List<ItemStack> result = new ArrayList<>(itemOrTag().getItems().size());
         for (Holder<Item> item : itemOrTag().getItems()) {
-            result.add(build(item, amount(), components()));
+            result.add(build(item, count(), components()));
         }
         return result;
     }

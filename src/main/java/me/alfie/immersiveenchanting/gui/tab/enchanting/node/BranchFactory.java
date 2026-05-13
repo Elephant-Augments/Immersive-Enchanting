@@ -86,7 +86,7 @@ public class BranchFactory {
 
     private static Identifier createModFilterBranchId(String modid) {
         final String modFilterStem = "mod_filter/";
-        return Identifier.fromNamespaceAndPath(ImmersiveEnchanting.MODID, modFilterStem + modFilterStem);
+        return Identifier.fromNamespaceAndPath(ImmersiveEnchanting.MODID, modFilterStem + modid);
     }
 
     private static void buildModFilterBranches(BuildBranchesEvent event, List<Holder<Enchantment>> applicableEnchantments) {

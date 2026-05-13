@@ -115,9 +115,6 @@ public class CostDatapack extends ModDatapack<CostData, CostRegistry> {
         Set<Holder<Enchantment>> missingInCost = new HashSet<>(allEnchantmentsSet);
         missingInCost.removeAll(costRegistrySet);
 
-        Set<Holder<Enchantment>> extraInCost = new HashSet<>(costRegistrySet);
-        extraInCost.removeAll(allEnchantmentsSet);
-
         MutableComponent modIdComponent = Component.literal("[ImmersiveEnchanting] ");
         if(!missingInCost.isEmpty()) {
 
@@ -130,15 +127,29 @@ public class CostDatapack extends ModDatapack<CostData, CostRegistry> {
             ImmersiveEnchanting.LOGGER.error("There are missing enchantment cost files for the following enchantments: {}", missingIds);
         }
 
-        if(!extraInCost.isEmpty()) {
-
-            Set<Identifier> extraIds = getEnchantmentIds(extraInCost);
-            player.sendSystemMessage(
-                    modIdComponent.append(Component.translatable("immersiveenchanting.warn.too_many_cost_files")
+        //Check enchanting fuels
+        if(!CostRegistry.client().isRegistered(CostRegistry.ENCHANTING_FUELS)) {
+            ImmersiveEnchanting.LOGGER.error("enchantment_costs/immersiveenchanting/enchanting_fuels.json is missing. Please add this file to your datapack.");
+             player.sendSystemMessage(
+                    modIdComponent.append(Component.translatable("immersiveenchanting.warn.enchanting_fuels_missing")
                             .withStyle(ChatFormatting.RED))
             );
+        }
 
-            ImmersiveEnchanting.LOGGER.error("The following enchantments are not recognised: {}", extraIds);
+        if(!CostRegistry.client().isRegistered(CostRegistry.TRANSMUTE)) {
+             player.sendSystemMessage(
+                    modIdComponent.append(Component.translatable("immersiveenchanting.warn.cost_files_missing")
+                            .withStyle(ChatFormatting.RED))
+            );
+            ImmersiveEnchanting.LOGGER.error("enchantment_costs/immersiveenchanting/transmute.json is missing. Please add this file to your datapack.");
+        }
+
+        if(!CostRegistry.client().isRegistered(CostRegistry.REPLICATE)) {
+            player.sendSystemMessage(
+                    modIdComponent.append(Component.translatable("immersiveenchanting.warn.cost_files_missing")
+                            .withStyle(ChatFormatting.RED))
+            );
+            ImmersiveEnchanting.LOGGER.error("enchantment_costs/immersiveenchanting/replicate.json is missing. Please add this file to your datapack.");
         }
     }
 
