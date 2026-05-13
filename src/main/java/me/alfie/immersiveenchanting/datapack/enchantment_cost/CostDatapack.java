@@ -55,10 +55,8 @@ public class CostDatapack extends ModDatapack<CostData, CostRegistry> {
             Identifier id = remapIdentifierPath(entry.getKey());
             CostData data = entry.getValue();
 
-            if(data.enabled()) {
-                getData().register(id, data);
-                count++;
-            }
+            getData().register(id, data);
+            count++;
         }
 
         ImmersiveEnchanting.LOGGER.debug("Populated temp cost registry with {} entries, ready to pull.", count);

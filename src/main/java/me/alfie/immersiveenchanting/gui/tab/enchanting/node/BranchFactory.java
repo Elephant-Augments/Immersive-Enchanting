@@ -74,7 +74,11 @@ public class BranchFactory {
                 String modid = applicableEnchantment.getKey().identifier().getNamespace();
                 String filteredModid = event.getCanvas().screen().enchantingTab().getFilteredModid();
                 if(filteredModid == null || filteredModid.equals(modid)) {
-                    buildEnchantingBranch(event, applicableEnchantment);
+                    if(!event.costRegistry().isRegistered(applicableEnchantment)
+                        || event.costRegistry().get(applicableEnchantment).enabled()) {
+
+                        buildEnchantingBranch(event, applicableEnchantment);
+                    }
                 }
             }
 
@@ -147,7 +151,7 @@ public class BranchFactory {
         List<NodeTemplate> nodeTemplates = new ArrayList<>();
 
         int maxLevel;
-        if(event.costRegistry().get(enchantmentHolder) != null) {
+        if(event.costRegistry().isRegistered(enchantmentHolder)) {
             //Use the max level from the cost registry, which may be higher than the enchantment's inherent max level if the datapack adds extra levels.
             maxLevel = event.costRegistry().get(enchantmentHolder).levelCosts().maxLevel();
         } else {
