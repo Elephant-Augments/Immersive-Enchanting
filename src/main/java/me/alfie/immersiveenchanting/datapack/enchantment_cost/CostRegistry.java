@@ -152,8 +152,16 @@ public class CostRegistry {
         return result;
     }
 
+    /**Returns all enchantment holders in the registry, including disabled ones.*/
     public List<Holder<Enchantment>> getAllEnchantmentHolders() {
         return new ArrayList<>(ENCHANTMENT_HOLDER_REGISTRY.keySet());
+    }
+
+    /**Returns only the enabled enchantments in the registry. Excludes disabled ones.*/
+    public List<Holder<Enchantment>> getAllEnabledEnchantmentHolders() {
+        List<Holder<Enchantment>> result = getAllEnchantmentHolders();
+        result.removeIf(holder -> !get(holder).enabled());
+        return result;
     }
 
     /**
@@ -170,6 +178,6 @@ public class CostRegistry {
     }
 
     public Holder<Enchantment> getRandomEnchantment(RandomSource randomSource) {
-        return getAllEnchantmentHolders().get(randomSource.nextInt(getAllEnchantmentHolders().size()));
+        return getAllEnabledEnchantmentHolders().get(randomSource.nextInt(getAllEnabledEnchantmentHolders().size()));
     }
 }

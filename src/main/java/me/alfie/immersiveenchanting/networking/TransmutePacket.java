@@ -65,11 +65,11 @@ public record TransmutePacket() implements ModNetworkPacket<TransmutePacket> {
 
         ItemStack ancientBookStack = menu.getToolSlot().getItem();
         List<Holder<Enchantment>> availableEnchantments = menu.getAvailableEnchantments();
-        List<Holder<Enchantment>> allEnchantments = CostRegistry.server().getAllEnchantmentHolders();
+        List<Holder<Enchantment>> allEnchantments = CostRegistry.server().getAllEnabledEnchantmentHolders();
 
         allEnchantments.removeIf(holder ->
                 availableEnchantments.stream().anyMatch(av -> av.value().equals(holder.value())));
-        if(allEnchantments.isEmpty()) allEnchantments = CostRegistry.server().getAllEnchantmentHolders();
+        if(allEnchantments.isEmpty()) allEnchantments = CostRegistry.server().getAllEnabledEnchantmentHolders();
 
         RandomSource random = level.getRandom();
         int randomIndex = random.nextInt(allEnchantments.size());

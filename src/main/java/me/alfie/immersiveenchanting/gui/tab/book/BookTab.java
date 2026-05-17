@@ -100,7 +100,7 @@ public class BookTab {
                     new HashSet<>(screen.getMenu().getAvailableEnchantments());
 
             renderedEnchantments.addAll(
-                    CostRegistry.client().getAllEnchantmentHolders().stream()
+                    CostRegistry.client().getAllEnabledEnchantmentHolders().stream()
                             .filter(e -> !unlocked.contains(e))
                             .toList()
             );

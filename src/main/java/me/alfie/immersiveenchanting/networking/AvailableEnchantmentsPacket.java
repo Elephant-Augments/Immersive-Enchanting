@@ -74,7 +74,7 @@ public record AvailableEnchantmentsPacket(List<Holder<Enchantment>> availableEnc
             if(ServerConfig.areAncientBooksRequired()) {
                 menu.setAvailableEnchantments(packet.availableEnchantments());
             } else {
-                menu.setAvailableEnchantments(CostRegistry.server().getAllEnchantmentHolders());
+                menu.setAvailableEnchantments(CostRegistry.server().getAllEnabledEnchantmentHolders());
             }
 
 

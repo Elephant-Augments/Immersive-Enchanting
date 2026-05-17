@@ -226,25 +226,6 @@ public class BranchFactory {
     }
 
     /**
-     * Returns all enchantments from the cost registry that are compatible with {@code stack}
-     * (i.e. supported by the item and not conflicting with its other enchantments), sorted alphabetically.
-     */
-    @Deprecated
-    private static List<Holder<Enchantment>> getApplicableEnchantments(ItemStack stack, CostRegistry costRegistry) {
-        List<Holder<Enchantment>> sortedEnchantments = EnchantmentUtil.sortByName(costRegistry.getAllEnchantmentHolders());
-
-        List<Holder<Enchantment>> applicableEnchantments = new ArrayList<>();
-
-        for(Holder<Enchantment> enchantment : sortedEnchantments) {
-            Set<Holder<Enchantment>> itemEnchantments = new HashSet<>(stack.getTagEnchantments().keySet());
-            itemEnchantments.remove(enchantment);
-            if(!EnchantmentHelper.isEnchantmentCompatible(itemEnchantments, enchantment)) continue;
-            if(stack.supportsEnchantment(enchantment)) applicableEnchantments.add(enchantment);
-        }
-        return applicableEnchantments;
-    }
-
-    /**
      * Returns all enchantments from {@code allEnchantments} that are compatible with {@code stack}
      * (i.e. supported by the item and not conflicting with its other enchantments), sorted alphabetically.
      * @param stack The item stack for which to find applicable enchantments.

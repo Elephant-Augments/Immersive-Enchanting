@@ -90,7 +90,7 @@ public class InjectAncientBookLootModifier extends LootModifier {
                         CostRegistry.server().getRandomEnchantment(context.getRandom()));
 
             } else if(mode.equals(Mode.RANDOMLY_ENCHANT_FROM_ENABLED_EXCEPT.getString())) {
-                List<Holder<Enchantment>> applicableEnchantments = CostRegistry.server().getAllEnchantmentHolders();
+                List<Holder<Enchantment>> applicableEnchantments = CostRegistry.server().getAllEnabledEnchantmentHolders();
                 applicableEnchantments.removeAll(enchantments);
                 int randomIndex = context.getRandom().nextInt(applicableEnchantments.size());
 
