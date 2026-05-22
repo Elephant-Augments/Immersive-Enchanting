@@ -19,6 +19,11 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Loot modifier that adds enchanted Ancient Books to generated loot.
+ *
+ * <p>Supports multiple modes for selecting enchantments during generation.</p>
+ */
 public class InjectAncientBookLootModifier extends LootModifier {
 
     public static final MapCodec<InjectAncientBookLootModifier> CODEC =
@@ -47,21 +52,6 @@ public class InjectAncientBookLootModifier extends LootModifier {
     private final int minRolls;
     private final int maxRolls;
 
-    public enum Mode {
-        RANDOMLY_ENCHANT_FROM_ENABLED("random_enchantment_from_enabled"),
-        RANDOMLY_ENCHANT_FROM_ENABLED_EXCEPT("random_enchantment_from_enabled_except"),
-        RANDOMLY_ENCHANT_FROM_LIST("random_enchantment_from_list");
-
-        private String string;
-        Mode(String string) {
-            this.string = string;
-        }
-
-        public String getString() {
-            return this.string;
-        }
-    }
-
     protected InjectAncientBookLootModifier(LootItemCondition[] conditionsIn,
                                             String mode,
                                             Optional<List<Holder<Enchantment>>> enchantments,
@@ -80,12 +70,12 @@ public class InjectAncientBookLootModifier extends LootModifier {
         for (int i = 0; i < rolls; i++) {
             ItemStack ancientBook = new ItemStack(ModItems.ANCIENT_BOOK.get());
 
-            if(mode.equals(Mode.RANDOMLY_ENCHANT_FROM_ENABLED.getString())) {
+            if (mode.equals(Mode.RANDOMLY_ENCHANT_FROM_ENABLED.getString())) {
                 EnchantmentUtil.setStoredEnchantment(ancientBook,
                         CostRegistry.server().getRandomEnchantment(context.getRandom()));
 
-            } else if(mode.equals(Mode.RANDOMLY_ENCHANT_FROM_ENABLED_EXCEPT.getString())) {
-                List<Holder<Enchantment>> applicableEnchantments = CostRegistry.server().getAllEnchantmentHolders();
+            } else if (mode.equals(Mode.RANDOMLY_ENCHANT_FROM_ENABLED_EXCEPT.getString())) {
+                List<Holder<Enchantment>> applicableEnchantments = CostRegistry.server().getAllEnabledEnchantmentHolders();
                 applicableEnchantments.removeAll(enchantments);
                 int randomIndex = context.getRandom().nextInt(applicableEnchantments.size());
 
@@ -108,5 +98,21 @@ public class InjectAncientBookLootModifier extends LootModifier {
     @Override
     public MapCodec<? extends IGlobalLootModifier> codec() {
         return CODEC;
+    }
+
+    public enum Mode {
+        RANDOMLY_ENCHANT_FROM_ENABLED("random_enchantment_from_enabled"),
+        RANDOMLY_ENCHANT_FROM_ENABLED_EXCEPT("random_enchantment_from_enabled_except"),
+        RANDOMLY_ENCHANT_FROM_LIST("random_enchantment_from_list");
+
+        private final String string;
+
+        Mode(String string) {
+            this.string = string;
+        }
+
+        public String getString() {
+            return this.string;
+        }
     }
 }

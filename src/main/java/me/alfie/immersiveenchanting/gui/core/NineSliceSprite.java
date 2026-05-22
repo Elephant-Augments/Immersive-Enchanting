@@ -8,14 +8,14 @@ public enum NineSliceSprite {
     TOOLTIP_OBTAINED("tooltip/tooltip_obtained"),
     TOOLTIP_UNOBTAINED("tooltip/tooltip_unobtained");
 
-    private final ResourceLocation identifier;
+    private final ResourceLocation id;
 
     NineSliceSprite(String path) {
-        this.identifier = ResourceLocation.fromNamespaceAndPath(ImmersiveEnchanting.MODID, path);
+        this.id = ResourceLocation.fromNamespaceAndPath(ImmersiveEnchanting.MODID, path);
     }
 
     public ResourceLocation id() {
-        return identifier;
+        return id;
     }
 
 }

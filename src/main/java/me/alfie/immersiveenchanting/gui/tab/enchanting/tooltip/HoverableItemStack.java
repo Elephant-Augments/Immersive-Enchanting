@@ -18,17 +18,16 @@ import net.minecraft.world.item.ItemStack;
  */
 public class HoverableItemStack {
 
-    private float x;
-    private float y;
-
     private final EnchantingTableScreen screen;
     private final ItemStack stack;
+    private float x;
+    private float y;
 
     /**
      * Creates a new hoverable item stack renderer.
      *
      * @param screen the screen used for mouse position and hover checks
-     * @param stack the item stack to render
+     * @param stack  the item stack to render
      */
     public HoverableItemStack(EnchantingTableScreen screen, ItemStack stack) {
         this.screen = screen;
@@ -42,14 +41,14 @@ public class HoverableItemStack {
      * the item's 16x16 bounds, the item's tooltip is rendered at the mouse cursor.
      *
      * @param graphics the rendering context
-     * @param mouseX current mouse X position (screen space)
-     * @param mouseY current mouse Y position (screen space)
+     * @param mouseX   current mouse X position (screen space)
+     * @param mouseY   current mouse Y position (screen space)
      */
     public void render(GuiGraphics graphics, double mouseX, double mouseY) {
         graphics.renderItem(stack, (int) x, (int) y);
         graphics.renderItemDecorations(Minecraft.getInstance().font, stack, (int) x, (int) y);
 
-        if(screen.isMouseOver(x, y, 16, 16, mouseX, mouseY)) {
+        if (screen.isMouseOver(x, y, 16, 16, mouseX, mouseY)) {
             graphics.renderTooltip(Minecraft.getInstance().font, stack, (int) mouseX, (int) mouseY);
         }
     }

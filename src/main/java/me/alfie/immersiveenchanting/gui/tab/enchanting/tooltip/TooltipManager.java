@@ -9,14 +9,14 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 public class TooltipManager {
 
+    public static final long HOLD_TRESHOLD_MILLIS = 1000;
+    private final EnchantingTableScreen screen;
     private Node lockedTooltipNode;
     private NodeTooltip activeTooltip;
+    private int activeTooltipPriority;
     private boolean isTooltipRequestedThisFrame;
-    private final EnchantingTableScreen screen;
-
     private Node heldTooltipNode;
     private long holdStartTime;
-    public static final long HOLD_TRESHOLD_MILLIS = 1000;
 
     public TooltipManager(EnchantingTableScreen screen) {
         this.screen = screen;
@@ -30,53 +30,70 @@ public class TooltipManager {
         lockedTooltipNode = null;
     }
 
-    public boolean isTooltipLocked() {
-        return lockedTooltipNode != null;
-    }
-
     public boolean isTooltipLockedFor(Node node) {
         return lockedTooltipNode == node;
-    }
-
-    public Node getActiveTooltipNode() {
-        return activeTooltip != null ? activeTooltip.node() : null;
     }
 
     public NodeTooltip getActiveTooltip() {
         return activeTooltip;
     }
 
-    public boolean hasActiveTooltip() {
-        return activeTooltip != null;
-    }
-
     public boolean isActiveTooltipFor(Node node) {
         return activeTooltip != null && activeTooltip.node().equals(node);
     }
 
-    public void requestTooltip(Node node) {
+    /**
+     * Marks this frame as having a tooltip request and sets the tooltip for {@code node}
+     * if the priority is high enough. Called by nodes and the active tooltip during rendering
+     * so the manager knows not to clear the tooltip at end-of-frame.
+     */
+    public void requestTooltip(Node node, int priority) {
+        if (priority < activeTooltipPriority) return;
+
         isTooltipRequestedThisFrame = true;
-        setTooltip(node);
+        setTooltip(node, priority);
+    }
+
+    /**
+     * Changes the active tooltip to the given node, unless the tooltip is locked
+     * or the node is already the active tooltip. Also plays the node hover sound.
+     */
+    private void setTooltip(Node node, int priority) {
+        if (isTooltipLocked()) return;
+        if (hasActiveTooltip() && getActiveTooltipNode().equals(node)) return;
+
+        activeTooltip = new NodeTooltip(screen, node);
+        activeTooltipPriority = priority;
+        FxHelper.playNodeHover(screen.player().level(), node);
+    }
+
+    public boolean isTooltipLocked() {
+        return lockedTooltipNode != null;
+    }
+
+    public boolean hasActiveTooltip() {
+        return activeTooltip != null;
+    }
+
+    public Node getActiveTooltipNode() {
+        return activeTooltip != null ? activeTooltip.node() : null;
     }
 
     public boolean isTooltipRequestedThisFrame() {
         return isTooltipRequestedThisFrame;
     }
 
-    private void setTooltip(Node node) {
-        if(isTooltipLocked()) return;
-        if(hasActiveTooltip() && getActiveTooltipNode().equals(node)) return;
-
-        activeTooltip = new NodeTooltip(screen, node);
-        FxHelper.playNodeHover(screen.player(), node);
-    }
-
+    /**
+     * Clears the per-frame tooltip request flag. Called at the end of every render frame
+     * so that the screen can detect when no node requested a tooltip and clear it.
+     */
     public void resetFrameState() {
         isTooltipRequestedThisFrame = false;
     }
 
     public void clearActiveTooltip() {
         activeTooltip = null;
+        activeTooltipPriority = 0;
     }
 
 
@@ -85,30 +102,38 @@ public class TooltipManager {
         holdStartTime = System.currentTimeMillis();
     }
 
-    public void resetHold() {
-        heldTooltipNode = null;
-        holdStartTime = -1;
-    }
-
     public boolean isHoldingTooltip() {
         return heldTooltipNode != null;
     }
 
+    /**
+     * Checks whether the hold threshold has been reached and fires the remove action if so.
+     * Called each frame while a node is being held.
+     */
     public void updateHold() {
-        if(heldTooltipNode == null) return;
+        if (heldTooltipNode == null) return;
 
-        if(getElapsedHeldTime() >= HOLD_TRESHOLD_MILLIS) triggerHeldTooltip();
+        if (getElapsedHeldTime() >= HOLD_TRESHOLD_MILLIS) triggerHeldTooltip();
     }
 
     public long getElapsedHeldTime() {
         return System.currentTimeMillis() - holdStartTime;
     }
 
+    /**
+     * Sends the enchantment removal packet for the currently held node and resets the hold state.
+     * Called when the hold duration reaches {@link #HOLD_TRESHOLD_MILLIS}.
+     */
     private void triggerHeldTooltip() {
         PacketDistributor.sendToServer(new RemoveEnchantmentPacket(
-                EnchantmentUtil.toHolder(heldTooltipNode.id(), screen.registryAccess()),
-                heldTooltipNode.getEnchantmentLevel()));
+                EnchantmentUtil.toHolder(heldTooltipNode.branchId(), screen.registryAccess()),
+                heldTooltipNode.getPosition()));
 
         resetHold();
+    }
+
+    public void resetHold() {
+        heldTooltipNode = null;
+        holdStartTime = -1;
     }
 }

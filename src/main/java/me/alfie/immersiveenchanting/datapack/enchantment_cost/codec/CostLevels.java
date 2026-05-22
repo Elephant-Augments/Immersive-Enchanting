@@ -38,7 +38,7 @@ public record CostLevels(Map<Integer, CostHolder> levelCostMap) {
 
                 buf.writeVarInt(map.size());
 
-                for(Map.Entry<Integer, CostHolder> entry : map.entrySet()) {
+                for (Map.Entry<Integer, CostHolder> entry : map.entrySet()) {
                     buf.writeVarInt(entry.getKey());
                     CostHolder.STREAM_CODEC.encode(buf, entry.getValue());
                 }
@@ -59,6 +59,7 @@ public record CostLevels(Map<Integer, CostHolder> levelCostMap) {
     );
 
     public CostHolder getLevel(int level) {
+        if (!levelCostMap.containsKey(level)) return CostHolder.EMPTY;
         return levelCostMap.get(level);
     }
 
@@ -67,13 +68,14 @@ public record CostLevels(Map<Integer, CostHolder> levelCostMap) {
     }
 
     /**
-     * Returns a list of all valid costs for this enchantment, ignoring the level.
+     * Returns a list of all valid costs for this enchantment, ignoring the position.
+     *
      * @return
      */
     public List<Cost> getAllLevels() {
         List<Cost> result = new ArrayList<>();
 
-        for(CostHolder holder : levelCostMap().values()) {
+        for (CostHolder holder : levelCostMap().values()) {
             result.addAll(holder.costs());
         }
 

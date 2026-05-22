@@ -16,7 +16,23 @@ import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
-public record RemoveEnchantmentPacket(Holder<Enchantment> enchantmentHolder, int level) implements ModNetworkPacket<RemoveEnchantmentPacket> {
+/**
+ * Client-to-server packet requesting removal of an enchantment position.
+ *
+ * <p>If allowed by server configuration, reduces the specified enchantment by one position.
+ * If the resulting position reaches zero, the enchantment is fully removed from the item.</p>
+ *
+ * <p>No action is taken if:
+ * <ul>
+ *     <li>Enchantment removal is disabled in config</li>
+ *     <li>The item has no matching enchantment</li>
+ *     <li>The enchantment position is already zero</li>
+ * </ul>
+ *
+ * <p>On success, the item is updated server-side and feedback effects are triggered.</p>
+ */
+public record RemoveEnchantmentPacket(Holder<Enchantment> enchantmentHolder,
+                                      int level) implements ModNetworkPacket<RemoveEnchantmentPacket> {
 
     public static final Type<@NotNull RemoveEnchantmentPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(ImmersiveEnchanting.MODID, "remove_enchantment"));
 
@@ -26,18 +42,18 @@ public record RemoveEnchantmentPacket(Holder<Enchantment> enchantmentHolder, int
             RemoveEnchantmentPacket::new);
 
     @Override
-    public Type<@NotNull RemoveEnchantmentPacket> typeId() {
-        return TYPE;
-    }
-
-    @Override
     public StreamCodec<RegistryFriendlyByteBuf, RemoveEnchantmentPacket> codec() {
         return STREAM_CODEC;
     }
 
     @Override
+    public Type<@NotNull RemoveEnchantmentPacket> typeId() {
+        return TYPE;
+    }
+
+    @Override
     public void exec(RemoveEnchantmentPacket packet, IPayloadContext context) {
-        if(!ServerConfig.isEnchantmentRemovalAllowed()) return;
+        if (!ServerConfig.isEnchantmentRemovalAllowed()) return;
         if (!(context.player().containerMenu instanceof EnchantingTableMenu menu)) return;
 
         ItemStack stack = menu.getToolSlot().getItem();

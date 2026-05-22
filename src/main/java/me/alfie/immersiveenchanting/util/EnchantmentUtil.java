@@ -10,13 +10,12 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
-import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import javax.annotation.Nullable;
@@ -24,64 +23,39 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Utility class providing helper methods for working with enchantments.
+ * Utility methods for working with enchantments, item data, and cost validation.
  *
- * <p>This class centralises common logic related to enchantment handling,
- * including:</p>
+ * <p>Handles common tasks such as:
  * <ul>
- *     <li>Converting between {@link ResourceLocation} and {@link Holder} representations</li>
+ *     <li>Converting between {@link ResourceLocation} and {@link Holder}</li>
  *     <li>Reading and writing stored enchantments on item stacks</li>
- *     <li>Sorting and accessing enchantment data</li>
- *     <li>Validating whether an enchantment can be applied</li>
+ *     <li>Validating enchantment application rules</li>
  *     <li>Resolving and deducting enchantment costs</li>
  * </ul>
  *
- * <p>It is primarily used by enchanting-related systems such as custom
- * enchanting tables and item interactions.</p>
+ * <p>Primarily used by enchanting systems (e.g. {@link EnchantingTableMenu}).
  *
- * <p><b>Note:</b> Some methods assume server-side execution and/or prior
- * validation (e.g. cost deduction). Callers are responsible for ensuring
- * correct usage.</p>
+ * <p>Most methods assume valid inputs and correct execution context.
  */
 public class EnchantmentUtil {
 
     /**
-     * Resolves an enchantment identifier into a {@link Holder}.
+     * Converts an enchantment ResourceLocation into a registry holder.
      *
-     * @param id     the enchantment identifier
-     * @param access the registry access used to look up the enchantment
-     * @return the corresponding {@link Holder<Enchantment>}
-     * @throws java.util.NoSuchElementException if the enchantment is not present
+     * @param id     enchantment ResourceLocation
+     * @param access registry access used for lookup
+     * @return enchantment holder
+     * @throws java.util.NoSuchElementException if the enchantment is not found
      */
     public static Holder<Enchantment> toHolder(ResourceLocation id, RegistryAccess access) {
-        return access.lookupOrThrow(Registries.ENCHANTMENT)
-                .get(ResourceKey.create(Registries.ENCHANTMENT, id))
-                .orElseThrow();
+        return access.lookupOrThrow(Registries.ENCHANTMENT).get(id).orElseThrow();
     }
 
     /**
-     * Converts an enchantment holder into its identifier.
+     * Stores a single enchantment on an item as stored enchantments.
      *
-     * @param enchantmentHolder the enchantment holder
-     * @return the identifier of the enchantment
-     * @throws java.util.NoSuchElementException if the holder has no registry key
-     */
-    public static ResourceLocation toId(Holder<Enchantment> enchantmentHolder) {
-        return enchantmentHolder.unwrapKey().orElseThrow().location();
-    }
-
-    /**
-     * Stores a single enchantment on an "ancient book" item stack.
-     *
-     * <p>This method is intended to run on the server. However, it also supports
-     * {@code null} levels to allow usage in contexts where no {@link Level} is
-     * available (such as creative tab population).</p>
-     *
-     * <p>If a non-null level is provided, this method will only execute on the
-     * server side. Client-side calls with a valid level are ignored.</p>
-     *
-     * @param ancientBook        the item stack to modify
-     * @param enchantmentHolder  the enchantment to store
+     * @param ancientBook       item stack to modify
+     * @param enchantmentHolder enchantment to store
      */
     public static void setStoredEnchantment(ItemStack ancientBook, Holder<Enchantment> enchantmentHolder) {
         ItemEnchantments.Mutable itemEnchantments = new ItemEnchantments.Mutable(ItemEnchantments.EMPTY);
@@ -90,88 +64,104 @@ public class EnchantmentUtil {
     }
 
     /**
-     * Retrieves the stored enchantment identifier from an "ancient book".
+     * Retrieves the first stored enchantment from an item.
      *
-     * <p>If multiple enchantments are present, only the first is returned.</p>
-     *
-     * @param ancientBook the item stack to read from
-     * @return the stored enchantment holder, or {@code null} if none is present
+     * @param ancientBook item stack to read from
+     * @return stored enchantment holder, or {@code null} if none exists
      */
     public static @Nullable Holder<Enchantment> getStoredEnchantment(ItemStack ancientBook) {
         ItemEnchantments itemEnchantments = ancientBook.get(DataComponents.STORED_ENCHANTMENTS);
-        if(itemEnchantments == null) return null;
+        if (itemEnchantments == null) return null;
 
         List<Holder<Enchantment>> enchantments = itemEnchantments.keySet().stream().toList();
-        if(enchantments.isEmpty()) return null;
+        if (enchantments.isEmpty()) return null;
 
         return enchantments.getFirst();
     }
 
+    /**
+     * Marks an item as replicated.
+     *
+     * @param stack item stack to modify
+     */
     public static void setReplicated(ItemStack stack) {
         stack.set(ModDataComponents.REPLICATED, new ReplicatedDataComponent(true));
     }
 
-    public static boolean isReplicated(ItemStack stack) {
-        if(!stack.has(ModDataComponents.REPLICATED)) return false;
-        return stack.get(ModDataComponents.REPLICATED.get()).isReplicated();
-    }
-
+    /**
+     * Sorts enchantments alphabetically by display name.
+     *
+     * @param enchantmentHolders list to sort (modified in place)
+     * @return sorted list of enchantments
+     */
     public static List<Holder<Enchantment>> sortByName(List<Holder<Enchantment>> enchantmentHolders) {
         enchantmentHolders.sort(Comparator.comparing(enchantmentHolder -> enchantmentHolder.value().description().getString()));
-         return enchantmentHolders;
+        return enchantmentHolders;
     }
 
+    /**
+     * Checks whether an enchantment can be applied in the enchanting table.
+     *
+     * @param menu              enchanting menu
+     * @param enchantmentHolder enchantment to apply
+     * @param level             target position
+     * @param context           network context / player context
+     * @return true if enchantment can be applied
+     */
     public static boolean canEnchant(EnchantingTableMenu menu,
                                      Holder<Enchantment> enchantmentHolder, int level,
                                      IPayloadContext context) {
+        if (!CostRegistry.server().isRegistered(enchantmentHolder) ||
+                !CostRegistry.server().isRegistered(CostRegistry.ENCHANTING_FUELS)) return false;
+        if (!CostRegistry.server().get(enchantmentHolder).enabled()) return false;
+
+
         ItemStack stackToEnchant = menu.getToolSlot().getItem();
-        if(!isNextLevel(stackToEnchant, enchantmentHolder, level)) return false;
-        if(!stackToEnchant.supportsEnchantment(enchantmentHolder)) return false;
-        if(!isEnchantmentAvailableInBookshelves(enchantmentHolder, menu, context)) return false;
+        if (!isNextLevel(stackToEnchant, enchantmentHolder, level)) return false;
+        if (!stackToEnchant.supportsEnchantment(enchantmentHolder)) return false;
+        if (!isEnchantmentAvailableInBookshelves(enchantmentHolder, menu, context)) return false;
 
-        if(context.player().hasInfiniteMaterials()) return true;
-        if(!hasValidCostAndFuel(menu.getCostSlot().getItem(), menu.getFuelSlot().getItem(), toId(enchantmentHolder), level, context.player(), CostRegistry.server())) return false;
-
-        return true;
+        if (context.player().hasInfiniteMaterials()) return true;
+        return hasValidCostAndFuel(menu.getCostSlot().getItem(), menu.getFuelSlot().getItem(), toId(enchantmentHolder), level, context.player(), CostRegistry.server());
     }
 
-    public static boolean canTransmute(EnchantingTableMenu menu, Holder<Enchantment> newEnchantment, IPayloadContext context) {
-        if(!isEnchantmentAvailableInBookshelves(newEnchantment, menu, context)) return false;
-        if(EnchantmentUtil.isReplicated(menu.getToolSlot().getItem())) return false;
-
-        if(context.player().hasInfiniteMaterials()) return true;
-        if(!hasValidCostAndFuel(menu.getCostSlot().getItem(), menu.getFuelSlot().getItem(), CostRegistry.TRANSMUTE, 1, context.player(), CostRegistry.server())) return false;
-
-        return true;
-    }
-
-    public static boolean canReplicate(EnchantingTableMenu menu, IPayloadContext context) {
-        if(context.player().hasInfiniteMaterials()) return true;
-        if(!hasValidCostAndFuel(menu.getCostSlot().getItem(), menu.getFuelSlot().getItem(), CostRegistry.REPLICATE, 1, context.player(), CostRegistry.server())) return false;
-
-        return true;
-    }
-
-    private static boolean isEnchantmentAvailableInBookshelves(Holder<Enchantment> enchantmentHolder, EnchantingTableMenu menu, IPayloadContext context) {
-        List<Holder<Enchantment>> availableEnchantments = BookshelfChecker.getEnchantmentsInBookshelves(menu.getBlockPos(), context.player().level());
-        return availableEnchantments.contains(enchantmentHolder);
-    }
-
+    /**
+     * Checks if the enchantment is the next valid position.
+     *
+     * @param stack             item being enchanted
+     * @param enchantmentHolder enchantment
+     * @param level             target position
+     * @return true if next position
+     */
     private static boolean isNextLevel(ItemStack stack, Holder<Enchantment> enchantmentHolder, int level) {
         int equippedLevel = stack.getEnchantmentLevel(enchantmentHolder);
         return level == equippedLevel + 1;
     }
 
-    public static boolean hasValidCost(ItemStack costStack,
-                                       ResourceLocation enchantmentId, int level,
-                                       Player player, CostRegistry costRegistry) {
-        return findValidCost(costStack, enchantmentId, level, player, costRegistry) != null;
+    /**
+     * Validates whether an enchantment is available from surrounding bookshelves.
+     *
+     * @param enchantmentHolder enchantment to check
+     * @param menu              enchanting menu
+     * @param context           player context
+     * @return true if available
+     */
+    private static boolean isEnchantmentAvailableInBookshelves(Holder<Enchantment> enchantmentHolder, EnchantingTableMenu menu, IPayloadContext context) {
+        List<Holder<Enchantment>> availableEnchantments = BookshelfChecker.getEnchantmentsInBookshelves(menu.getBlockPos(), context.player().level());
+        return availableEnchantments.contains(enchantmentHolder);
     }
 
-    public static boolean hasValidEnchantingFuel(ItemStack fuelStack, int level, CostRegistry costRegistry) {
-        return findValidEnchantingFuel(fuelStack, level, costRegistry) != null;
-    }
-
+    /**
+     * Checks whether both cost and fuel requirements are satisfied.
+     *
+     * @param costStack     item used for cost
+     * @param fuelStack     item used for fuel
+     * @param enchantmentId enchantment being applied
+     * @param level         target position
+     * @param player        player performing the action
+     * @param costRegistry  cost registry used for lookup
+     * @return true if both cost and fuel are valid
+     */
     public static boolean hasValidCostAndFuel(ItemStack costStack, ItemStack fuelStack,
                                               ResourceLocation enchantmentId, int level,
                                               Player player, CostRegistry costRegistry) {
@@ -179,16 +169,65 @@ public class EnchantmentUtil {
                 && hasValidEnchantingFuel(fuelStack, level, costRegistry);
     }
 
+    /**
+     * Converts a registry holder into its ResourceLocation.
+     *
+     * @param enchantmentHolder enchantment holder
+     * @return ResourceLocation of the enchantment
+     * @throws java.util.NoSuchElementException if the holder has no registry key
+     */
+    public static ResourceLocation toId(Holder<Enchantment> enchantmentHolder) {
+        return enchantmentHolder.unwrapKey().orElseThrow().ResourceLocation();
+    }
+
+    /**
+     * Checks if a valid cost exists for the given enchantment.
+     *
+     * @param costStack     item used for cost validation
+     * @param enchantmentId enchantment being applied
+     * @param level         target position
+     * @param player        player performing the action
+     * @param costRegistry  cost registry used for lookup
+     * @return true if a valid cost exists
+     */
+    public static boolean hasValidCost(ItemStack costStack,
+                                       ResourceLocation enchantmentId, int level,
+                                       Player player, CostRegistry costRegistry) {
+        return findValidCost(costStack, enchantmentId, level, player, costRegistry) != null;
+    }
+
+    /**
+     * Checks if valid enchanting fuel exists for the given position.
+     *
+     * @param fuelStack    fuel item stack
+     * @param level        target position
+     * @param costRegistry cost registry used for lookup
+     * @return true if valid fuel exists
+     */
+    public static boolean hasValidEnchantingFuel(ItemStack fuelStack, int level, CostRegistry costRegistry) {
+        return findValidEnchantingFuel(fuelStack, level, costRegistry) != null;
+    }
+
+    /**
+     * Finds a valid cost entry for the given enchantment and position.
+     *
+     * @param costStack     item used for validation
+     * @param enchantmentId enchantment being applied
+     * @param level         target position
+     * @param player        player performing the action
+     * @param costRegistry  cost registry used for lookup
+     * @return matching cost, or null if none found
+     */
     private static Cost findValidCost(ItemStack costStack, ResourceLocation enchantmentId, int level,
                                       Player player, CostRegistry costRegistry) {
         List<Cost> validCosts = costRegistry.get(enchantmentId).levelCosts().getLevel(level).costs();
 
-        for(Cost validCost : validCosts) {
-            if(!playerHasEnoughLevels(player, validCost)) continue;
+        for (Cost validCost : validCosts) {
+            if (!playerHasEnoughLevels(player, validCost)) continue;
 
             //Check all item stacks in validCost
-            for(ItemStack validCostStack : validCost.getItemStacks()) {
-                if(isCostStackValid(costStack, validCostStack)) {
+            for (ItemStack validCostStack : validCost.getItemStacks()) {
+                if (isCostStackValid(costStack, validCostStack)) {
                     return validCost;
                 }
             }
@@ -197,45 +236,135 @@ public class EnchantmentUtil {
         return null;
     }
 
+    /**
+     * Finds a valid fuel cost for the given position.
+     *
+     * @param fuelStack    fuel item stack
+     * @param level        target position
+     * @param costRegistry cost registry used for lookup
+     * @return matching fuel cost, or null if none found
+     */
     private static Cost findValidEnchantingFuel(ItemStack fuelStack, int level, CostRegistry costRegistry) {
         List<Cost> validFuels = costRegistry.get(CostRegistry.ENCHANTING_FUELS).levelCosts().getLevel(level).costs();
 
-        for(Cost validFuel : validFuels) {
-            for(ItemStack validFuelStack : validFuel.getItemStacks()) {
-                if(isCostStackValid(fuelStack, validFuelStack)) return validFuel;
+        for (Cost validFuel : validFuels) {
+            for (ItemStack validFuelStack : validFuel.getItemStacks()) {
+                if (isCostStackValid(fuelStack, validFuelStack)) return validFuel;
             }
         }
 
         return null;
     }
 
-    private static boolean isCostStackValid(ItemStack costStack, ItemStack validCostStack) {
-        return costStack.getItem().equals(validCostStack.getItem()) && costStack.getCount() >= validCostStack.getCount();
-    }
-
+    /**
+     * Checks whether the player has enough XP levels for a cost.
+     *
+     * @param player    player to check
+     * @param validCost cost requirement
+     * @return true if player has enough levels
+     */
     private static boolean playerHasEnoughLevels(Player player, Cost validCost) {
         return player.experienceLevel >= validCost.xpLevels();
     }
 
+    /**
+     * Checks if two item stacks match in type and quantity.
+     *
+     * @param costStack      actual stack
+     * @param validCostStack required stack
+     * @return true if stack is valid
+     */
+    private static boolean isCostStackValid(ItemStack costStack, ItemStack validCostStack) {
+        if (validCostStack.is(Items.AIR)) return true;
+
+        return ItemStack.isSameItemSameComponents(costStack, validCostStack)
+                && costStack.getCount() >= validCostStack.getCount();
+    }
+
+    /**
+     * Checks whether a transmutation operation is allowed.
+     *
+     * @param menu           enchanting menu
+     * @param newEnchantment enchantment to apply
+     * @param context        player/network context
+     * @return true if transmutation is allowed
+     */
+    public static boolean canTransmute(EnchantingTableMenu menu, Holder<Enchantment> newEnchantment, IPayloadContext context) {
+        if (!CostRegistry.server().isRegistered(CostRegistry.TRANSMUTE)) return false;
+        if (!CostRegistry.server().get(CostRegistry.TRANSMUTE).enabled()) return false;
+
+        if (!isEnchantmentAvailableInBookshelves(newEnchantment, menu, context)) return false;
+        if (EnchantmentUtil.isReplicated(menu.getToolSlot().getItem())) return false;
+
+        if (context.player().hasInfiniteMaterials()) return true;
+        return hasValidCostAndFuel(menu.getCostSlot().getItem(), menu.getFuelSlot().getItem(), CostRegistry.TRANSMUTE, 1, context.player(), CostRegistry.server());
+    }
+
+    /**
+     * Checks if an item is marked as replicated.
+     *
+     * @param stack item stack to check
+     * @return true if replicated, false otherwise
+     */
+    public static boolean isReplicated(ItemStack stack) {
+        if (!stack.has(ModDataComponents.REPLICATED)) return false;
+        return stack.get(ModDataComponents.REPLICATED.get()).isReplicated();
+    }
+
+    /**
+     * Checks whether replication is allowed.
+     *
+     * @param menu    enchanting menu
+     * @param context player/network context
+     * @return true if replication is allowed
+     */
+    public static boolean canReplicate(EnchantingTableMenu menu, IPayloadContext context) {
+        if (!CostRegistry.server().isRegistered(CostRegistry.REPLICATE)) return false;
+        if (!CostRegistry.server().get(CostRegistry.REPLICATE).enabled()) return false;
+
+
+        if (context.player().hasInfiniteMaterials()) return true;
+        return hasValidCostAndFuel(menu.getCostSlot().getItem(), menu.getFuelSlot().getItem(), CostRegistry.REPLICATE, 1, context.player(), CostRegistry.server());
+    }
+
+    /**
+     * Deducts a validated enchantment cost and fuel from the menu.
+     *
+     * <p>Throws if no valid cost is found (should be pre-validated before calling).
+     *
+     * @param menu          enchanting menu
+     * @param enchantmentId enchantment being applied
+     * @param level         target position
+     * @param player        player performing the action
+     * @param costRegistry  cost registry used for lookup
+     * @throws IllegalStateException if no valid cost exists
+     */
     public static void deductValidCost(EnchantingTableMenu menu,
                                        ResourceLocation enchantmentId, int level,
                                        Player player, CostRegistry costRegistry) {
-        if(player.hasInfiniteMaterials()) return;
+        if (player.hasInfiniteMaterials()) return;
 
         ItemStack costStack = menu.getCostSlot().getItem();
         ItemStack fuelStack = menu.getFuelSlot().getItem();
-        if(!hasValidCostAndFuel(costStack, fuelStack, enchantmentId, level, player, costRegistry)) throw new IllegalStateException("Cannot deduct cost as there is no valid cost!");
+        if (!hasValidCostAndFuel(costStack, fuelStack, enchantmentId, level, player, costRegistry))
+            throw new IllegalStateException("Cannot deduct cost as there is no valid cost!");
 
         Cost validCost = findValidCost(costStack, enchantmentId, level, player, costRegistry);
         Cost validFuel = findValidEnchantingFuel(fuelStack, level, costRegistry);
 
-        menu.getCostSlot().getItem().shrink(validCost.amount());
-        menu.getFuelSlot().getItem().shrink(validFuel.amount());
+        menu.getCostSlot().getItem().shrink(validCost.itemStackHolder().count());
+        menu.getFuelSlot().getItem().shrink(validFuel.itemStackHolder().count());
 
         player.giveExperienceLevels(-validCost.xpLevels());
     }
 
-    public static List<Holder.Reference<Enchantment>> getAllRegisteredEnchantments(HolderLookup.Provider lookup) {
-        return lookup.lookupOrThrow(Registries.ENCHANTMENT).listElements().toList();
+    /**
+     * Retrieves all registered enchantments from a lookup provider.
+     *
+     * @param lookup registry lookup provider
+     * @return list of all enchantments
+     */
+    public static List<Holder<Enchantment>> getAllRegisteredEnchantments(HolderLookup.Provider lookup) {
+        return lookup.lookupOrThrow(Registries.ENCHANTMENT).listElements().map(holder -> (Holder<Enchantment>) holder).toList();
     }
 }

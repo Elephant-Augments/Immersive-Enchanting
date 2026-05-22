@@ -10,6 +10,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.EnchantingTableBlockEntity;
 import net.neoforged.neoforge.event.level.BlockEvent;
 
+import java.util.Collections;
+
 /**
  * Drops the persistent enchanting-table inventory when the block is broken.
  *
@@ -38,17 +40,17 @@ public final class EnchantingTableBreakHandler {
 
         boolean anything = false;
         for (ItemStack stack : items) {
-            if (!stack.isEmpty()) { anything = true; break; }
+            if (!stack.isEmpty()) {
+                anything = true;
+                break;
+            }
         }
         if (!anything) return;
 
-        // Drop everything at the broken block's position.
         Containers.dropContents(level, pos, items);
 
         // Clear the list so nothing can be duplicated if the BE is read again
         // before unloading.
-        for (int i = 0; i < items.size(); i++) {
-            items.set(i, ItemStack.EMPTY);
-        }
+        Collections.fill(items, ItemStack.EMPTY);
     }
 }

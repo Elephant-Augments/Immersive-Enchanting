@@ -9,28 +9,26 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
-public record Cost(ItemOrTag itemOrTag, int amount, int xpLevels) {
+public record Cost(ItemOrTagStack itemStackHolder, int xpLevels) {
 
     public static final Codec<Cost> CODEC = RecordCodecBuilder.create(
             instance -> instance.group(
-                    ItemOrTag.CODEC.fieldOf("item").forGetter(Cost::itemOrTag),
-                    Codec.INT.fieldOf("amount").forGetter(Cost::amount),
+                    ItemOrTagStack.CODEC.fieldOf("item_stack").forGetter(Cost::itemStackHolder),
                     Codec.INT.optionalFieldOf("xp_levels", 0).forGetter(Cost::xpLevels)
             ).apply(instance, Cost::new)
     );
 
     public static final StreamCodec<RegistryFriendlyByteBuf, Cost> STREAM_CODEC = StreamCodec.composite(
-            ItemOrTag.STREAM_CODEC, Cost::itemOrTag,
-            ByteBufCodecs.VAR_INT, Cost::amount,
+            ItemOrTagStack.STREAM_CODEC, Cost::itemStackHolder,
             ByteBufCodecs.VAR_INT, Cost::xpLevels,
             Cost::new);
 
+    public static final Cost EMPTY = new Cost(ItemOrTagStack.EMPTY, 0);
+
     /**
-     * Returns all items found in ItemOrTag with this amount.
-     * @return
+     * Convenience method to getItemStacks() on itemStackHolder()
      */
     public List<ItemStack> getItemStacks() {
-        return itemOrTag().getItemStacks(amount());
+        return itemStackHolder().getItemStacks();
     }
-
 }

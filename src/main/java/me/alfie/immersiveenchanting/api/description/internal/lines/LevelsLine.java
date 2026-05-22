@@ -14,6 +14,10 @@ import org.jetbrains.annotations.NotNull;
 
 public record LevelsLine(NodeTooltip tooltip) implements DescriptionLine {
 
+    /**
+     * Renders the "XP Levels:" label, followed by an XP orb icon sprite, then the
+     * required level count in green to the right of the icon.
+     */
     @Override
     public void render(GuiGraphics graphics, int lineX, int lineY, double mouseX, double mouseY) {
         DescriptionHelper.text(graphics, getText(), lineX, lineY);

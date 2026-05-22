@@ -1,6 +1,7 @@
 package me.alfie.immersiveenchanting.datapack.enchantment_cost.codec;
 
 import com.mojang.serialization.Codec;
+import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -9,12 +10,10 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public record ItemOrTag(Optional<ResourceLocation> item,
                         Optional<TagKey<Item>> tag) {
@@ -23,7 +22,7 @@ public record ItemOrTag(Optional<ResourceLocation> item,
     public static final Codec<ItemOrTag> CODEC = Codec.STRING.xmap(
             str -> {
                 //Decode item/tag
-                if(str.startsWith("#")) {
+                if (str.startsWith("#")) {
                     ResourceLocation id = ResourceLocation.parse(str.substring(1));
                     return new ItemOrTag(Optional.empty(),
                             Optional.of(TagKey.create(Registries.ITEM, id)));
@@ -36,7 +35,8 @@ public record ItemOrTag(Optional<ResourceLocation> item,
             itemOrTag -> {
                 return itemOrTag.tag
                         .map(itemTagKey -> "#" + itemTagKey.location())
-                        .orElseGet(() -> itemOrTag.item.orElseThrow().toString());
+                        .orElse(itemOrTag.item.orElseThrow() //ID is always present. If not, the file will not have parsed.
+                                .toString());
             }
     );
 
@@ -45,7 +45,7 @@ public record ItemOrTag(Optional<ResourceLocation> item,
                 boolean isTag = value.tag().isPresent();
                 buf.writeBoolean(isTag);
 
-                if(isTag) {
+                if (isTag) {
                     ResourceLocation id = value.tag().get().location();
                     ResourceLocation.STREAM_CODEC.encode(buf, id);
                 } else {
@@ -55,7 +55,7 @@ public record ItemOrTag(Optional<ResourceLocation> item,
             buf -> {
                 boolean isTag = buf.readBoolean();
 
-                if(isTag) {
+                if (isTag) {
                     ResourceLocation id = ResourceLocation.STREAM_CODEC.decode(buf);
                     return new ItemOrTag(
                             Optional.empty(),
@@ -71,27 +71,30 @@ public record ItemOrTag(Optional<ResourceLocation> item,
             }
     );
 
+    public static final ItemOrTag EMPTY = new ItemOrTag(Optional.of(ResourceLocation.parse("minecraft:air")), Optional.empty());
+
     /**
      * Returns all items found in ItemOrTag.
+     *
      * @return
      */
-    public List<ItemStack> getItemStacks(int amount) {
-        if(tag().isPresent()) {
-            List<Item> itemsInTag = BuiltInRegistries.ITEM.getTag(tag().get())
-                    .map(tagSet -> tagSet.stream()
-                            .map(Holder::value)
-                            .collect(Collectors.toList())).orElse(List.of());
-
-            List<ItemStack> itemStacks = new ArrayList<>();
-            for(Item item : itemsInTag) {
-                itemStacks.add(new ItemStack(item, amount));
-            }
-            return itemStacks;
-
+    public List<Holder<Item>> getItems() {
+        if (tag().isPresent()) {
+            return BuiltInRegistries.ITEM.get(tag().get())
+                    .map(tagSet -> tagSet.stream().toList())
+                    .orElse(List.of());
         } else {
-            ResourceLocation id = item().get();
-            Item item = BuiltInRegistries.ITEM.get(id);
-            return List.of(new ItemStack(item, amount));
+            ResourceLocation id = item().get(); //ID at this point is always present, since either item or tag must be non-empty
+
+            return BuiltInRegistries.ITEM.get(id)
+                    .map(List::<Holder<Item>>of)
+                    .orElseGet(() -> {
+                                ImmersiveEnchanting.LOGGER.error("Could not find item with ID '{}' while resolving ItemOrTag. Defaulting to 'minecraft:air'.", id);
+
+                                return List.of(BuiltInRegistries.ITEM.wrapAsHolder(Items.AIR));
+                            }
+                    );
+
         }
     }
 }

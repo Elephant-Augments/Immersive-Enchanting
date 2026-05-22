@@ -8,8 +8,6 @@ import org.jetbrains.annotations.NotNull;
 
 public interface ModNetworkPacket<T extends CustomPacketPayload> extends CustomPacketPayload {
 
-    Type<@NotNull T> typeId();
-
     StreamCodec<RegistryFriendlyByteBuf, T> codec();
 
     @Override
@@ -17,5 +15,14 @@ public interface ModNetworkPacket<T extends CustomPacketPayload> extends CustomP
         return typeId();
     }
 
+    Type<@NotNull T> typeId();
+
+    /**
+     * Executes the packet logic on the receiving side.
+     * Called on the game thread after the packet is received and decoded.
+     *
+     * @param packet  the decoded packet instance
+     * @param context payload context providing the player and other execution helpers
+     */
     void exec(T packet, IPayloadContext context);
 }

@@ -3,7 +3,7 @@ package me.alfie.immersiveenchanting.gui.canvas;
 import me.alfie.immersiveenchanting.gui.core.Sprite;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FastColor;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * Base class for objects that can be rendered on a {@link Canvas} without
@@ -12,11 +12,10 @@ import net.minecraft.util.FastColor;
  */
 public abstract class CanvasRenderable {
 
+    private final Canvas canvas;
     private float canvasX;
     private float canvasY;
     private float scale = 1f;
-    private final Canvas canvas;
-
     //Used when applying offsets i.e setScaleKeepPos()
     private float baseCanvasX;
     private float baseCanvasY;
@@ -34,18 +33,31 @@ public abstract class CanvasRenderable {
      * Render this object on the canvas. Called every frame.
      *
      * @param graphics The graphics context
-     * @param mouseX Current mouse X position relative to GUI
-     * @param mouseY Current mouse Y position relative to GUI
+     * @param mouseX   Current mouse X position relative to GUI
+     * @param mouseY   Current mouse Y position relative to GUI
      */
     public abstract void render(GuiGraphics graphics, int mouseX, int mouseY);
 
     /**
-     * Gets the canvas this object is attached to.
+     * Sets the object’s position so that it is centered on the canvas
+     * based on a {@link Sprite}.
      *
-     * @return The canvas
+     * @param sprite The sprite to center
      */
-    public Canvas canvas() {
-        return canvas;
+    public void setCenterPos(Sprite sprite) {
+        setCenterPos(sprite.width(), sprite.height());
+    }
+
+    /**
+     * Sets the object’s position so that it is centered on the canvas,
+     * based on the texture’s width and height.
+     *
+     * @param textureWidth  Width of the object
+     * @param textureHeight Height of the object
+     */
+    public void setCenterPos(int textureWidth, int textureHeight) {
+        setCanvasPos(canvas().getCenter().x() - (float) textureWidth / 2,
+                canvas().getCenter().y() - (float) textureHeight / 2);
     }
 
     /**
@@ -62,52 +74,12 @@ public abstract class CanvasRenderable {
     }
 
     /**
-     * Sets the object’s position so that it is centered on the canvas,
-     * based on the texture’s width and height.
+     * Gets the canvas this object is attached to.
      *
-     * @param textureWidth Width of the object
-     * @param textureHeight Height of the object
+     * @return The canvas
      */
-    public void setCenterPos(int textureWidth, int textureHeight) {
-        setCanvasPos(canvas().getCenter().x() - (float) textureWidth / 2,
-                canvas().getCenter().y() - (float) textureHeight / 2);
-    }
-
-    /**
-     * Sets the object’s position so that it is centered on the canvas
-     * based on a {@link Sprite}.
-     *
-     * @param sprite The sprite to center
-     */
-    public void setCenterPos(Sprite sprite) {
-        setCenterPos(sprite.width(), sprite.height());
-    }
-
-    /**
-     * Gets the current X coordinate on the canvas.
-     *
-     * @return Canvas X position
-     */
-    public float canvasX() {
-        return canvasX;
-    }
-
-    /**
-     * Gets the current Y coordinate on the canvas.
-     *
-     * @return Canvas Y position
-     */
-    public float canvasY() {
-        return canvasY;
-    }
-
-    /**
-     * Gets the current scale of the object.
-     *
-     * @return Scale factor
-     */
-    public float scale() {
-        return scale;
+    public Canvas canvas() {
+        return canvas;
     }
 
     /**
@@ -130,10 +102,19 @@ public abstract class CanvasRenderable {
     }
 
     /**
+     * Gets the current scale of the object.
+     *
+     * @return Scale factor
+     */
+    public float scale() {
+        return scale;
+    }
+
+    /**
      * Sets the scale while keeping the object centered in its original position.
      * Adjusts canvas coordinates accordingly.
      *
-     * @param scale The new scale factor
+     * @param scale  The new scale factor
      * @param sprite The sprite to scale
      */
     public void setScaleKeepPos(float scale, Sprite sprite) {
@@ -149,7 +130,7 @@ public abstract class CanvasRenderable {
      * Draws a {@link Sprite} at the object’s canvas position.
      *
      * @param graphics The graphics context
-     * @param sprite The sprite to draw
+     * @param sprite   The sprite to draw
      */
     public void blit(GuiGraphics graphics, Sprite sprite, int color) {
         blit(graphics, sprite.id(), sprite.width(), sprite.height(), color);
@@ -159,9 +140,9 @@ public abstract class CanvasRenderable {
      * Draws a texture at the object’s canvas position.
      *
      * @param graphics The graphics context
-     * @param id The texture identifier
-     * @param width Width of the texture
-     * @param height Height of the texture
+     * @param id       The texture ResourceLocation
+     * @param width    Width of the texture
+     * @param height   Height of the texture
      */
     public void blit(GuiGraphics graphics, ResourceLocation id,
                      int width, int height, int color) {
@@ -170,57 +151,67 @@ public abstract class CanvasRenderable {
 
     /**
      * Draws a texture at the canvas position, optionally offset by pixels.
-     *
+     * <p>
      * WARNING: Offsets modify the transform matrix directly. Do NOT use this for
      * objects that rely on logical canvasX/Y (like mouse hover checks).
      * Use the other blit() overloads for those.
      *
      * @param graphics The graphics context
-     * @param id The texture identifier
-     * @param width Width of the texture
-     * @param height Height of the texture
-     * @param offsetX Pixel offset on the X axis
-     * @param offsetY Pixel offset on the Y axis
+     * @param id       The texture ResourceLocation
+     * @param width    Width of the texture
+     * @param height   Height of the texture
+     * @param offsetX  Pixel offset on the X axis
+     * @param offsetY  Pixel offset on the Y axis
      */
     public void blit(GuiGraphics graphics, ResourceLocation id,
-                           int width, int height,
-                           int offsetX, int offsetY, int color) {
+                     int width, int height,
+                     int offsetX, int offsetY, int color) {
         graphics.pose().pushPose();
 
-        graphics.pose().translate(canvasX(), canvasY(), 0);
+        graphics.pose().translate(canvasX(), canvasY(), 1);
         graphics.pose().scale(scale(), scale(), 1);
-        graphics.pose().translate(-canvasX(), -canvasY(), 0);
-
-        setColor(graphics, color);
+        graphics.pose().translate(-canvasX(), -canvasY(), 1);
 
         graphics.blit(
                 id,
                 (int) canvasX() + offsetX, (int) canvasY() + offsetY,
                 0, 0,
                 width, height,
-                width, height
+                width, height,
+                color
         );
-
-        resetColor(graphics);
 
         graphics.pose().popPose();
     }
 
     /**
-     * Helper to set brightness in older ports. Ensure to resetColor().
-     * @param graphics
-     * @param color
+     * Gets the current X coordinate on the canvas.
+     *
+     * @return Canvas X position
      */
-    public static void setColor(GuiGraphics graphics, int color) {
-        float r = ((color >> 16) & 0XFF) / 255f;
-        float g = ((color >> 8) & 0XFF) / 255f;
-        float b = (color & 0xFF) / 255f;
-
-        graphics.setColor(r, g, b, 1f
-        );
+    public float canvasX() {
+        return canvasX;
     }
 
-    public static void resetColor(GuiGraphics graphics) {
-        graphics.setColor(1f, 1f, 1f, 1f);
+    /**
+     * Gets the current Y coordinate on the canvas.
+     *
+     * @return Canvas Y position
+     */
+    public float canvasY() {
+        return canvasY;
+    }
+
+    public void item(GuiGraphics graphics, ItemStack stack,
+                     int offsetX, int offsetY, int color) {
+        graphics.pose().pushPose();
+
+        graphics.pose().translate(canvasX(), canvasY(), 1);
+        graphics.pose().scale(scale(), scale(), 1);
+        graphics.pose().translate(-canvasX(), -canvasY(), 1);
+
+        graphics.renderItem(stack, (int) canvasX() + offsetX, (int) canvasY() + offsetY);
+
+        graphics.pose().popPose();
     }
 }

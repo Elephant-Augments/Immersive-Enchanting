@@ -15,15 +15,22 @@ public class DescriptionLayout {
     protected final List<DescriptionLine> lines = new ArrayList<>();
     protected final int lineSpace;
 
-    /**Add extra padding to the width of the description layout to expand the box manually, useful for descriptions using item rendering.*/
+    /**
+     * Add extra padding to the width of the description layout to expand the box manually, useful for descriptions using item rendering.
+     */
     public int widthPadding = 0;
 
     public DescriptionLayout(TooltipDescription tooltipDescription) {
         lineSpace = Minecraft.getInstance().font.lineHeight;
     }
 
+    /**
+     * Insert a line at the given index, shifting existing lines down.
+     * If {@code lineNumber} is beyond the current list size, empty no-op lines are appended
+     * until the list is long enough, then the new line is inserted at {@code lineNumber}.
+     */
     public void insertLine(int lineNumber, DescriptionLine line) {
-        while(lines.size() < lineNumber) {
+        while (lines.size() < lineNumber) {
             lines.add(new DescriptionLine() {
                 @Override
                 public void render(GuiGraphics graphics, int lineX, int lineY, double mouseX, double mouseY) {
@@ -48,9 +55,10 @@ public class DescriptionLayout {
 
     /**
      * Draw the lines in this layout.
+     *
      * @param graphics
-     * @param startX The start position to render lines at
-     * @param startY The start position to render lines at
+     * @param startX   The start position to render lines at
+     * @param startY   The start position to render lines at
      */
     public void render(GuiGraphics graphics, int startX, int startY, double mouseX, double mouseY) {
         int yOffset = 0;
@@ -61,35 +69,35 @@ public class DescriptionLayout {
         }
     }
 
-
-
-    /**
-     * Return the longest string contained in the layout.
-     * @return
-     */
-    private String getLongestString() {
-        Component longest = Component.empty();
-        for(DescriptionLine line : lines) {
-            Component lineText = line.getText();
-
-            if(lineText.getString().length() > longest.getString().length()) {
-                longest = lineText;
-            }
-        }
-        return longest.getString();
-    }
-
     /**
      * Get the height of all the lines put together + any spacing.
+     *
      * @return
      */
     public int getRenderedHeight() {
         final int padding = 4;
-        return (lines.size()+1) * lineSpace + padding;
+        return (lines.size() + 1) * lineSpace + padding;
     }
 
     public int getRenderedWidth() {
         final int padding = 8;
         return Minecraft.getInstance().font.width(getLongestString()) + padding + widthPadding;
+    }
+
+    /**
+     * Return the longest string contained in the layout.
+     *
+     * @return
+     */
+    private String getLongestString() {
+        Component longest = Component.empty();
+        for (DescriptionLine line : lines) {
+            Component lineText = line.getText();
+
+            if (lineText.getString().length() > longest.getString().length()) {
+                longest = lineText;
+            }
+        }
+        return longest.getString();
     }
 }

@@ -9,15 +9,24 @@ import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.NodeTooltip;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 
+/**
+ * Populates the tooltip description for the Transmute node based on its current state:
+ * <ul>
+ *   <li>UNOBTAINED – shows the transmute description text followed by the cost lines</li>
+ *   <li>LOCKED – shows a hint explaining why transmute is unavailable</li>
+ *   <li>ALERT – indicates the held item cannot be transmuted</li>
+ * </ul>
+ * No-ops for all other nodes.
+ */
 public class TransmuteLayoutExtension implements DescriptionLayoutExtension {
     @Override
     public void extendLayout(DescriptionLayout description, NodeTooltip tooltip) {
-        if(!tooltip.node().id().equals(CostRegistry.TRANSMUTE)) return;
+        if (!tooltip.node().branchId().equals(CostRegistry.TRANSMUTE)) return;
 
         description.widthPadding = 16;
 
         int linesCreated = 0;
-        if(tooltip.node().isState(NodeState.UNOBTAINED)) {
+        if (tooltip.node().isState(NodeState.UNOBTAINED)) {
             linesCreated = DescriptionHelper.lineWrapComponent(
                     Component.translatable("immersiveenchanting.tooltip.desc.transmute")
                             .withStyle(ChatFormatting.GRAY),
@@ -34,7 +43,8 @@ public class TransmuteLayoutExtension implements DescriptionLayoutExtension {
                     DescriptionHelper.DEFAULT_LINE_WIDTH, description, 0);
         }
 
-        if(tooltip.node().isState(NodeState.UNOBTAINED)) DescriptionHelper.insertCostLines(tooltip, description, linesCreated+1);
+        if (tooltip.node().isState(NodeState.UNOBTAINED))
+            DescriptionHelper.insertCostLines(tooltip, description, linesCreated + 1);
 
     }
 }

@@ -26,9 +26,9 @@ public interface IEnchantingTableInventory {
 
     /**
      * @return the live, mutable backing list of three item stacks. Mutating
-     *         elements directly should be followed by a call to
-     *         {@link #immersive$setChangedAndSync()} so the client is kept
-     *         in sync with the new contents.
+     * elements directly should be followed by a call to
+     * {@link #immersive$setChangedAndSync()} so the client is kept
+     * in sync with the new contents.
      */
     NonNullList<ItemStack> immersive$getItems();
 

@@ -12,7 +12,7 @@ import java.util.List;
 public record CostHolder(List<Cost> costs) {
 
     public static final Codec<CostHolder> CODEC = Codec.list(
-            Cost.CODEC)
+                    Cost.CODEC)
             .xmap(
                     CostHolder::new,
                     CostHolder::costs
@@ -23,12 +23,15 @@ public record CostHolder(List<Cost> costs) {
             CostHolder::costs,
             CostHolder::new);
 
+    public static final CostHolder EMPTY = new CostHolder(List.of());
+
     public List<ItemStack> getAllItemStacks() {
         List<ItemStack> result = new ArrayList<>();
-        for(Cost cost : costs()) {
+        for (Cost cost : costs()) {
             result.addAll(cost.getItemStacks());
         }
 
         return result;
     }
+
 }

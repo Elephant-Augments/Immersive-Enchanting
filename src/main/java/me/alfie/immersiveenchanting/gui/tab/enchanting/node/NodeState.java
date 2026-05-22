@@ -8,9 +8,9 @@ public enum NodeState {
     LOCKED(Sprite.LOCKED_NODE),
     ALERT(Sprite.ALERT_NODE);
 
-    private Sprite basic;
-    private Sprite advanced;
-    private Sprite elite;
+    private final Sprite basic;
+    private final Sprite advanced;
+    private final Sprite elite;
 
     NodeState(Sprite basic, Sprite advanced, Sprite elite) {
         this.basic = basic;

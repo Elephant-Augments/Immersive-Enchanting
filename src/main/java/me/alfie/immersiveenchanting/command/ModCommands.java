@@ -25,7 +25,7 @@ public class ModCommands {
                 GenerateEmptyDatapackCommand.COMMAND
         );
 
-        for(ModCommand command : commands) {
+        for (ModCommand command : commands) {
             command.register(dispatcher);
         }
 
@@ -40,17 +40,13 @@ public class ModCommands {
      * <code>/modid commandName</code>
      * </pre>
      *
-     *
      * @param commandName the literal name of the subcommand (e.g. "reload", "list")
      * @param permission  the level of permission required to execute the command
      * @param executor    the command execution logic, returning a result integer
-     *
      * @return a {@link LiteralArgumentBuilder} representing the fully configured command,
-     *         ready to be registered with the {@link CommandDispatcher}
-     *
+     * ready to be registered with the {@link CommandDispatcher}
      * @implNote This helper attaches the command under {@code ImmersiveEnchanting.MODID}
-     *           as the root literal.
-     *
+     * as the root literal.
      */
     public static LiteralArgumentBuilder<CommandSourceStack> simpleCommand(String commandName,
                                                                            int permission,
@@ -60,10 +56,25 @@ public class ModCommands {
                 .executes(executor));
     }
 
+    /**
+     * Like {@link #simpleCommand} but adds a required {@code target} entity argument.
+     * If the command is run without providing a target, a translatable failure message is sent
+     * and the command returns {@code 0}.
+     *
+     * <p>The resulting command structure is:
+     * <pre>
+     * <code>/modid commandName [target]</code>
+     * </pre>
+     *
+     * @param commandName    the literal name of the subcommand
+     * @param permission     the permission level required to execute the command
+     * @param entityArgument the entity selector argument type (e.g. single player, multiple entities)
+     * @param executor       the command execution logic when a target is provided
+     */
     public static LiteralArgumentBuilder<CommandSourceStack> simpleEntityArgumentCommand(String commandName,
-                                                                                   int permission,
-                                                                                   EntityArgument entityArgument,
-                                                                                   Command<CommandSourceStack> executor) {
+                                                                                         int permission,
+                                                                                         EntityArgument entityArgument,
+                                                                                         Command<CommandSourceStack> executor) {
         return Commands.literal(ImmersiveEnchanting.MODID).then(Commands.literal(commandName)
                 .requires(source -> source.hasPermission(permission))
                 .then(Commands.argument("target", entityArgument).executes(executor))

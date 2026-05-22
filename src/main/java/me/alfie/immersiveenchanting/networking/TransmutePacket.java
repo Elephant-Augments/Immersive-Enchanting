@@ -1,7 +1,6 @@
 package me.alfie.immersiveenchanting.networking;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
-import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
@@ -26,6 +25,22 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+/**
+ * Client-to-server packet requesting enchantment transmutation.
+ *
+ * <p>Replaces the stored enchantment on an ancient book with a new randomly selected one,
+ * excluding currently available bookshelf enchantments where applicable.</p>
+ *
+ * <p>The operation is validated server-side and requires:
+ * <ul>
+ *     <li>Transmutation to be enabled in configuration</li>
+ *     <li>Valid cost and fuel requirements</li>
+ *     <li>A valid target enchantment selection</li>
+ * </ul>
+ *
+ * <p>On success, the item is updated, feedback is shown to the player, and
+ * visual/audio effects are played at the enchanting table.</p>
+ */
 public record TransmutePacket() implements ModNetworkPacket<TransmutePacket> {
 
     public static final Type<@NotNull TransmutePacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(ImmersiveEnchanting.MODID, "transmute"));
@@ -43,32 +58,32 @@ public record TransmutePacket() implements ModNetworkPacket<TransmutePacket> {
 
     @Override
     public void exec(TransmutePacket packet, IPayloadContext context) {
-        if(!ServerConfig.isAllowTransmute()) return;
-
         Player player = context.player();
         Level level = player.level();
-        if(!(player.containerMenu instanceof EnchantingTableMenu menu)) return;
+        if (!(player.containerMenu instanceof EnchantingTableMenu menu)) return;
 
         ItemStack ancientBookStack = menu.getToolSlot().getItem();
         List<Holder<Enchantment>> availableEnchantments = menu.getAvailableEnchantments();
-        List<Holder<Enchantment>> allEnchantments = CostRegistry.server().getAllEnchantmentHolders();
+        List<Holder<Enchantment>> allEnchantments = CostRegistry.server().getAllEnabledEnchantmentHolders();
 
         allEnchantments.removeIf(holder ->
                 availableEnchantments.stream().anyMatch(av -> av.value().equals(holder.value())));
-        if(allEnchantments.isEmpty()) allEnchantments = CostRegistry.server().getAllEnchantmentHolders();
+        if (allEnchantments.isEmpty()) allEnchantments = CostRegistry.server().getAllEnabledEnchantmentHolders();
 
         RandomSource random = level.getRandom();
         int randomIndex = random.nextInt(allEnchantments.size());
         Holder<Enchantment> newEnchantment = allEnchantments.get(randomIndex);
         Holder<Enchantment> oldEnchantment = EnchantmentUtil.getStoredEnchantment(ancientBookStack);
 
-        if(EnchantmentUtil.canTransmute(menu, oldEnchantment, context)) {
+        if (EnchantmentUtil.canTransmute(menu, oldEnchantment, context)) {
             EnchantmentUtil.deductValidCost(menu, CostRegistry.TRANSMUTE, 1, player, CostRegistry.server());
 
             EnchantmentUtil.setStoredEnchantment(ancientBookStack, newEnchantment);
             BlockPos tablePos = menu.getBlockPos();
 
             ItemStack newBookStack = menu.getToolSlot().getItem().copyAndClear();
+            menu.getToolSlot().setChanged();
+
             ItemEntity itemEntity = new ItemEntity(
                     level,
                     tablePos.getX() + 0.5,
@@ -83,7 +98,7 @@ public record TransmutePacket() implements ModNetworkPacket<TransmutePacket> {
             Component actionBarMessage = Component.translatable("immersiveenchanting.action_bar.transmute_success",
                     newEnchantmentName).withStyle(ChatFormatting.GRAY);
 
-            player.displayClientMessage(actionBarMessage, true);
+            player.sendOverlayMessage(actionBarMessage);
             player.closeContainer();
 
             FxHelper.playTransmute((ServerLevel) level, tablePos);

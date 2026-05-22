@@ -18,24 +18,24 @@ public class ModItems {
     public static final Supplier<Item> ANCIENT_BOOK = ITEMS.registerItem(
             "ancient_book",
             AncientBook::new,
-            new Item.Properties()
+            properties -> properties
     );
 
     public static final Supplier<Item> BIBLIOCLASM_MUSIC_DISC = ITEMS.registerItem(
             "music_disc_biblioclasm",
             BiblioclasmDisc::new,
-            new Item.Properties()
+            properties -> properties
     );
 
     public static final Supplier<Item> ARCANE_MEMORIES_MUSIC_DISC = ITEMS.registerItem(
             "music_disc_arcane_memories",
             ArcaneMemoriesDisc::new,
-            new Item.Properties()
+            properties -> properties
     );
 
     public static final DeferredItem<@NotNull BlockItem> CREATIVE_BOOKSHELF_ITEM = ITEMS.registerSimpleBlockItem(
             ModBlocks.CREATIVE_BOOKSHELF_BLOCK,
-            new Item.Properties().rarity(Rarity.EPIC)
+            properties -> properties.rarity(Rarity.EPIC)
     );
 
     public static void register(IEventBus eventBus) {

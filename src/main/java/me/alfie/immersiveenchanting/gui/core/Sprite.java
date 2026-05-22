@@ -7,6 +7,8 @@ import net.minecraft.resources.ResourceLocation;
 public enum Sprite {
     ENCHANTING_TABLE_GUI("textures/gui/container/enchanting_table.png", 256, 256),
     BACKGROUND_TILE("textures/gui/sprites/background_tile.png", 16, 16),
+    ALT_BACKGROUND_TILE("textures/gui/sprites/alt_background_tile.png", 16, 16),
+
 
     //Enchanting tab
     BOOK_OPEN("textures/gui/sprites/enchantingtab/book_open.png", 32, 32),
@@ -36,28 +38,17 @@ public enum Sprite {
     ELITE_NODE_UNOBTAINED("textures/gui/sprites/node/elite_node_unobtained.png", 26, 26),
     ELITE_NODE_OBTAINED("textures/gui/sprites/node/elite_node_obtained.png", 26, 26),
     LOCKED_NODE("textures/gui/sprites/node/locked_node.png", 26, 26),
-    ALERT_NODE("textures/gui/sprites/node/alert_node.png", 26, 26);
+    ALERT_NODE("textures/gui/sprites/node/alert_node.png", 26, 26),
+    ERROR_NODE("textures/gui/sprites/node/error_node.png", 26, 26);
 
-    private final ResourceLocation identifier;
+    private final ResourceLocation id;
     private final int width;
     private final int height;
 
     Sprite(String path, int width, int height) {
-        this.identifier = ResourceLocation.fromNamespaceAndPath(ImmersiveEnchanting.MODID, path);
+        this.id = ResourceLocation.fromNamespaceAndPath(ImmersiveEnchanting.MODID, path);
         this.width = width;
         this.height = height;
-    }
-
-    public ResourceLocation id() {
-        return identifier;
-    }
-
-    public int width() {
-        return width;
-    }
-
-    public int height() {
-        return height;
     }
 
     public void draw(GuiGraphics graphics, int x, int y) {
@@ -68,5 +59,17 @@ public enum Sprite {
                 width(), height(),
                 width(), height()
         );
+    }
+
+    public ResourceLocation id() {
+        return id;
+    }
+
+    public int width() {
+        return width;
+    }
+
+    public int height() {
+        return height;
     }
 }

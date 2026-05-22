@@ -9,9 +9,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.enchantment.Enchantment;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public enum DisabledEnchantmentsCommand implements ModCommand {
@@ -24,17 +22,18 @@ public enum DisabledEnchantmentsCommand implements ModCommand {
                         "disabledEnchantments",
                         2,
                         context -> {
-                            List<Holder.Reference<Enchantment>> registeredEnchantments =
+                            List<Holder<Enchantment>> registeredEnchantments =
                                     EnchantmentUtil.getAllRegisteredEnchantments(context.getSource().registryAccess());
 
-                            List<Holder<Enchantment>> datapackEnchantments =
+                            List<Holder<Enchantment>> all =
                                     CostRegistry.server().getAllEnchantmentHolders();
 
-                            Set<Holder<Enchantment>> datapackSet = new HashSet<>(datapackEnchantments);
+                            List<Holder<Enchantment>> enabled =
+                                    CostRegistry.server().getAllEnabledEnchantmentHolders();
 
-                            List<Holder<Enchantment>> result = registeredEnchantments.stream()
-                                    .filter(e -> !datapackSet.contains(e))
-                                    .map(e -> (Holder<Enchantment>) e)
+                            //Disabled enchantments
+                            List<Holder<Enchantment>> result = all.stream()
+                                    .filter(holder -> !enabled.contains(holder))
                                     .toList();
 
                             String disabled = result.stream()

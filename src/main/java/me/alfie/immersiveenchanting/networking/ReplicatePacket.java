@@ -1,7 +1,6 @@
 package me.alfie.immersiveenchanting.networking;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
-import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
@@ -19,6 +18,17 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Client-to-server packet requesting item replication.
+ *
+ * <p>If allowed by configuration and cost validation, the currently held item is duplicated.
+ * The original item is consumed and replaced by two dropped item entities:
+ * one normal copy and one marked as "replicated".</p>
+ *
+ * <p>Visual and audio feedback is played on success, and the container is closed.</p>
+ *
+ * <p>This operation is server-authoritative and cannot be performed client-side.</p>
+ */
 public record ReplicatePacket() implements ModNetworkPacket<ReplicatePacket> {
 
     public static final Type<@NotNull ReplicatePacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(ImmersiveEnchanting.MODID, "replicate"));
@@ -36,16 +46,16 @@ public record ReplicatePacket() implements ModNetworkPacket<ReplicatePacket> {
 
     @Override
     public void exec(ReplicatePacket packet, IPayloadContext context) {
-        if(!ServerConfig.isAllowReplicate()) return;
-
         Player player = context.player();
         Level level = player.level();
-        if(!(player.containerMenu instanceof EnchantingTableMenu menu)) return;
+        if (!(player.containerMenu instanceof EnchantingTableMenu menu)) return;
 
-        if(EnchantmentUtil.canReplicate(menu, context)) {
+        if (EnchantmentUtil.canReplicate(menu, context)) {
             EnchantmentUtil.deductValidCost(menu, CostRegistry.REPLICATE, 1, player, CostRegistry.server());
 
             ItemStack oldStack = menu.getToolSlot().getItem().copyAndClear();
+            menu.getToolSlot().setChanged();
+
             ItemStack newStack = oldStack.copy();
             EnchantmentUtil.setReplicated(newStack);
 

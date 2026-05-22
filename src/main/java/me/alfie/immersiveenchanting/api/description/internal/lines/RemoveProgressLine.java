@@ -13,13 +13,19 @@ import org.jetbrains.annotations.NotNull;
 import java.awt.*;
 
 public record RemoveProgressLine(NodeTooltip tooltip) implements DescriptionLine {
+    /**
+     * Renders a progress bar showing how far the player is through the hold-to-remove gesture.
+     * The bar has a black background and a red fill that grows from left to right as
+     * {@link TooltipManager#getElapsedHeldTime()} approaches {@link TooltipManager#HOLD_TRESHOLD_MILLIS}.
+     * Also triggers the removal sound effect via {@link me.alfie.immersiveenchanting.util.FxHelper#playRemoveProgress}.
+     */
     @Override
     public void render(GuiGraphics graphics, int lineX, int lineY, double mouseX, double mouseY) {
         final int width = Minecraft.getInstance().font.width(getText());
         final int height = Minecraft.getInstance().font.lineHeight;
         final int padding = 2;
 
-        graphics.fill(lineX, lineY, lineX+width, lineY+height, Color.BLACK.getRGB());
+        graphics.fill(lineX, lineY, lineX + width, lineY + height, Color.BLACK.getRGB());
 
         float progress = tooltip.screen()
                 .tooltipManager()
@@ -34,7 +40,7 @@ public record RemoveProgressLine(NodeTooltip tooltip) implements DescriptionLine
 
         graphics.fill(innerX, innerY, innerX + filledWidth, innerY + innerHeight, 0xFFFF5555);
 
-        FxHelper.playRemoveProgress(tooltip.screen().player(), progress);
+        FxHelper.playRemoveProgress(tooltip.screen().player().level(), progress);
     }
 
     @Override

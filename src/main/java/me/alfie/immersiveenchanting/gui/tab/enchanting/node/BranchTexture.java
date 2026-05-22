@@ -42,6 +42,11 @@ public class BranchTexture extends CanvasRenderable {
         blit(graphics, textureId, textureWidth, textureHeight, brightness);
     }
 
+    /**
+     * Draws connector lines between every consecutive node in the branch and from the
+     * first node back to the canvas center, then bakes the result into a GPU texture.
+     * Must be called after nodes have been positioned via {@link NodeBranch#placeNodesAlongLine()}.
+     */
     public void calculateNodeConnections() {
         if (branch.nodes().isEmpty()) return;
 
@@ -76,6 +81,11 @@ public class BranchTexture extends CanvasRenderable {
         }
     }
 
+    /**
+     * Rasterizes a 1-pixel-wide line between two canvas points using Bresenham's algorithm,
+     * then adds a 1-pixel black border around every white pixel. The resulting pixels are
+     * appended to {@link #precomputedPixels} for later baking.
+     */
     private void makeTexture(int x1, int y1, int x2, int y2) {
         final int WHITE = 0xFFFFFFFF;
         final int BLACK = 0xFF000000;
@@ -132,6 +142,11 @@ public class BranchTexture extends CanvasRenderable {
         }
     }
 
+    /**
+     * Creates a {@link DynamicTexture} sized to the bounding box of {@link #precomputedPixels},
+     * writes the pixels into it, and uploads it to the GPU under a unique ResourceLocation.
+     * Also updates to the top-left of that bounding box.
+     */
     private void bakeTexture() {
         if (precomputedPixels.isEmpty()) return;
 
@@ -172,6 +187,9 @@ public class BranchTexture extends CanvasRenderable {
         bakedTexture.upload(); // upload to GPU
     }
 
+    /**
+     * Packs two ints into a single long for use as a hash-set key.
+     */
     private long key(int x, int y) {
         return (((long) x) << 32) | (y & 0xFFFFFFFFL);
     }

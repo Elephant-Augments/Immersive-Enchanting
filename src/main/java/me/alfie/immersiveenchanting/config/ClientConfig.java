@@ -8,10 +8,6 @@ public class ClientConfig {
     public static final ClientConfig CONFIG;
     public static final ModConfigSpec CONFIG_SPEC;
 
-    public final ModConfigSpec.ConfigValue<Boolean> SHOW_ADDED_BY_TOOLTIP;
-    public final ModConfigSpec.ConfigValue<Integer> ITEM_CAROUSEL_SPEED;
-    public final ModConfigSpec.ConfigValue<Boolean> PLAY_NODE_HOVER_SOUNDS;
-
     static {
         Pair<ClientConfig, ModConfigSpec> pair =
                 new ModConfigSpec.Builder().configure(ClientConfig::new);
@@ -19,6 +15,10 @@ public class ClientConfig {
         CONFIG = pair.getLeft();
         CONFIG_SPEC = pair.getRight();
     }
+
+    public final ModConfigSpec.ConfigValue<Boolean> SHOW_ADDED_BY_TOOLTIP;
+    public final ModConfigSpec.ConfigValue<Integer> ITEM_CAROUSEL_SPEED;
+    public final ModConfigSpec.ConfigValue<Boolean> PLAY_NODE_HOVER_SOUNDS;
 
     // Constructor takes only the builder
     public ClientConfig(ModConfigSpec.Builder builder) {
@@ -48,7 +48,9 @@ public class ClientConfig {
         return ClientConfig.CONFIG.SHOW_ADDED_BY_TOOLTIP.get();
     }
 
-    public static boolean areNodeHoverSoundsEnabled() {return ClientConfig.CONFIG.PLAY_NODE_HOVER_SOUNDS.get();}
+    public static boolean areNodeHoverSoundsEnabled() {
+        return ClientConfig.CONFIG.PLAY_NODE_HOVER_SOUNDS.get();
+    }
 
     public static int getItemCarouselSpeed() {
         return ClientConfig.CONFIG.ITEM_CAROUSEL_SPEED.get();

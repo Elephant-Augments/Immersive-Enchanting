@@ -8,10 +8,15 @@ import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.NodeTooltip;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 
+/**
+ * Populates the tooltip description for the Replicate node.
+ * Always shows the replicate description text followed by the cost lines,
+ * regardless of node state. No-ops for all other nodes.
+ */
 public class ReplicateLayoutExtension implements DescriptionLayoutExtension {
     @Override
     public void extendLayout(DescriptionLayout description, NodeTooltip tooltip) {
-        if(!tooltip.node().id().equals(CostRegistry.REPLICATE)) return;
+        if (!tooltip.node().branchId().equals(CostRegistry.REPLICATE)) return;
 
         description.widthPadding = 16;
 
@@ -20,7 +25,7 @@ public class ReplicateLayoutExtension implements DescriptionLayoutExtension {
                         .withStyle(ChatFormatting.GRAY),
                 DescriptionHelper.DEFAULT_LINE_WIDTH, description, 0);
 
-        DescriptionHelper.insertCostLines(tooltip, description, linesCreated+1);
+        DescriptionHelper.insertCostLines(tooltip, description, linesCreated + 1);
 
     }
 }

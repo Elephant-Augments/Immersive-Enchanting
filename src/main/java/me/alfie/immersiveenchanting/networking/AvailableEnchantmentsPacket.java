@@ -15,7 +15,19 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public record AvailableEnchantmentsPacket(List<Holder<Enchantment>> availableEnchantments) implements ModNetworkPacket<AvailableEnchantmentsPacket> {
+/**
+ * Clientbound packet that syncs available enchantments from nearby bookshelves.
+ *
+ * <p>This packet is sent from the server to update the client-side enchanting
+ * table UI with the enchantments currently accessible in the world.</p>
+ *
+ * <p>If ancient books are disabled in configuration, the client is instead
+ * given the full enchantment list.</p>
+ *
+ * <p>Used to keep the enchanting screen in sync with server-side bookshelf state.</p>
+ */
+public record AvailableEnchantmentsPacket(
+        List<Holder<Enchantment>> availableEnchantments) implements ModNetworkPacket<AvailableEnchantmentsPacket> {
 
     public static final Type<@NotNull AvailableEnchantmentsPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(ImmersiveEnchanting.MODID, "available_enchantments"));
 
@@ -44,31 +56,28 @@ public record AvailableEnchantmentsPacket(List<Holder<Enchantment>> availableEnc
     };
 
     @Override
-    public Type<@NotNull AvailableEnchantmentsPacket> typeId() {
-        return TYPE;
-    }
-
-    @Override
     public StreamCodec<RegistryFriendlyByteBuf, AvailableEnchantmentsPacket> codec() {
         return STREAM_CODEC;
     }
 
     @Override
-    public void exec(AvailableEnchantmentsPacket packet, IPayloadContext context) {
-        if(context.player().containerMenu instanceof EnchantingTableMenu menu) {
+    public Type<@NotNull AvailableEnchantmentsPacket> typeId() {
+        return TYPE;
+    }
 
-            if(ServerConfig.areAncientBooksRequired()) {
+    @Override
+    public void exec(AvailableEnchantmentsPacket packet, IPayloadContext context) {
+        if (context.player().containerMenu instanceof EnchantingTableMenu menu) {
+
+            if (ServerConfig.areAncientBooksRequired()) {
                 menu.setAvailableEnchantments(packet.availableEnchantments());
             } else {
-                menu.setAvailableEnchantments(CostRegistry.server().getAllEnchantmentHolders());
+                menu.setAvailableEnchantments(CostRegistry.server().getAllEnabledEnchantmentHolders());
             }
 
 
         }
     }
-
-
-
 
 
 }

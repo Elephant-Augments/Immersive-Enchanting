@@ -1,7 +1,6 @@
 package me.alfie.immersiveenchanting;
 
 import com.mojang.logging.LogUtils;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import me.alfie.immersiveenchanting.block.ModBlocks;
 import me.alfie.immersiveenchanting.config.ClientConfig;
 import me.alfie.immersiveenchanting.config.ServerConfig;
@@ -16,16 +15,13 @@ import me.alfie.immersiveenchanting.structure.ModStructureProcessors;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.npc.VillagerProfession;
-import net.minecraft.world.entity.npc.VillagerTrades;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
-import net.neoforged.neoforge.event.village.VillagerTradesEvent;
+import net.neoforged.fml.loading.moddiscovery.ModInfo;
 import org.slf4j.Logger;
-
-import java.util.List;
 
 @Mod(ImmersiveEnchanting.MODID)
 public class ImmersiveEnchanting {
@@ -47,28 +43,27 @@ public class ImmersiveEnchanting {
         modContainer.registerConfig(ModConfig.Type.SERVER, ServerConfig.CONFIG_SPEC);
     }
 
+    /**
+     * Returns a copy of the component styled with the galactic alphabet font.
+     */
     public static Component styleWithAltFont(Component component) {
         ResourceLocation fontStyle = ResourceLocation.withDefaultNamespace("alt");
         return component.copy().withStyle(Style.EMPTY.withFont(fontStyle));
     }
 
     /**
-     * OLDER VERSIONS ONLY (1.21.1)
-     * Villager trades are data driven in newer versions.
+     * Resolves a human-readable mod name from its namespace/mod ID.
+     * Falls back to the raw namespace if the mod is not loaded or has no display name,
+     * and capitalizes the first character of the result.
      */
-    public static void disableEnchantedBookVillagerTrades(VillagerTradesEvent event) {
-        if (ServerConfig.isAllowEnchantedBookTrades()) return;
+    public static String getModName(String namespace) {
+        ModInfo modInfo = (ModInfo) ModList.get().getModContainerById(namespace)
+                .map(ModContainer::getModInfo)
+                .orElse(null);
 
-        if (event.getType() == VillagerProfession.LIBRARIAN) {
-            Int2ObjectMap<List<VillagerTrades.ItemListing>> trades = event.getTrades();
+        String name = modInfo != null ? modInfo.getDisplayName() : namespace;
 
-            for (int level : trades.keySet()) {
-                List<VillagerTrades.ItemListing> tradeList = trades.get(level);
-                if (tradeList == null) continue;
-
-                tradeList.removeIf(
-                        listing -> listing instanceof VillagerTrades.EnchantBookForEmeralds);
-            }
-        }
+        if (name == null || name.isEmpty()) return name;
+        return Character.toUpperCase(name.charAt(0)) + name.substring(1);
     }
 }

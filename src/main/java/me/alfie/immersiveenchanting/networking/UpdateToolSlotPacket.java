@@ -11,12 +11,16 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Client-to-server packet for synchronizing tool slot interactions in the enchanting table.
+ *
+ * <p>Handles manual item transfer between the tool slot and the player cursor,
+ * supporting both taking and placing items.</p>
+ *
+ * <p>Used to keep custom enchanting UI behavior in sync with server-side inventory state
+ * when standard container interactions are bypassed or extended.</p>
+ */
 public record UpdateToolSlotPacket(int mode) implements ModNetworkPacket<UpdateToolSlotPacket> {
-
-    public enum Mode {
-        TAKE,
-        PLACE
-    }
 
     public static final Type<@NotNull UpdateToolSlotPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(ImmersiveEnchanting.MODID, "update_tool_slot"));
     public static final StreamCodec<RegistryFriendlyByteBuf, UpdateToolSlotPacket> STREAM_CODEC = StreamCodec.composite(
@@ -26,13 +30,13 @@ public record UpdateToolSlotPacket(int mode) implements ModNetworkPacket<UpdateT
     );
 
     @Override
-    public Type<@NotNull UpdateToolSlotPacket> typeId() {
-        return TYPE;
+    public StreamCodec<RegistryFriendlyByteBuf, UpdateToolSlotPacket> codec() {
+        return STREAM_CODEC;
     }
 
     @Override
-    public StreamCodec<RegistryFriendlyByteBuf, UpdateToolSlotPacket> codec() {
-        return STREAM_CODEC;
+    public Type<@NotNull UpdateToolSlotPacket> typeId() {
+        return TYPE;
     }
 
     @Override
@@ -43,14 +47,19 @@ public record UpdateToolSlotPacket(int mode) implements ModNetworkPacket<UpdateT
         Slot slot = menu.getToolSlot();
         ItemStack stack;
 
-        if(mode == Mode.TAKE && menu.getCarried().isEmpty()) {
+        if (mode == Mode.TAKE && menu.getCarried().isEmpty()) {
             stack = slot.getItem();
             menu.setCarried(stack.copyAndClear());
         } else if (mode == Mode.PLACE) {
             stack = menu.getCarried();
             slot.safeInsert(stack);
         }
-        slot.setChanged();;
+        slot.setChanged();
+    }
+
+    public enum Mode {
+        TAKE,
+        PLACE
     }
 
 

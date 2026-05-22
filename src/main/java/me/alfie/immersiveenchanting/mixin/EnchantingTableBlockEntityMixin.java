@@ -11,6 +11,8 @@ import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.EnchantingTableBlockEntity;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -39,15 +41,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(EnchantingTableBlockEntity.class)
 public abstract class EnchantingTableBlockEntityMixin extends BlockEntity implements IEnchantingTableInventory {
 
+    @Unique
+    private final NonNullList<ItemStack> immersive$items =
+            NonNullList.withSize(IMMERSIVE_INVENTORY_SIZE, ItemStack.EMPTY);
+
     // Required by the BlockEntity superclass constructor; never actually called
     // because Mixin doesn't add new constructors. Present only to satisfy javac.
     private EnchantingTableBlockEntityMixin() {
         super(null, null, null);
     }
-
-    @Unique
-    private final NonNullList<ItemStack> immersive$items =
-            NonNullList.withSize(IMMERSIVE_INVENTORY_SIZE, ItemStack.EMPTY);
 
     @Override
     public NonNullList<ItemStack> immersive$getItems() {
@@ -69,7 +71,7 @@ public abstract class EnchantingTableBlockEntityMixin extends BlockEntity implem
     @Override
     public void immersive$setChangedAndSync() {
         this.setChanged();
-        if (this.level != null && !this.level.isClientSide) {
+        if (this.level != null && !this.level.isClientSide()) {
             this.level.sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 3);
         }
     }
@@ -77,17 +79,15 @@ public abstract class EnchantingTableBlockEntityMixin extends BlockEntity implem
     // ---- NBT persistence ----
 
     @Inject(method = "saveAdditional", at = @At("TAIL"))
-    private void immersive$saveAdditional(CompoundTag tag, HolderLookup.Provider registries, CallbackInfo ci) {
-        ContainerHelper.saveAllItems(tag, this.immersive$items, true, registries);
+    private void immersive$saveAdditional(ValueOutput output, CallbackInfo ci) {
+        ContainerHelper.saveAllItems(output, this.immersive$items, true);
     }
 
     @Inject(method = "loadAdditional", at = @At("TAIL"))
-    private void immersive$loadAdditional(CompoundTag tag, HolderLookup.Provider registries, CallbackInfo ci) {
+    private void immersive$loadAdditional(ValueInput input, CallbackInfo ci) {
         // Reset to empty before loading so removed slots clear properly.
-        for (int i = 0; i < IMMERSIVE_INVENTORY_SIZE; i++) {
-            this.immersive$items.set(i, ItemStack.EMPTY);
-        }
-        ContainerHelper.loadAllItems(tag, this.immersive$items, registries);
+        for (int i = 0; i < IMMERSIVE_INVENTORY_SIZE; i++) this.immersive$items.set(i, ItemStack.EMPTY);
+        ContainerHelper.loadAllItems(input, this.immersive$items);
     }
 
     // ---- Client sync ----

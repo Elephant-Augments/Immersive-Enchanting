@@ -23,13 +23,15 @@ public class TooltipDescription extends TooltipComponent {
     public void render(GuiGraphics graphics, double mouseX, double mouseY) {
         TooltipDescriptionExtensions.rebuild(tooltip, layout);
 
-        int yOffset = Node.HEIGHT-10;
-        setPos(x()+1, y()+yOffset);
+        int yOffset = Node.HEIGHT - 10;
+        setPos(x() + 1, y() + yOffset);
         super.blitNineSliceSprite(graphics);
 
         setTextStartPos(x() + 4, y() + 12);
         layout.render(graphics, getTextStartPos().x(), getTextStartPos().y(), mouseX, mouseY);
 
+
+        if (!tooltip.isLockingAllowed()) return;
         Sprite mouseSprite = tooltip.screen().tooltipManager().isTooltipLocked() ? Sprite.MOUSE_HINT_ON : Sprite.MOUSE_HINT_OFF;
         graphics.blit(
                 mouseSprite.id(),

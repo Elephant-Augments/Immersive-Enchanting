@@ -5,7 +5,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public class NineSliceBox {
 
-    private ResourceLocation texture;
+    private final ResourceLocation texture;
     private int x;
     private int y;
     private int width;
@@ -26,20 +26,20 @@ public class NineSliceBox {
         );
     }
 
-    public void setWidth(int width) {
-        this.width = width;
-    }
-
-    public void setHeight(int height) {
-        this.height = height;
-    }
-
     public int getWidth() {
         return this.width;
     }
 
+    public void setWidth(int width) {
+        this.width = width;
+    }
+
     public int getHeight() {
         return this.height;
+    }
+
+    public void setHeight(int height) {
+        this.height = height;
     }
 
     public void setPos(int x, int y) {

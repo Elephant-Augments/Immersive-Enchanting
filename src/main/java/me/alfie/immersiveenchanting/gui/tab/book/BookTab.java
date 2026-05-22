@@ -14,17 +14,21 @@ import java.util.List;
 import java.util.*;
 
 public class BookTab {
+    public final int MAX_BOXES_RENDERED = 6;
     private final EnchantingTableScreen screen;
-
     private final List<Holder<Enchantment>> renderedEnchantments = new ArrayList<>();
-
     private final List<FilterCheckbox> filterCheckboxes = new ArrayList<>();
     private final Scrollbar scrollbar;
     private final Searchbar searchbar;
 
-
-    public final int MAX_BOXES_RENDERED = 6;
-
+    /**
+     * Creates a new book tab instance for the enchanting screen.
+     * <P>
+     * <p>Initializes filter checkboxes, scrollbar, and search bar components.</p>
+     * <p>
+     *
+     * @param screen the parent {@link EnchantingTableScreen}
+     */
     public BookTab(EnchantingTableScreen screen) {
         this.screen = screen;
 
@@ -34,53 +38,58 @@ public class BookTab {
         searchbar = new Searchbar(this);
     }
 
+    /**
+     * Initializes the book tab state.
+     * <P>
+     * <p>Resets all filters, scroll position, and search input.</p>
+     */
     public void init() {
         resetFilters();
         scrollbar().resetScrollIndex();
         searchbar.clearSearch();
     }
 
-    public EnchantingTableScreen screen() {
-        return screen;
-    }
-
-    public List<BookFilters> getEnabledFilters() {
-        List<BookFilters> bookFilters = new ArrayList<>();
-        for(FilterCheckbox checkbox : filterCheckboxes) {
-            if(checkbox.isEnabled()) bookFilters.add(checkbox.filterType);
-        }
-        return bookFilters;
-    }
-
-    private void applyFilters() {
-        renderedEnchantments.clear();
-        List<BookFilters> enabledFilters = getEnabledFilters();
-
-        if(enabledFilters.contains(BookFilters.UNLOCKED)) {
-            renderedEnchantments.addAll(screen.getMenu().getAvailableEnchantments());
-        }
-
-        if (enabledFilters.contains(BookFilters.LOCKED)) {
-            Set<Holder<Enchantment>> unlocked =
-                    new HashSet<>(screen.getMenu().getAvailableEnchantments());
-
-            renderedEnchantments.addAll(
-                    CostRegistry.client().getAllEnchantmentHolders().stream()
-                            .filter(e -> !unlocked.contains(e))
-                            .toList()
-            );
-        }
-
-        searchbar.checkSearch();
-        renderedEnchantments.sort(Comparator.comparing(e -> e.value().description().getString()));
-    }
-
+    /**
+     * Resets all filters to their default enabled state.
+     * <P>
+     * <p>All filter checkboxes are set to enabled.</p>
+     */
     private void resetFilters() {
-        for(FilterCheckbox filterCheckbox : filterCheckboxes) {
+        for (FilterCheckbox filterCheckbox : filterCheckboxes) {
             filterCheckbox.setEnabled(true);
         }
     }
 
+    /**
+     * Gets the scrollbar component for this tab.
+     * <p>
+     *
+     * @return the {@link Scrollbar}
+     */
+    public Scrollbar scrollbar() {
+        return scrollbar;
+    }
+
+    /**
+     * Gets the parent enchanting table screen.
+     * <p>
+     *
+     * @return the {@link EnchantingTableScreen} associated with this tab
+     */
+    public EnchantingTableScreen screen() {
+        return screen;
+    }
+
+    /**
+     * Renders the entire book tab UI.
+     * <P>
+     * <p>Includes filter checkboxes, enchantment list, scrollbar, and search bar.</p>
+     * <p>
+     *
+     * @param graphics the GUI rendering context
+     * @param mouseX   the current mouse X position
+     * @param mouseY   the current mouse Y position
+     */
     public void render(GuiGraphics graphics, double mouseX, double mouseY) {
         renderFilterCheckboxes(graphics, mouseX, mouseY);
         renderEnchantmentBoxes(graphics);
@@ -88,6 +97,44 @@ public class BookTab {
         searchbar.render(graphics);
     }
 
+    /**
+     * Renders filter checkboxes and the total enchantment count label.
+     * <P>
+     * <p>Checkbox positions are dynamically calculated based on index.</p>
+     * <p>
+     *
+     * @param graphics the GUI rendering context
+     * @param mouseX   the current mouse X position
+     * @param mouseY   the current mouse Y position
+     */
+    private void renderFilterCheckboxes(GuiGraphics graphics, double mouseX, double mouseY) {
+        int count = 0;
+        final int spacing = 18;
+
+        for (FilterCheckbox filterCheckbox : filterCheckboxes()) {
+            filterCheckbox.setX(138);
+            filterCheckbox.setY(12 + (count * spacing));
+            filterCheckbox.render(graphics, mouseX, mouseY);
+            count++;
+        }
+
+        final int xPos = screen.getGuiLeft() + 138;
+        final int yPos = screen.getGuiTop() + (count * spacing) + 16;
+        graphics.drawString(Minecraft.getInstance().font,
+                Component.translatable("immersiveenchanting.label.total_enchantments", renderedEnchantments.size()),
+                xPos, yPos, Color.WHITE.getRGB());
+    }
+
+    /**
+     * Renders the list of enchantment boxes.
+     * <P>
+     * <p>Displays up to {@code MAX_BOXES_RENDERED} entries based on the current scroll position.</p>
+     * <P>
+     * <p>Empty boxes are rendered when there are fewer enchantments than available slots.</p>
+     * <p>
+     *
+     * @param graphics the GUI rendering context
+     */
     private void renderEnchantmentBoxes(GuiGraphics graphics) {
         int x = screen.getGuiLeft() + 13;
         int y = screen.getGuiTop() + 6;
@@ -95,7 +142,7 @@ public class BookTab {
         for (int i = 0; i < MAX_BOXES_RENDERED; i++) {
             applyFilters();
 
-            if (scrollbar.scrollIndex+i < renderedEnchantments.size()) {
+            if (scrollbar.scrollIndex + i < renderedEnchantments.size()) {
                 Holder<Enchantment> enchantmentHolder = renderedEnchantments.get(scrollbar.scrollIndex + i);
                 EnchantmentBox box = new EnchantmentBox(this, enchantmentHolder);
                 box.render(graphics, x, y);
@@ -108,36 +155,82 @@ public class BookTab {
         }
     }
 
-    private void renderFilterCheckboxes(GuiGraphics graphics, double mouseX, double mouseY) {
-        int count = 0;
-        final int spacing = 18;
-
-        for(FilterCheckbox filterCheckbox : filterCheckboxes()) {
-            filterCheckbox.setX(138);
-            filterCheckbox.setY(12 + (count*spacing));
-            filterCheckbox.render(graphics, mouseX, mouseY);
-            count++;
-        }
-
-        final int xPos = screen.getGuiLeft() + 138;
-        final int yPos = screen.getGuiTop() + (count * spacing) + 16;
-        graphics.drawString(Minecraft.getInstance().font,
-                Component.translatable("immersiveenchanting.label.total_enchantments", renderedEnchantments.size()),
-                xPos, yPos, Color.WHITE.getRGB());
-    }
-
+    /**
+     * Gets the list of filter checkbox components.
+     * <p>
+     *
+     * @return the list of {@link FilterCheckbox} instances
+     */
     public List<FilterCheckbox> filterCheckboxes() {
         return filterCheckboxes;
     }
 
-    public Scrollbar scrollbar() {
-        return scrollbar;
+    /**
+     * Applies active filters and search criteria to determine which enchantments are rendered.
+     * <P>
+     * <p>This method:</p>
+     * <p>
+     * <ul>
+     *     <li>Clears the current rendered enchantment list</li>
+     *     <li>Adds unlocked enchantments if enabled</li>
+     *     <li>Adds locked enchantments if enabled</li>
+     *     <li>Applies search filtering</li>
+     *     <li>Sorts the results alphabetically</li>
+     * </ul>
+     */
+    private void applyFilters() {
+        renderedEnchantments.clear();
+        List<BookFilters> enabledFilters = getEnabledFilters();
+
+        if (enabledFilters.contains(BookFilters.UNLOCKED)) {
+            renderedEnchantments.addAll(screen.getMenu().getAvailableEnchantments());
+        }
+
+        if (enabledFilters.contains(BookFilters.LOCKED)) {
+            Set<Holder<Enchantment>> unlocked =
+                    new HashSet<>(screen.getMenu().getAvailableEnchantments());
+
+            renderedEnchantments.addAll(
+                    CostRegistry.client().getAllEnabledEnchantmentHolders().stream()
+                            .filter(e -> !unlocked.contains(e))
+                            .toList()
+            );
+        }
+
+        searchbar.checkSearch();
+        renderedEnchantments.sort(Comparator.comparing(e -> e.value().description().getString()));
     }
 
+    /**
+     * Retrieves all currently enabled filters.
+     * <p>
+     *
+     * @return a list of active {@link BookFilters}
+     */
+    public List<BookFilters> getEnabledFilters() {
+        List<BookFilters> bookFilters = new ArrayList<>();
+        for (FilterCheckbox checkbox : filterCheckboxes) {
+            if (checkbox.isEnabled()) bookFilters.add(checkbox.filterType);
+        }
+        return bookFilters;
+    }
+
+    /**
+     * Gets the search bar component.
+     * <p>
+     *
+     * @return the {@link Searchbar}
+     */
     public Searchbar searchbar() {
         return searchbar;
     }
 
+    /**
+     * Gets the list of enchantments currently being rendered.
+     * <p>
+     *
+     * @return the filtered and sorted list of {@link Enchantment} holders
+     */
     public List<Holder<Enchantment>> getRenderedEnchantments() {
         return renderedEnchantments;
     }
