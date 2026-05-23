@@ -41,6 +41,8 @@ public class ImmersiveEnchanting {
 
         modContainer.registerConfig(ModConfig.Type.CLIENT, ClientConfig.CONFIG_SPEC);
         modContainer.registerConfig(ModConfig.Type.SERVER, ServerConfig.CONFIG_SPEC);
+
+
     }
 
     /**

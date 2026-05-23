@@ -3,6 +3,7 @@ package me.alfie.immersiveenchanting.event;
 import me.alfie.immersiveenchanting.ImmersiveEnchantingClient;
 import me.alfie.immersiveenchanting.api.ApiPostEvents;
 import me.alfie.immersiveenchanting.api.datapack.manager.ServerDatapackManager;
+import me.alfie.immersiveenchanting.api.description.RegisterDescriptionLayoutEvent;
 import me.alfie.immersiveenchanting.api.description.TooltipDescriptionExtensions;
 import me.alfie.immersiveenchanting.command.ModCommands;
 import me.alfie.immersiveenchanting.creativetab.ModCreativeTab;
@@ -12,6 +13,7 @@ import me.alfie.immersiveenchanting.datapack.node_sounds.NodeSoundsDatapack;
 import me.alfie.immersiveenchanting.gui.ModMenus;
 import me.alfie.immersiveenchanting.networking.ModPackets;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.neoforge.common.NeoForge;
 
 public class ModEvents {
@@ -59,15 +61,15 @@ public class ModEvents {
         modEventBus.addListener(ModCreativeTab::buildCreativeTab);
 
         registerPostEvents(modEventBus);
-        registerInternalApiEvents();
+        registerInternalApiEvents(modEventBus);
     }
 
     private static void registerPostEvents(IEventBus modEventBus) {
         modEventBus.addListener(ApiPostEvents::postRegisterTooltipDescriptionsEvent);
     }
 
-    private static void registerInternalApiEvents() {
-        NeoForge.EVENT_BUS.addListener(TooltipDescriptionExtensions::registerInternalTooltipDescriptions);
+    private static void registerInternalApiEvents(IEventBus modEventBus) {
+        modEventBus.addListener(TooltipDescriptionExtensions::registerInternalTooltipDescriptions);
     }
 
 

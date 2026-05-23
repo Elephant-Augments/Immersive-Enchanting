@@ -1,10 +1,11 @@
 {
+  "enabled": false,
   "levels": {
     "1": [
       {
         "item_stack": {
-          "item_or_tag_id": "minecraft:axolotl_bucket",
-          "count": 1
+          "item_or_tag_id": "minecraft:air",
+          "count": 0
         }
       }
     ]

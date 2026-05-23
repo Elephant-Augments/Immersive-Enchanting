@@ -4,8 +4,8 @@
   "package": "me.alfie.immersiveenchanting.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "EnchantingTableBlockMixin",
     "EnchantingTableBlockEntityMixin",
+    "EnchantingTableBlockMixin",
     "ItemStackMixin"
   ],
   "injectors": {

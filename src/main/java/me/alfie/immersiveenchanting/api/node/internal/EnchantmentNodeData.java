@@ -11,7 +11,7 @@ import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.neoforged.neoforge.client.network.ClientPacketDistributor;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 public record EnchantmentNodeData(ResourceLocation enchantmentId, int level) implements NodePayload {
 
@@ -39,7 +39,7 @@ public record EnchantmentNodeData(ResourceLocation enchantmentId, int level) imp
                         screen.tooltipManager().startHold(node);
                     } else {
                         Holder<Enchantment> enchantmentHolder = EnchantmentUtil.toHolder(data.enchantmentId(), screen.registryAccess());
-                        ClientPacketDistributor.sendToServer(new EnchantPacket(enchantmentHolder, data.level()));
+                        PacketDistributor.sendToServer(new EnchantPacket(enchantmentHolder, data.level()));
                     }
 
                 }

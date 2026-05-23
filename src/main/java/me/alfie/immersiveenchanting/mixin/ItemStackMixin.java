@@ -13,9 +13,11 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.loading.moddiscovery.ModInfo;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -58,29 +60,37 @@ public abstract class ItemStackMixin {
      * @param flag     tooltip visibility flags
      */
     @Inject(
-            method = "addToTooltip(Lnet/minecraft/core/component/DataComponentType;Lnet/minecraft/world/item/Item$TooltipContext;Lnet/minecraft/world/item/component/TooltipDisplay;Ljava/util/function/Consumer;Lnet/minecraft/world/item/TooltipFlag;)V",
+            method = "addToTooltip(Lnet/minecraft/core/component/DataComponentType;Lnet/minecraft/world/item/Item$TooltipContext;Ljava/util/function/Consumer;Lnet/minecraft/world/item/TooltipFlag;)V",
             at = @At("HEAD"),
             cancellable = true
     )
     private <T extends net.minecraft.world.item.component.TooltipProvider>
-    void immersiveenchanting$addToTooltip(DataComponentType<T> type, Item.TooltipContext context, TooltipDisplay display, Consumer<Component> consumer, TooltipFlag flag, CallbackInfo ci) {
-        ItemStack self = (ItemStack) (Object) this;
+    void immersiveenchanting$addToTooltip(DataComponentType<T> type,
+                                          Item.TooltipContext context,
+                                          Consumer<Component> consumer,
+                                          TooltipFlag flag,
+                                          CallbackInfo ci) {
+        ItemStack self = (ItemStack)(Object)this;
         if (type == DataComponents.STORED_ENCHANTMENTS && self.is(ModItems.ANCIENT_BOOK.get())) {
             ItemEnchantments enchantments = self.get(DataComponents.STORED_ENCHANTMENTS);
 
             MutableComponent component = Component.empty();
             if (enchantments != null) {
-                for (Holder<Enchantment> enchantmentHolder : enchantments.keySet()) {
+                for(Holder<Enchantment> enchantmentHolder : enchantments.keySet()) {
                     component
                             .append(Component.translatable("item.immersiveenchanting.ancient_book.desc.enchantment"))
                             .append(" ")
                             .append(enchantmentHolder.value().description());
                     consumer.accept(component.withStyle(ChatFormatting.GOLD));
 
-                    if (ClientConfig.isShowAddedByTooltipEnabled()) {
-                        String modName = ImmersiveEnchanting.getModName(enchantmentHolder.getKey()
-                                .ResourceLocation()
-                                .getNamespace());
+                    if(ClientConfig.isShowAddedByTooltipEnabled()) {
+                        String modNamespace = enchantmentHolder.getKey().location().getNamespace();
+
+                        ModInfo modInfo = (ModInfo) ModList.get().getModContainerById(modNamespace)
+                                .map(ModContainer::getModInfo)
+                                .orElse(null);
+
+                        String modName = modInfo != null ? modInfo.getDisplayName() : modNamespace;
 
                         consumer.accept(
                                 Component.translatable("item.immersiveenchanting.ancient_book.desc.enchantment_added_by", modName)
@@ -90,7 +100,7 @@ public abstract class ItemStackMixin {
                 }
             }
 
-            if (EnchantmentUtil.isReplicated(self)) consumer.accept(
+            if(EnchantmentUtil.isReplicated(self)) consumer.accept(
                     Component.translatable("item.immersiveenchanting.ancient_book.desc.replicated")
                             .withStyle(ChatFormatting.GRAY)
             );

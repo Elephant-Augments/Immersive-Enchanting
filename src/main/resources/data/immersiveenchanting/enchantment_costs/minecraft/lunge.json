@@ -1,9 +1,10 @@
 {
+  "enabled": true,
   "levels": {
     "1": [
       {
         "item_stack": {
-          "item_or_tag_id": "minecraft:water_bucket",
+          "item_or_tag_id": "minecraft:slime_ball",
           "count": 1
         }
       }
@@ -11,7 +12,7 @@
     "2": [
       {
         "item_stack": {
-          "item_or_tag_id": "minecraft:slime_block",
+          "item_or_tag_id": "minecraft:rabbit_foot",
           "count": 1
         }
       }
@@ -19,7 +20,7 @@
     "3": [
       {
         "item_stack": {
-          "item_or_tag_id": "minecraft:heart_of_the_sea",
+          "item_or_tag_id": "minecraft:ochre_froglight",
           "count": 1
         }
       }

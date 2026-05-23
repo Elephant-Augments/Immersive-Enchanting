@@ -10,7 +10,6 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
 
 import java.util.List;
 import java.util.Optional;
@@ -80,20 +79,21 @@ public record ItemOrTag(Optional<ResourceLocation> item,
      */
     public List<Holder<Item>> getItems() {
         if (tag().isPresent()) {
-            return BuiltInRegistries.ITEM.get(tag().get())
+            return BuiltInRegistries.ITEM.getTag(tag().get())
                     .map(tagSet -> tagSet.stream().toList())
                     .orElse(List.of());
         } else {
             ResourceLocation id = item().get(); //ID at this point is always present, since either item or tag must be non-empty
 
-            return BuiltInRegistries.ITEM.get(id)
-                    .map(List::<Holder<Item>>of)
-                    .orElseGet(() -> {
-                                ImmersiveEnchanting.LOGGER.error("Could not find item with ID '{}' while resolving ItemOrTag. Defaulting to 'minecraft:air'.", id);
+            if (!BuiltInRegistries.ITEM.containsKey(id)) {
+                ImmersiveEnchanting.LOGGER.error(
+                        "Could not find item with ID '{}' while resolving ItemOrTag. Defaulting to 'minecraft:air'.",
+                        id
+                );
+            }
 
-                                return List.of(BuiltInRegistries.ITEM.wrapAsHolder(Items.AIR));
-                            }
-                    );
+            Item item = BuiltInRegistries.ITEM.get(id); //Auto defaults to air if id is invalid
+            return List.of(BuiltInRegistries.ITEM.wrapAsHolder(item));
 
         }
     }

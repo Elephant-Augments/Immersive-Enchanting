@@ -6,7 +6,6 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.neoforged.neoforge.client.network.event.RegisterClientPayloadHandlersEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
@@ -50,7 +49,7 @@ public class ModPackets {
      *
      * @param event
      */
-    public static void registerClient(RegisterClientPayloadHandlersEvent event) {
+    public static void registerClient(RegisterPayloadHandlersEvent event) {
 
     }
 }

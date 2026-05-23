@@ -37,10 +37,11 @@ public record ModIconsMap(Map<String, ResourceLocation> map) {
      */
     public ItemStack getAsItemStack(String modid) {
         ResourceLocation id = map().get(modid);
+
         if (id == null) return new ItemStack(ModItems.ANCIENT_BOOK.get());
 
-        return BuiltInRegistries.ITEM.get(id)
-                .map(item -> new ItemStack(item, 1))
-                .orElse(ItemStack.EMPTY);
+        return BuiltInRegistries.ITEM.containsKey(id)
+                ? new ItemStack(BuiltInRegistries.ITEM.get(id))
+                : ItemStack.EMPTY;
     }
 }

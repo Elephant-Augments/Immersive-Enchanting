@@ -2,8 +2,10 @@
   "levels": {
     "1": [
       {
-        "item": "minecraft:chorus_fruit",
-        "amount": 16
+        "item_stack": {
+          "item_or_tag_id": "minecraft:chorus_fruit",
+          "count": 16
+        }
       }
     ]
   }

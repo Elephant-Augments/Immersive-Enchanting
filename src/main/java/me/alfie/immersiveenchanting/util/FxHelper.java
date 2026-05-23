@@ -42,13 +42,13 @@ public class FxHelper {
     /**
      * Plays the sounds for when an item is placed into or removed from the tool slot.
      */
-    public static void playToolSlotChanged(Level level) {
-        playClientUISound(level, SoundEvents.ARMOR_EQUIP_GENERIC.value(), 0.5f, 1f);
-        playClientUISound(level, SoundEvents.BOOK_PAGE_TURN, 0.3f, 1.2f);
+    public static void playToolSlotChanged(Player player) {
+        playClientUISound(player, SoundEvents.ARMOR_EQUIP_GENERIC.value(), 0.5f, 1f);
+        playClientUISound(player, SoundEvents.BOOK_PAGE_TURN, 0.3f, 1.2f);
     }
 
-    private static void playClientUISound(Level level, SoundEvent sound, float volume, float pitch) {
-        level.playPlayerSound(sound, SoundSource.UI, volume, pitch);
+    private static void playClientUISound(Player player, SoundEvent sound, float volume, float pitch) {
+        player.level().playLocalSound(player, sound, SoundSource.MASTER, volume, pitch);
     }
 
     /**
@@ -57,16 +57,16 @@ public class FxHelper {
      * Plays an extra resonate chime if the node is at its maximum level.
      * No-ops if node hover sounds are disabled in config.
      */
-    public static void playNodeHover(Level level, Node node) {
+    public static void playNodeHover(Player player, Node node) {
         if (!ClientConfig.areNodeHoverSoundsEnabled()) return;
 
         if (node.isDataType(ModFilterNodeData.TYPE)) {
-            playModFilterNodeHover(level);
+            playModFilterNodeHover(player);
             return;
         }
 
         if (node.isState(NodeState.LOCKED) || node.isState(NodeState.ALERT)) {
-            playGenericNodeHover(level);
+            playGenericNodeHover(player);
             return;
         }
 
@@ -77,52 +77,51 @@ public class FxHelper {
             float newPitch = defaultPitch + (nodePosition) * 0.5f;
             newPitch = Math.min(newPitch, 2.0f);
 
-            playClientUISound(level, node.branchId(), nodeSound.volume(), newPitch);
+            playClientUISound(player, node.branchId(), nodeSound.volume(), newPitch);
         } else {
-            playGenericNodeHover(level);
+            playGenericNodeHover(player);
         }
 
         if (node.getTier().equals(NodeTier.ELITE)) {
-            playClientUISound(level, SoundEvents.AMETHYST_BLOCK_RESONATE, 1f, 2);
+            playClientUISound(player, SoundEvents.AMETHYST_BLOCK_RESONATE, 1f, 2);
         }
     }
 
-    private static void playModFilterNodeHover(Level level) {
-        float randomPitch = level.getRandom().nextFloat() * 2;
-        playClientUISound(level, SoundEvents.DISPENSER_DISPENSE, 0.5f, randomPitch);
+    private static void playModFilterNodeHover(Player player) {
+        float randomPitch = player.getRandom().nextFloat() * 2;
+        playClientUISound(player, SoundEvents.DISPENSER_DISPENSE, 0.5f, randomPitch);
     }
 
-    private static void playGenericNodeHover(Level level) {
-        playClientUISound(level, SoundEvents.CHISELED_BOOKSHELF_PICKUP_ENCHANTED, 0.5f, 1f);
+    private static void playGenericNodeHover(Player player) {
+        playClientUISound(player, SoundEvents.CHISELED_BOOKSHELF_PICKUP_ENCHANTED, 0.5f, 1f);
     }
 
     public static boolean doesSoundExist(ResourceLocation id) {
         if (NodeSoundMap.client().containsKey(id)) {
             NodeSound nodeSound = NodeSoundMap.client().get(id);
-            Optional<Holder.Reference<SoundEvent>> soundEvent = BuiltInRegistries.SOUND_EVENT.get(nodeSound.sound());
-            return soundEvent.isPresent();
+            return BuiltInRegistries.SOUND_EVENT.containsKey(nodeSound.sound());
         }
 
         return false;
     }
 
-    private static void playClientUISound(Level level, ResourceLocation id, float volume, float pitch) {
-        if (doesSoundExist(id)) {
+    private static void playClientUISound(Player player, ResourceLocation id, float volume, float pitch) {
+        if(doesSoundExist(id)) {
             SoundEvent sound = getSoundEvent(id);
-            playClientUISound(level, sound, volume, pitch);
+            playClientUISound(player, sound, volume, pitch);
         }
     }
 
     public static SoundEvent getSoundEvent(ResourceLocation id) {
-        if (doesSoundExist(id)) {
+        if(doesSoundExist(id)) {
             return BuiltInRegistries.SOUND_EVENT.get(NodeSoundMap.client().get(id)
-                    .sound()).get().value();
+                    .sound());
         }
-        throw new IllegalArgumentException(id + " is not a valid sound ResourceLocation!");
+        throw new IllegalArgumentException(id + " is not a valid sound identifier!");
     }
 
-    public static void playTooltipLock(Level level) {
-        playClientUISound(level, SoundEvents.DISPENSER_FAIL, 0.5f, 2f);
+    public static void playTooltipLock(Player player) {
+        playClientUISound(player, SoundEvents.DISPENSER_FAIL, 0.5f, 2f);
     }
 
     public static void playEnchantSuccess(Level level, BlockPos tablePos, boolean isHighestTier) {
@@ -190,7 +189,7 @@ public class FxHelper {
      * Plays a tick sound tied to the hold-to-remove progress. Fires once per 10% increment
      * and lowers in pitch as progress increases, giving audio feedback during removal.
      */
-    public static void playRemoveProgress(Level level, float progress) {
+    public static void playRemoveProgress(Player player, float progress) {
         float step = (float) Math.floor(progress * 10f);
 
         if (step == lastRemoveSoundStep) return;
@@ -198,7 +197,7 @@ public class FxHelper {
 
         float pitch = 1.8f - progress;
 
-        playClientUISound(level, SoundEvents.EXPERIENCE_ORB_PICKUP, 0.5f, pitch);
+        playClientUISound(player, SoundEvents.EXPERIENCE_ORB_PICKUP, 0.5f, pitch);
     }
 
     public static void playEnchantmentRemove(Level level, BlockPos tablePos) {
@@ -206,14 +205,14 @@ public class FxHelper {
     }
 
     public static void playGenericUISound(Player player) {
-        playClientUISound(player.level(), SoundEvents.UI_BUTTON_CLICK.value(), 0.3f, 1f);
+        playClientUISound(player, SoundEvents.UI_BUTTON_CLICK.value(), 0.3f, 1f);
     }
 
     public static void playTabDown(Player player) {
-        playClientUISound(player.level(), SoundEvents.DISPENSER_DISPENSE, 0.5f, 0.8f);
+        playClientUISound(player, SoundEvents.DISPENSER_DISPENSE, 0.5f, 0.8f);
     }
 
     public static void playTabUp(Player player) {
-        playClientUISound(player.level(), SoundEvents.DISPENSER_DISPENSE, 0.5f, 1.2f);
+        playClientUISound(player, SoundEvents.DISPENSER_DISPENSE, 0.5f, 1.2f);
     }
 }

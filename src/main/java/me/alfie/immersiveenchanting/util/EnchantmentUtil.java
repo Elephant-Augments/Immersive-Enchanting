@@ -10,6 +10,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -48,7 +49,9 @@ public class EnchantmentUtil {
      * @throws java.util.NoSuchElementException if the enchantment is not found
      */
     public static Holder<Enchantment> toHolder(ResourceLocation id, RegistryAccess access) {
-        return access.lookupOrThrow(Registries.ENCHANTMENT).get(id).orElseThrow();
+        return access.lookupOrThrow(Registries.ENCHANTMENT)
+                .get(ResourceKey.create(Registries.ENCHANTMENT, id))
+                .orElseThrow();
     }
 
     /**
@@ -177,7 +180,7 @@ public class EnchantmentUtil {
      * @throws java.util.NoSuchElementException if the holder has no registry key
      */
     public static ResourceLocation toId(Holder<Enchantment> enchantmentHolder) {
-        return enchantmentHolder.unwrapKey().orElseThrow().ResourceLocation();
+        return enchantmentHolder.unwrapKey().orElseThrow().location();
     }
 
     /**

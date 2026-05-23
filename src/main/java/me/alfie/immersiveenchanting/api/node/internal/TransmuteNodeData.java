@@ -5,7 +5,7 @@ import me.alfie.immersiveenchanting.api.node.NodeData;
 import me.alfie.immersiveenchanting.api.node.NodePayload;
 import me.alfie.immersiveenchanting.networking.TransmutePacket;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.client.network.ClientPacketDistributor;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 public record TransmuteNodeData() implements NodePayload {
 
@@ -16,7 +16,7 @@ public record TransmuteNodeData() implements NodePayload {
                 TYPE,
                 new TransmuteNodeData(),
                 (data, context) -> {
-                    ClientPacketDistributor.sendToServer(new TransmutePacket());
+                    PacketDistributor.sendToServer(new TransmutePacket());
                 }
         );
     }

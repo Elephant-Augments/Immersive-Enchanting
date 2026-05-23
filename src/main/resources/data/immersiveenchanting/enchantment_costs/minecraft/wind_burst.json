@@ -2,20 +2,26 @@
   "levels": {
     "1": [
       {
-        "item": "minecraft:piston",
-        "amount": 1
+        "item_stack": {
+          "item_or_tag_id": "minecraft:piston",
+          "count": 1
+        }
       }
     ],
     "2": [
       {
-        "item": "minecraft:wind_charge",
-        "amount": 1
+        "item_stack": {
+          "item_or_tag_id": "minecraft:wind_charge",
+          "count": 1
+        }
       }
     ],
     "3": [
       {
-        "item": "minecraft:shulker_shell",
-        "amount": 1
+        "item_stack": {
+          "item_or_tag_id": "minecraft:shulker_shell",
+          "count": 1
+        }
       }
     ]
   }

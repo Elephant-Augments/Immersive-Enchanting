@@ -49,7 +49,7 @@ public record DatapackKey<T>(String modid, String directory) {
                     DatapackKey::new
             );
 
-    public ResourceLocation ResourceLocation() {
+    public ResourceLocation identifier() {
         return ResourceLocation.fromNamespaceAndPath(modid, directory);
     }
 }

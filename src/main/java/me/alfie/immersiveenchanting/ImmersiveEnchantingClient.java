@@ -1,5 +1,6 @@
 package me.alfie.immersiveenchanting;
 
+import me.alfie.immersiveenchanting.client.EnchantingTableItemRenderer;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.ModContainer;

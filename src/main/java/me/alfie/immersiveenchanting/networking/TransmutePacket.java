@@ -98,7 +98,7 @@ public record TransmutePacket() implements ModNetworkPacket<TransmutePacket> {
             Component actionBarMessage = Component.translatable("immersiveenchanting.action_bar.transmute_success",
                     newEnchantmentName).withStyle(ChatFormatting.GRAY);
 
-            player.sendOverlayMessage(actionBarMessage);
+            player.displayClientMessage(actionBarMessage, true);
             player.closeContainer();
 
             FxHelper.playTransmute((ServerLevel) level, tablePos);

@@ -1,8 +1,6 @@
 package me.alfie.immersiveenchanting.api.datapack;
 
-import me.alfie.immersiveenchanting.api.datapack.manager.ServerDatapackManager;
-import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
+import net.neoforged.neoforge.event.AddReloadListenerEvent;
 
 import java.util.function.Supplier;
 
@@ -15,7 +13,7 @@ import java.util.function.Supplier;
  *     <li>Registering the datapack internally for later access and syncing</li>
  * </ul>
  *
- * <p>This should be called during {@link AddServerReloadListenersEvent}.</p>
+ * <p>This should be called during {@link net.neoforged.neoforge.event.AddReloadListenerEvent}.</p>
  */
 public class DatapackRegistry {
 
@@ -34,7 +32,7 @@ public class DatapackRegistry {
      * <ol>
      *     <li>Create a new datapack instance using the supplied factory</li>
      *     <li>Register it as a reload listener (so it loads on /reload)</li>
-     *     <li>Store it in {@link ServerDatapackManager#DATAPACKS} for later use</li>
+     *     <li>Store it in {@link DatapackRegistry#DATAPACKS} for later use</li>
      * </ol>
      *
      * <p>The {@link Supplier} is used instead of passing an instance directly to
@@ -45,13 +43,11 @@ public class DatapackRegistry {
      * @param <C>     the raw data type decoded from JSON (Codec type)
      * @param <T>     the processed data type returned by the datapack
      */
-    public static <C, T> void register(AddServerReloadListenersEvent event, Supplier<ModDatapack<C, T>> factory) {
+    public static <C, T> void register(AddReloadListenerEvent event, Supplier<ModDatapack<C, T>> factory) {
         ModDatapack<C, T> datapack = factory.get();
         DatapackKey<T> datapackKey = datapack.key();
 
-        event.addListener(
-                ResourceLocation.fromNamespaceAndPath(datapackKey.modid(), datapackKey.directory()),
-                datapack);
+        event.addListener(datapack);
 
         DATAPACKS.register(datapackKey, datapack);
     }

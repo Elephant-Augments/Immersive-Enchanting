@@ -1,6 +1,7 @@
 package me.alfie.immersiveenchanting.api.description;
 
 import net.neoforged.bus.api.Event;
+import net.neoforged.fml.event.IModBusEvent;
 
 import java.util.function.Consumer;
 
@@ -11,7 +12,7 @@ import java.util.function.Consumer;
  * <p>This event is intended as a public extension point for the tooltip description system.
  * Mods should use {@link #register(DescriptionLayoutExtension)} to add their custom extensions.</p>
  */
-public class RegisterDescriptionLayoutEvent extends Event {
+public class RegisterDescriptionLayoutEvent extends Event implements IModBusEvent {
 
     private final Consumer<DescriptionLayoutExtension> registrar;
 

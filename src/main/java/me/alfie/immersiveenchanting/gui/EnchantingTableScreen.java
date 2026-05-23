@@ -57,7 +57,10 @@ public class EnchantingTableScreen extends AbstractContainerScreen<@NotNull Ench
     private boolean isTabKeyDown;
 
     public EnchantingTableScreen(EnchantingTableMenu menu, Inventory inventory, Component title) {
-        super(menu, inventory, title, 256, 222);
+        super(menu, inventory, title);
+        this.imageHeight = 222;
+        this.imageWidth = 256;
+
         registryAccess = inventory.player.registryAccess();
         this.player = inventory.player;
         this.scrollableCanvas = new Canvas(this);
@@ -93,7 +96,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<@NotNull Ench
     private void onToolSlotUpdate(ItemStack newStack) {
         enchantingTab.setDisplay(EnchantingTab.Display.ENCHANTMENTS);
         rebuildBranches(newStack);
-        FxHelper.playToolSlotChanged(player().level());
+        if (!menu.getToolSlot().getItem().isEmpty()) FxHelper.playToolSlotChanged(player());
 
         if (camera() == null) return;
         if (newStack.getItem().equals(lastToolSlotStack.getItem())) return;

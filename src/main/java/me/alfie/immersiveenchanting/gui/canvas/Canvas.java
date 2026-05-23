@@ -62,14 +62,15 @@ public class Canvas implements ScreenEventListener {
                     tile = Sprite.ALT_BACKGROUND_TILE;
                 }
 
+                CanvasRenderable.setColor(graphics, currentBrightness);
                 graphics.blit(
                         tile.id(),
                         x * TILE_SIZE, y * TILE_SIZE,
                         0, 0,
-                        tile.width(), tile.height(),
-                        tile.width(), tile.height(),
-                        getCurrentBrightness()
+                        Sprite.BACKGROUND_TILE.width(), Sprite.BACKGROUND_TILE.height(),
+                        Sprite.BACKGROUND_TILE.width(), Sprite.BACKGROUND_TILE.height()
                 );
+                CanvasRenderable.resetColor(graphics);
 
             }
         }

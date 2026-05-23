@@ -23,6 +23,13 @@
   "immersiveenchanting.tooltip.desc.transmute_hint": "You must first add an Ancient Book of the same enchantment to the bookshelf.",
   "immersiveenchanting.tooltip.desc.not_transmutable": "Replicated books cannot be transmuted!",
 
+  "immersiveenchanting.tooltip.desc.cost_load_error": "enchantment_costs/%s.json is missing or invalid!",
+  "immersiveenchanting.tooltip.desc.fuels_load_error": "enchantment_costs/immersiveenchanting/enchanting_fuels.json is missing or invalid!",
+
+  "immersiveenchanting.tooltip.desc.no_fuel_data": "Could not find enchanting fuel cost data for this enchantment level. Please check enchanting_fuels.json",
+  "immersiveenchanting.tooltip.desc.no_cost_data": "Could not find cost data for this enchantment level. Please check %s.json",
+
+
   "immersiveenchanting.tooltip.title.unavailable_enchantment": "???",
   "immersiveenchanting.tooltip.title.replicate": "Replicate",
   "immersiveenchanting.tooltip.title.transmute": "Transmute",
@@ -39,12 +46,20 @@
   "immersiveenchanting.filter.locked": "Show locked",
   "immersiveenchanting.label.total_enchantments": "%d enchantment(s)",
 
+  "immersiveenchanting.mod_filter.all": "All",
+  "immersiveenchanting.mod_filter.desc": "Click to show %s enchantments",
+  "immersiveenchanting.mod_filter.selected": "Showing %s enchantments",
+
+
   "immersiveenchanting.command.disabled_enchantments": "The following enchantments are disabled OR do not have an enchantment cost file: %s",
   "immersiveenchanting.command.enabled_enchantments": "The following enchantments are enabled: %s",
   "immersiveenchanting.command.generate_empty_datapack": "Success! Click to copy the generated folder path.",
   "immersiveenchanting.command.give_random_ancient_book": "Gave random Ancient Book to the selected player(s)!",
   "immersiveenchanting.command.no_target": "No target given!",
 
+  "immersiveenchanting.warn.cost_files_missing": "There are invalid or missing enchantment cost files for enchantment(s). Check the log to see which enchantments are affected. To supress this warning, please add or fix cost files.",
+  "immersiveenchanting.warn.too_many_cost_files": "There are enchantment cost files for enchantment(s) that are not recognised. Check the log to see which enchantments are affected. To supress this warning, please remove these cost files.",
+  "immersiveenchanting.warn.enchanting_fuels_missing": "The enchanting fuel cost file (enchantment_costs/immersiveenchanting/enchanting_fuels.json) is missing or invalid! Please add a valid enchanting fuel cost file.",
 
   "immersiveenchanting.configuration.general": "General",
   "immersiveenchanting.configuration.bookshelves": "Bookshelf Search Settings",

@@ -58,7 +58,6 @@ public class DescriptionHelper {
             return;
         }
 
-
         if (!tooltip.screen().enchantmentCostRenderer().getCurrentRenderedCost().stack().is(Items.AIR)) {
             description.insertLine(lineNumber, new MaterialsLine(tooltip));
             lineNumber += 2;

@@ -1,5 +1,6 @@
 package me.alfie.immersiveenchanting.datapack.enchantment_cost;
 
+import com.google.gson.JsonElement;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.api.datapack.DatapackRegistry;
 import me.alfie.immersiveenchanting.api.datapack.ModDatapack;
@@ -17,7 +18,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
+import net.neoforged.neoforge.event.AddReloadListenerEvent;
 
 import java.util.HashSet;
 import java.util.List;
@@ -95,19 +96,21 @@ public class CostDatapack extends ModDatapack<CostData, CostRegistry> {
             );
             ImmersiveEnchanting.LOGGER.error("enchantment_costs/immersiveenchanting/replicate.json is missing. Please add this file to your datapack.");
         }
-    }    /**
+    }
+
+    /**
      * Called on every datapack reload. Clears and repopulates a temporary {@link CostRegistry}
      * with enabled entries. The registry is not pushed to {@link me.alfie.immersiveenchanting.datapack.manager.ServerDatapackManager}
      * yet — that happens when {@link #getBuilt()} is called by the server manager.
      */
     @Override
-    protected void apply(Map<ResourceLocation, CostData> ResourceLocationEnchantmentDataMap, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
+    protected void apply(Map<ResourceLocation, JsonElement> map, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
         getData().clear();
 
         int count = 0;
-        for (Map.Entry<ResourceLocation, CostData> entry : ResourceLocationEnchantmentDataMap.entrySet()) {
+        for (Map.Entry<ResourceLocation, JsonElement> entry : map.entrySet()) {
             ResourceLocation id = remapResourceLocationPath(entry.getKey());
-            CostData data = entry.getValue();
+            CostData data = parseOrDefault(entry.getValue(), CostData.EMPTY);
 
             getData().register(id, data);
             count++;
@@ -118,9 +121,11 @@ public class CostDatapack extends ModDatapack<CostData, CostRegistry> {
 
     private static Set<ResourceLocation> getEnchantmentIds(Set<Holder<Enchantment>> enchantmentHolders) {
         return enchantmentHolders.stream()
-                .map(holder -> holder.unwrapKey().orElseThrow().ResourceLocation())
+                .map(holder -> holder.unwrapKey().orElseThrow().location())
                 .collect(Collectors.toSet());
-    }    /**
+    }
+
+    /**
      * Converts the datapack file path ResourceLocation (e.g. {@code minecraft/sharpness})
      * into the proper enchantment ResourceLocation form (e.g. {@code minecraft:sharpness})
      * by replacing the first path separator with a colon.
@@ -141,7 +146,7 @@ public class CostDatapack extends ModDatapack<CostData, CostRegistry> {
         return ResourceLocation.fromNamespaceAndPath(namespace, subPath);
     }
 
-    public static void register(AddServerReloadListenersEvent event) {
+    public static void register(AddReloadListenerEvent event) {
         DatapackRegistry.register(event, CostDatapack::new);
     }
 

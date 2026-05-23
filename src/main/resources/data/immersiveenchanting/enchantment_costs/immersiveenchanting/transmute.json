@@ -2,8 +2,10 @@
   "levels": {
     "1": [
       {
-        "item": "minecraft:air",
-        "amount": 1,
+        "item_stack": {
+          "item_or_tag_id": "minecraft:air",
+          "count": 1
+        },
         "xp_levels": 10
       }
     ]

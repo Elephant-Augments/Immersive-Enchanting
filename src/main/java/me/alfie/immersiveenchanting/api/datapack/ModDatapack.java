@@ -1,9 +1,12 @@
 package me.alfie.immersiveenchanting.api.datapack;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.JsonOps;
+import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -49,7 +52,7 @@ import java.util.Map;
  * @param <A> Raw data type decoded from JSON using the {@link Codec}
  * @param <B> Final processed data type used by your mod
  */
-public abstract class ModDatapack<A, B> extends SimpleJsonResourceReloadListener<A> {
+public abstract class ModDatapack<A, B> extends SimpleJsonResourceReloadListener {
 
     /**
      * Unique key identifying this datapack and its output type.
@@ -61,15 +64,18 @@ public abstract class ModDatapack<A, B> extends SimpleJsonResourceReloadListener
      */
     private StreamCodec<RegistryFriendlyByteBuf, B> streamCodec;
 
+    private Codec<A> codec;
+
     /**
      * @param codec       Codec used to read JSON into {@code A}
      * @param datapackKey Unique key identifying this datapack
      * @param streamCodec Codec used to sync {@code B} over the network
      */
     protected ModDatapack(Codec<A> codec, DatapackKey<B> datapackKey, StreamCodec<RegistryFriendlyByteBuf, B> streamCodec) {
-        super(codec, FileToIdConverter.json(datapackKey.directory()));
+        super(new Gson(), datapackKey.directory());
         this.key = datapackKey;
         this.streamCodec = streamCodec;
+        this.codec = codec;
     }
 
     /**
@@ -103,7 +109,12 @@ public abstract class ModDatapack<A, B> extends SimpleJsonResourceReloadListener
      * @param profilerFiller  profiler
      */
     @Override
-    protected void apply(Map<ResourceLocation, A> input, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
+    protected void apply(Map<ResourceLocation, JsonElement> input, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
     }
 
+    public A parseOrDefault(JsonElement element, A defaultValue) {
+        return codec.parse(JsonOps.INSTANCE, element)
+                .resultOrPartial(error -> ImmersiveEnchanting.LOGGER.error("Failed to parse JSON for datapack {}: {}", key, error))
+                .orElse(defaultValue);
+    }
 }

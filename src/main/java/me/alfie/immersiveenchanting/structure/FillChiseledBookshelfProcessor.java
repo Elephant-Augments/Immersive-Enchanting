@@ -20,7 +20,6 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlac
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
-import net.minecraft.world.level.storage.TagValueOutput;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -138,7 +137,8 @@ public class FillChiseledBookshelfProcessor extends StructureProcessor {
         final String itemTag = "Items";
         final String slotTag = "Slot";
 
-        ListTag blockItemsTag = blockTag.getList(itemTag).orElse(new ListTag());
+        ListTag blockItemsTag = blockTag.contains(itemTag, ListTag.TAG_LIST) ?
+                blockTag.getList(itemTag, ListTag.TAG_COMPOUND) : new ListTag();
 
         if (!stack.isEmpty()) {
             CompoundTag stackTag = stackToTag(stack, registryAccess);
@@ -163,8 +163,6 @@ public class FillChiseledBookshelfProcessor extends StructureProcessor {
      * @return NBT compound representing the item stack
      */
     private CompoundTag stackToTag(ItemStack stack, RegistryAccess registryAccess) {
-        TagValueOutput out = TagValueOutput.createWithContext(new ProblemReporter.Collector(), registryAccess);
-        out.storeNullable("item", ItemStack.CODEC, stack);
-        return out.buildResult().getCompoundOrEmpty("item");
+        return (CompoundTag) stack.save(registryAccess);
     }
 }
