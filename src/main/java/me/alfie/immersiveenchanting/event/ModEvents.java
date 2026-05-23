@@ -59,15 +59,15 @@ public class ModEvents {
         modEventBus.addListener(ModCreativeTab::buildCreativeTab);
 
         registerPostEvents(modEventBus);
-        registerInternalApiEvents();
+        registerInternalApiEvents(modEventBus);
     }
 
     private static void registerPostEvents(IEventBus modEventBus) {
         modEventBus.addListener(ApiPostEvents::postRegisterTooltipDescriptionsEvent);
     }
 
-    private static void registerInternalApiEvents() {
-        NeoForge.EVENT_BUS.addListener(TooltipDescriptionExtensions::registerInternalTooltipDescriptions);
+    private static void registerInternalApiEvents(IEventBus modEventBus) {
+        modEventBus.addListener(TooltipDescriptionExtensions::registerInternalTooltipDescriptions);
     }
 
 

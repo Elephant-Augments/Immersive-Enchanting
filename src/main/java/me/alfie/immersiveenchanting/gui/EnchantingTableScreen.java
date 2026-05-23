@@ -368,7 +368,7 @@ public class EnchantingTableScreen extends AbstractContainerScreen<@NotNull Ench
     private void onToolSlotUpdate(ItemStack newStack) {
         enchantingTab.setDisplay(EnchantingTab.Display.ENCHANTMENTS);
         rebuildBranches(newStack);
-        FxHelper.playToolSlotChanged(player().level());
+        if (!menu.getToolSlot().getItem().isEmpty()) FxHelper.playToolSlotChanged(player());
 
         if(camera() == null) return;
         if(newStack.getItem().equals(lastToolSlotStack.getItem())) return;
