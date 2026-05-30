@@ -40,7 +40,7 @@ public record RemoveProgressLine(NodeTooltip tooltip) implements DescriptionLine
 
         graphics.fill(innerX, innerY, innerX + filledWidth, innerY + innerHeight, 0xFFFF5555);
 
-        FxHelper.playRemoveProgress(tooltip.screen().player().level(), progress);
+        FxHelper.playRemoveProgress(tooltip.screen().player(), progress);
     }
 
     @Override

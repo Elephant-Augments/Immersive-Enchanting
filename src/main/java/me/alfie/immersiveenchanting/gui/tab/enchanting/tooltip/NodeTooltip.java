@@ -133,7 +133,7 @@ public class NodeTooltip implements ScreenEventListener {
                     screen().tooltipManager().unlockTooltip();
                 } else {
                     screen().tooltipManager().lockTooltip(node());
-                    FxHelper.playTooltipLock(screen().player().level());
+                    FxHelper.playTooltipLock(screen().player());
                 }
             }
             return true;

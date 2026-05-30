@@ -67,7 +67,7 @@ public record EnchantPacket(Holder<Enchantment> enchantmentHolder, int level) im
                     .levelCosts()
                     .maxLevel();
 
-            FxHelper.playEnchantSuccess(context.player().level(), menu.getBlockPos(), isHighestTier);
+            FxHelper.playEnchantSuccess(context.player(), menu.getBlockPos(), isHighestTier);
         }
     }
 

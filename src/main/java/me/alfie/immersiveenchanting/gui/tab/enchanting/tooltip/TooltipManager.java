@@ -81,7 +81,7 @@ public class TooltipManager {
 
         activeTooltip = new NodeTooltip(screen, node);
         activeTooltipPriority = priority;
-        FxHelper.playNodeHover(screen.player().level(), node);
+        FxHelper.playNodeHover(screen.player(), node);
     }
 
     /**
