@@ -1,14 +1,13 @@
 package me.alfie.immersiveenchanting.networking;
 
+import me.alfie.alfinolib.networking.NetworkPacket;
+import me.alfie.alfinolib.networking.codec.StreamCodec;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
-import me.alfie.immersiveenchanting.config.ServerConfig;
-import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import me.alfie.immersiveenchanting.util.FxHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -30,30 +29,22 @@ import org.jetbrains.annotations.NotNull;
  *
  * <p>This operation is server-authoritative and cannot be performed client-side.</p>
  */
-public record ReplicatePacket() implements ModNetworkPacket<ReplicatePacket> {
+public record ReplicatePacket() implements NetworkPacket<ReplicatePacket> {
 
     public static final Type<@NotNull ReplicatePacket> TYPE = new Type<>(Identifier.fromNamespaceAndPath(ImmersiveEnchanting.MODID, "replicate"));
-    public static final StreamCodec<RegistryFriendlyByteBuf, ReplicatePacket> STREAM_CODEC = StreamCodec.unit(new ReplicatePacket());
-
-    @Override
-    public Type<@NotNull ReplicatePacket> typeId() {
+    @Override public Type<@NotNull ReplicatePacket> type() {
         return TYPE;
     }
 
-    @Override
-    public StreamCodec<RegistryFriendlyByteBuf, ReplicatePacket> codec() {
-        return STREAM_CODEC;
-    }
+    public static StreamCodec<RegistryFriendlyByteBuf, ReplicatePacket> STREAM_CODEC = StreamCodec.unit(new ReplicatePacket());
 
     @Override
-    public void exec(ReplicatePacket packet, IPayloadContext context) {
+    public void exec(IPayloadContext context) {
         Player player = context.player();
         Level level = player.level();
         if(!(player.containerMenu instanceof EnchantingTableMenu menu)) return;
 
-        if(EnchantmentUtil.canReplicate(menu, context)) {
-            EnchantmentUtil.deductValidCost(menu, CostRegistry.REPLICATE, 1, player, CostRegistry.server());
-
+        if(EnchantmentUtil.canReplicate(menu, player)) {
             ItemStack oldStack = menu.getToolSlot().getItem().copyAndClear();
             menu.getToolSlot().setChanged();
 

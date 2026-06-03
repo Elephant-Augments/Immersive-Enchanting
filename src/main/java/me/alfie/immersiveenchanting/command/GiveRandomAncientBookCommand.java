@@ -6,17 +6,12 @@ import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.Permissions;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.Enchantment;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 public enum GiveRandomAncientBookCommand implements ModCommand {
     COMMAND;

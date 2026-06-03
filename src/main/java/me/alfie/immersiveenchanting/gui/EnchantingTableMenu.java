@@ -1,7 +1,7 @@
 package me.alfie.immersiveenchanting.gui;
 
-import me.alfie.immersiveenchanting.datapack.enchantment_cost.codec.Cost;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.codec.Cost;
 import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.util.EnchantingTableContainer;
 import net.minecraft.core.BlockPos;
@@ -17,7 +17,6 @@ import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;

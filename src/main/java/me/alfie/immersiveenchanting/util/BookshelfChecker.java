@@ -1,8 +1,10 @@
 package me.alfie.immersiveenchanting.util;
 
+import me.alfie.alfinolib.gui.GuiGraphicsX;
+import me.alfie.alfinolib.gui.util.GuiGraphicsApi;
+import me.alfie.alfinolib.networking.Networking;
 import me.alfie.immersiveenchanting.block.ModBlocks;
 import me.alfie.immersiveenchanting.config.ServerConfig;
-import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.networking.AvailableEnchantmentsPacket;
 import net.minecraft.core.BlockPos;
@@ -29,7 +31,8 @@ public class BookshelfChecker {
     public static void checkBookshelves(BlockPos blockPos, Level level, ServerPlayer serverPlayer) {
         List<Holder<Enchantment>> availableEnchantments = getEnchantmentsInBookshelves(blockPos, level);
 
-        PacketDistributor.sendToPlayer(serverPlayer, new AvailableEnchantmentsPacket(availableEnchantments));
+        Networking.sendToClient(serverPlayer, new AvailableEnchantmentsPacket(
+                EnchantmentUtil.toResourceKeys(availableEnchantments)));
     }
 
     /**

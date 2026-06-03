@@ -1,8 +1,8 @@
 package me.alfie.immersiveenchanting.mixin;
 
 import me.alfie.immersiveenchanting.block.ModBlocks;
-import me.alfie.immersiveenchanting.util.BookshelfChecker;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
+import me.alfie.immersiveenchanting.util.BookshelfChecker;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;

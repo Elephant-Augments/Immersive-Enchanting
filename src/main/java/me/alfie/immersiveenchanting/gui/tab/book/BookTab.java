@@ -1,17 +1,16 @@
 package me.alfie.immersiveenchanting.gui.tab.book;
 
+import me.alfie.alfinolib.gui.GuiGraphicsX;
+import me.alfie.alfinolib.gui.util.GuiGraphicsApi;
+import me.alfie.alfinolib.gui.util.MousePos;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.core.Sprite;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.enchantment.Enchantment;
 
-import java.awt.*;
 import java.util.*;
-import java.util.List;
 
 public class BookTab {
     private final EnchantingTableScreen screen;
@@ -121,32 +120,16 @@ public class BookTab {
         }
     }
 
-    /**
-     * Renders the entire book tab UI.
-     <P>
-     * <p>Includes filter checkboxes, enchantment list, scrollbar, and search bar.</p>
-     <P>
-     * @param graphics the GUI rendering context
-     * @param mouseX the current mouse X position
-     * @param mouseY the current mouse Y position
-     */
-    public void render(GuiGraphicsExtractor graphics, double mouseX, double mouseY) {
-        renderFilterCheckboxes(graphics, mouseX, mouseY);
-        renderEnchantmentBoxes(graphics);
-        scrollbar.render(graphics, mouseX, mouseY);
-        searchbar.render(graphics);
+
+    public void render(GuiGraphicsX gx, MousePos mousePos) {
+        renderFilterCheckboxes(gx, mousePos);
+        renderEnchantmentBoxes(gx);
+        scrollbar.render(gx, mousePos);
+        searchbar.render(gx);
     }
 
-    /**
-     * Renders the list of enchantment boxes.
-     <P>
-     * <p>Displays up to {@code MAX_BOXES_RENDERED} entries based on the current scroll position.</p>
-     <P>
-     * <p>Empty boxes are rendered when there are fewer enchantments than available slots.</p>
-     <P>
-     * @param graphics the GUI rendering context
-     */
-    private void renderEnchantmentBoxes(GuiGraphicsExtractor graphics) {
+
+    private void renderEnchantmentBoxes(GuiGraphicsX gx) {
         int x = screen.getGuiLeft() + 13;
         int y = screen.getGuiTop() + 6;
 
@@ -156,41 +139,35 @@ public class BookTab {
             if (scrollbar.scrollIndex+i < renderedEnchantments.size()) {
                 Holder<Enchantment> enchantmentHolder = renderedEnchantments.get(scrollbar.scrollIndex + i);
                 EnchantmentBox box = new EnchantmentBox(this, enchantmentHolder);
-                box.render(graphics, x, y);
+                box.render(gx, x, y);
             } else {
                 EnchantmentBox box = new EnchantmentBox(this, null);
-                box.render(graphics, x, y);
+                box.render(gx, x, y);
             }
 
             y += Sprite.ENCHANTMENT_BOX_LOCKED.height();
         }
     }
 
-    /**
-     * Renders filter checkboxes and the total enchantment count label.
-     <P>
-     * <p>Checkbox positions are dynamically calculated based on index.</p>
-     <P>
-     * @param graphics the GUI rendering context
-     * @param mouseX the current mouse X position
-     * @param mouseY the current mouse Y position
-     */
-    private void renderFilterCheckboxes(GuiGraphicsExtractor graphics, double mouseX, double mouseY) {
+
+    private void renderFilterCheckboxes(GuiGraphicsX gx, MousePos mousePos) {
         int count = 0;
         final int spacing = 18;
 
         for(FilterCheckbox filterCheckbox : filterCheckboxes()) {
             filterCheckbox.setX(138);
             filterCheckbox.setY(12 + (count*spacing));
-            filterCheckbox.render(graphics, mouseX, mouseY);
+            filterCheckbox.render(gx, mousePos);
             count++;
         }
 
         final int xPos = screen.getGuiLeft() + 138;
         final int yPos = screen.getGuiTop() + (count * spacing) + 16;
-        graphics.text(Minecraft.getInstance().font,
+
+        GuiGraphicsApi.text(
+                gx, screen().getFont(),
                 Component.translatable("immersiveenchanting.label.total_enchantments", renderedEnchantments.size()),
-                xPos, yPos, Color.WHITE.getRGB());
+                xPos, yPos, true);
     }
 
     /**

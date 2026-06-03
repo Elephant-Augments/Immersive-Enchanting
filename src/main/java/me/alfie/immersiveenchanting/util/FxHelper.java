@@ -1,5 +1,6 @@
 package me.alfie.immersiveenchanting.util;
 
+import me.alfie.alfinolib.util.ResourceId;
 import me.alfie.immersiveenchanting.api.node.internal.ModFilterNodeData;
 import me.alfie.immersiveenchanting.config.ClientConfig;
 import me.alfie.immersiveenchanting.datapack.node_sounds.NodeSound;
@@ -11,7 +12,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -108,14 +108,14 @@ public class FxHelper {
         player.level().playPlayerSound(sound, SoundSource.UI, volume, pitch);
     }
 
-    private static void playClientUISound(Player player, Identifier id, float volume, float pitch) {
+    private static void playClientUISound(Player player, ResourceId id, float volume, float pitch) {
         if(doesSoundExist(id)) {
             SoundEvent sound = getSoundEvent(id);
             playClientUISound(player, sound, volume, pitch);
         }
     }
 
-    public static boolean doesSoundExist(Identifier id) {
+    public static boolean doesSoundExist(ResourceId id) {
         if (NodeSoundMap.client().containsKey(id)) {
             NodeSound nodeSound = NodeSoundMap.client().get(id);
             Optional<Holder.Reference<SoundEvent>> soundEvent = BuiltInRegistries.SOUND_EVENT.get(nodeSound.sound());
@@ -125,7 +125,7 @@ public class FxHelper {
         return false;
     }
 
-    public static SoundEvent getSoundEvent(Identifier id) {
+    public static SoundEvent getSoundEvent(ResourceId id) {
         if(doesSoundExist(id)) {
             return BuiltInRegistries.SOUND_EVENT.get(NodeSoundMap.client().get(id)
                     .sound()).get().value();

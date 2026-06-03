@@ -1,9 +1,10 @@
 package me.alfie.immersiveenchanting.gui.canvas;
 
+import me.alfie.alfinolib.gui.GuiGraphicsX;
+import me.alfie.alfinolib.gui.util.GuiGraphicsApi;
+import me.alfie.alfinolib.gui.util.MousePos;
+import me.alfie.alfinolib.util.ResourceId;
 import me.alfie.immersiveenchanting.gui.core.Sprite;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
 /**
@@ -33,12 +34,8 @@ public abstract class CanvasRenderable {
 
     /**
      * Render this object on the canvas. Called every frame.
-     *
-     * @param graphics The graphics context
-     * @param mouseX Current mouse X position relative to GUI
-     * @param mouseY Current mouse Y position relative to GUI
      */
-    public abstract void render(GuiGraphicsExtractor graphics, int mouseX, int mouseY);
+    public abstract void render(GuiGraphicsX gx, MousePos mousePos);
 
     /**
      * Gets the canvas this object is attached to.
@@ -148,25 +145,17 @@ public abstract class CanvasRenderable {
 
     /**
      * Draws a {@link Sprite} at the object’s canvas position.
-     *
-     * @param graphics The graphics context
-     * @param sprite The sprite to draw
      */
-    public void blit(GuiGraphicsExtractor graphics, Sprite sprite, int color) {
-        blit(graphics, sprite.id(), sprite.width(), sprite.height(), color);
+    public void blit(GuiGraphicsX gx, Sprite sprite, int color) {
+        blit(gx, sprite.id(), sprite.width(), sprite.height(), color);
     }
 
     /**
      * Draws a texture at the object’s canvas position.
-     *
-     * @param graphics The graphics context
-     * @param id The texture identifier
-     * @param width Width of the texture
-     * @param height Height of the texture
      */
-    public void blit(GuiGraphicsExtractor graphics, Identifier id,
+    public void blit(GuiGraphicsX gx, ResourceId id,
                      int width, int height, int color) {
-        blit(graphics, id, width, height, 0, 0, color);
+        blit(gx, id, width, height, 0, 0, color);
     }
 
     /**
@@ -175,46 +164,37 @@ public abstract class CanvasRenderable {
      * WARNING: Offsets modify the transform matrix directly. Do NOT use this for
      * objects that rely on logical canvasX/Y (like mouse hover checks).
      * Use the other blit() overloads for those.
-     *
-     * @param graphics The graphics context
-     * @param id The texture identifier
-     * @param width Width of the texture
-     * @param height Height of the texture
-     * @param offsetX Pixel offset on the X axis
-     * @param offsetY Pixel offset on the Y axis
      */
-    public void blit(GuiGraphicsExtractor graphics, Identifier id,
+    public void blit(GuiGraphicsX gx, ResourceId id,
                            int width, int height,
                            int offsetX, int offsetY, int color) {
-        graphics.pose().pushMatrix();
+        gx.graphics().pose().pushMatrix();
 
-        graphics.pose().translate(canvasX(), canvasY());
-        graphics.pose().scale(scale());
-        graphics.pose().translate(-canvasX(), -canvasY());
+        gx.graphics().pose().translate(canvasX(), canvasY());
+        gx.graphics().pose().scale(scale());
+        gx.graphics().pose().translate(-canvasX(), -canvasY());
 
-        graphics.blit(
-                RenderPipelines.GUI_TEXTURED,
+        GuiGraphicsApi.blit(
+                gx,
                 id,
                 (int) canvasX() + offsetX, (int) canvasY() + offsetY,
-                0, 0,
-                width, height,
-                width, height,
-                color
+                width, height
         );
 
-        graphics.pose().popMatrix();
+        gx.graphics().pose().popMatrix();
     }
 
-    public void item(GuiGraphicsExtractor graphics, ItemStack stack,
+    public void item(GuiGraphicsX gx, ItemStack stack,
                      int offsetX, int offsetY, int color) {
-        graphics.pose().pushMatrix();
+        gx.graphics().pose().pushMatrix();
 
-        graphics.pose().translate(canvasX(), canvasY());
-        graphics.pose().scale(scale());
-        graphics.pose().translate(-canvasX(), -canvasY());
+        gx.graphics().pose().translate(canvasX(), canvasY());
+        gx.graphics().pose().scale(scale());
+        gx.graphics().pose().translate(-canvasX(), -canvasY());
 
-        graphics.item(stack, (int) canvasX() + offsetX, (int) canvasY() + offsetY);
+        GuiGraphicsApi.itemStack(gx, stack, canvas.screen().getFont(),
+                (int) canvasX() + offsetX, (int) canvasY() + offsetY);
 
-        graphics.pose().popMatrix();
+        gx.graphics().pose().popMatrix();
     }
 }

@@ -10,9 +10,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.item.enchantment.Enchantment;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public enum DisabledEnchantmentsCommand implements ModCommand {

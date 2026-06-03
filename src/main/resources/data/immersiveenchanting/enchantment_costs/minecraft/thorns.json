@@ -1,28 +1,7 @@
 {
   "levels": {
-    "1": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:sweet_berries",
-          "count": 16
-        }
-      }
-    ],
-    "2": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:cactus",
-          "count": 8
-        }
-      }
-    ],
-    "3": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:amethyst_shard",
-          "count": 1
-        }
-      }
-    ]
+    "1": [{"item_cost": {"item": "minecraft:sweet_berries", "count": 16}}],
+    "2": [{"item_cost": {"item": "minecraft:cactus", "count": 8}}],
+    "3": [{"item_cost": {"item": "minecraft:amethyst_shard", "count": 1}}]
   }
 }

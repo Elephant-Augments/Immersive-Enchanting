@@ -1,26 +1,21 @@
 package me.alfie.immersiveenchanting.datapack.enchantment_cost;
 
+import me.alfie.alfinolib.datapacks.*;
+import me.alfie.alfinolib.util.ResourceId;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
-import me.alfie.immersiveenchanting.api.datapack.*;
-import me.alfie.immersiveenchanting.api.datapack.internal.DatapackKeys;
-import me.alfie.immersiveenchanting.api.datapack.manager.ClientDatapackUpdatedEvent;
-import me.alfie.immersiveenchanting.api.datapack.manager.ServerDatapackUpdatedEvent;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.codec.CostData;
-import me.alfie.immersiveenchanting.api.datapack.manager.ServerDatapackManager;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 import java.util.HashSet;
 import java.util.List;
@@ -30,10 +25,11 @@ import java.util.stream.Collectors;
 
 public class CostDatapack extends ModDatapack<CostData, CostRegistry> {
 
-    private final CostRegistry DATA = new CostRegistry();
+    public static final DatapackKey<CostRegistry> KEY = new DatapackKey<>(ImmersiveEnchanting.MODID, "enchantment_costs");
+    private CostRegistry DATA;
 
-    protected CostDatapack() {
-        super(CostData.CODEC, DatapackKeys.COST, CostRegistry.STREAM_CODEC);
+    protected CostDatapack(RegistryAccess registryAccess) {
+        super(CostData.CODEC, KEY, CostRegistry.STREAM_CODEC, registryAccess);
     }
 
     @Override
@@ -41,21 +37,16 @@ public class CostDatapack extends ModDatapack<CostData, CostRegistry> {
         return DATA;
     }
 
-    /**
-     * Called on every datapack reload. Clears and repopulates a temporary {@link CostRegistry}
-     * with enabled entries. The registry is not pushed to {@link me.alfie.immersiveenchanting.datapack.manager.ServerDatapackManager}
-     * yet — that happens when {@link #getBuilt()} is called by the server manager.
-     */
     @Override
     protected void apply(Map<Identifier, CostData> identifierEnchantmentDataMap, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
-        getData().clear();
+        DATA = new CostRegistry();
 
         int count = 0;
         for(Map.Entry<Identifier, CostData> entry : identifierEnchantmentDataMap.entrySet()) {
-            Identifier id = remapIdentifierPath(entry.getKey());
+            ResourceId id = remapIdentifierPath(entry.getKey());
             CostData data = entry.getValue();
 
-            getData().register(id, data);
+            DATA.register(id, data);
             count++;
         }
 
@@ -69,7 +60,7 @@ public class CostDatapack extends ModDatapack<CostData, CostRegistry> {
      *
      * Also preserves any additional sub-paths, allowing for hierarchical organization of enchantment cost files (e.g. {@code minecraft/weapon/sharpness} -> {@code minecraft:weapon/sharpness}).
      */
-    private static Identifier remapIdentifierPath(Identifier originalId) {
+    private static ResourceId remapIdentifierPath(Identifier originalId) {
         String path = originalId.getPath();
 
         int firstSlash = path.indexOf('/');
@@ -80,7 +71,7 @@ public class CostDatapack extends ModDatapack<CostData, CostRegistry> {
         String namespace = path.substring(0, firstSlash);
         String subPath = path.substring(firstSlash + 1);
 
-        return Identifier.fromNamespaceAndPath(namespace, subPath);
+        return new ResourceId(namespace, subPath);
     }
 
     public static void resolveServerRegistry(ServerDatapackUpdatedEvent event) {
@@ -98,7 +89,7 @@ public class CostDatapack extends ModDatapack<CostData, CostRegistry> {
     }
 
     public static void register(AddServerReloadListenersEvent event) {
-        DatapackRegistry.register(event, CostDatapack::new);
+        DatapackRegistry.register(event, () -> new CostDatapack(event.getRegistryAccess()));
     }
 
 

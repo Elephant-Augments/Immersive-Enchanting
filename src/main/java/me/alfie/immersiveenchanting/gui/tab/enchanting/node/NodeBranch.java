@@ -1,10 +1,11 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.node;
 
+import me.alfie.alfinolib.gui.GuiGraphicsX;
+import me.alfie.alfinolib.gui.util.MousePos;
+import me.alfie.alfinolib.util.ResourceId;
 import me.alfie.immersiveenchanting.api.node.NodeTemplate;
-import me.alfie.immersiveenchanting.gui.canvas.CanvasRenderable;
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.resources.Identifier;
+import me.alfie.immersiveenchanting.gui.canvas.CanvasRenderable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,14 +15,14 @@ public class NodeBranch extends CanvasRenderable {
     private final List<Node> nodes;
     private float angle;
     private BranchTexture texture;
-    private final Identifier id;
+    private final ResourceId id;
 
     /**
      * Constructor for API users - angles are automatically calculated by ImmersiveEnchanting.
      * @param canvas
      * @param nodeTemplates
      */
-    public NodeBranch(Canvas canvas, Identifier id, List<NodeTemplate> nodeTemplates) {
+    public NodeBranch(Canvas canvas, ResourceId id, List<NodeTemplate> nodeTemplates) {
         super(canvas);
         this.id = id;
 
@@ -77,16 +78,16 @@ public class NodeBranch extends CanvasRenderable {
     }
 
     @Override
-    public void render(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-        texture.render(graphics, mouseX, mouseY);
+    public void render(GuiGraphicsX gx, MousePos mousePos) {
+        texture.render(gx, mousePos);
 
         for(Node node : nodes) {
-            node.render(graphics, mouseX, mouseY);
+            node.render(gx, mousePos);
         }
     }
 
 
-    public Identifier id() {
+    public ResourceId id() {
         return id;
     }
 }

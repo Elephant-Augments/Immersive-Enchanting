@@ -1,12 +1,5 @@
 {
   "levels": {
-    "1": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:chorus_fruit",
-          "count": 16
-        }
-      }
-    ]
+    "1": [{"item_cost": {"item": "minecraft:chorus_fruit", "count": 16}}]
   }
 }

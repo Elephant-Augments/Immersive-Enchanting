@@ -1,54 +1,34 @@
 package me.alfie.immersiveenchanting.networking;
 
-import net.minecraft.core.Holder;
+import me.alfie.alfinolib.networking.NetworkRegisterEvent;
+import me.alfie.alfinolib.networking.Networking;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.neoforged.neoforge.client.network.event.RegisterClientPayloadHandlersEvent;
-import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
-import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 public class ModPackets {
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, Holder<Enchantment>> ENCHANTMENT_HOLDER_CODEC = ByteBufCodecs.holderRegistry(Registries.ENCHANTMENT);
+    public static final StreamCodec<RegistryFriendlyByteBuf, ResourceKey<Enchantment>> ENCHANTMENT_CODEC = new StreamCodec<RegistryFriendlyByteBuf, ResourceKey<Enchantment>>() {
+        @Override
+        public void encode(RegistryFriendlyByteBuf buf, ResourceKey<Enchantment> enchantment) {
+            buf.writeResourceKey(enchantment);
+        }
 
-    /**
-     * Register payloads inbound to server.
-     * @param event
-     */
-    public static void registerServer(RegisterPayloadHandlersEvent event) {
-        final PayloadRegistrar registrar = event.registrar("1");
+        @Override
+        public ResourceKey<Enchantment> decode(RegistryFriendlyByteBuf buf) {
+            return buf.readResourceKey(Registries.ENCHANTMENT);
+        }
+    };
 
-        registrar.playToServer(UpdateToolSlotPacket.TYPE, UpdateToolSlotPacket.STREAM_CODEC,
-                (packet, context) -> packet.exec(packet, context));
 
-        registrar.playToServer(EnchantPacket.TYPE, EnchantPacket.STREAM_CODEC,
-                (packet, context) -> packet.exec(packet, context));
-
-        registrar.playToServer(TransmutePacket.TYPE, TransmutePacket.STREAM_CODEC,
-                (packet, context) -> packet.exec(packet, context));
-
-        registrar.playToServer(ReplicatePacket.TYPE, ReplicatePacket.STREAM_CODEC,
-                (packet, context) -> packet.exec(packet, context));
-
-        registrar.playToServer(RemoveEnchantmentPacket.TYPE, RemoveEnchantmentPacket.STREAM_CODEC,
-                (packet, context) -> packet.exec(packet, context));
-
-        registrar.playToClient(AvailableEnchantmentsPacket.TYPE, AvailableEnchantmentsPacket.STREAM_CODEC,
-                (packet, context) -> packet.exec(packet, context));
-
-        registrar.playToClient(SyncClientDatapackPacket.TYPE, SyncClientDatapackPacket.STREAM_CODEC,
-                (packet, context) -> packet.exec(packet, context));
-
-    }
-
-    /**
-     * Register payloads inbound to client.
-     * @param event
-     */
-    public static void registerClient(RegisterClientPayloadHandlersEvent event) {
-
+    public static void registerPackets(NetworkRegisterEvent event) {
+        event.register(Networking.Side.CLIENT, AvailableEnchantmentsPacket.TYPE, AvailableEnchantmentsPacket.STREAM_CODEC);
+        event.register(Networking.Side.SERVER, EnchantPacket.TYPE, EnchantPacket.STREAM_CODEC);
+        event.register(Networking.Side.SERVER, RemoveEnchantmentPacket.TYPE, RemoveEnchantmentPacket.STREAM_CODEC);
+        event.register(Networking.Side.SERVER, ReplicatePacket.TYPE, ReplicatePacket.STREAM_CODEC);
+        event.register(Networking.Side.SERVER, TransmutePacket.TYPE, TransmutePacket.STREAM_CODEC);
+        event.register(Networking.Side.SERVER, UpdateToolSlotPacket.TYPE, UpdateToolSlotPacket.STREAM_CODEC);
     }
 }

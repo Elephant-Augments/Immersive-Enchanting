@@ -1,6 +1,6 @@
 package me.alfie.immersiveenchanting.api.node;
 
-import net.minecraft.resources.Identifier;
+import me.alfie.alfinolib.util.ResourceId;
 
-public record SpriteIcon(Identifier id) implements NodeIcon {
+public record SpriteIcon(ResourceId id) implements NodeIcon {
 }

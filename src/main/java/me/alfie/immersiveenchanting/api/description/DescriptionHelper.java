@@ -1,14 +1,15 @@
 package me.alfie.immersiveenchanting.api.description;
 
+import me.alfie.alfinolib.gui.GuiGraphicsX;
+import me.alfie.alfinolib.gui.util.GuiGraphicsApi;
+import me.alfie.alfinolib.gui.util.MousePos;
 import me.alfie.immersiveenchanting.api.description.internal.lines.FuelsLine;
 import me.alfie.immersiveenchanting.api.description.internal.lines.LevelsLine;
 import me.alfie.immersiveenchanting.api.description.internal.lines.MaterialsLine;
-import me.alfie.immersiveenchanting.api.node.internal.EnchantmentNodeData;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.NodeTooltip;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.NotNull;
@@ -21,8 +22,8 @@ public class DescriptionHelper {
 
     public static final int DEFAULT_LINE_WIDTH = 32;
 
-    public static void text(GuiGraphicsExtractor graphics, Component component, int x, int y) {
-        graphics.text(Minecraft.getInstance().font, component, x, y, Color.WHITE.getRGB());
+    public static void text(GuiGraphicsX gx, Component component, int x, int y) {
+        GuiGraphicsApi.text(gx, Minecraft.getInstance().font, component, x, y, true);
     }
 
     /**
@@ -92,8 +93,8 @@ public class DescriptionHelper {
 
             description.insertLine(lineStart + i, new DescriptionLine() {
                 @Override
-                public void render(GuiGraphicsExtractor graphics, int lineX, int lineY, double mouseX, double mouseY) {
-                    text(graphics, getText(), lineX, lineY);
+                public void render(GuiGraphicsX gx, int lineX, int lineY, MousePos mousePos) {
+                    text(gx, getText(), lineX, lineY);
                 }
 
                 @Override
@@ -108,11 +109,6 @@ public class DescriptionHelper {
         return totalLines;
     }
 
-    /**
-     * Split a string into chunks.
-     * @param text
-     * @return
-     */
     private static List<String> chunkString(String text, int chunkSize) {
         java.util.List<String> parts = new ArrayList<>();
 
@@ -121,7 +117,7 @@ public class DescriptionHelper {
 
         for (String word : words) {
             // If adding this word would exceed the limit, flush the current chunk
-            if (current.length() > 0 &&
+            if (!current.isEmpty() &&
                     current.length() + 1 + word.length() > chunkSize) {
 
                 parts.add(current.toString());
@@ -129,14 +125,14 @@ public class DescriptionHelper {
             }
 
             // Append word (with space if needed)
-            if (current.length() > 0) {
+            if (!current.isEmpty()) {
                 current.append(' ');
             }
             current.append(word);
         }
 
         // Add remainder
-        if (current.length() > 0) {
+        if (!current.isEmpty()) {
             parts.add(current.toString());
         }
 

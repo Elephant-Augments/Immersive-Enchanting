@@ -1,13 +1,14 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.node;
 
 import com.mojang.blaze3d.platform.NativeImage;
+import me.alfie.alfinolib.gui.GuiGraphicsX;
+import me.alfie.alfinolib.gui.util.MousePos;
+import me.alfie.alfinolib.util.ResourceId;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
-import me.alfie.immersiveenchanting.gui.canvas.CanvasRenderable;
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
+import me.alfie.immersiveenchanting.gui.canvas.CanvasRenderable;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.resources.Identifier;
 import org.joml.Vector2i;
 
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ public class BranchTexture extends CanvasRenderable {
     private final NodeBranch branch;
 
     private final List<Pixel> precomputedPixels = new ArrayList<>();
-    private Identifier textureId;
+    private ResourceId textureId;
     private int textureWidth;
     private int textureHeight;
 
@@ -33,13 +34,13 @@ public class BranchTexture extends CanvasRenderable {
     }
 
     @Override
-    public void render(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+    public void render(GuiGraphicsX gx, MousePos mousePos) {
         int brightness = (canvas().screen().tooltipManager().hasActiveTooltip() &&
                 branch.nodes().contains(canvas().screen().tooltipManager().getActiveTooltipNode()))
                 ? Canvas.FULL_BRIGHTNESS
                 : canvas().getCurrentBrightness();
 
-        blit(graphics, textureId, textureWidth, textureHeight, brightness);
+        blit(gx, textureId, textureWidth, textureHeight, brightness);
     }
 
     /**
@@ -142,11 +143,6 @@ public class BranchTexture extends CanvasRenderable {
         }
     }
 
-    /**
-     * Creates a {@link DynamicTexture} sized to the bounding box of {@link #precomputedPixels},
-     * writes the pixels into it, and uploads it to the GPU under a unique identifier.
-     * Also updates {@link #canvasX}/{@link #canvasY} to the top-left of that bounding box.
-     */
     private void bakeTexture() {
         if (precomputedPixels.isEmpty()) return;
 
@@ -168,8 +164,8 @@ public class BranchTexture extends CanvasRenderable {
         // Create dynamic texture
         String label = "branch_connection";
         DynamicTexture bakedTexture = new DynamicTexture(label, textureWidth, textureHeight, true);
-        textureId = Identifier.fromNamespaceAndPath(ImmersiveEnchanting.MODID, label + hashCode());
-        Minecraft.getInstance().getTextureManager().register(textureId, bakedTexture);
+        textureId = new ResourceId(ImmersiveEnchanting.MODID, label + hashCode());
+        Minecraft.getInstance().getTextureManager().register(textureId.mc(), bakedTexture);
 
 
         NativeImage image = bakedTexture.getPixels();

@@ -1,9 +1,11 @@
 package me.alfie.immersiveenchanting.datapack.mod_icons;
 
+import me.alfie.alfinolib.datapacks.DatapackKey;
+import me.alfie.alfinolib.datapacks.DatapackRegistry;
+import me.alfie.alfinolib.datapacks.ModDatapack;
+import me.alfie.alfinolib.util.ResourceId;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
-import me.alfie.immersiveenchanting.api.datapack.internal.DatapackKeys;
-import me.alfie.immersiveenchanting.api.datapack.DatapackRegistry;
-import me.alfie.immersiveenchanting.api.datapack.ModDatapack;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -14,26 +16,27 @@ import java.util.Map;
 
 public class ModIconsDatapack extends ModDatapack<ModIconsMap, ModIconsMap> {
 
-    private ModIconsMap data = new ModIconsMap(new HashMap<>());
+    public static final DatapackKey<ModIconsMap> KEY = new DatapackKey<>(ImmersiveEnchanting.MODID, "mod_icons");
+    private ModIconsMap DATA = new ModIconsMap(new HashMap<>());
 
-    protected ModIconsDatapack() {
-        super(ModIconsMap.CODEC, DatapackKeys.MOD_ICONS, ModIconsMap.STREAM_CODEC);
+    protected ModIconsDatapack(RegistryAccess registryAccess) {
+        super(ModIconsMap.CODEC, KEY, ModIconsMap.STREAM_CODEC, registryAccess);
     }
 
     @Override
     protected void apply(Map<Identifier, ModIconsMap> input, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
-        Identifier key = DatapackKeys.MOD_ICONS.identifier();
-        data = input.getOrDefault(key, new ModIconsMap(new HashMap<>()));
+        ResourceId key = KEY.id();
+        DATA = parseOrDefault(input.get(key), new ModIconsMap(new HashMap<>()));
 
-        ImmersiveEnchanting.LOGGER.debug("Found {}", data);
+        ImmersiveEnchanting.LOGGER.debug("Found {}", DATA);
     }
 
     @Override
     public ModIconsMap getData() {
-        return data;
+        return DATA;
     }
 
     public static void register(AddServerReloadListenersEvent event) {
-        DatapackRegistry.register(event, ModIconsDatapack::new);
+        DatapackRegistry.register(event, () -> new ModIconsDatapack(event.getRegistryAccess()));
     }
 }

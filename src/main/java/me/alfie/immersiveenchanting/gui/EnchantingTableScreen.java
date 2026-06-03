@@ -1,37 +1,33 @@
 package me.alfie.immersiveenchanting.gui;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import me.alfie.immersiveenchanting.datapack.mod_icons.ModIconsMap;
+import me.alfie.alfinolib.gui.CommonAbstractContainerScreen;
+import me.alfie.alfinolib.gui.GuiGraphicsX;
+import me.alfie.alfinolib.gui.util.GuiGraphicsApi;
+import me.alfie.alfinolib.gui.util.MousePos;
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
+import me.alfie.immersiveenchanting.gui.canvas.Canvas;
+import me.alfie.immersiveenchanting.gui.canvas.CanvasCamera;
+import me.alfie.immersiveenchanting.gui.core.ScreenState;
+import me.alfie.immersiveenchanting.gui.core.Sprite;
 import me.alfie.immersiveenchanting.gui.tab.TabButton;
 import me.alfie.immersiveenchanting.gui.tab.book.BookTab;
 import me.alfie.immersiveenchanting.gui.tab.book.FilterCheckbox;
+import me.alfie.immersiveenchanting.gui.tab.enchanting.EnchantingTab;
+import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
+import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.CostRenderer;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.TooltipManager;
 import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.util.FxHelper;
-import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
-import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.CostRenderer;
-import me.alfie.immersiveenchanting.gui.canvas.CanvasCamera;
-import me.alfie.immersiveenchanting.gui.canvas.Canvas;
-import me.alfie.immersiveenchanting.gui.core.ScreenState;
-import me.alfie.immersiveenchanting.gui.core.Sprite;
-import me.alfie.immersiveenchanting.gui.tab.enchanting.EnchantingTab;
-import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -45,9 +41,7 @@ import java.util.List;
  *
  * <p>This screen acts as the central controller for all client-side enchanting UI logic.</p>
  */
-public class EnchantingTableScreen extends AbstractContainerScreen<@NotNull EnchantingTableMenu> {
-
-    private static final Logger log = LogManager.getLogger(EnchantingTableScreen.class);
+public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNull EnchantingTableMenu> {
     private CanvasCamera camera;
     private final Canvas scrollableCanvas;
     private ScreenState screenState;
@@ -58,17 +52,16 @@ public class EnchantingTableScreen extends AbstractContainerScreen<@NotNull Ench
 
     private ItemStack lastToolSlotStack = ItemStack.EMPTY;
 
+    private final Player player;
     private final RegistryAccess registryAccess;
 
     private final CostRenderer enchantmentCostRenderer;
     private final TooltipManager tooltipManager;
 
-    private final Player player;
-
     private boolean isTabKeyDown;
 
     public EnchantingTableScreen(EnchantingTableMenu menu, Inventory inventory, Component title) {
-        super(menu, inventory, title, 256, 222);
+        super(menu, inventory, title, 256, 256);
         registryAccess = inventory.player.registryAccess();
         this.player = inventory.player;
         this.scrollableCanvas = new Canvas(this);
@@ -94,73 +87,53 @@ public class EnchantingTableScreen extends AbstractContainerScreen<@NotNull Ench
         camera.centerCameraOnCanvas();
     }
 
-    /**
-     * Renders the main background layer including the canvas, active tab content,
-     * and GUI texture.
-     *
-     * <p>Applies scissoring for canvas clipping and handles camera transforms
-     * during rendering.</p>
-     */
     @Override
-    public void extractBackground(@NotNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
-        super.extractBackground(graphics, mouseX, mouseY, a);
+    public void renderBackground(GuiGraphicsX gx, MousePos mousePos, float partialTick) {
+        super.renderBackground(gx, mousePos, partialTick);
 
-
-        if(!canvas().DEBUG_DISABLE_CULLING) graphics.enableScissor(
+        if(!canvas().DEBUG_DISABLE_CULLING) gx.graphics().enableScissor(
                 camera.VIEWPORT_X, camera.VIEWPORT_Y,
                 camera.VIEWPORT_X + camera.VIEWPORT_WIDTH, camera.VIEWPORT_Y + camera.VIEWPORT_HEIGHT);
 
-        graphics.pose().pushMatrix();
-        graphics.pose().translate(camera.VIEWPORT_X, camera.VIEWPORT_Y);
-        graphics.pose().scale(camera.zoom());
-        graphics.pose().translate(-camera.x(), -camera.y());
+        gx.graphics().pose().pushMatrix();
+        gx.graphics().pose().translate(camera.VIEWPORT_X, camera.VIEWPORT_Y);
+        gx.graphics().pose().scale(camera.zoom());
+        gx.graphics().pose().translate(-camera.x(), -camera.y());
 
-        canvas().render(graphics);
+        canvas().render(gx);
 
-        if(isState(ScreenState.ENCHANTING)) {
-            enchantingTab.render(graphics, mouseX, mouseY);
-        }
+        if(isState(ScreenState.ENCHANTING)) enchantingTab.render(gx, mousePos);
+        gx.graphics().pose().popMatrix();
+        if(isState(ScreenState.BOOKS)) bookTab.render(gx, mousePos);
 
-        graphics.pose().popMatrix();
+        if(!canvas().DEBUG_DISABLE_CULLING) gx.graphics().disableScissor();
 
-        if(isState(ScreenState.BOOKS)) {
-            bookTab.render(graphics, mouseX, mouseY);
-        }
-
-        if(!canvas().DEBUG_DISABLE_CULLING) graphics.disableScissor();
-
-        graphics.blit(RenderPipelines.GUI_TEXTURED,
+        GuiGraphicsApi.blit(
+                gx,
                 Sprite.ENCHANTING_TABLE_GUI.id(),
                 getGuiLeft(), getGuiTop(),
-                0f,0f,
-                imageWidth, imageHeight,
-                Sprite.ENCHANTING_TABLE_GUI.width(), Sprite.ENCHANTING_TABLE_GUI.height());
+                imageWidth, imageHeight
+        );
 
-        tabButton.render(graphics, mouseX, mouseY);
-
+        tabButton.render(gx, mousePos);
     }
 
-    /**
-     * Handles dynamic rendering state including tooltips, carried items,
-     * and snapback animations.
-     *
-     * <p>Also manages tooltip lifecycle updates and clears invalid or stale tooltips.</p>
-     */
     @Override
-    public void extractRenderState(@NotNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
-        this.extractContents(graphics, mouseX, mouseY, a);
-        this.extractCarriedItem(graphics, mouseX, mouseY);
-        this.extractSnapbackItem(graphics);
+    public void render(GuiGraphicsX gx, MousePos mousePos, float partialTick) {
+        this.extractContents(gx.graphics(), mousePos.x(), mousePos.y(), partialTick);
+        this.extractCarriedItem(gx.graphics(), mousePos.x(), mousePos.y());
+        this.extractSnapbackItem(gx.graphics());
 
+        //Update tooltip manager
         List<Node> renderedNodes = enchantingTab.branchManager().getAllNodes();
 
         if(tooltipManager.hasActiveTooltip() && !renderedNodes.contains(tooltipManager.getActiveTooltipNode()))
             tooltipManager.clearActiveTooltip();
 
         if(tooltipManager.hasActiveTooltip())
-            tooltipManager.getActiveTooltip().render(graphics, mouseX, mouseY);
+            tooltipManager.getActiveTooltip().render(gx, mousePos);
 
-        if(!tooltipManager.isTooltipLocked()) this.extractTooltip(graphics, mouseX, mouseY);
+        if(!tooltipManager.isTooltipLocked()) this.extractTooltip(gx.graphics(), mousePos.x(), mousePos.y());
 
         if(!tooltipManager.isTooltipRequestedThisFrame() && !tooltipManager.isTooltipLocked())
             tooltipManager.clearActiveTooltip();
@@ -168,117 +141,84 @@ public class EnchantingTableScreen extends AbstractContainerScreen<@NotNull Ench
         tooltipManager.resetFrameState();
     }
 
-    /**
-     * Renders inventory labels and adjusts label positioning.
-     */
     @Override
-    protected void extractLabels(GuiGraphicsExtractor graphics, int xm, int ym) {
+    public void renderLabels(GuiGraphicsX gx, MousePos mousePos) {
         this.inventoryLabelX = 16;
-        graphics.text(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, -12566464, false);
+        GuiGraphicsApi.text(gx, this.font, this.playerInventoryTitle.copy().withColor(-12566464), this.inventoryLabelX, this.inventoryLabelY - 33, false);
     }
 
-    /**
-     * Handles mouse click input for all UI components depending on active screen state.
-     *
-     * <p>Delegates clicks to tabs, camera, tool slots, and interactive widgets.</p>
-     *
-     * @return true if the event was consumed
-     */
     @Override
-    public boolean mouseClicked(@NotNull MouseButtonEvent mouse, boolean doubleClick) {
-        if(tabButton.onMouseClick(mouse)) return true;
+    public boolean onMouseClick(MousePos mousePos, int button) {
+        if(tabButton.onMouseClick(mousePos, button)) return true;
 
         if(isState(ScreenState.ENCHANTING)) {
-            if(enchantingTab.centralSlot().onMouseClick(mouse)) return true;
+            if(enchantingTab.centralSlot().onMouseClick(mousePos, button)) return true;
 
-            if(tooltipManager.hasActiveTooltip() && tooltipManager.getActiveTooltip().onMouseClick(mouse)) return true;
+            if(tooltipManager.hasActiveTooltip() && tooltipManager.getActiveTooltip().onMouseClick(mousePos, button)) return true;
 
-            if(camera.onMouseClick(mouse)) return true;
+            if(camera.onMouseClick(mousePos, button)) return true;
         } else if(isState(ScreenState.BOOKS)) {
-            if(bookTab.scrollbar().onMouseClick(mouse)) return true;
+            if(bookTab.scrollbar().onMouseClick(mousePos, button)) return true;
 
-            for(FilterCheckbox checkbox : bookTab.filterCheckboxes()) if(checkbox.onMouseClick(mouse)) return true;
+            for(FilterCheckbox checkbox : bookTab.filterCheckboxes()) if(checkbox.onMouseClick(mousePos, button)) return true;
         }
 
-        return super.mouseClicked(mouse, doubleClick);
+        return super.onMouseClick(mousePos, button);
     }
 
-    /**
-     * Handles mouse drag input for camera movement and scrollable UI elements.
-     *
-     * @return true if the event was consumed
-     */
     @Override
-    public boolean mouseDragged(@NotNull MouseButtonEvent mouse, double dx, double dy) {
-        if(camera.onMouseDrag(mouse, dx / camera().zoom(), dy / camera().zoom())) return true;
+    public boolean onMouseDrag(MousePos mousePos, int button, double dx, double dy) {
+        if(camera.onMouseDrag(mousePos, button, dx / camera().zoom(), dy / camera().zoom())) return true;
 
-        if(bookTab.scrollbar().onMouseDrag(mouse, dx, dy)) return true;
+        if(bookTab.scrollbar().onMouseDrag(mousePos, button, dx, dy)) return true;
 
-        return super.mouseDragged(mouse, dx, dy);
+        return super.onMouseDrag(mousePos, button, dx, dy);
     }
 
-    /**
-     * Handles mouse release events for camera, tooltips, and UI components.
-     *
-     * @return true if the event was consumed
-     */
     @Override
-    public boolean mouseReleased(@NotNull MouseButtonEvent mouse) {
-        if(tooltipManager().hasActiveTooltip() && tooltipManager().getActiveTooltip().onMouseRelease(mouse)) return true;
+    public boolean onMouseRelease(MousePos mousePos, int button) {
+        if(tooltipManager().hasActiveTooltip() && tooltipManager().getActiveTooltip().onMouseRelease(mousePos, button)) return true;
 
-        if(camera.onMouseRelease(mouse)) return true;
+        if(camera.onMouseRelease(mousePos, button)) return true;
 
-        if(bookTab.scrollbar().onMouseRelease(mouse)) return true;
+        if(bookTab.scrollbar().onMouseRelease(mousePos, button)) return true;
 
-        return super.mouseReleased(mouse);
+        return super.onMouseRelease(mousePos, button);
     }
 
-    /**
-     * Handles scroll input for either camera zoom or book tab scrolling,
-     * depending on the active screen state.
-     *
-     * @return true if the event was consumed
-     */
     @Override
-    public boolean mouseScrolled(double x, double y, double scrollX, double scrollY) {
+    public boolean onMouseScrolled(MousePos mousePos, double scrollY) {
         if(isState(ScreenState.ENCHANTING)) {
-            if(camera.onMouseScrolled(x, y, scrollY)) return true;
+            if(camera.onMouseScrolled(mousePos, scrollY)) return true;
         } else if(isState(ScreenState.BOOKS)) {
-            if(bookTab.scrollbar().onMouseScrolled(x, y, scrollY)) return true;
+            if(bookTab.scrollbar().onMouseScrolled(mousePos, scrollY)) return true;
         }
 
-        return super.mouseScrolled(x, y, scrollX, scrollY);
+        return super.onMouseScrolled(mousePos, scrollY);
     }
 
-    /**
-     * Handles keyboard input for the screen.
-     *
-     * <p>In book mode, supports search input and backspace handling.</p>
-     *
-     * @return true if the event was consumed
-     */
     @Override
-    public boolean keyPressed(@NotNull KeyEvent event) {
+    public boolean onKeyPress(int keyCode, int scanCode, int modifiers) {
         if(isState(ScreenState.BOOKS)) {
-            if(event.key() == InputConstants.KEY_BACKSPACE) {
+            if(keyCode == InputConstants.KEY_BACKSPACE) {
                 bookTab.searchbar().removeCharFromSearch();
             }
 
-            if(event.key() == InputConstants.KEY_ESCAPE) {
-                return super.keyPressed(event);
+            if(keyCode == InputConstants.KEY_ESCAPE) {
+                return super.onKeyPress(keyCode, scanCode, modifiers);
             } else {
                 return true;
             }
         }
 
         if(isState(ScreenState.ENCHANTING)) {
-            if(event.key() == InputConstants.KEY_TAB) {
+            if(keyCode == InputConstants.KEY_TAB) {
                 isTabKeyDown = true;
                 return true;
             }
         }
 
-        return super.keyPressed(event);
+        return super.onKeyPress(keyCode, scanCode, modifiers);
     }
 
     @Override
@@ -291,34 +231,13 @@ public class EnchantingTableScreen extends AbstractContainerScreen<@NotNull Ench
         return super.keyReleased(event);
     }
 
-    /**
-     * Handles character input for text entry in book search mode.
-     *
-     * @return true if the event was consumed
-     */
     @Override
-    public boolean charTyped(@NotNull CharacterEvent event) {
+    public boolean onCharTyped(char codePoint, int modifiers) {
         if(isState(ScreenState.BOOKS)) {
-            bookTab.searchbar().addCharToSearch((char) event.codepoint());
+            bookTab.searchbar().addCharToSearch(codePoint);
         }
 
-        return super.charTyped(event);
-    }
-
-    /**
-     * Checks whether the mouse is inside a given rectangular area.
-     *
-     * @param x top-left x position
-     * @param y top-left y position
-     * @param width rectangle width
-     * @param height rectangle height
-     * @param mouseX current mouse x
-     * @param mouseY current mouse y
-     * @return true if the mouse is within bounds
-     */
-    public boolean isMouseOver(double x, double y, int width, int height, double mouseX, double mouseY) {
-        return mouseX >= x && mouseX < x + width
-                && mouseY >= y && mouseY < y + height;
+        return super.onCharTyped(codePoint, modifiers);
     }
 
     /**

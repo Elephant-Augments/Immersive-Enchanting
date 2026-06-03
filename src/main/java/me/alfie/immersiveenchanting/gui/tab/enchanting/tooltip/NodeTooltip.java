@@ -2,13 +2,13 @@ package me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.cursor.CursorTypes;
-import me.alfie.immersiveenchanting.util.FxHelper;
+import me.alfie.alfinolib.gui.GuiGraphicsX;
+import me.alfie.alfinolib.gui.ScreenEventListener;
+import me.alfie.alfinolib.gui.util.MousePos;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
-import me.alfie.immersiveenchanting.gui.core.ScreenEventListener;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
+import me.alfie.immersiveenchanting.util.FxHelper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.input.MouseButtonEvent;
 import org.joml.Vector2f;
 
 /**
@@ -73,7 +73,7 @@ public class NodeTooltip implements ScreenEventListener {
      * @param mouseX current mouse X position
      * @param mouseY current mouse Y position
      */
-    public void render(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+    public void render(GuiGraphicsX gx, MousePos mousePos) {
         screenPos = screen.canvas().canvasToScreen(node.canvasX(), node.canvasY());
 
         title.setPos((int) screenPos.x(), (int) screenPos.y());
@@ -90,18 +90,19 @@ public class NodeTooltip implements ScreenEventListener {
         title.setHeight(titleHeight);
         description.setHeight(descHeight);
 
-        description.render(graphics, mouseX, mouseY);
-        title.blitNineSliceSprite(graphics);
+        description.render(gx, mousePos);
+        title.blitNineSliceSprite(gx);
 
         boolean locked = screen().tooltipManager().isTooltipLockedFor(node());
         hoverWidth = locked ? sharedWidth : Node.WIDTH;
         hoverHeight = locked ? titleHeight+descHeight-13 : Node.HEIGHT;
 
-        if(screen.isMouseOver(screenPos.x(), screenPos.y(), Node.WIDTH, Node.HEIGHT, mouseX, mouseY)) {
-            graphics.requestCursor(CursorTypes.POINTING_HAND);
+        if(mousePos.isOver((int) screenPos.x(), (int) screenPos.y(), Node.WIDTH, Node.HEIGHT)) {
+            gx.graphics().requestCursor(CursorTypes.POINTING_HAND);
+
         }
 
-        if(screen().isMouseOver(screenPos.x(), screenPos.y(), hoverWidth, hoverHeight, mouseX, mouseY)) {
+        if(mousePos.isOver((int) screenPos.x(), (int) screenPos.y(), hoverWidth, hoverHeight)) {
             screen().tooltipManager().requestTooltip(node(), 0);
 
             if(screen().tooltipManager().isHoldingTooltip()) screen().tooltipManager().updateHold();
@@ -110,16 +111,13 @@ public class NodeTooltip implements ScreenEventListener {
 
             screen().tooltipManager().resetHold();
         }
-
-
     }
 
 
-
     @Override
-    public boolean onMouseClick(MouseButtonEvent mouse) {
-        if(screen().isMouseOver(screenPos.x(), screenPos.y(), Node.WIDTH, Node.HEIGHT, mouse.x(), mouse.y())) {
-            if(mouse.button() == InputConstants.MOUSE_BUTTON_LEFT) {
+    public boolean onMouseClick(MousePos mousePos, int button) {
+        if(mousePos.isOver((int) screenPos.x(), (int) screenPos.y(), Node.WIDTH, Node.HEIGHT)) {
+            if(button == InputConstants.MOUSE_BUTTON_LEFT) {
                 node().click();
                 screen().tooltipManager().unlockTooltip();
                 return true;
@@ -127,8 +125,8 @@ public class NodeTooltip implements ScreenEventListener {
         }
 
 
-        if(screen().isMouseOver(screenPos.x(), screenPos.y(), hoverWidth, hoverHeight, mouse.x(), mouse.y())) {
-            if(mouse.button() == InputConstants.MOUSE_BUTTON_RIGHT && isLockingAllowed()) {
+        if(mousePos.isOver((int) screenPos.x(), (int) screenPos.y(), hoverWidth, hoverHeight)) {
+            if(button == InputConstants.MOUSE_BUTTON_RIGHT && isLockingAllowed()) {
                 if(screen().tooltipManager().isTooltipLockedFor(node())) {
                     screen().tooltipManager().unlockTooltip();
                 } else {
@@ -139,15 +137,14 @@ public class NodeTooltip implements ScreenEventListener {
             return true;
         }
 
-
-        return ScreenEventListener.super.onMouseClick(mouse);
+        return ScreenEventListener.super.onMouseClick(mousePos, button);
     }
 
     @Override
-    public boolean onMouseRelease(MouseButtonEvent mouse) {
+    public boolean onMouseRelease(MousePos mousePos, int button) {
         screen().tooltipManager().resetHold();
 
-        return ScreenEventListener.super.onMouseRelease(mouse);
+        return ScreenEventListener.super.onMouseRelease(mousePos, button);
     }
 
     /**

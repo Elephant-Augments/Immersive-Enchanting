@@ -1,10 +1,11 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip;
 
+import me.alfie.alfinolib.gui.util.GuiGraphicsApi;
+import me.alfie.alfinolib.util.ResourceId;
 import me.alfie.immersiveenchanting.config.ClientConfig;
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.codec.Cost;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.codec.CostHolder;
-import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
@@ -30,7 +31,7 @@ public class CostRenderer {
      * Loads the cost and fuel data for the given enchantment ID and level so it can be
      * cycled and displayed in the tooltip. Must be called whenever the active node changes.
      */
-    public void setCostToRender(Identifier id, int level) {
+    public void setCostToRender(ResourceId id, int level) {
         holder = Optional.ofNullable(costRegistry.get(id))
                 .map(entry -> entry.levelCosts().getLevel(level))
                 .orElse(CostHolder.EMPTY);
@@ -58,29 +59,10 @@ public class CostRenderer {
     }
 
     public RenderedCost getCurrentRenderedCost() {
-        return getCycledElement(renderedCosts);
+        return GuiGraphicsApi.getCycledElement(renderedCosts, ClientConfig.getItemCarouselSpeed());
     }
 
     public RenderedCost getCurrentRenderedFuel() {
-        return getCycledElement(renderedFuelCosts);
-    }
-
-    /**
-     * Returns the currently active element from a list, cycling through it
-     * based on system time and a given interval in milliseconds.
-     *
-     * @param <T> the type of elements
-     * @param list the list of elements to cycle through
-     * @return the current element
-     */
-    public static <T> T getCycledElement(List<T> list) {
-        if (list == null || list.isEmpty()) return null;
-
-        final int CAROUSEL_SPEED = ClientConfig.getItemCarouselSpeed();
-
-        long currentTime = System.currentTimeMillis();
-        int index = (int)((currentTime / CAROUSEL_SPEED) % list.size());
-
-        return list.get(index);
+        return GuiGraphicsApi.getCycledElement(renderedFuelCosts, ClientConfig.getItemCarouselSpeed());
     }
 }

@@ -1,16 +1,17 @@
 package me.alfie.immersiveenchanting.networking;
 
+import me.alfie.alfinolib.networking.NetworkPacket;
+import me.alfie.alfinolib.networking.codec.StreamCodec;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.config.ServerConfig;
-import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import me.alfie.immersiveenchanting.util.FxHelper;
 import net.minecraft.core.Holder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -33,46 +34,49 @@ import org.jetbrains.annotations.NotNull;
  *
  * <p>On success, the item is updated server-side and feedback effects are triggered.</p>
  */
-public record RemoveEnchantmentPacket(Holder<Enchantment> enchantmentHolder, int level) implements ModNetworkPacket<RemoveEnchantmentPacket> {
+public record RemoveEnchantmentPacket(ResourceKey<Enchantment> enchantmentKey, int level) implements NetworkPacket<RemoveEnchantmentPacket> {
 
     public static final Type<@NotNull RemoveEnchantmentPacket> TYPE = new Type<>(Identifier.fromNamespaceAndPath(ImmersiveEnchanting.MODID, "remove_enchantment"));
-
-    public static final StreamCodec<RegistryFriendlyByteBuf, RemoveEnchantmentPacket> STREAM_CODEC = StreamCodec.composite(
-            ModPackets.ENCHANTMENT_HOLDER_CODEC, RemoveEnchantmentPacket::enchantmentHolder,
-            ByteBufCodecs.VAR_INT, RemoveEnchantmentPacket::level,
-            RemoveEnchantmentPacket::new);
-
-    @Override
-    public Type<@NotNull RemoveEnchantmentPacket> typeId() {
+    @Override public Type<@NotNull RemoveEnchantmentPacket> type() {
         return TYPE;
     }
 
-    @Override
-    public StreamCodec<RegistryFriendlyByteBuf, RemoveEnchantmentPacket> codec() {
-        return STREAM_CODEC;
-    }
+    public static StreamCodec<RegistryFriendlyByteBuf, RemoveEnchantmentPacket> STREAM_CODEC = new StreamCodec<RegistryFriendlyByteBuf, RemoveEnchantmentPacket>() {
+        @Override
+        public void encode(RegistryFriendlyByteBuf buf, RemoveEnchantmentPacket packet) {
+            ModPackets.ENCHANTMENT_CODEC.encode(buf, packet.enchantmentKey);
+            buf.writeInt(packet.level);
+        }
+
+        @Override
+        public RemoveEnchantmentPacket decode(RegistryFriendlyByteBuf buf) {
+            return new RemoveEnchantmentPacket(ModPackets.ENCHANTMENT_CODEC.decode(buf), buf.readInt());
+        }
+    };
 
     @Override
-    public void exec(RemoveEnchantmentPacket packet, IPayloadContext context) {
+    public void exec(IPayloadContext context) {
+        Player player = context.player();
+        if (!(player.containerMenu instanceof EnchantingTableMenu menu)) return;
         if(!ServerConfig.isEnchantmentRemovalAllowed()) return;
-        if (!(context.player().containerMenu instanceof EnchantingTableMenu menu)) return;
+
+        Holder<Enchantment> enchantmentHolder = EnchantmentUtil.toHolder(enchantmentKey,
+                player.registryAccess());
 
         ItemStack stack = menu.getToolSlot().getItem();
         ItemEnchantments.Mutable mutable = new ItemEnchantments.Mutable(stack.getTagEnchantments());
 
-        int currentLevel = mutable.getLevel(packet.enchantmentHolder());
+        int currentLevel = mutable.getLevel(enchantmentHolder);
         if (currentLevel <= 0) return;
 
         int newLevel = currentLevel - 1;
-
         if (newLevel > 0) {
-            mutable.set(packet.enchantmentHolder(), newLevel);
+            mutable.set(enchantmentHolder, newLevel);
         } else {
-            mutable.removeIf(e -> e.equals(packet.enchantmentHolder()));
+            mutable.removeIf(e -> e.equals(enchantmentHolder));
         }
 
         EnchantmentHelper.setEnchantments(stack, mutable.toImmutable());
         FxHelper.playEnchantmentRemove(context.player().level(), menu.getBlockPos());
     }
-
 }

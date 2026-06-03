@@ -1,15 +1,12 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting;
 
+import me.alfie.alfinolib.gui.GuiGraphicsX;
+import me.alfie.alfinolib.gui.util.MousePos;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
-import me.alfie.immersiveenchanting.gui.tab.enchanting.node.*;
-import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.TooltipManager;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.world.item.ItemStack;
+import me.alfie.immersiveenchanting.gui.tab.enchanting.node.BranchManager;
+import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeBranch;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 
 /**
  * Represents the main "Enchanting" tab in the {@link EnchantingTableScreen}.
@@ -73,12 +70,12 @@ public class EnchantingTab {
      * @param mouseX   Current mouse X
      * @param mouseY   Current mouse Y
      */
-    public void render(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+    public void render(GuiGraphicsX gx, MousePos mousePos) {
         for(NodeBranch branch : branchManager.branches()) {
-            branch.render(graphics, mouseX, mouseY);
+            branch.render(gx, mousePos);
         }
 
-        centralSlot.render(graphics, mouseX, mouseY);
+        centralSlot.render(gx, mousePos);
     }
 
     /**

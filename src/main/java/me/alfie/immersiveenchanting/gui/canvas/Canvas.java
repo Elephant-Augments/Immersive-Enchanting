@@ -1,12 +1,14 @@
 package me.alfie.immersiveenchanting.gui.canvas;
 
+import me.alfie.alfinolib.gui.GuiGraphicsX;
+import me.alfie.alfinolib.gui.ScreenEventListener;
+import me.alfie.alfinolib.gui.util.GuiGraphicsApi;
+import me.alfie.alfinolib.gui.util.MousePos;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
-import me.alfie.immersiveenchanting.gui.core.ScreenEventListener;
 import me.alfie.immersiveenchanting.gui.core.ScreenState;
 import me.alfie.immersiveenchanting.gui.core.Sprite;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.EnchantingTab;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.BranchManager;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
@@ -36,7 +38,7 @@ public class Canvas implements ScreenEventListener {
         return screen;
     }
 
-    public void render(GuiGraphicsExtractor graphics) {
+    public void render(GuiGraphicsX gx) {
         updateBrightness(screen().tooltipManager().hasActiveTooltip(),
                 0.02f);
         if(screen.isState(ScreenState.BOOKS)) currentBrightness = FULL_BRIGHTNESS;
@@ -70,9 +72,9 @@ public class Canvas implements ScreenEventListener {
                     tile = Sprite.ALT_BACKGROUND_TILE;
                 }
 
-                graphics.blit(
+                gx.graphics().blit(
                         RenderPipelines.GUI_TEXTURED,
-                        tile.id(),
+                        tile.id().mc(),
                         x * TILE_SIZE, y * TILE_SIZE,
                         0, 0,
                         tile.width(), tile.height(),
@@ -198,7 +200,7 @@ public class Canvas implements ScreenEventListener {
      */
     public boolean isMouseOver(float canvasX, float canvasY,
                                float width, float height,
-                               double mouseX, double mouseY) {
+                               MousePos mousePos) {
         Vector2f screenPos = canvasToScreen(canvasX, canvasY);
         float scaledWidth = getScaledLength(width);
         float scaledHeight = getScaledLength(height);
@@ -220,7 +222,7 @@ public class Canvas implements ScreenEventListener {
 
         if(visibleLeft >= visibleRight || visibleTop >= visibleBottom) return false;
 
-        return mouseX >= visibleLeft && mouseX <= visibleRight
-                && mouseY >= visibleTop && mouseY <= visibleBottom;
+        return mousePos.x() >= visibleLeft && mousePos.x() <= visibleRight
+                && mousePos.y() >= visibleTop && mousePos.y() <= visibleBottom;
     }
 }

@@ -1,13 +1,10 @@
 package me.alfie.immersiveenchanting.datapack.mod_icons;
 
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.mojang.serialization.codecs.UnboundedMapCodec;
+import me.alfie.alfinolib.networking.codec.StreamCodec;
 import me.alfie.immersiveenchanting.item.ModItems;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
@@ -20,16 +17,36 @@ public record ModIconsMap(Map<String, Identifier> map) {
             Codec.unboundedMap(Codec.STRING, Identifier.CODEC)
                     .xmap(ModIconsMap::new, ModIconsMap::map);
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, ModIconsMap> STREAM_CODEC =
-            StreamCodec.composite(
-                    ByteBufCodecs.map(
-                            HashMap::new,
-                            ByteBufCodecs.STRING_UTF8,
-                            Identifier.STREAM_CODEC
-                    ),
-                    ModIconsMap::map,
-                    ModIconsMap::new
-            );
+
+    public static final StreamCodec<RegistryFriendlyByteBuf, ModIconsMap> STREAM_CODEC = new StreamCodec<RegistryFriendlyByteBuf, ModIconsMap>() {
+        @Override
+        public void encode(RegistryFriendlyByteBuf buf, ModIconsMap modIconsMap) {
+            Map<String, Identifier> map = modIconsMap.map();
+
+            buf.writeVarInt(map.size());
+
+            for (Map.Entry<String, Identifier> entry : map.entrySet()) {
+                buf.writeUtf(entry.getKey());
+                Identifier.STREAM_CODEC.encode(buf, entry.getValue());
+            }
+        }
+
+        @Override
+        public ModIconsMap decode(RegistryFriendlyByteBuf buf) {
+            int size = buf.readVarInt();
+
+            Map<String, Identifier> map = new HashMap<>(size);
+
+            for (int i = 0; i < size; i++) {
+                String key = buf.readUtf();
+                Identifier value = Identifier.STREAM_CODEC.decode(buf);
+
+                map.put(key, value);
+            }
+
+            return new ModIconsMap(map);
+        }
+    };
 
     /**
      * Returns the id as an item stack. If there is none defined, falls back to ancient book.

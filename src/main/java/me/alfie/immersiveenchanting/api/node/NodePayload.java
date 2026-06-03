@@ -1,5 +1,6 @@
 package me.alfie.immersiveenchanting.api.node;
 
+import me.alfie.alfinolib.util.ResourceId;
 import net.minecraft.resources.Identifier;
 
 /**
@@ -7,5 +8,5 @@ import net.minecraft.resources.Identifier;
  */
 public interface NodePayload {
 
-    Identifier type();
+    ResourceId type();
 }

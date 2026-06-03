@@ -1,11 +1,13 @@
 package me.alfie.immersiveenchanting.api.description.internal;
 
-import me.alfie.immersiveenchanting.api.description.*;
+import me.alfie.immersiveenchanting.api.description.DescriptionHelper;
+import me.alfie.immersiveenchanting.api.description.DescriptionLayout;
+import me.alfie.immersiveenchanting.api.description.DescriptionLayoutExtension;
 import me.alfie.immersiveenchanting.api.description.internal.lines.*;
+import me.alfie.immersiveenchanting.api.node.internal.EnchantmentNodeData;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeState;
-import me.alfie.immersiveenchanting.api.node.internal.EnchantmentNodeData;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.NodeTooltip;
 
 /**

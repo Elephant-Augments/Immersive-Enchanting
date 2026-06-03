@@ -1,14 +1,14 @@
 package me.alfie.immersiveenchanting.gui.tab;
 
 import com.mojang.blaze3d.platform.cursor.CursorTypes;
+import me.alfie.alfinolib.gui.GuiGraphicsX;
+import me.alfie.alfinolib.gui.ScreenEventListener;
+import me.alfie.alfinolib.gui.util.GuiGraphicsApi;
+import me.alfie.alfinolib.gui.util.MousePos;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
-import me.alfie.immersiveenchanting.gui.core.ScreenEventListener;
 import me.alfie.immersiveenchanting.gui.core.ScreenState;
 import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.util.FxHelper;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -49,7 +49,7 @@ public class TabButton implements ScreenEventListener {
      * @param mouseX the current mouse X position
      * @param mouseY the current mouse Y position
      */
-    public void render(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+    public void render(GuiGraphicsX gx, MousePos mousePos) {
         if(screen.isState(ScreenState.ENCHANTING)) {
             label = Component.translatable("immersiveenchanting.tab.book");
             icon = new ItemStack(ModItems.ANCIENT_BOOK.get(), 1);
@@ -58,55 +58,15 @@ public class TabButton implements ScreenEventListener {
             icon = new ItemStack(Items.ENCHANTING_TABLE, 1);
         }
 
-        graphics.item(icon, screen.getGuiLeft()+202, screen.getGuiTop()+132);
-        renderHoverTooltip(graphics, mouseX, mouseY);
+        final int x = screen.getGuiLeft() + 202;
+        final int y = screen.getGuiTop() + 132;
+        GuiGraphicsApi.itemStackWithTooltip(gx, icon, screen.getFont(), x, y, mousePos);
+        if (mousePos.isOver(x, y, width, height)) gx.graphics().requestCursor(CursorTypes.POINTING_HAND);
     }
 
-    /**
-     * Renders the hover tooltip and updates the cursor when the mouse is over the button.
-     <P>
-     * <p>Displays the current label and changes the cursor to a pointing hand.</p>
-     <P>
-     * @param graphics the GUI graphics context
-     * @param mouseX the current mouse X position
-     * @param mouseY the current mouse Y position
-     */
-    private void renderHoverTooltip(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-        if(this.isMouseOver(mouseX, mouseY)) {
-            graphics.requestCursor(CursorTypes.POINTING_HAND);
-            graphics.setTooltipForNextFrame(Minecraft.getInstance().font, label, mouseX, mouseY);
-        }
-
-    }
-
-    /**
-     * Checks whether the mouse is currently hovering over the tab button.
-     <P>
-     * @param mouseX the current mouse X position
-     * @param mouseY the current mouse Y position
-     * @return {@code true} if the mouse is within the button bounds
-     */
-    private boolean isMouseOver(double mouseX, double mouseY) {
-        return screen.isMouseOver(screen.getGuiLeft() + x, screen.getGuiTop() + y, width, height, mouseX, mouseY);
-    }
-
-    /**
-     * Handles mouse click interactions for the tab button.
-     <P>
-     * <p>If the button is clicked:</p>
-     <P>
-     * <ul>
-     *     <li>Plays a UI sound</li>
-     *     <li>Switches between ENCHANTING and BOOKS screen states</li>
-     *     <li>Initializes the book tab when entering BOOKS state</li>
-     * </ul>
-     <P>
-     * @param mouse the mouse click event
-     * @return {@code true} if the click was handled, otherwise falls back to default handling
-     */
     @Override
-    public boolean onMouseClick(MouseButtonEvent mouse) {
-        if(this.isMouseOver(mouse.x(), mouse.y())) {
+    public boolean onMouseClick(MousePos mousePos, int button) {
+        if(mousePos.isOver(screen.getGuiLeft() + 202, screen.getGuiTop() + 132, width, height)) {
             FxHelper.playGenericUISound(screen.player());
 
             if(screen.isState(ScreenState.ENCHANTING)) {
@@ -119,6 +79,6 @@ public class TabButton implements ScreenEventListener {
             return true;
         }
 
-        return ScreenEventListener.super.onMouseClick(mouse);
+        return ScreenEventListener.super.onMouseClick(mousePos, button);
     }
 }

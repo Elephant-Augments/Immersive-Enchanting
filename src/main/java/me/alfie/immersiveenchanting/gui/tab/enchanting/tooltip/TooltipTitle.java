@@ -1,5 +1,7 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip;
 
+import me.alfie.alfinolib.gui.GuiGraphicsX;
+import me.alfie.alfinolib.gui.util.GuiGraphicsApi;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.api.node.ItemIcon;
 import me.alfie.immersiveenchanting.api.node.NodeIcon;
@@ -13,7 +15,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 
 import java.awt.*;
 
@@ -80,43 +81,38 @@ public class TooltipTitle extends TooltipComponent {
      * and finally the title text. The title text is vertically centered relative to the node
      * sprite. A small horizontal offset is applied to position the title correctly.</p>
      *
-     * @param graphics The graphics context used for rendering
      */
     @Override
-    public void blitNineSliceSprite(GuiGraphicsExtractor graphics) {
+    public void blitNineSliceSprite(GuiGraphicsX gx) {
         setPos(x()+2, y());
-        super.blitNineSliceSprite(graphics);
+        super.blitNineSliceSprite(gx);
         setPos(x()-2, y());
 
         Node node = tooltip.node();
-        graphics.blit(
-                RenderPipelines.GUI_TEXTURED,
+
+        GuiGraphicsApi.blit(
+                gx,
                 node.getState().getSpriteForTier(node.getTier()).id(),
                 x(), y(),
-                0, 0,
-                Node.WIDTH, Node.HEIGHT,
                 Node.WIDTH, Node.HEIGHT
         );
 
         NodeIcon icon = node.getIcon();
         if(icon instanceof SpriteIcon sprite) {
-            graphics.blit(
-                    RenderPipelines.GUI_TEXTURED,
+            GuiGraphicsApi.blit(
+                    gx,
                     sprite.id(),
                     x()+4, y()+4,
-                    0, 0,
-                    16, 16,
                     16, 16
             );
         } else if (icon instanceof ItemIcon item) {
-            graphics.item(item.stack(), x()+4, y()+4);
+            GuiGraphicsApi.itemStack(gx, item.stack(), tooltip.screen().getFont(), x()+4, y()+4);
         }
 
         int xo = Node.WIDTH;
         int yo = Node.HEIGHT/2 - Minecraft.getInstance().font.lineHeight/2;
         setTextStartPos(x() + xo, y() + yo);
-        graphics.text(Minecraft.getInstance().font, titleText,
-                getTextStartPos().x(), getTextStartPos().y(),
-                Color.WHITE.getRGB());
+        GuiGraphicsApi.text(gx, tooltip.screen().getFont(), titleText,
+                getTextStartPos().x(), getTextStartPos().y(), true);
     }
 }

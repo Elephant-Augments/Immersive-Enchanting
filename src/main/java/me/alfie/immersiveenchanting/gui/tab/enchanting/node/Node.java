@@ -1,14 +1,16 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.node;
 
+import me.alfie.alfinolib.gui.GuiGraphicsX;
+import me.alfie.alfinolib.gui.util.MousePos;
+import me.alfie.alfinolib.util.ResourceId;
 import me.alfie.immersiveenchanting.api.node.*;
 import me.alfie.immersiveenchanting.api.node.internal.EnchantmentNodeData;
 import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
-import me.alfie.immersiveenchanting.gui.canvas.CanvasRenderable;
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
+import me.alfie.immersiveenchanting.gui.canvas.CanvasRenderable;
 import me.alfie.immersiveenchanting.gui.core.Sprite;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -88,7 +90,7 @@ public class Node extends CanvasRenderable {
         data.onClick(new NodeClickContext(canvas().screen(), this));
     }
 
-    public Identifier dataType() {
+    public ResourceId dataType() {
         return data.type();
     }
 
@@ -96,7 +98,7 @@ public class Node extends CanvasRenderable {
         return data;
     }
 
-    public boolean isDataType(Identifier id) {
+    public boolean isDataType(ResourceId id) {
         return data.type() == id;
     }
 
@@ -118,30 +120,12 @@ public class Node extends CanvasRenderable {
         return parentBranch;
     }
 
-    /**
-     * Renders this node on the screen.
-     *
-     * <p>This method first applies the node's current scale. If no other node has
-     * requested a tooltip for this frame, and the mouse is hovering over this node,
-     * it registers itself as the next node tooltip and skips rendering the node visuals.
-     * If this node is already the pending tooltip, rendering is also skipped.</p>
-     *
-     * <p>Otherwise, the node's background sprite is drawn, and if an icon texture is
-     * set, it is rendered on top of the background.</p>
-     *
-     * @param graphics The graphics context used for rendering
-     * @param mouseX The current mouse X position
-     * @param mouseY The current mouse Y position
-     */
+
     @Override
-    public void render(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+    public void render(GuiGraphicsX gx, MousePos mousePos) {
         setScaleKeepPos(BranchManager.getNodeBranchScale(), state.getSpriteForTier(tier));
 
-        if(canvas().isMouseOver(
-                canvasX(), canvasY(),
-                getScaledLength(Node.WIDTH), getScaledLength(Node.HEIGHT),
-                mouseX, mouseY)) {
-
+        if(canvas().isMouseOver(canvasX(), canvasY(), Node.WIDTH, Node.HEIGHT, mousePos)) {
             if(!canvas().screen().camera().isDragging()) {
                 int priority = canvas().screen()
                         .enchantingTab()
@@ -151,28 +135,27 @@ public class Node extends CanvasRenderable {
 
                 canvas().screen().tooltipManager().requestTooltip(this, priority);
             }
-
         }
 
-        if(canvas().screen().tooltipManager().isActiveTooltipFor(this)) return;
 
-        blit(graphics, state.getSpriteForTier(tier), canvas().getCurrentBrightness());
+        if(canvas().screen().tooltipManager().isActiveTooltipFor(this)) return;
+        blit(gx, state.getSpriteForTier(tier), canvas().getCurrentBrightness());
 
         if(data().value() instanceof EnchantmentNodeData enchantmentData) {
             Holder<Enchantment> enchantmentHolder = EnchantmentUtil.toHolder(enchantmentData.enchantmentId(), canvas().screen().registryAccess());
 
             if(!CostRegistry.client().isRegistered(enchantmentHolder)) {
                 //Red error node for enchantments that failed to load costs
-                blit(graphics, Sprite.ERROR_NODE, canvas().getCurrentBrightness());
+                blit(gx, Sprite.ERROR_NODE, canvas().getCurrentBrightness());
             }
 
         }
 
 
         if(getIcon() instanceof SpriteIcon sprite) {
-            blit(graphics, sprite.id(), 16, 16, 4, 4, canvas().getCurrentBrightness());
+            blit(gx, sprite.id(), 16, 16, 4, 4, canvas().getCurrentBrightness());
         } else if(getIcon() instanceof ItemIcon item) {
-            item(graphics, item.stack(), 4, 4, canvas().getCurrentBrightness());
+            item(gx, item.stack(), 4, 4, canvas().getCurrentBrightness());
         }
     }
 
@@ -212,7 +195,7 @@ public class Node extends CanvasRenderable {
     /**
      * @return The identifier associated with this node
      */
-    public Identifier branchId() {
+    public ResourceId branchId() {
         return getParentBranch().id();
     }
 

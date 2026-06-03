@@ -1,12 +1,14 @@
 package me.alfie.immersiveenchanting.networking;
 
-import io.netty.buffer.ByteBuf;
+import me.alfie.alfinolib.networking.NetworkPacket;
+import me.alfie.alfinolib.networking.codec.CommonCodecs;
+import me.alfie.alfinolib.networking.codec.StreamCodec;
+import me.alfie.alfinolib.networking.codec.StreamCodecBuilder;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
@@ -21,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
  * <p>Used to keep custom enchanting UI behavior in sync with server-side inventory state
  * when standard container interactions are bypassed or extended.</p>
  */
-public record UpdateToolSlotPacket(int mode) implements ModNetworkPacket<UpdateToolSlotPacket> {
+public record UpdateToolSlotPacket(int mode) implements NetworkPacket<UpdateToolSlotPacket> {
 
     public enum Mode {
         TAKE,
@@ -29,39 +31,31 @@ public record UpdateToolSlotPacket(int mode) implements ModNetworkPacket<UpdateT
     }
 
     public static final Type<@NotNull UpdateToolSlotPacket> TYPE = new Type<>(Identifier.fromNamespaceAndPath(ImmersiveEnchanting.MODID, "update_tool_slot"));
-    public static final StreamCodec<RegistryFriendlyByteBuf, UpdateToolSlotPacket> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.VAR_INT,
-            UpdateToolSlotPacket::mode,
-            UpdateToolSlotPacket::new
-    );
+    @Override public Type<@NotNull UpdateToolSlotPacket> type() {return TYPE;}
+
+    public static final StreamCodec<RegistryFriendlyByteBuf, UpdateToolSlotPacket> STREAM_CODEC =
+            StreamCodecBuilder.<RegistryFriendlyByteBuf, UpdateToolSlotPacket>create()
+                    .add(CommonCodecs.VAR_INT, UpdateToolSlotPacket::mode)
+                    .build(UpdateToolSlotPacket::new);
+
 
     @Override
-    public Type<@NotNull UpdateToolSlotPacket> typeId() {
-        return TYPE;
-    }
+    public void exec(IPayloadContext context) {
+        Player player = context.player();
+        if(!(player.containerMenu instanceof EnchantingTableMenu menu)) return;
 
-    @Override
-    public StreamCodec<RegistryFriendlyByteBuf, UpdateToolSlotPacket> codec() {
-        return STREAM_CODEC;
-    }
-
-    @Override
-    public void exec(UpdateToolSlotPacket packet, IPayloadContext context) {
-        Mode mode = Mode.values()[packet.mode()];
-
-        EnchantingTableMenu menu = (EnchantingTableMenu) context.player().containerMenu;
+        Mode updateMode = Mode.values()[mode];
         Slot slot = menu.getToolSlot();
         ItemStack stack;
 
-        if(mode == Mode.TAKE && menu.getCarried().isEmpty()) {
+        if(updateMode == Mode.TAKE && menu.getCarried().isEmpty()) {
             stack = slot.getItem();
             menu.setCarried(stack.copyAndClear());
-        } else if (mode == Mode.PLACE) {
+        } else if (updateMode == Mode.PLACE) {
             stack = menu.getCarried();
             slot.safeInsert(stack);
         }
+
         slot.setChanged();;
     }
-
-
 }

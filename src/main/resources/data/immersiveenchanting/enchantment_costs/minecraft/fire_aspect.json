@@ -1,20 +1,6 @@
 {
   "levels": {
-    "1": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:fire_charge",
-          "count": 3
-        }
-      }
-    ],
-    "2": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:magma_cream",
-          "count": 1
-        }
-      }
-    ]
+    "1": [{"item_cost": {"item": "minecraft:fire_charge", "count": 3}}],
+    "2": [{"item_cost": {"item": "minecraft:magma_cream", "count": 1}}]
   }
 }

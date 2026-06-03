@@ -1,6 +1,7 @@
 package me.alfie.immersiveenchanting.api.description;
 
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import me.alfie.alfinolib.gui.GuiGraphicsX;
+import me.alfie.alfinolib.gui.util.MousePos;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,7 +14,7 @@ public interface DescriptionLine {
      * @param mouseX Current mouse X, forwarded for hover effects (e.g. item tooltips)
      * @param mouseY Current mouse Y, forwarded for hover effects (e.g. item tooltips)
      */
-    void render(GuiGraphicsExtractor graphics, int lineX, int lineY, double mouseX, double mouseY);
+    void render(GuiGraphicsX gx, int lineX, int lineY, MousePos mousePos);
 
     /**
      * Return the text that is being drawn. This is used to expand the description box.

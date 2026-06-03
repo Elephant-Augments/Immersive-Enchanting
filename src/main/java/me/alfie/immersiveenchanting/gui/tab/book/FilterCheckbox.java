@@ -1,16 +1,12 @@
 package me.alfie.immersiveenchanting.gui.tab.book;
 
-import com.mojang.blaze3d.platform.cursor.CursorType;
 import com.mojang.blaze3d.platform.cursor.CursorTypes;
-import me.alfie.immersiveenchanting.gui.core.ScreenEventListener;
+import me.alfie.alfinolib.gui.GuiGraphicsX;
+import me.alfie.alfinolib.gui.ScreenEventListener;
+import me.alfie.alfinolib.gui.util.GuiGraphicsApi;
+import me.alfie.alfinolib.gui.util.MousePos;
 import me.alfie.immersiveenchanting.gui.core.Sprite;
 import me.alfie.immersiveenchanting.util.FxHelper;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.renderer.RenderPipelines;
-
-import java.awt.*;
 
 /**
  * A clickable checkbox UI element used to enable or disable a {@link BookFilters} option
@@ -64,71 +60,40 @@ public class FilterCheckbox implements ScreenEventListener {
         bookTab.scrollbar().resetScrollIndex();
     }
 
-    /**
-     * Renders the checkbox and its label.
-     *
-     * <p>Displays either an "on" or "off" sprite depending on state,
-     * and changes the cursor when hovered.</p>
-     *
-     * @param graphics Rendering context
-     * @param mouseX   Current mouse X
-     * @param mouseY   Current mouse Y
-     */
-    public void render(GuiGraphicsExtractor graphics, double mouseX, double mouseY) {
+
+    public void render(GuiGraphicsX gx, MousePos mousePos) {
         Sprite sprite = isEnabled() ? Sprite.CHECKBOX_ON : Sprite.CHECKBOX_OFF;
 
         int x = bookTab.screen().getGuiLeft() + this.x;
         int y = bookTab.screen().getGuiTop() + this.y;
-        graphics.blit(
-                RenderPipelines.GUI_TEXTURED,
+
+        GuiGraphicsApi.blit(gx,
                 sprite.id(),
-                x,
-                y,
-                0f, 0f,
-                sprite.width(), sprite.height(),
-                sprite.width(), sprite.height()
-        );
+                x, y,
+                sprite.width(), sprite.height());
 
-        graphics.text(Minecraft.getInstance().font, filterType.getLabel(), x+20, y, Color.WHITE.getRGB());
 
-        if(this.isMouseOver(mouseX, mouseY)) graphics.requestCursor(CursorTypes.POINTING_HAND);
+        GuiGraphicsApi.text(gx, bookTab.screen().getFont(), filterType.getLabel(), x+20, y, true);
+
+        if(this.isMouseOver(mousePos)) gx.graphics().requestCursor(CursorTypes.POINTING_HAND);
     }
 
-    /**
-     * Checks whether the mouse is hovering over this checkbox.
-     *
-     * @param mouseX Current mouse X
-     * @param mouseY Current mouse Y
-     * @return {@code true} if the mouse is within bounds
-     */
-    private boolean isMouseOver(double mouseX, double mouseY) {
-        return bookTab.screen().isMouseOver(
-                bookTab.screen().getGuiLeft() + x, bookTab.screen().getGuiTop() + y,
-                Sprite.CHECKBOX_ON.width(), Sprite.CHECKBOX_ON.height(),
-                mouseX, mouseY);
+
+    private boolean isMouseOver(MousePos mousePos) {
+        return mousePos.isOver(bookTab.screen().getGuiLeft() + x, bookTab.screen().getGuiTop() + y,
+                Sprite.CHECKBOX_ON.width(), Sprite.CHECKBOX_ON.height());
     }
 
-    /**
-     * Handles mouse click interaction.
-     *
-     * <p>If clicked while hovered:
-     * <ul>
-     *     <li>Toggles the filter</li>
-     *     <li>Plays a UI sound</li>
-     * </ul>
-     *
-     * @param mouse Mouse event
-     * @return {@code true} if the click was handled
-     */
+
     @Override
-    public boolean onMouseClick(MouseButtonEvent mouse) {
-        if(this.isMouseOver(mouse.x(), mouse.y())) {
+    public boolean onMouseClick(MousePos mousePos, int button) {
+        if(this.isMouseOver(mousePos)) {
             FxHelper.playGenericUISound(bookTab.screen().player());
             toggleEnabled();
             return true;
         }
 
-        return ScreenEventListener.super.onMouseClick(mouse);
+        return ScreenEventListener.super.onMouseClick(mousePos, button);
     }
 
     /**

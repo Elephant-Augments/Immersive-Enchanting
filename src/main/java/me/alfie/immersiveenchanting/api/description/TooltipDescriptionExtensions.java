@@ -6,8 +6,6 @@ import me.alfie.immersiveenchanting.api.description.internal.ModFilterLayoutExte
 import me.alfie.immersiveenchanting.api.description.internal.ReplicateLayoutExtension;
 import me.alfie.immersiveenchanting.api.description.internal.TransmuteLayoutExtension;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.NodeTooltip;
-import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
-import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.ArrayList;
 import java.util.List;

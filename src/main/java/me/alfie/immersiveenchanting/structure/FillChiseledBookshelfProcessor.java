@@ -147,14 +147,11 @@ public class FillChiseledBookshelfProcessor extends StructureProcessor {
         float roll = random.nextFloat();
 
         if(roll < chance) {
-            List<ItemStack> itemStacks = lootEntry.getItemStacks();
-            int randomIndex = random.nextInt(itemStacks.size());
-
-            ItemStack randomStack = itemStacks.get(randomIndex);
-            if(randomStack.is(ModItems.ANCIENT_BOOK.get())) EnchantmentUtil.setStoredEnchantment(randomStack,
+            ItemStack stack = new ItemStack(lootEntry.item(), 1);
+            if(stack.is(ModItems.ANCIENT_BOOK.get())) EnchantmentUtil.setStoredEnchantment(stack,
                     CostRegistry.server().getRandomEnchantment(random));
 
-            return randomStack;
+            return stack;
         }
         return ItemStack.EMPTY;
     }

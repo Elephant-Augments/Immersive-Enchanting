@@ -1,28 +1,7 @@
 {
   "levels": {
-    "1": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:bamboo",
-          "count": 1
-        }
-      }
-    ],
-    "2": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:prismarine_shard",
-          "count": 1
-        }
-      }
-    ],
-    "3": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:breeze_rod",
-          "count": 1
-        }
-      }
-    ]
+    "1": [{"item_cost": {"item": "minecraft:bamboo", "count": 1}}],
+    "2": [{"item_cost": {"item": "minecraft:prismarine_shard", "count": 1}}],
+    "3": [{"item_cost": {"item": "minecraft:breeze_rod", "count": 1}}]
   }
 }

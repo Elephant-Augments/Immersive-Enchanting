@@ -1,44 +1,9 @@
 {
   "levels": {
-    "1": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:cake",
-          "count": 1
-        }
-      }
-    ],
-    "2": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:redstone_block",
-          "count": 1
-        }
-      }
-    ],
-    "3": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:glistering_melon_slice",
-          "count": 1
-        }
-      }
-    ],
-    "4": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:rabbit_foot",
-          "count": 1
-        }
-      }
-    ],
-    "5": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:dragon_breath",
-          "count": 1
-        }
-      }
-    ]
+    "1": [{"item_cost": {"item": "minecraft:cake", "count": 1}}],
+    "2": [{"item_cost": {"item": "minecraft:redstone_block", "count": 1}}],
+    "3": [{"item_cost": {"item": "minecraft:glistering_melon_slice", "count": 1}}],
+    "4": [{"item_cost": {"item": "minecraft:rabbit_foot", "count": 1}}],
+    "5": [{"item_cost": {"item": "minecraft:dragon_breath", "count": 1}}]
   }
 }

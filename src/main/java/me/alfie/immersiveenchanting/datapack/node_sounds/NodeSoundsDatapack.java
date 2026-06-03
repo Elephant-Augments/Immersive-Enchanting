@@ -1,9 +1,10 @@
 package me.alfie.immersiveenchanting.datapack.node_sounds;
 
+import me.alfie.alfinolib.datapacks.DatapackKey;
+import me.alfie.alfinolib.datapacks.DatapackRegistry;
+import me.alfie.alfinolib.datapacks.ModDatapack;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
-import me.alfie.immersiveenchanting.api.datapack.internal.DatapackKeys;
-import me.alfie.immersiveenchanting.api.datapack.DatapackRegistry;
-import me.alfie.immersiveenchanting.api.datapack.ModDatapack;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -14,10 +15,11 @@ import java.util.Map;
 
 public class NodeSoundsDatapack extends ModDatapack<NodeSoundMap, NodeSoundMap> {
 
+    public static DatapackKey<NodeSoundMap> KEY = new DatapackKey<>(ImmersiveEnchanting.MODID, "sounds");
     private NodeSoundMap data = new NodeSoundMap(new HashMap<>());
 
-    protected NodeSoundsDatapack() {
-        super(NodeSoundMap.CODEC, DatapackKeys.NODE_SOUNDS, NodeSoundMap.STREAM_CODEC);
+    protected NodeSoundsDatapack(RegistryAccess registryAccess) {
+        super(NodeSoundMap.CODEC, KEY, NodeSoundMap.STREAM_CODEC, registryAccess);
     }
 
     @Override
@@ -34,6 +36,6 @@ public class NodeSoundsDatapack extends ModDatapack<NodeSoundMap, NodeSoundMap> 
     }
 
     public static void register(AddServerReloadListenersEvent event) {
-        DatapackRegistry.register(event, NodeSoundsDatapack::new);
+        DatapackRegistry.register(event, () -> new NodeSoundsDatapack(event.getRegistryAccess()));
     }
 }

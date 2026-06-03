@@ -1,23 +1,22 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.node;
 
+import me.alfie.alfinolib.datapacks.ClientDatapackManager;
+import me.alfie.alfinolib.util.ResourceId;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
-import me.alfie.immersiveenchanting.api.datapack.internal.DatapackKeys;
-import me.alfie.immersiveenchanting.api.datapack.manager.ClientDatapackManager;
 import me.alfie.immersiveenchanting.api.node.*;
-import me.alfie.immersiveenchanting.config.ServerConfig;
-import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
-import me.alfie.immersiveenchanting.gui.tab.enchanting.EnchantingTab;
 import me.alfie.immersiveenchanting.api.node.internal.EnchantmentNodeData;
 import me.alfie.immersiveenchanting.api.node.internal.ModFilterNodeData;
 import me.alfie.immersiveenchanting.api.node.internal.ReplicateNodeData;
 import me.alfie.immersiveenchanting.api.node.internal.TransmuteNodeData;
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
+import me.alfie.immersiveenchanting.datapack.mod_icons.ModIconsDatapack;
+import me.alfie.immersiveenchanting.gui.canvas.Canvas;
+import me.alfie.immersiveenchanting.gui.tab.enchanting.EnchantingTab;
 import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.util.EnchantmentTextureHelper;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
-import me.alfie.immersiveenchanting.gui.canvas.Canvas;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -88,9 +87,9 @@ public class BranchFactory {
 
     }
 
-    private static Identifier createModFilterBranchId(String modid) {
+    private static ResourceId createModFilterBranchId(String modid) {
         final String modFilterStem = "mod_filter/";
-        return Identifier.fromNamespaceAndPath(ImmersiveEnchanting.MODID, modFilterStem + modid);
+        return new ResourceId(ImmersiveEnchanting.MODID, modFilterStem + modid);
     }
 
     private static void buildModFilterBranches(BuildBranchesEvent event, List<Holder<Enchantment>> applicableEnchantments) {
@@ -106,7 +105,7 @@ public class BranchFactory {
             buildModFilterBranch(event, title, modid);
         }
 
-        ItemIcon itemIcon = new ItemIcon(ClientDatapackManager.get(DatapackKeys.MOD_ICONS)
+        ItemIcon itemIcon = new ItemIcon(ClientDatapackManager.get(ModIconsDatapack.KEY)
                 .getAsItemStack(ModFilterNodeData.ALL_MODS));
 
         NodeState state =
@@ -128,7 +127,7 @@ public class BranchFactory {
 
 
     private static void buildModFilterBranch(BuildBranchesEvent event, Component modTitle, String modid) {
-        ItemIcon itemIcon = new ItemIcon(ClientDatapackManager.get(DatapackKeys.MOD_ICONS)
+        ItemIcon itemIcon = new ItemIcon(ClientDatapackManager.get(ModIconsDatapack.KEY)
                 .getAsItemStack(modid));
 
         NodeState state =
@@ -167,7 +166,8 @@ public class BranchFactory {
             if(!event.getCanvas().screen().getMenu().isEnchantmentAvailable(enchantmentHolder))
                 state = NodeState.LOCKED;
 
-            Identifier enchantmentId = enchantmentHolder.getKey().identifier();
+
+            ResourceId enchantmentId = EnchantmentUtil.toId(enchantmentHolder);
             nodeTemplates.add(new NodeTemplate(
                     Enchantment.getFullname(enchantmentHolder, enchantmentLevel+1),
                     enchantmentLevel,

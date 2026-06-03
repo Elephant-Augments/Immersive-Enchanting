@@ -1,15 +1,19 @@
 package me.alfie.immersiveenchanting.api.node.internal;
 
+import me.alfie.alfinolib.util.ResourceId;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
+import me.alfie.immersiveenchanting.api.node.NodeData;
 import me.alfie.immersiveenchanting.api.node.NodePayload;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
-import me.alfie.immersiveenchanting.api.node.NodeData;
 import net.minecraft.resources.Identifier;
 
 public record ModFilterNodeData(String modid) implements NodePayload {
 
     public static final String ALL_MODS = "all";
-    public static final Identifier TYPE = Identifier.fromNamespaceAndPath(ImmersiveEnchanting.MODID, "mod_filter");
+    public static final ResourceId TYPE = new ResourceId(ImmersiveEnchanting.MODID, "mod_filter");
+    @Override public ResourceId type() {
+        return TYPE;
+    }
 
     /**
      * Creates a {@link NodeData} for a mod-filter node.
@@ -30,10 +34,5 @@ public record ModFilterNodeData(String modid) implements NodePayload {
                     screen.rebuildBranches();
                 }
         );
-    }
-
-    @Override
-    public Identifier type() {
-        return TYPE;
     }
 }

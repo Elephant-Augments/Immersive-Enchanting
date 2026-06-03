@@ -1,13 +1,5 @@
 {
   "levels": {
-    "1": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:writable_book",
-          "count": 1
-        },
-        "xp_levels": 10
-      }
-    ]
+    "1": [{"item_cost": {"item": "minecraft:writable_book", "count": 1}, "xp_levels": 10}]
   }
 }
