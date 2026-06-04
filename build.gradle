@@ -94,7 +94,7 @@ dependencies {
     //Set to implementation instead of compileOnly in Dev environment.
     //implementation fg.deobf("curse.maven:domestication-innovation-591149:4911955")
     //implementation fg.deobf("curse.maven:citadel-331936:7476570")
-    implementation fg.deobf("curse.maven:alfinolib-1554698:8196185")
+    compileOnly fg.deobf("curse.maven:alfinolib-1554698:8196185")
 }
 
 mixin {
