@@ -226,7 +226,7 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
             }
 
             //Quick move into menu
-            if(stack.getItem().isEnchantable(stack) || stack.is(Items.ENCHANTED_BOOK) || stack.is(ModItems.ANCIENT_BOOK.get()) || stack.is(ModItems.CREATIVE_BOOKSHELF_ITEM)) {
+            if(stack.getItem().isEnchantable(stack) || stack.is(Items.BOOK) || stack.is(Items.ENCHANTED_BOOK) || stack.is(ModItems.ANCIENT_BOOK.get()) || stack.is(ModItems.CREATIVE_BOOKSHELF_ITEM)) {
                 if (!this.moveItemStackTo(stack, 0, 1, false)) return ItemStack.EMPTY;
             } else if(enchantingFuelItems.contains(stack.getItem())) {
                 if (!this.moveItemStackTo(stack, 1, 2, false)) return ItemStack.EMPTY;

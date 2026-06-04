@@ -1,6 +1,7 @@
 package me.alfie.immersiveenchanting.gui;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.systems.RenderSystem;
 import me.alfie.alfinolib.gui.CommonAbstractContainerScreen;
 import me.alfie.alfinolib.gui.GuiGraphicsX;
 import me.alfie.alfinolib.gui.util.GuiGraphicsApi;
@@ -104,16 +105,23 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
 
         if(isState(ScreenState.ENCHANTING)) enchantingTab.render(gx, mousePos);
         gx.graphics().pose().popPose();
+
+        gx.graphics().pose().pushPose();
+        gx.graphics().pose().translate(0, 0, 2);
         if(isState(ScreenState.BOOKS)) bookTab.render(gx, mousePos);
+        gx.graphics().pose().popPose();
 
         if(!canvas().DEBUG_DISABLE_CULLING) gx.graphics().disableScissor();
 
+        RenderSystem.enableBlend();
         GuiGraphicsApi.blit(
                 gx,
                 Sprite.ENCHANTING_TABLE_GUI.id(),
                 getGuiLeft(), getGuiTop(),
                 imageWidth, imageHeight
         );
+        RenderSystem.disableBlend();
+
 
         tabButton.render(gx, mousePos);
     }
@@ -125,6 +133,8 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
         //Update tooltip manager
         List<Node> renderedNodes = enchantingTab.branchManager().getAllNodes();
 
+        gx.graphics().pose().pushPose();
+        gx.graphics().pose().translate(0, 0, 400);
         if(tooltipManager.hasActiveTooltip() && !renderedNodes.contains(tooltipManager.getActiveTooltipNode()))
             tooltipManager.clearActiveTooltip();
 
@@ -137,6 +147,7 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
             tooltipManager.clearActiveTooltip();
 
         tooltipManager.resetFrameState();
+        gx.graphics().pose().popPose();
     }
 
     @Override
