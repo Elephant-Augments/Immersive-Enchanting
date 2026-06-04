@@ -127,7 +127,7 @@ configurations {
 
 dependencies {
     //Change to compileOnly on build!!!
-    compileOnly "curse.maven:alfinolib-1554698:8195082"
+    compileOnly "curse.maven:alfinolib-1554698:8196187"
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
