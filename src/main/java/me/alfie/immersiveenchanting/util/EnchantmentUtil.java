@@ -3,15 +3,14 @@ package me.alfie.immersiveenchanting.util;
 import me.alfie.alfinolib.util.ResourceId;
 import me.alfie.immersiveenchanting.datacomponent.ModDataComponents;
 import me.alfie.immersiveenchanting.datacomponent.ReplicatedDataComponent;
-import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 
@@ -65,6 +64,28 @@ public final class EnchantmentUtil {
         return enchantments.getFirst();
     }
 
+    /**
+     * Universal enchantment level accessor for stored_enchantments and enchantments.
+     */
+    public static ItemEnchantments getEnchantments(ItemStack stack) {
+        if(stack.has(DataComponents.STORED_ENCHANTMENTS)) {
+            return stack.get(DataComponents.STORED_ENCHANTMENTS);
+        } else {
+            return stack.getTagEnchantments();
+        }
+    }
+
+    /**
+     * Universal enchantment level accessor for stored_enchantments and enchantments.
+     */
+    public static int getEnchantmentLevel(ItemStack stack, Holder<Enchantment> enchantmentHolder) {
+        if(stack.has(DataComponents.STORED_ENCHANTMENTS)) {
+            return stack.get(DataComponents.STORED_ENCHANTMENTS).getLevel(enchantmentHolder);
+        } else {
+            return stack.getEnchantmentLevel(enchantmentHolder);
+        }
+    }
+
     public static void setReplicated(ItemStack ancientBook) {
         ancientBook.set(ModDataComponents.REPLICATED, new ReplicatedDataComponent(true));
     }
@@ -76,5 +97,19 @@ public final class EnchantmentUtil {
 
     public static List<Holder<Enchantment>> getAllEnchantmentsInRegistry(HolderLookup.Provider lookup) {
         return lookup.lookupOrThrow(Registries.ENCHANTMENT).listElements().map(holder -> (Holder<Enchantment>) holder).toList();
+    }
+
+    public static ItemStack tryConvertVanillaBook(ItemStack book) {
+        if(book.is(Items.ENCHANTED_BOOK)
+                && book.has(DataComponents.STORED_ENCHANTMENTS)
+                && book.get(DataComponents.STORED_ENCHANTMENTS).keySet().isEmpty()) {
+            return new ItemStack(Items.BOOK);
+
+        } else if(book.is(Items.BOOK) && book.has(DataComponents.ENCHANTMENTS)) {
+            ItemStack enchantedBook = new ItemStack(Items.ENCHANTED_BOOK);
+            enchantedBook.set(DataComponents.STORED_ENCHANTMENTS, getEnchantments(book));
+            return enchantedBook;
+        }
+        return book;
     }
 }

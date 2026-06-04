@@ -14,6 +14,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
@@ -60,15 +61,17 @@ public record EnchantPacket(ResourceKey<Enchantment> enchantmentKey, int level) 
         Holder<Enchantment> enchantmentHolder = EnchantmentUtil.toHolder(enchantmentKey,
                 player.registryAccess());
 
-        ItemStack stackToEnchant = menu.getToolSlot().getItem();
+        ItemStack stack = menu.getToolSlot().getItem();
         if(CostHelper.canEnchant(menu, enchantmentHolder, level, player)) {
-            stackToEnchant.enchant(enchantmentHolder, level);
+            stack.enchant(enchantmentHolder, level);
             menu.getToolSlot().setChanged();
 
             boolean isHighestTier = level == CostRegistry.server()
                     .get(enchantmentHolder)
                     .levelCosts()
                     .maxLevel();
+
+            menu.getToolSlot().set(EnchantmentUtil.tryConvertVanillaBook(stack));
 
             FxHelper.playEnchantSuccess(context.player(), menu.getBlockPos(), isHighestTier);
         }

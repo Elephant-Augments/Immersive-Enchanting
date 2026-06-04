@@ -8,6 +8,7 @@ import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
 import net.minecraft.core.Holder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 
 import java.util.List;
@@ -19,11 +20,14 @@ public class CostHelper {
         if(!CostRegistry.server().isRegistered(enchantmentHolder) ||
             !CostRegistry.server().isRegistered(CostRegistry.ENCHANTING_FUELS)) return false;
         if(!CostRegistry.server().get(enchantmentHolder).enabled()) return false;
+        if(!isEnchantmentAvailableInBookshelves(enchantmentHolder, menu, player)) return false;
 
         ItemStack stackToEnchant = menu.getToolSlot().getItem();
-        if(!isEnchantmentNextLevel(stackToEnchant, enchantmentHolder, level)) return false;
-        if(!stackToEnchant.supportsEnchantment(enchantmentHolder)) return false;
-        if(!isEnchantmentAvailableInBookshelves(enchantmentHolder, menu, player)) return false;
+
+        if(!stackToEnchant.is(Items.BOOK)) {
+            if(!isEnchantmentNextLevel(stackToEnchant, enchantmentHolder, level)) return false;
+            if(!stackToEnchant.supportsEnchantment(enchantmentHolder)) return false;
+        }
 
         return tryConsumeValidCostAndFuel(
                 EnchantmentUtil.toId(enchantmentHolder), level,
@@ -56,7 +60,7 @@ public class CostHelper {
     }
 
     private static boolean isEnchantmentNextLevel(ItemStack stack, Holder<Enchantment> enchantmentHolder, int level) {
-        int equippedLevel = stack.getEnchantmentLevel(enchantmentHolder);
+        int equippedLevel = EnchantmentUtil.getEnchantmentLevel(stack, enchantmentHolder);
         return level == equippedLevel + 1;
     }
 

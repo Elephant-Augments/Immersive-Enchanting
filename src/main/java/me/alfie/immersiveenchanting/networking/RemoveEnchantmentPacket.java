@@ -13,6 +13,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
@@ -64,7 +65,7 @@ public record RemoveEnchantmentPacket(ResourceKey<Enchantment> enchantmentKey, i
                 player.registryAccess());
 
         ItemStack stack = menu.getToolSlot().getItem();
-        ItemEnchantments.Mutable mutable = new ItemEnchantments.Mutable(stack.getTagEnchantments());
+        ItemEnchantments.Mutable mutable = new ItemEnchantments.Mutable(EnchantmentUtil.getEnchantments(stack));
 
         int currentLevel = mutable.getLevel(enchantmentHolder);
         if (currentLevel <= 0) return;
@@ -77,6 +78,9 @@ public record RemoveEnchantmentPacket(ResourceKey<Enchantment> enchantmentKey, i
         }
 
         EnchantmentHelper.setEnchantments(stack, mutable.toImmutable());
+
+        menu.getToolSlot().set(EnchantmentUtil.tryConvertVanillaBook(stack));
+
         FxHelper.playEnchantmentRemove(context.player().level(), menu.getBlockPos());
     }
 }

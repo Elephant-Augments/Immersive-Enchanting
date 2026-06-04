@@ -108,11 +108,12 @@ public class Node extends CanvasRenderable {
      * (i.e. it is the top-most equipped level) and removal is enabled in server config.
      */
     public boolean canRemove() {
-        return getPosition() + 1 == canvas().screen()
-                .getMenu()
-                .getToolSlot()
-                .getItem()
-                .getEnchantmentLevel(EnchantmentUtil.toHolder(branchId(), canvas().screen().registryAccess()))
+        return getPosition() + 1 == EnchantmentUtil.getEnchantmentLevel(
+                canvas().screen()
+                        .getMenu()
+                        .getToolSlot()
+                        .getItem(),
+                EnchantmentUtil.toHolder(branchId(), canvas().screen().registryAccess()))
                 && ServerConfig.isEnchantmentRemovalAllowed();
     }
 

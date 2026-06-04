@@ -16,8 +16,10 @@ import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.util.EnchantmentTextureHelper;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.neoforged.neoforge.common.NeoForge;
@@ -63,7 +65,7 @@ public class BranchFactory {
         List<Holder<Enchantment>> allEnchantments = EnchantmentUtil.getAllEnchantmentsInRegistry(event.getCanvas().screen().registryAccess());
         List<Holder<Enchantment>> applicableEnchantments = getApplicableEnchantments(event.getStack(), allEnchantments);
 
-        if(event.getStack().is(ModItems.CREATIVE_BOOKSHELF_ITEM)) {
+        if(event.getStack().is(ModItems.CREATIVE_BOOKSHELF_ITEM) || event.getStack().is(Items.BOOK)) {
             applicableEnchantments = allEnchantments;
         }
 
@@ -159,7 +161,7 @@ public class BranchFactory {
         }
 
         for (int enchantmentLevel = 0; enchantmentLevel < maxLevel; enchantmentLevel++) {
-            int equippedLevel = event.getStack().getEnchantmentLevel(enchantmentHolder);
+            int equippedLevel = EnchantmentUtil.getEnchantmentLevel(event.getStack(), enchantmentHolder);
             NodeState state = equippedLevel > enchantmentLevel ? NodeState.OBTAINED : NodeState.UNOBTAINED;
             NodeTier tier = enchantmentLevel+1 == maxLevel ? NodeTier.ELITE : NodeTier.BASIC;
 
