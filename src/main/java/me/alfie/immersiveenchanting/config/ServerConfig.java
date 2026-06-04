@@ -21,6 +21,8 @@ public class ServerConfig {
 
     public final ModConfigSpec.ConfigValue<Boolean> OBFUSCATE_LOCKED_ENCHANTMENTS;
 
+    public final ModConfigSpec.ConfigValue<Boolean> DISABLE_ENCHANTED_BOOK_TRADES;
+
 
     static {
         Pair<ServerConfig, ModConfigSpec> pair =
@@ -71,6 +73,11 @@ public class ServerConfig {
                 .comment("If enabled, vanilla enchanted books will spawn normally in loot tables such as chests.")
                 .translation("immersiveenchanting.config.enable_enchanted_book_loot_tables")
                 .define("enableEnchantedBookLootTables", false);
+
+        DISABLE_ENCHANTED_BOOK_TRADES = builder
+                .comment("If enabled, vanilla enchanted books will not appear in villager trades.")
+                .translation("immersiveenchanting.config.disable_enchanted_book_trades")
+                .define("disableEnchantedBookTrades", true);
     }
 
     public static boolean areAncientBooksRequired() {
@@ -89,6 +96,10 @@ public class ServerConfig {
 
     public static boolean isAllowEnchantedBookLootTables() {
         return ServerConfig.CONFIG.ENABLE_ENCHANTED_BOOK_LOOT_TABLES.get();
+    }
+
+    public static boolean areEnchantedBookTradesDisabled() {
+        return ServerConfig.CONFIG.DISABLE_ENCHANTED_BOOK_TRADES.get();
     }
 
     public static boolean isObfuscateLockedEnchantments() {

@@ -4,9 +4,10 @@
   "package": "me.alfie.immersiveenchanting.mixin",
   "compatibilityLevel": "JAVA_25",
   "mixins": [
-    "EnchantingTableBlockMixin",
     "EnchantingTableBlockEntityMixin",
-    "ItemStackMixin"
+    "EnchantingTableBlockMixin",
+    "ItemStackMixin",
+    "VillagerTradeMixin"
   ],
   "injectors": {
     "defaultRequire": 1

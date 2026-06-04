@@ -79,5 +79,6 @@
   "immersiveenchanting.config.play_node_hover_sounds": "Play Node Hover Sounds",
   "immersiveenchanting.config.enable_enchanted_book_loot_tables": "Enable Enchanted Book Loot Tables",
   "immersiveenchanting.config.enable_enchanted_book_trades": "Enable Enchanted Book Villager Trades",
-  "immersiveenchanting.config.obfuscate_locked_enchantments": "Obfuscate Locked Enchantments"
+  "immersiveenchanting.config.obfuscate_locked_enchantments": "Obfuscate Locked Enchantments",
+  "immersiveenchanting.config.disable_enchanted_book_trades": "Disable Enchanted Book Villager Trades"
 }
