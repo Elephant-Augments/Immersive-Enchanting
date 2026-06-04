@@ -1,18 +1,22 @@
 package me.alfie.immersiveenchanting.util;
 
+import me.alfie.alfinolib.util.ResourceId;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
 
 public class EnchantmentTextureHelper {
-
-    public static ResourceLocation getTexture(ResourceLocation enchantmentId) {
-        String directory = "textures/enchantment/" + enchantmentId.getNamespace() + '/' + enchantmentId.getPath() + ".png";
-        ResourceLocation iconId = ResourceLocation.fromNamespaceAndPath("immersiveenchanting", directory);
+    /**
+     * Returns the texture identifier for the given enchantment's node icon.
+     * Looks for {@code immersiveenchanting:textures/enchantment/<namespace>/<path>.png};
+     * falls back to the generic {@code ancient_book.png} if no custom texture is found.
+     */
+    public static ResourceId getTexture(ResourceId enchantmentId) {
+        String directory = "textures/enchantment/" + enchantmentId.namespace() + '/' + enchantmentId.path() + ".png";
+        ResourceId iconId = new ResourceId("immersiveenchanting", directory);
 
         return Minecraft.getInstance().getResourceManager()
-                .getResource(iconId)
+                .getResource(iconId.mc())
                 .isPresent()
                 ? iconId
-                : ResourceLocation.fromNamespaceAndPath("immersiveenchanting", "textures/item/ancient_book.png");
+                : new ResourceId("immersiveenchanting", "textures/item/ancient_book.png");
     }
 }

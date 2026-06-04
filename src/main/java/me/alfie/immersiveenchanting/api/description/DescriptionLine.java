@@ -1,12 +1,19 @@
 package me.alfie.immersiveenchanting.api.description;
 
-import net.minecraft.client.gui.GuiGraphics;
+import me.alfie.alfinolib.gui.GuiGraphicsX;
+import me.alfie.alfinolib.gui.util.MousePos;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
 public interface DescriptionLine {
 
-    void render(GuiGraphics graphics, int lineX, int lineY, double mouseX, double mouseY);
+    /**
+     * Render this line at the given position.
+     * @param lineX The left edge of the description box content area
+     * @param lineY The top of this line, already offset for its position in the layout
+
+     */
+    void render(GuiGraphicsX gx, int lineX, int lineY, MousePos mousePos);
 
     /**
      * Return the text that is being drawn. This is used to expand the description box.

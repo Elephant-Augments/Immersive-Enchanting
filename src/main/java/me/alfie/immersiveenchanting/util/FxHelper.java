@@ -1,21 +1,25 @@
 package me.alfie.immersiveenchanting.util;
 
+import me.alfie.alfinolib.util.ResourceId;
+import me.alfie.immersiveenchanting.api.node.internal.ModFilterNodeData;
 import me.alfie.immersiveenchanting.config.ClientConfig;
-import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
-import me.alfie.immersiveenchanting.datapack.manager.ClientDatapackManager;
 import me.alfie.immersiveenchanting.datapack.node_sounds.NodeSound;
+import me.alfie.immersiveenchanting.datapack.node_sounds.NodeSoundMap;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeState;
+import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeTier;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+
+import java.util.Optional;
 
 public class FxHelper {
 
@@ -29,26 +33,36 @@ public class FxHelper {
     public static void playNodeHover(Player player, Node node) {
         if(!ClientConfig.areNodeHoverSoundsEnabled()) return;
 
+        if(node.isDataType(ModFilterNodeData.TYPE)) {
+            playModFilterNodeHover(player);
+            return;
+        }
+
         if(node.isState(NodeState.LOCKED) || node.isState(NodeState.ALERT)) {
             playGenericNodeHover(player);
             return;
         }
 
-        if(doesSoundExist(node.id())) {
-            NodeSound nodeSound = ClientDatapackManager.nodeSoundMap().get(node.id());
-            int nodeLevel = node.getEnchantmentLevel();
+        if(doesSoundExist(node.branchId())) {
+            NodeSound nodeSound = NodeSoundMap.client().get(node.branchId());
+            int nodePosition = node.getPosition();
             float defaultPitch = nodeSound.pitch();
-            float newPitch = defaultPitch + (nodeLevel - 1) * 0.5f;
+            float newPitch = defaultPitch + (nodePosition) * 0.5f;
             newPitch = Math.min(newPitch, 2.0f);
 
-            playClientUISound(player, node.id(), nodeSound.volume(), newPitch);
+            playClientUISound(player, node.branchId(), nodeSound.volume(), newPitch);
         } else {
             playGenericNodeHover(player);
         }
 
-        if(node.getEnchantmentLevel() == CostRegistry.client().get(node.id()).levelCosts().maxLevel()) {
+        if(node.getTier().equals(NodeTier.ELITE)) {
             playClientUISound(player, SoundEvents.AMETHYST_BLOCK_RESONATE, 1f, 2);
         }
+    }
+
+    private static void playModFilterNodeHover(Player player) {
+        float randomPitch = player.getRandom().nextFloat() * 2;
+        playClientUISound(player, SoundEvents.DISPENSER_DISPENSE, 0.5f, randomPitch);
     }
 
     private static void playGenericNodeHover(Player player) {
@@ -59,12 +73,12 @@ public class FxHelper {
         playClientUISound(player, SoundEvents.DISPENSER_FAIL, 0.5f, 2f);
     }
 
-    public static void playEnchantSuccess(Level level, BlockPos tablePos, boolean isHighestTier) {
+    public static void playEnchantSuccess(Player player, BlockPos tablePos, boolean isHighestTier) {
         if(isHighestTier) {
-            level.playSound(null, tablePos, SoundEvents.BEACON_POWER_SELECT,
+            player.level().playSound(null, tablePos, SoundEvents.BEACON_POWER_SELECT,
                     SoundSource.BLOCKS, 1.0F, 1.0F);
         } else {
-            level.playSound(null, tablePos, SoundEvents.ENCHANTMENT_TABLE_USE,
+            player.level().playSound(null, tablePos, SoundEvents.ENCHANTMENT_TABLE_USE,
                     SoundSource.BLOCKS, 1.0F, 1.0F);
         }
     }
@@ -73,25 +87,25 @@ public class FxHelper {
         player.level().playLocalSound(player.blockPosition(), sound, SoundSource.MASTER, volume, pitch, false);
     }
 
-    private static void playClientUISound(Player player, ResourceLocation id, float volume, float pitch) {
+    private static void playClientUISound(Player player, ResourceId id, float volume, float pitch) {
         if(doesSoundExist(id)) {
             SoundEvent sound = getSoundEvent(id);
             playClientUISound(player, sound, volume, pitch);
         }
     }
 
-    public static boolean doesSoundExist(ResourceLocation id) {
-        if (ClientDatapackManager.nodeSoundMap().containsKey(id)) {
-            NodeSound nodeSound = ClientDatapackManager.nodeSoundMap().get(id);
+    public static boolean doesSoundExist(ResourceId id) {
+        if (NodeSoundMap.client().containsKey(id)) {
+            NodeSound nodeSound = NodeSoundMap.client().get(id);
             return BuiltInRegistries.SOUND_EVENT.containsKey(nodeSound.sound());
         }
 
         return false;
     }
 
-    public static SoundEvent getSoundEvent(ResourceLocation id) {
+    public static SoundEvent getSoundEvent(ResourceId id) {
         if(doesSoundExist(id)) {
-            return BuiltInRegistries.SOUND_EVENT.get(ClientDatapackManager.nodeSoundMap().get(id)
+            return BuiltInRegistries.SOUND_EVENT.get(NodeSoundMap.client().get(id)
                     .sound());
         }
         throw new IllegalArgumentException(id + " is not a valid sound identifier!");
@@ -165,5 +179,13 @@ public class FxHelper {
 
     public static void playGenericUISound(Player player) {
         playClientUISound(player, SoundEvents.UI_BUTTON_CLICK.value(), 0.3f, 1f);
+    }
+
+    public static void playTabDown(Player player) {
+        playClientUISound(player, SoundEvents.DISPENSER_DISPENSE, 0.5f, 0.8f);
+    }
+
+    public static void playTabUp(Player player) {
+        playClientUISound(player, SoundEvents.DISPENSER_DISPENSE, 0.5f, 1.2f);
     }
 }

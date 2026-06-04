@@ -8,10 +8,11 @@
     "minecraft:flame",
     "minecraft:knockback",
     "minecraft:looting",
+    "minecraft:lunge",
     "minecraft:sharpness",
     "minecraft:smite",
     "minecraft:soul_speed",
-    "minecraft:sweeping"
+    "minecraft:sweeping_edge"
   ],
   "min_rolls": 1,
   "max_rolls": 1,

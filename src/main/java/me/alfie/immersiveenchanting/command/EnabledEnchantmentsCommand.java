@@ -25,7 +25,7 @@ public enum EnabledEnchantmentsCommand implements ModCommand {
                         2,
                         context -> {
                             List<Holder<Enchantment>> datapackEnchantments =
-                                    CostRegistry.server().getAllEnchantmentHolders();
+                                    CostRegistry.server().getAllEnabledEnchantmentHolders();
 
                             String enabled = datapackEnchantments.stream()
                                     .map(Holder::unwrapKey)

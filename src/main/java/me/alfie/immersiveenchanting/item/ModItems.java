@@ -27,9 +27,9 @@ public class ModItems {
             "music_disc_arcane_memories",
             ArcaneMemoriesDisc::new);
 
-    public static final RegistryObject<BlockItem> CREATIVE_BOOKSHELF =
+    public static final RegistryObject<BlockItem> CREATIVE_BOOKSHELF_ITEM =
             ITEMS.register("creative_bookshelf",
-                    () -> new BlockItem(ModBlocks.CREATIVE_BOOKSHELF.get(), new Item.Properties().rarity(Rarity.EPIC)));
+                    () -> new BlockItem(ModBlocks.CREATIVE_BOOKSHELF_BLOCK.get(), new Item.Properties().rarity(Rarity.EPIC)));
 
 
     public static void register(IEventBus eventBus) {

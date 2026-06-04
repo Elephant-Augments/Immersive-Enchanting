@@ -1,13 +1,13 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip;
 
-import net.minecraft.resources.ResourceLocation;
+import me.alfie.alfinolib.util.ResourceId;
 import org.joml.Vector2i;
 
 public abstract class TooltipComponent extends NineSliceBox {
 
     private Vector2i textStartPos;
 
-    public TooltipComponent(ResourceLocation texture) {
+    public TooltipComponent(ResourceId texture) {
         super(texture);
     }
 

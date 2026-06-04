@@ -1,13 +1,14 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.node;
 
 import com.mojang.blaze3d.platform.NativeImage;
+import me.alfie.alfinolib.gui.GuiGraphicsX;
+import me.alfie.alfinolib.gui.util.MousePos;
+import me.alfie.alfinolib.util.ResourceId;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
 import me.alfie.immersiveenchanting.gui.canvas.CanvasRenderable;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.resources.ResourceLocation;
 import org.joml.Vector2i;
 
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ public class BranchTexture extends CanvasRenderable {
     private final NodeBranch branch;
 
     private final List<Pixel> precomputedPixels = new ArrayList<>();
-    private ResourceLocation textureId;
+    private ResourceId textureId;
     private int textureWidth;
     private int textureHeight;
 
@@ -33,15 +34,20 @@ public class BranchTexture extends CanvasRenderable {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY) {
+    public void render(GuiGraphicsX gx, MousePos mousePos) {
         int brightness = (canvas().screen().tooltipManager().hasActiveTooltip() &&
                 branch.nodes().contains(canvas().screen().tooltipManager().getActiveTooltipNode()))
                 ? Canvas.FULL_BRIGHTNESS
                 : canvas().getCurrentBrightness();
 
-        blit(graphics, textureId, textureWidth, textureHeight, brightness);
+        blit(gx, textureId, textureWidth, textureHeight, brightness);
     }
 
+    /**
+     * Draws connector lines between every consecutive node in the branch and from the
+     * first node back to the canvas center, then bakes the result into a GPU texture.
+     * Must be called after nodes have been positioned via {@link NodeBranch#placeNodesAlongLine()}.
+     */
     public void calculateNodeConnections() {
         if (branch.nodes().isEmpty()) return;
 
@@ -76,6 +82,11 @@ public class BranchTexture extends CanvasRenderable {
         }
     }
 
+    /**
+     * Rasterizes a 1-pixel-wide line between two canvas points using Bresenham's algorithm,
+     * then adds a 1-pixel black border around every white pixel. The resulting pixels are
+     * appended to {@link #precomputedPixels} for later baking.
+     */
     private void makeTexture(int x1, int y1, int x2, int y2) {
         final int WHITE = 0xFFFFFFFF;
         final int BLACK = 0xFF000000;
@@ -153,8 +164,8 @@ public class BranchTexture extends CanvasRenderable {
         // Create dynamic texture
         String label = "branch_connection";
         DynamicTexture bakedTexture = new DynamicTexture(textureWidth, textureHeight, true);
-        textureId = ResourceLocation.fromNamespaceAndPath(ImmersiveEnchanting.MODID, label + hashCode());
-        Minecraft.getInstance().getTextureManager().register(textureId, bakedTexture);
+        textureId = new ResourceId(ImmersiveEnchanting.MODID, label + hashCode());
+        Minecraft.getInstance().getTextureManager().register(textureId.mc(), bakedTexture);
 
 
         NativeImage image = bakedTexture.getPixels();
@@ -172,6 +183,7 @@ public class BranchTexture extends CanvasRenderable {
         bakedTexture.upload(); // upload to GPU
     }
 
+    /** Packs two ints into a single long for use as a hash-set key. */
     private long key(int x, int y) {
         return (((long) x) << 32) | (y & 0xFFFFFFFFL);
     }

@@ -191,7 +191,7 @@
       "volume": 0.5,
       "pitch": 1.0
     },
-    "minecraft:sweeping_edge": {
+    "minecraft:sweeping": {
       "sound": "minecraft:entity.player.attack.sweep",
       "volume": 0.5,
       "pitch": 1.0

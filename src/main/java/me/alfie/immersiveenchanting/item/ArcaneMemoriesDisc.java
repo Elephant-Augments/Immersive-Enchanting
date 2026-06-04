@@ -1,6 +1,7 @@
 package me.alfie.immersiveenchanting.item;
 
 import me.alfie.immersiveenchanting.sound.ModSounds;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.RecordItem;
 

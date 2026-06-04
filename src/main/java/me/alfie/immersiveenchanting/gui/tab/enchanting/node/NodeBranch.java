@@ -1,23 +1,51 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.node;
 
+import me.alfie.alfinolib.gui.GuiGraphicsX;
+import me.alfie.alfinolib.gui.util.MousePos;
+import me.alfie.alfinolib.util.ResourceId;
+import me.alfie.immersiveenchanting.api.node.NodeTemplate;
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
 import me.alfie.immersiveenchanting.gui.canvas.CanvasRenderable;
-import net.minecraft.client.gui.GuiGraphics;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class NodeBranch extends CanvasRenderable {
 
-    private List<Node> nodes;
+    private final List<Node> nodes;
     private float angle;
     private BranchTexture texture;
+    private final ResourceId id;
 
-    public NodeBranch(Canvas canvas, List<Node> nodes, float angle) {
+    /**
+     * Constructor for API users - angles are automatically calculated by ImmersiveEnchanting.
+     * @param canvas
+     * @param nodeTemplates
+     */
+    public NodeBranch(Canvas canvas, ResourceId id, List<NodeTemplate> nodeTemplates) {
         super(canvas);
-        this.nodes = nodes;
-        this.angle = angle;
+        this.id = id;
+
+        List<Node> builtNodes = new ArrayList<>();
+        for(NodeTemplate nodeTemplate : nodeTemplates) {
+            builtNodes.add(new Node(
+                    nodeTemplate.title(),
+                    nodeTemplate.level(),
+                    canvas,
+                    nodeTemplate.state(),
+                    nodeTemplate.tier(),
+                    nodeTemplate.icon(),
+                    this,
+                    nodeTemplate.data()
+            ));
+        }
+        nodes = builtNodes;
 
         texture = new BranchTexture(this, canvas);
+    }
+
+    public void setAngle(float angle) {
+        this.angle = angle;
     }
 
     public List<Node> nodes() {
@@ -28,6 +56,10 @@ public class NodeBranch extends CanvasRenderable {
         return angle;
     }
 
+    /**
+     * Positions each node along the branch's angle at equal step intervals from the canvas center,
+     * then recalculates the connector line textures between them.
+     */
     public void placeNodesAlongLine() {
         double stepX = Math.cos(angle) * BranchManager.getNodeStep();
         double stepY = Math.sin(angle) * BranchManager.getNodeStep();
@@ -46,13 +78,16 @@ public class NodeBranch extends CanvasRenderable {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY) {
-        texture.render(graphics, mouseX, mouseY);
+    public void render(GuiGraphicsX gx, MousePos mousePos) {
+        texture.render(gx, mousePos);
 
         for(Node node : nodes) {
-            node.render(graphics, mouseX, mouseY);
+            node.render(gx, mousePos);
         }
     }
 
 
+    public ResourceId id() {
+        return id;
+    }
 }

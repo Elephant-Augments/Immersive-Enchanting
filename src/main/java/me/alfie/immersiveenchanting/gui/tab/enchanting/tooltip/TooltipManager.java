@@ -1,16 +1,18 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip;
 
+import me.alfie.alfinolib.networking.Networking;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
-import me.alfie.immersiveenchanting.networking.ModPackets;
 import me.alfie.immersiveenchanting.networking.RemoveEnchantmentPacket;
-import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import me.alfie.immersiveenchanting.util.FxHelper;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 
 public class TooltipManager {
 
     private Node lockedTooltipNode;
     private NodeTooltip activeTooltip;
+    private int activeTooltipPriority;
     private boolean isTooltipRequestedThisFrame;
     private final EnchantingTableScreen screen;
 
@@ -54,29 +56,46 @@ public class TooltipManager {
         return activeTooltip != null && activeTooltip.node().equals(node);
     }
 
-    public void requestTooltip(Node node) {
+    /**
+     * Marks this frame as having a tooltip request and sets the tooltip for {@code node}
+     * if the priority is high enough. Called by nodes and the active tooltip during rendering
+     * so the manager knows not to clear the tooltip at end-of-frame.
+     */
+    public void requestTooltip(Node node, int priority) {
+        if(priority < activeTooltipPriority) return;
+
         isTooltipRequestedThisFrame = true;
-        setTooltip(node);
+        setTooltip(node, priority);
     }
 
     public boolean isTooltipRequestedThisFrame() {
         return isTooltipRequestedThisFrame;
     }
 
-    private void setTooltip(Node node) {
+    /**
+     * Changes the active tooltip to the given node, unless the tooltip is locked
+     * or the node is already the active tooltip. Also plays the node hover sound.
+     */
+    private void setTooltip(Node node, int priority) {
         if(isTooltipLocked()) return;
         if(hasActiveTooltip() && getActiveTooltipNode().equals(node)) return;
 
         activeTooltip = new NodeTooltip(screen, node);
+        activeTooltipPriority = priority;
         FxHelper.playNodeHover(screen.player(), node);
     }
 
+    /**
+     * Clears the per-frame tooltip request flag. Called at the end of every render frame
+     * so that the screen can detect when no node requested a tooltip and clear it.
+     */
     public void resetFrameState() {
         isTooltipRequestedThisFrame = false;
     }
 
     public void clearActiveTooltip() {
         activeTooltip = null;
+        activeTooltipPriority = 0;
     }
 
 
@@ -94,6 +113,10 @@ public class TooltipManager {
         return heldTooltipNode != null;
     }
 
+    /**
+     * Checks whether the hold threshold has been reached and fires the remove action if so.
+     * Called each frame while a node is being held.
+     */
     public void updateHold() {
         if(heldTooltipNode == null) return;
 
@@ -104,11 +127,14 @@ public class TooltipManager {
         return System.currentTimeMillis() - holdStartTime;
     }
 
+    /**
+     * Sends the enchantment removal packet for the currently held node and resets the hold state.
+     * Called when the hold duration reaches {@link #HOLD_TRESHOLD_MILLIS}.
+     */
     private void triggerHeldTooltip() {
-        ModPackets.toServer(new RemoveEnchantmentPacket(
-                EnchantmentUtil.toResourceKey(heldTooltipNode.id()),
-                heldTooltipNode.getEnchantmentLevel()
-        ));
+        Networking.sendToServer(new RemoveEnchantmentPacket(
+                ResourceKey.create(Registries.ENCHANTMENT, heldTooltipNode.branchId().mc()),
+                heldTooltipNode.getPosition()));
 
         resetHold();
     }

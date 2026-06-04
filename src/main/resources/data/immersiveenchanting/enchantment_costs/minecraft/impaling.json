@@ -1,34 +1,9 @@
 {
   "levels": {
-    "1": [
-      {
-        "item": "minecraft:pufferfish_bucket",
-        "amount": 1
-      }
-    ],
-    "2": [
-      {
-        "item": "minecraft:horn_coral",
-        "amount": 8
-      }
-    ],
-    "3": [
-      {
-        "item": "minecraft:prismarine_shard",
-        "amount": 8
-      }
-    ],
-    "4": [
-      {
-        "item": "minecraft:diamond",
-        "amount": 1
-      }
-    ],
-    "5": [
-      {
-        "item": "minecraft:nautilus_shell",
-        "amount": 1
-      }
-    ]
+    "1": [{"item_cost": {"item": "minecraft:pufferfish_bucket", "count": 1}}],
+    "2": [{"item_cost": {"item": "minecraft:horn_coral", "count": 8}}],
+    "3": [{"item_cost": {"item": "minecraft:prismarine_shard", "count": 8}}],
+    "4": [{"item_cost": {"item": "minecraft:diamond", "count": 1}}],
+    "5": [{"item_cost": {"item": "minecraft:nautilus_shell", "count": 1}}]
   }
 }

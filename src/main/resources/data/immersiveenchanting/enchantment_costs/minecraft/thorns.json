@@ -1,22 +1,7 @@
 {
   "levels": {
-    "1": [
-      {
-        "item": "minecraft:sweet_berries",
-        "amount": 16
-      }
-    ],
-    "2": [
-      {
-        "item": "minecraft:cactus",
-        "amount": 8
-      }
-    ],
-    "3": [
-      {
-        "item": "minecraft:amethyst_shard",
-        "amount": 1
-      }
-    ]
+    "1": [{"item_cost": {"item": "minecraft:sweet_berries", "count": 16}}],
+    "2": [{"item_cost": {"item": "minecraft:cactus", "count": 8}}],
+    "3": [{"item_cost": {"item": "minecraft:amethyst_shard", "count": 1}}]
   }
 }

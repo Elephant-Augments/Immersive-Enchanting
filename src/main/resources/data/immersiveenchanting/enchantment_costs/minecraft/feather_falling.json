@@ -1,28 +1,8 @@
 {
   "levels": {
-    "1": [
-      {
-        "item": "minecraft:feather",
-        "amount": 2
-      }
-    ],
-    "2": [
-      {
-        "item": "minecraft:water_bucket",
-        "amount": 1
-      }
-    ],
-    "3": [
-      {
-        "item": "minecraft:hay_block",
-        "amount": 8
-      }
-    ],
-    "4": [
-      {
-        "item": "minecraft:slime_block",
-        "amount": 1
-      }
-    ]
+    "1": [{"item_cost": {"item": "minecraft:feather", "count": 2}}],
+    "2": [{"item_cost": {"item": "minecraft:water_bucket", "count": 1}}],
+    "3": [{"item_cost": {"item": "minecraft:hay_block", "count": 8}}],
+    "4": [{"item_cost": {"item": "minecraft:slime_block", "count": 1}}]
   }
 }

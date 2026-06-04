@@ -15,7 +15,7 @@ import java.util.List;
 
 public class ModCommands {
 
-    public static void registerCommands(RegisterCommandsEvent event) {
+    public static void register(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
 
         List<ModCommand> commands = List.of(
@@ -31,27 +31,6 @@ public class ModCommands {
 
     }
 
-    /**
-     * Creates a simple command under this mod's root literal with a permission requirement
-     * and a single execution handler.
-     *
-     * <p>The resulting command structure is:
-     * <pre>
-     * <code>/modid commandName</code>
-     * </pre>
-     *
-     *
-     * @param commandName the literal name of the subcommand (e.g. "reload", "list")
-     * @param permission  the level of permission required to execute the command
-     * @param executor    the command execution logic, returning a result integer
-     *
-     * @return a {@link LiteralArgumentBuilder} representing the fully configured command,
-     *         ready to be registered with the {@link CommandDispatcher}
-     *
-     * @implNote This helper attaches the command under {@code ImmersiveEnchanting.MODID}
-     *           as the root literal.
-     *
-     */
     public static LiteralArgumentBuilder<CommandSourceStack> simpleCommand(String commandName,
                                                                            int permission,
                                                                            Command<CommandSourceStack> executor) {

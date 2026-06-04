@@ -4,16 +4,26 @@ import me.alfie.immersiveenchanting.api.description.DescriptionHelper;
 import me.alfie.immersiveenchanting.api.description.DescriptionLayout;
 import me.alfie.immersiveenchanting.api.description.DescriptionLayoutExtension;
 import me.alfie.immersiveenchanting.api.description.internal.lines.*;
+import me.alfie.immersiveenchanting.api.node.internal.EnchantmentNodeData;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeState;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.NodeTooltip;
 
+/**
+ * Populates the tooltip description for enchantment nodes based on their current state:
+ * <ul>
+ *   <li>UNOBTAINED – shows the enchantment cost (materials, fuel, XP levels)</li>
+ *   <li>OBTAINED – shows "Equipped" or, while the remove key is held, a removal progress bar</li>
+ *   <li>LOCKED – shows "Unavailable Enchantment"</li>
+ * </ul>
+ * No-ops for non-enchantment nodes.
+ */
 public class EnchantLayoutExtension implements DescriptionLayoutExtension {
 
     @Override
     public void extendLayout(DescriptionLayout description, NodeTooltip tooltip) {
-        if(!tooltip.node().isEnchantment()) return;
+        if(!tooltip.node().isDataType(EnchantmentNodeData.TYPE)) return;
 
         description.widthPadding = 16;
 
@@ -29,7 +39,7 @@ public class EnchantLayoutExtension implements DescriptionLayoutExtension {
             } else {
                 description.insertLine(0, new EquippedLine(tooltip));
 
-                if(tooltip.canRemove()) {
+                if(tooltip.node().canRemove()) {
                     description.insertLine(1, new RemoveHintLine(tooltip));
                 }
 

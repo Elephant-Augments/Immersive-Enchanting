@@ -6,9 +6,10 @@
     "minecraft:feather_falling",
     "minecraft:knockback",
     "minecraft:looting",
+    "minecraft:lunge",
     "minecraft:sharpness",
     "minecraft:smite",
-    "minecraft:sweeping",
+    "minecraft:sweeping_edge",
     "minecraft:swift_sneak"
   ],
   "min_rolls": 1,

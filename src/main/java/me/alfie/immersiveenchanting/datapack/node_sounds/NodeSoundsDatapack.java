@@ -1,59 +1,42 @@
 package me.alfie.immersiveenchanting.datapack.node_sounds;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
-import com.mojang.serialization.JsonOps;
+import me.alfie.alfinolib.datapacks.DatapackKey;
+import me.alfie.alfinolib.datapacks.DatapackRegistry;
+import me.alfie.alfinolib.datapacks.ModDatapack;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraftforge.event.AddReloadListenerEvent;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class NodeSoundsDatapack extends SimpleJsonResourceReloadListener {
+public class NodeSoundsDatapack extends ModDatapack<NodeSoundMap, NodeSoundMap> {
 
-    private static NodeSoundsDatapack INSTANCE;
-    private static final String DIRECTORY = "sounds";
-    private NodeSoundMap TEMP = new NodeSoundMap(new HashMap<>());
+    public static DatapackKey<NodeSoundMap> KEY = new DatapackKey<>(ImmersiveEnchanting.MODID, "sounds");
+    private NodeSoundMap DATA = new NodeSoundMap(new HashMap<>());
 
-    protected NodeSoundsDatapack(Gson gson, String directory) {
-        super(gson, directory);
+    protected NodeSoundsDatapack(RegistryAccess registryAccess) {
+        super(NodeSoundMap.CODEC, KEY, NodeSoundMap.STREAM_CODEC, registryAccess);
     }
 
-    public static NodeSoundsDatapack getInstance() {
-        return INSTANCE;
+    @Override public NodeSoundMap getData() {
+        return DATA;
     }
 
-    public NodeSoundMap getBuilt() {
-        return TEMP;
-    }
 
     @Override
-    protected void apply(Map<ResourceLocation, JsonElement> map, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
-        ResourceLocation key = ResourceLocation.fromNamespaceAndPath("immersiveenchanting", "node_sounds");
+    protected void apply(Map<ResourceLocation, JsonElement> input, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
+        ResourceLocation key = ResourceLocation.fromNamespaceAndPath(ImmersiveEnchanting.MODID, "node_sounds");
+        DATA = parseOrDefault(input.get(key), new NodeSoundMap(new HashMap<>()));
 
-        JsonElement json = map.get(key);
-
-        if(json != null) {
-            TEMP = NodeSoundMap.CODEC
-                    .parse(JsonOps.INSTANCE, json)
-                    .resultOrPartial(error -> ImmersiveEnchanting.LOGGER.error("Failled to parse {}: {}", key, error))
-                    .orElse(new NodeSoundMap(new HashMap<>()));
-        } else {
-            TEMP = new NodeSoundMap(new HashMap<>());
-        }
+        ImmersiveEnchanting.LOGGER.debug("Found {}", String.valueOf(DATA));
     }
 
-    public static void registerServerDatapack(AddReloadListenerEvent event) {
-        NodeSoundsDatapack datapack = new NodeSoundsDatapack(new Gson(), DIRECTORY);
-        INSTANCE = datapack;
-
-        event.addListener(datapack);
+    public static void register(AddReloadListenerEvent event) {
+        DatapackRegistry.register(event, () -> new NodeSoundsDatapack(event.getRegistryAccess()));
     }
-
-
-
 }

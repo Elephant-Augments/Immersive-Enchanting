@@ -1,8 +1,9 @@
 package me.alfie.immersiveenchanting.api.description;
 
+import me.alfie.alfinolib.gui.GuiGraphicsX;
+import me.alfie.alfinolib.gui.util.MousePos;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.TooltipDescription;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,11 +23,16 @@ public class DescriptionLayout {
         lineSpace = Minecraft.getInstance().font.lineHeight;
     }
 
+    /**
+     * Insert a line at the given index, shifting existing lines down.
+     * If {@code lineNumber} is beyond the current list size, empty no-op lines are appended
+     * until the list is long enough, then the new line is inserted at {@code lineNumber}.
+     */
     public void insertLine(int lineNumber, DescriptionLine line) {
         while(lines.size() < lineNumber) {
             lines.add(new DescriptionLine() {
                 @Override
-                public void render(GuiGraphics graphics, int lineX, int lineY, double mouseX, double mouseY) {
+                public void render(GuiGraphicsX gx, int lineX, int lineY, MousePos mousePos) {
 
                 }
             });
@@ -46,17 +52,11 @@ public class DescriptionLayout {
         lines.clear();
     }
 
-    /**
-     * Draw the lines in this layout.
-     * @param graphics
-     * @param startX The start position to render lines at
-     * @param startY The start position to render lines at
-     */
-    public void render(GuiGraphics graphics, int startX, int startY, double mouseX, double mouseY) {
+    public void render(GuiGraphicsX gx, int startX, int startY, MousePos mousePos) {
         int yOffset = 0;
 
         for (DescriptionLine line : lines) {
-            line.render(graphics, startX, startY + yOffset, mouseX, mouseY);
+            line.render(gx, startX, startY + yOffset, mousePos);
             yOffset += lineSpace;
         }
     }

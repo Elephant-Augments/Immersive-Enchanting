@@ -29,14 +29,14 @@ public class ModCreativeTab {
         CREATIVE_REGISTER.register(eventBus);
     }
 
-    public static void buildCreativeTab(BuildCreativeModeTabContentsEvent event) {
+    public static void build(BuildCreativeModeTabContentsEvent event) {
         if(event.getTab() == ModCreativeTab.ENCHANTING_TAB.get()) {
             event.accept(new ItemStack(Items.ENCHANTING_TABLE));
             event.accept(new ItemStack(Items.CHISELED_BOOKSHELF));
-            event.accept(new ItemStack(ModItems.CREATIVE_BOOKSHELF.get()));
+            event.accept(new ItemStack(ModItems.CREATIVE_BOOKSHELF_ITEM.get()));
             event.accept(new ItemStack(Items.LAPIS_LAZULI));
 
-            for(Holder<Enchantment> enchantmentHolder : EnchantmentUtil.getAllRegisteredEnchantments(event.getParameters().holders())) {
+            for(Holder<Enchantment> enchantmentHolder : EnchantmentUtil.getAllEnchantmentsInRegistry(event.getParameters().holders())) {
                 ItemStack stack = new ItemStack(ModItems.ANCIENT_BOOK.get());
                 EnchantmentUtil.setStoredEnchantment(stack, enchantmentHolder);
                 event.accept(stack);

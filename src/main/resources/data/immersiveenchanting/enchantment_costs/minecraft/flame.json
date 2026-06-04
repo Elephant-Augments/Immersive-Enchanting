@@ -1,10 +1,5 @@
 {
   "levels": {
-    "1": [
-      {
-        "item": "minecraft:torchflower",
-        "amount": 1
-      }
-    ]
+    "1": [{"item_cost": {"item": "minecraft:torchflower", "count": 1}}]
   }
 }

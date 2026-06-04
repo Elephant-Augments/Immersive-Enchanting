@@ -1,11 +1,14 @@
 package me.alfie.immersiveenchanting.gui.canvas;
 
+import me.alfie.alfinolib.gui.GuiGraphicsX;
+import me.alfie.alfinolib.gui.ScreenEventListener;
+import me.alfie.alfinolib.gui.util.GuiGraphicsApi;
+import me.alfie.alfinolib.gui.util.MousePos;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
-import me.alfie.immersiveenchanting.gui.core.ScreenEventListener;
 import me.alfie.immersiveenchanting.gui.core.ScreenState;
 import me.alfie.immersiveenchanting.gui.core.Sprite;
+import me.alfie.immersiveenchanting.gui.tab.enchanting.EnchantingTab;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.BranchManager;
-import net.minecraft.client.gui.GuiGraphics;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 
@@ -34,7 +37,7 @@ public class Canvas implements ScreenEventListener {
         return screen;
     }
 
-    public void render(GuiGraphics graphics) {
+    public void render(GuiGraphicsX gx) {
         updateBrightness(screen().tooltipManager().hasActiveTooltip(),
                 0.02f);
         if(screen.isState(ScreenState.BOOKS)) currentBrightness = FULL_BRIGHTNESS;
@@ -61,22 +64,36 @@ public class Canvas implements ScreenEventListener {
                 if(right < viewportLeft || left > viewportRight
                         || bottom < viewportTop || top > viewportBottom) continue;
 
-                CanvasRenderable.setColor(graphics, currentBrightness);
-                graphics.blit(
-                        Sprite.BACKGROUND_TILE.id(),
+                Sprite tile;
+                if(screen().enchantingTab().isDisplay(EnchantingTab.Display.ENCHANTMENTS)) {
+                    tile = Sprite.BACKGROUND_TILE;
+                } else {
+                    tile = Sprite.ALT_BACKGROUND_TILE;
+                }
+
+                CanvasRenderable.setColor(gx.graphics(), currentBrightness);
+                gx.graphics().blit(
+                        tile.id().mc(),
                         x * TILE_SIZE, y * TILE_SIZE,
                         0, 0,
                         Sprite.BACKGROUND_TILE.width(), Sprite.BACKGROUND_TILE.height(),
                         Sprite.BACKGROUND_TILE.width(), Sprite.BACKGROUND_TILE.height()
                 );
-                CanvasRenderable.resetColor(graphics);
-
+                CanvasRenderable.resetColor(gx.graphics());
 
             }
         }
     }
 
+    /**
+     * Resizes the canvas so that nodes at the furthest possible branch depth are not clipped.
+     *
+     * @param highestEnchantmentLevel the maximum enchantment level across all registered enchantments,
+     *                                used to determine how far branches can extend
+     */
     public void setSizeToFitNodes(int highestEnchantmentLevel) {
+        highestEnchantmentLevel = Math.max(5, highestEnchantmentLevel); //Prevent canvas too small
+
         int tileCount = ((BranchManager.getNodeStep() * 2) * highestEnchantmentLevel + TILE_SIZE - 1) / TILE_SIZE;
         int tileMargin = 2;
         setSize(tileCount + tileMargin);
@@ -96,6 +113,10 @@ public class Canvas implements ScreenEventListener {
         return new Vector2i(width / 2, height / 2);
     }
 
+    /**
+     * Converts a canvas-space position to a screen-space position, accounting for
+     * the camera's current scroll offset and zoom level.
+     */
     public Vector2f canvasToScreen(Vector2f pos) {
         return new Vector2f(
                 (pos.x() - screen().camera().x()) * screen().camera().zoom() + screen().camera().VIEWPORT_X,
@@ -107,6 +128,10 @@ public class Canvas implements ScreenEventListener {
         return canvasToScreen(new Vector2f(x, y));
     }
 
+    /**
+     * Converts a screen-space position back to canvas-space, the inverse of
+     * {@link #canvasToScreen(Vector2f)}.
+     */
     public Vector2f screenToCanvas(Vector2f pos) {
         return new Vector2f(
                 (pos.x() - screen().camera().VIEWPORT_X) / screen().camera().zoom() + screen().camera().x(),
@@ -122,6 +147,14 @@ public class Canvas implements ScreenEventListener {
         return length * screen().camera().zoom();
     }
 
+    /**
+     * Smoothly lerps the canvas tint color toward a target brightness.
+     * When a tooltip is active ({@code hovered = true}) the canvas dims to {@link #TINTED_BRIGHTNESS};
+     * otherwise it fades back to {@link #FULL_BRIGHTNESS}.
+     *
+     * @param hovered   whether a tooltip is currently being shown
+     * @param deltaTime time delta used to scale the interpolation speed
+     */
     public void updateBrightness(boolean hovered, float deltaTime) {
         int targetBrightness = hovered ? TINTED_BRIGHTNESS : FULL_BRIGHTNESS;
         if(screen().getMenu().getToolSlot().getItem().isEmpty()) targetBrightness = TINTED_BRIGHTNESS;
@@ -160,13 +193,11 @@ public class Canvas implements ScreenEventListener {
      * @param canvasY
      * @param width
      * @param height
-     * @param mouseX
-     * @param mouseY
      * @return
      */
     public boolean isMouseOver(float canvasX, float canvasY,
                                float width, float height,
-                               double mouseX, double mouseY) {
+                               MousePos mousePos) {
         Vector2f screenPos = canvasToScreen(canvasX, canvasY);
         float scaledWidth = getScaledLength(width);
         float scaledHeight = getScaledLength(height);
@@ -188,7 +219,7 @@ public class Canvas implements ScreenEventListener {
 
         if(visibleLeft >= visibleRight || visibleTop >= visibleBottom) return false;
 
-        return mouseX >= visibleLeft && mouseX <= visibleRight
-                && mouseY >= visibleTop && mouseY <= visibleBottom;
+        return mousePos.x() >= visibleLeft && mousePos.x() <= visibleRight
+                && mousePos.y() >= visibleTop && mousePos.y() <= visibleBottom;
     }
 }

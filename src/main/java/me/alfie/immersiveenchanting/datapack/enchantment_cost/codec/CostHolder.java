@@ -1,9 +1,8 @@
 package me.alfie.immersiveenchanting.datapack.enchantment_cost.codec;
 
 import com.mojang.serialization.Codec;
-import me.alfie.immersiveenchanting.networking.StreamCodec;
+import me.alfie.alfinolib.networking.codec.StreamCodec;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,12 +16,12 @@ public record CostHolder(List<Cost> costs) {
                     CostHolder::costs
             );
 
-    public static final StreamCodec<CostHolder> STREAM_CODEC = new StreamCodec<CostHolder>() {
+    public static final StreamCodec<FriendlyByteBuf, CostHolder> STREAM_CODEC = new StreamCodec<FriendlyByteBuf, CostHolder>() {
         @Override
-        public void encode(FriendlyByteBuf buf, CostHolder value) {
-            List<Cost> costs = value.costs();
+        public void encode(FriendlyByteBuf buf, CostHolder costHolder) {
+            List<Cost> costs = costHolder.costs;
 
-            buf.writeInt(costs.size());
+            buf.writeVarInt(costs.size());
             for (Cost cost : costs) {
                 Cost.STREAM_CODEC.encode(buf, cost);
             }
@@ -30,7 +29,7 @@ public record CostHolder(List<Cost> costs) {
 
         @Override
         public CostHolder decode(FriendlyByteBuf buf) {
-            int size = buf.readInt();
+            int size = buf.readVarInt();
 
             List<Cost> costs = new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
@@ -41,12 +40,5 @@ public record CostHolder(List<Cost> costs) {
         }
     };
 
-    public List<ItemStack> getAllItemStacks() {
-        List<ItemStack> result = new ArrayList<>();
-        for(Cost cost : costs()) {
-            result.addAll(cost.getItemStacks());
-        }
-
-        return result;
-    }
+    public static final CostHolder EMPTY = new CostHolder(List.of());
 }

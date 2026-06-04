@@ -1,15 +1,18 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip;
 
+import me.alfie.alfinolib.gui.GuiGraphicsX;
+import me.alfie.alfinolib.gui.util.GuiGraphicsApi;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
+import me.alfie.immersiveenchanting.api.node.ItemIcon;
+import me.alfie.immersiveenchanting.api.node.NodeIcon;
+import me.alfie.immersiveenchanting.api.node.SpriteIcon;
 import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.gui.core.NineSliceSprite;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeState;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 
 import java.awt.*;
 
@@ -74,40 +77,38 @@ public class TooltipTitle extends TooltipComponent {
      * and finally the title text. The title text is vertically centered relative to the node
      * sprite. A small horizontal offset is applied to position the title correctly.</p>
      *
-     * @param graphics The graphics context used for rendering
      */
     @Override
-    public void blitNineSliceSprite(GuiGraphics graphics, int uvOffset) {
+    public void blitNineSliceSprite(GuiGraphicsX gx, int uvOffset) {
         setPos(x()+2, y());
-
-        super.blitNineSliceSprite(graphics, uvOffset);
+        super.blitNineSliceSprite(gx, uvOffset);
         setPos(x()-2, y());
 
         Node node = tooltip.node();
-        graphics.blit(
+
+        GuiGraphicsApi.blit(
+                gx,
                 node.getState().getSpriteForTier(node.getTier()).id(),
                 x(), y(),
-                0, 0,
-                Node.WIDTH, Node.HEIGHT,
                 Node.WIDTH, Node.HEIGHT
         );
 
-        ResourceLocation iconTexture = node.getIconTexture();
-        if(iconTexture != null) {
-            graphics.blit(
-                    iconTexture,
+        NodeIcon icon = node.getIcon();
+        if(icon instanceof SpriteIcon sprite) {
+            GuiGraphicsApi.blit(
+                    gx,
+                    sprite.id(),
                     x()+4, y()+4,
-                    0, 0,
-                    16, 16,
                     16, 16
             );
+        } else if (icon instanceof ItemIcon item) {
+            GuiGraphicsApi.itemStack(gx, item.stack(), tooltip.screen().getFont(), x()+4, y()+4);
         }
 
         int xo = Node.WIDTH;
         int yo = Node.HEIGHT/2 - Minecraft.getInstance().font.lineHeight/2;
         setTextStartPos(x() + xo, y() + yo);
-        graphics.drawString(Minecraft.getInstance().font, titleText,
-                getTextStartPos().x(), getTextStartPos().y(),
-                Color.WHITE.getRGB());
+        GuiGraphicsApi.text(gx, tooltip.screen().getFont(), titleText,
+                getTextStartPos().x(), getTextStartPos().y(), true);
     }
 }

@@ -1,17 +1,16 @@
 package me.alfie.immersiveenchanting.loot;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import net.minecraft.core.Holder;
-import net.minecraft.core.HolderSet;
-import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -44,6 +43,11 @@ public class InjectAncientBookLootModifier extends LootModifier {
                     ).apply(instance, InjectAncientBookLootModifier::new)
             );
 
+    @Override public Codec<? extends IGlobalLootModifier> codec() {
+        return CODEC;
+    }
+
+
     private final String mode;
     private final List<ResourceKey<Enchantment>> enchantments;
     private final int minRolls;
@@ -66,8 +70,7 @@ public class InjectAncientBookLootModifier extends LootModifier {
 
     protected InjectAncientBookLootModifier(LootItemCondition[] conditionsIn,
                                             String mode,
-                                            Optional<List<ResourceKey<Enchantment>>> enchantments,
-                                            int minRolls,
+                                            Optional<List<ResourceKey<Enchantment>>> enchantments,                                            int minRolls,
                                             int maxRolls) {
         super(conditionsIn);
         this.mode = mode;
@@ -78,7 +81,6 @@ public class InjectAncientBookLootModifier extends LootModifier {
 
     @Override
     protected ObjectArrayList<ItemStack> doApply(@NotNull ObjectArrayList<ItemStack> generatedLoot, @NotNull LootContext context) {
-        //Convert holder set
         List<Holder<Enchantment>> enchantmentHolders = EnchantmentUtil.toHolders(enchantments, context.getLevel().registryAccess());
 
         int rolls = context.getRandom().nextIntBetweenInclusive(minRolls, maxRolls);
@@ -90,7 +92,7 @@ public class InjectAncientBookLootModifier extends LootModifier {
                         CostRegistry.server().getRandomEnchantment(context.getRandom()));
 
             } else if(mode.equals(Mode.RANDOMLY_ENCHANT_FROM_ENABLED_EXCEPT.getString())) {
-                List<Holder<Enchantment>> applicableEnchantments = CostRegistry.server().getAllEnchantmentHolders();
+                List<Holder<Enchantment>> applicableEnchantments = CostRegistry.server().getAllEnabledEnchantmentHolders();
                 applicableEnchantments.removeAll(enchantmentHolders);
                 int randomIndex = context.getRandom().nextInt(applicableEnchantments.size());
 
@@ -107,11 +109,8 @@ public class InjectAncientBookLootModifier extends LootModifier {
             generatedLoot.add(ancientBook);
         }
 
+
         return generatedLoot;
     }
 
-    @Override
-    public Codec<? extends IGlobalLootModifier> codec() {
-        return CODEC;
-    }
 }

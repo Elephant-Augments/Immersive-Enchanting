@@ -1,8 +1,9 @@
 package me.alfie.immersiveenchanting.gui.canvas;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import me.alfie.alfinolib.gui.ScreenEventListener;
+import me.alfie.alfinolib.gui.util.MousePos;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
-import me.alfie.immersiveenchanting.gui.core.ScreenEventListener;
 
 /**
  * Handles camera movement, zooming, and interaction for a scrollable canvas viewport.
@@ -74,7 +75,7 @@ public class CanvasCamera implements ScreenEventListener {
         return y;
     }
 
-    /** @return current zoom level */
+    /** @return current zoom position */
     public float zoom() {
         return zoom;
     }
@@ -102,13 +103,13 @@ public class CanvasCamera implements ScreenEventListener {
     }
 
     /**
-     * Sets the zoom level while keeping the viewport center fixed.
+     * Sets the zoom position while keeping the viewport center fixed.
      *
      * Without this adjustment, zooming would anchor at the top-left corner.
      * This method ensures the point at the center of the viewport remains
      * visually stable during zoom.
      *
-     * @param zoom New zoom level
+     * @param zoom New zoom position
      */
     public void setZoom(float zoom) {
         float centerX = VIEWPORT_WIDTH / 2f;
@@ -136,28 +137,20 @@ public class CanvasCamera implements ScreenEventListener {
         this.y += dy;
     }
 
-    /**
-     * Handles mouse click events to start dragging if inside the viewport.
-     */
     @Override
-    public boolean onMouseClick(double mouseX, double mouseY, int button) {
-        if(button != InputConstants.MOUSE_BUTTON_LEFT) return ScreenEventListener.super.onMouseClick(mouseX, mouseY, button);
+    public boolean onMouseClick(MousePos mousePos, int button) {
+        if(button != InputConstants.MOUSE_BUTTON_LEFT) return ScreenEventListener.super.onMouseClick(mousePos, button);
 
-        if(isMouseOverViewport(mouseX, mouseY) && isDraggingEnabled()) {
+        if(isMouseOverViewport(mousePos) && isDraggingEnabled()) {
             dragging = true;
             return true;
         }
 
-        return ScreenEventListener.super.onMouseClick(mouseX, mouseY, button);
+        return ScreenEventListener.super.onMouseClick(mousePos, button);
     }
 
-    /**
-     * Handles mouse drag events to pan the camera.
-     *
-     * Drag direction is inverted to simulate "grabbing" the canvas.
-     */
     @Override
-    public boolean onMouseDrag(double mouseX, double mouseY, int button, double dx, double dy) {
+    public boolean onMouseDrag(MousePos mousePos, int button, double dx, double dy) {
         if(dragging) {
             move((float) -dx, (float) -dy);
             clampPosition();
@@ -165,7 +158,7 @@ public class CanvasCamera implements ScreenEventListener {
             return true;
         }
 
-        return ScreenEventListener.super.onMouseDrag(mouseX, mouseY, button, dx, dy);
+        return ScreenEventListener.super.onMouseDrag(mousePos, button, dx, dy);
     }
 
     /**
@@ -180,36 +173,30 @@ public class CanvasCamera implements ScreenEventListener {
         setPos(Math.max(0, Math.min(x, maxX)), Math.max(0, Math.min(y, maxY)));
     }
 
-    /**
-     * Stops dragging when the mouse is released.
-     */
     @Override
-    public boolean onMouseRelease(double mouseX, double mouseY, int button) {
+    public boolean onMouseRelease(MousePos mousePos, int button) {
         dragging = false;
-        return ScreenEventListener.super.onMouseRelease(mouseX, mouseY, button);
+        return ScreenEventListener.super.onMouseRelease(mousePos, button);
     }
 
-    /**
-     * Handles scroll input to zoom in/out when inside the viewport.
-     */
     @Override
-    public boolean onMouseScrolled(double mouseX, double mouseY, double scrollY) {
-        if(isMouseOverViewport(mouseX, mouseY) && isDraggingEnabled()) {
+    public boolean onMouseScrolled(MousePos mousePos, double scrollY) {
+        if(isMouseOverViewport(mousePos) && isDraggingEnabled()) {
             float newZoom = zoom() + (float)(ZOOM_STEP * scrollY);
             newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newZoom));
             setZoom(newZoom);
         }
 
-        return ScreenEventListener.super.onMouseScrolled(mouseX, mouseY, scrollY);
+        return ScreenEventListener.super.onMouseScrolled(mousePos, scrollY);
     }
 
     /**
      * Checks whether a given mouse position is inside the viewport bounds.
      */
-    public boolean isMouseOverViewport(double mouseX, double mouseY) {
-        return mouseX >= VIEWPORT_X &&
-                mouseX <= VIEWPORT_X + VIEWPORT_WIDTH &&
-                mouseY >= VIEWPORT_Y &&
-                mouseY <= VIEWPORT_Y + VIEWPORT_HEIGHT;
+    public boolean isMouseOverViewport(MousePos mousePos) {
+        return mousePos.x() >= VIEWPORT_X &&
+                mousePos.x() <= VIEWPORT_X + VIEWPORT_WIDTH &&
+                mousePos.y() >= VIEWPORT_Y &&
+                mousePos.y() <= VIEWPORT_Y + VIEWPORT_HEIGHT;
     }
 }

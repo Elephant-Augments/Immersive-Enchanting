@@ -1,15 +1,17 @@
 package me.alfie.immersiveenchanting.gui.tab;
 
+import me.alfie.alfinolib.gui.GuiGraphicsX;
+import me.alfie.alfinolib.gui.ScreenEventListener;
+import me.alfie.alfinolib.gui.util.GuiGraphicsApi;
+import me.alfie.alfinolib.gui.util.MousePos;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
-import me.alfie.immersiveenchanting.gui.core.ScreenEventListener;
 import me.alfie.immersiveenchanting.gui.core.ScreenState;
 import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.util.FxHelper;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+
 
 public class TabButton implements ScreenEventListener {
 
@@ -23,11 +25,28 @@ public class TabButton implements ScreenEventListener {
     private ItemStack icon = new ItemStack(ModItems.ANCIENT_BOOK.get(), 1);
     private Component label = Component.empty();
 
+    /**
+     * Creates a new tab button tied to the given screen.
+     <P>
+     * @param screen the parent {@link EnchantingTableScreen} this button belongs to
+     */
     public TabButton(EnchantingTableScreen screen) {
         this.screen = screen;
     }
 
-    public void render(GuiGraphics graphics, int mouseX, int mouseY) {
+    /**
+     * Renders the tab button, including its icon and hover tooltip.
+     <P>
+     * <p>The displayed icon and label depend on the current {@link ScreenState}:</p>
+     <P>
+     * <ul>
+     *     <li>ENCHANTING → shows book icon (switch to books view)</li>
+     *     <li>BOOKS → shows enchanting table icon (switch to enchanting view)</li>
+     * </ul>
+     <P>
+
+     */
+    public void render(GuiGraphicsX gx, MousePos mousePos) {
         if(screen.isState(ScreenState.ENCHANTING)) {
             label = Component.translatable("immersiveenchanting.tab.book");
             icon = new ItemStack(ModItems.ANCIENT_BOOK.get(), 1);
@@ -36,24 +55,14 @@ public class TabButton implements ScreenEventListener {
             icon = new ItemStack(Items.ENCHANTING_TABLE, 1);
         }
 
-        graphics.renderItem(icon, screen.getGuiLeft()+202, screen.getGuiTop()+132);
-        renderHoverTooltip(graphics, mouseX, mouseY);
-    }
-
-    private void renderHoverTooltip(GuiGraphics graphics, int mouseX, int mouseY) {
-        if(this.isMouseOver(mouseX, mouseY) && !screen.tooltipManager().isTooltipLocked()) {
-            graphics.renderTooltip(Minecraft.getInstance().font, label, mouseX, mouseY);
-        }
-
-    }
-
-    private boolean isMouseOver(double mouseX, double mouseY) {
-        return screen.isMouseOver(screen.getGuiLeft() + x, screen.getGuiTop() + y, width, height, mouseX, mouseY);
+        final int x = screen.getGuiLeft() + 202;
+        final int y = screen.getGuiTop() + 132;
+        GuiGraphicsApi.itemStackWithTooltip(gx, icon, screen.getFont(), x, y, mousePos);
     }
 
     @Override
-    public boolean onMouseClick(double mouseX, double mouseY, int button) {
-        if(this.isMouseOver(mouseX, mouseY)) {
+    public boolean onMouseClick(MousePos mousePos, int button) {
+        if(mousePos.isOver(screen.getGuiLeft() + 202, screen.getGuiTop() + 132, width, height)) {
             FxHelper.playGenericUISound(screen.player());
 
             if(screen.isState(ScreenState.ENCHANTING)) {
@@ -66,6 +75,6 @@ public class TabButton implements ScreenEventListener {
             return true;
         }
 
-        return ScreenEventListener.super.onMouseClick(mouseX, mouseY, button);
+        return ScreenEventListener.super.onMouseClick(mousePos, button);
     }
 }

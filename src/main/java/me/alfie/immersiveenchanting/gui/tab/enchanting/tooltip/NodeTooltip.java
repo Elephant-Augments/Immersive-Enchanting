@@ -1,20 +1,14 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import me.alfie.immersiveenchanting.config.ServerConfig;
-import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
+import me.alfie.alfinolib.gui.GuiGraphicsX;
+import me.alfie.alfinolib.gui.ScreenEventListener;
+import me.alfie.alfinolib.gui.util.MousePos;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
-import me.alfie.immersiveenchanting.gui.core.ScreenEventListener;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeState;
-import me.alfie.immersiveenchanting.networking.EnchantPacket;
-import me.alfie.immersiveenchanting.networking.ModPackets;
-import me.alfie.immersiveenchanting.networking.ReplicatePacket;
-import me.alfie.immersiveenchanting.networking.TransmutePacket;
-import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import me.alfie.immersiveenchanting.util.FxHelper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import org.joml.Vector2f;
 
 /**
@@ -45,6 +39,8 @@ public class NodeTooltip implements ScreenEventListener {
     private int hoverWidth;
     private int hoverHeight;
 
+    private boolean lockingAllowed = true;
+
     /**
      * Creates a tooltip for a specific node on the enchanting screen.
      *
@@ -54,7 +50,7 @@ public class NodeTooltip implements ScreenEventListener {
     public NodeTooltip(EnchantingTableScreen screen, Node node) {
         this.node = node;
         this.screen = screen;
-        screen().enchantmentCostRenderer().setCostToRender(node().id(), node().getEnchantmentLevel());
+        screen().enchantmentCostRenderer().setCostToRender(node().branchId(), node().getPosition() + 1);
 
         this.title = new TooltipTitle(this);
         this.description = new TooltipDescription(this);
@@ -73,11 +69,8 @@ public class NodeTooltip implements ScreenEventListener {
      *     <li>Detects mouse hover and schedules this tooltip for display</li>
      * </ul>
      *
-     * @param graphics the rendering context
-     * @param mouseX current mouse X position
-     * @param mouseY current mouse Y position
      */
-    public void render(GuiGraphics graphics, int mouseX, int mouseY) {
+    public void render(GuiGraphicsX gx, MousePos mousePos) {
         screenPos = screen.canvas().canvasToScreen(node.canvasX(), node.canvasY());
 
         title.setPos((int) screenPos.x(), (int) screenPos.y());
@@ -94,17 +87,17 @@ public class NodeTooltip implements ScreenEventListener {
         title.setHeight(titleHeight);
         description.setHeight(descHeight);
 
-        description.render(graphics, mouseX, mouseY);
+        description.render(gx, mousePos);
 
         int titleUvOffset = node().isState(NodeState.OBTAINED) ? 0 : 26;
-        title.blitNineSliceSprite(graphics, titleUvOffset);
+        title.blitNineSliceSprite(gx, titleUvOffset);
 
         boolean locked = screen().tooltipManager().isTooltipLockedFor(node());
         hoverWidth = locked ? sharedWidth : Node.WIDTH;
         hoverHeight = locked ? titleHeight+descHeight-13 : Node.HEIGHT;
 
-        if(screen().isMouseOver(screenPos.x(), screenPos.y(), hoverWidth, hoverHeight, mouseX, mouseY)) {
-            screen().tooltipManager().requestTooltip(node());
+        if(mousePos.isOver((int) screenPos.x(), (int) screenPos.y(), hoverWidth, hoverHeight)) {
+            screen().tooltipManager().requestTooltip(node(), 0);
 
             if(screen().tooltipManager().isHoldingTooltip()) screen().tooltipManager().updateHold();
         } else {
@@ -112,41 +105,22 @@ public class NodeTooltip implements ScreenEventListener {
 
             screen().tooltipManager().resetHold();
         }
-
-
     }
 
 
-
     @Override
-    public boolean onMouseClick(double mouseX, double mouseY, int button) {
-        if(screen().isMouseOver(screenPos.x(), screenPos.y(), Node.WIDTH, Node.HEIGHT, mouseX, mouseY)) {
+    public boolean onMouseClick(MousePos mousePos, int button) {
+        if(mousePos.isOver((int) screenPos.x(), (int) screenPos.y(), Node.WIDTH, Node.HEIGHT)) {
             if(button == InputConstants.MOUSE_BUTTON_LEFT) {
-                if(node().isEnchantment()) {
-
-                    if(node().isState(NodeState.OBTAINED) && canRemove()) {
-                        screen().tooltipManager().startHold(node());
-                    } else {
-                        ModPackets.toServer(new EnchantPacket(
-                                EnchantmentUtil.toResourceKey(node.id()),
-                                node().getEnchantmentLevel()
-                        ));
-                    }
-
-                } else if (node.id().equals(CostRegistry.TRANSMUTE)) {
-                    ModPackets.toServer(new TransmutePacket());
-                } else if (node.id().equals(CostRegistry.REPLICATE)) {
-                    ModPackets.toServer(new ReplicatePacket());
-                }
-
+                node().click();
                 screen().tooltipManager().unlockTooltip();
                 return true;
             }
         }
 
 
-        if(screen().isMouseOver(screenPos.x(), screenPos.y(), hoverWidth, hoverHeight, mouseX, mouseY)) {
-            if(button == InputConstants.MOUSE_BUTTON_RIGHT) {
+        if(mousePos.isOver((int) screenPos.x(), (int) screenPos.y(), hoverWidth, hoverHeight)) {
+            if(button == InputConstants.MOUSE_BUTTON_RIGHT && isLockingAllowed()) {
                 if(screen().tooltipManager().isTooltipLockedFor(node())) {
                     screen().tooltipManager().unlockTooltip();
                 } else {
@@ -157,15 +131,14 @@ public class NodeTooltip implements ScreenEventListener {
             return true;
         }
 
-
-        return ScreenEventListener.super.onMouseClick(mouseX, mouseY, button);
+        return ScreenEventListener.super.onMouseClick(mousePos, button);
     }
 
     @Override
-    public boolean onMouseRelease(double mouseX, double mouseY, int button) {
+    public boolean onMouseRelease(MousePos mousePos, int button) {
         screen().tooltipManager().resetHold();
 
-        return ScreenEventListener.super.onMouseRelease(mouseX, mouseY, button);
+        return ScreenEventListener.super.onMouseRelease(mousePos, button);
     }
 
     /**
@@ -182,12 +155,11 @@ public class NodeTooltip implements ScreenEventListener {
         return screen;
     }
 
-    public boolean canRemove() {
-        return node().getEnchantmentLevel() == screen()
-                .getMenu()
-                .getToolSlot()
-                .getItem()
-                .getEnchantmentLevel(EnchantmentUtil.toHolder(node().id(), screen().registryAccess()).get())
-                && ServerConfig.isEnchantmentRemovalAllowed();
+    public void setLockingAllowed(boolean allowed) {
+        lockingAllowed = allowed;
+    }
+
+    public boolean isLockingAllowed() {
+        return lockingAllowed;
     }
 }

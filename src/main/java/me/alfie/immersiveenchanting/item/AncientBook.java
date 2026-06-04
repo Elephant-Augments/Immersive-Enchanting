@@ -4,7 +4,6 @@ import me.alfie.immersiveenchanting.config.ClientConfig;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.*;
@@ -17,7 +16,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Map;
 
 public class AncientBook extends EnchantedBookItem {
 
@@ -37,7 +35,10 @@ public class AncientBook extends EnchantedBookItem {
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         //Mask enchantments
         ItemStack copy = stack.copy();
-        copy.getTag().remove(EnchantedBookItem.TAG_STORED_ENCHANTMENTS);
+        if(copy.getOrCreateTag().contains(EnchantedBookItem.TAG_STORED_ENCHANTMENTS)) {
+            copy.getTag().remove(EnchantedBookItem.TAG_STORED_ENCHANTMENTS);
+        }
+
         super.appendHoverText(copy, level, tooltipComponents, tooltipFlag);
 
         if(level == null) return;

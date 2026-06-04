@@ -2,10 +2,10 @@ package me.alfie.immersiveenchanting.api.description;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.api.description.internal.EnchantLayoutExtension;
+import me.alfie.immersiveenchanting.api.description.internal.ModFilterLayoutExtension;
 import me.alfie.immersiveenchanting.api.description.internal.ReplicateLayoutExtension;
 import me.alfie.immersiveenchanting.api.description.internal.TransmuteLayoutExtension;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.NodeTooltip;
-import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +19,7 @@ public final class TooltipDescriptionExtensions {
      */
     public static void register(DescriptionLayoutExtension extension) {
         EXTENSIONS.add(extension);
+        ImmersiveEnchanting.LOGGER.debug("Successfully registered DescriptionLayoutExtension {}", extension);
     }
 
     /**
@@ -37,15 +38,21 @@ public final class TooltipDescriptionExtensions {
         }
     }
 
+    /**
+     * Clear the layout and re-run all registered extensions. Use this when the node state
+     * has changed and the entire description needs to be regenerated from scratch.
+     */
     public static void rebuild(NodeTooltip parentTooltip,
                                DescriptionLayout descriptionLayout) {
         descriptionLayout.clear();
         apply(parentTooltip, descriptionLayout);
     }
 
-    public static void registerInternalTooltipDescriptions(FMLLoadCompleteEvent event) {
-        TooltipDescriptionExtensions.register(new EnchantLayoutExtension());
-        TooltipDescriptionExtensions.register(new TransmuteLayoutExtension());
-        TooltipDescriptionExtensions.register(new ReplicateLayoutExtension());
+    /** Registers the built-in layout extensions via the {@link RegisterDescriptionLayoutEvent}. */
+    public static void registerInternalTooltipDescriptions(RegisterDescriptionLayoutEvent event) {
+        event.register(new EnchantLayoutExtension());
+        event.register(new TransmuteLayoutExtension());
+        event.register(new ReplicateLayoutExtension());
+        event.register(new ModFilterLayoutExtension());
     }
 }

@@ -1,63 +1,80 @@
 package me.alfie.immersiveenchanting.networking;
 
+import me.alfie.alfinolib.networking.NetworkPacket;
+import me.alfie.alfinolib.networking.codec.StreamCodec;
+import me.alfie.alfinolib.util.ResourceId;
+import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
+import me.alfie.immersiveenchanting.util.CostHelper;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import me.alfie.immersiveenchanting.util.FxHelper;
 import net.minecraft.core.Holder;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraftforge.network.NetworkEvent;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
-import java.util.function.Supplier;
 
-public record EnchantPacket(ResourceKey<Enchantment> enchantmentResourceKey,
-                            int level) implements ModNetworkPacket {
+/**
+ * Client-to-server packet requesting an enchantment to be applied.
+ *
+ * <p>Validates the request against server-side rules before applying:
+ * <ul>
+ *     <li>Enchantment compatibility</li>
+ *     <li>Level progression rules</li>
+ *     <li>Bookshelf availability</li>
+ *     <li>Cost and fuel requirements</li>
+ * </ul>
+ *
+ * <p>If valid, the enchantment is applied to the item and resources are consumed.
+ * On success, visual and audio feedback is triggered on the client.</p>
+ */
+public record EnchantPacket(ResourceKey<Enchantment> enchantmentKey, int level) implements NetworkPacket<EnchantPacket> {
 
-    public static final PacketCodec<EnchantPacket> CODEC = new PacketCodec<>(){
+    public static StreamCodec<FriendlyByteBuf, EnchantPacket> STREAM_CODEC = new StreamCodec<FriendlyByteBuf, EnchantPacket>() {
         @Override
-        public void encode(EnchantPacket packet, FriendlyByteBuf buf) {
-            buf.writeResourceKey(packet.enchantmentResourceKey());
-            buf.writeInt(packet.level());
-
+        public void encode(FriendlyByteBuf buf, EnchantPacket packet) {
+            ModPackets.ENCHANTMENT_CODEC.encode(buf, packet.enchantmentKey);
+            buf.writeInt(packet.level);
         }
 
         @Override
         public EnchantPacket decode(FriendlyByteBuf buf) {
-            return new EnchantPacket(buf.readResourceKey(Registries.ENCHANTMENT), buf.readInt());
+            return new EnchantPacket(ModPackets.ENCHANTMENT_CODEC.decode(buf), buf.readInt());
         }
     };
 
     @Override
     public void exec(NetworkEvent.Context context) {
-        if(!context.getDirection().getReceptionSide().isServer()) return;
-        if(!(context.getSender().containerMenu instanceof EnchantingTableMenu menu)) return;
-        //Resolve holder
-        Holder<Enchantment> enchantmentHolder = EnchantmentUtil.toHolder(enchantmentResourceKey().location(),
-                context.getSender().level().registryAccess());
+        Player player = context.getSender();
+        if(!(player.containerMenu instanceof EnchantingTableMenu menu)) return;
 
-        ItemStack stackToEnchant = menu.getToolSlot().getItem();
-        if(EnchantmentUtil.canEnchant(menu, enchantmentHolder, level(), context)) {
-            EnchantmentUtil.deductValidCost(menu, EnchantmentUtil.toId(enchantmentHolder), level(),
-                    context.getSender(), CostRegistry.server());
+        Holder<Enchantment> enchantmentHolder = EnchantmentUtil.toHolder(enchantmentKey,
+                player.level().registryAccess());
 
-            //PORT INFO 1.20.1 .enchant() doesn't overwrite enchantments, they're appended.
-            Map<Enchantment, Integer> enchantments = EnchantmentHelper.getEnchantments(stackToEnchant);
+        ItemStack stack = menu.getToolSlot().getItem();
+        if(CostHelper.canEnchant(menu, enchantmentHolder, level, player)) {
+            Map<Enchantment, Integer> enchantments = EnchantmentHelper.getEnchantments(stack);
             enchantments.remove(enchantmentHolder.value());
             enchantments.put(enchantmentHolder.get(), level());
-            EnchantmentHelper.setEnchantments(enchantments, stackToEnchant);
+            EnchantmentHelper.setEnchantments(enchantments, stack);
+            menu.getToolSlot().setChanged();
 
-            boolean isHighestTier = level() == CostRegistry.server()
+            boolean isHighestTier = level == CostRegistry.server()
                     .get(enchantmentHolder)
                     .levelCosts()
                     .maxLevel();
 
-            FxHelper.playEnchantSuccess(context.getSender().level(), menu.getBlockPos(), isHighestTier);
+            menu.getToolSlot().set(EnchantmentUtil.tryConvertVanillaBook(stack));
+
+            FxHelper.playEnchantSuccess(context.getSender(), menu.getBlockPos(), isHighestTier);
         }
     }
 }

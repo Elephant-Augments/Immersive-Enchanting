@@ -2,8 +2,12 @@ package me.alfie.immersiveenchanting.datapack.enchantment_cost.codec;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import me.alfie.immersiveenchanting.networking.StreamCodec;
+import me.alfie.alfinolib.networking.codec.CommonCodecs;
+import me.alfie.alfinolib.networking.codec.StreamCodec;
+import me.alfie.alfinolib.networking.codec.StreamCodecBuilder;
 import net.minecraft.network.FriendlyByteBuf;
+
+import java.util.HashMap;
 
 public record CostData(boolean enabled, CostLevels levelCosts) {
 
@@ -13,20 +17,11 @@ public record CostData(boolean enabled, CostLevels levelCosts) {
                     CostLevels.CODEC.fieldOf("levels").forGetter(CostData::levelCosts)
             ).apply(instance, CostData::new));
 
-    public static final StreamCodec<CostData> STREAM_CODEC = new StreamCodec<CostData>() {
-        @Override
-        public void encode(FriendlyByteBuf buf, CostData value) {
-            buf.writeBoolean(value.enabled());
-            CostLevels.STREAM_CODEC.encode(buf, value.levelCosts());
-        }
+    public static final StreamCodec<FriendlyByteBuf, CostData> STREAM_CODEC =
+            StreamCodecBuilder.<FriendlyByteBuf, CostData>create()
+                    .add(CommonCodecs.BOOL, CostData::enabled)
+                    .add(CostLevels.STREAM_CODEC, CostData::levelCosts)
+                    .build(CostData::new);
 
-        @Override
-        public CostData decode(FriendlyByteBuf buf) {
-            boolean enabled = buf.readBoolean();
-            CostLevels levelCosts = CostLevels.STREAM_CODEC.decode(buf);
-
-            return new CostData(enabled, levelCosts);
-        }
-    };
-
+    public static final CostData EMPTY = new CostData(true, new CostLevels(new HashMap<>()));
 }

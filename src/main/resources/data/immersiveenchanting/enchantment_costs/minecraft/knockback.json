@@ -1,16 +1,6 @@
 {
   "levels": {
-    "1": [
-      {
-        "item": "minecraft:piston",
-        "amount": 1
-      }
-    ],
-    "2": [
-      {
-        "item": "minecraft:rabbit_foot",
-        "amount": 1
-      }
-    ]
+    "1": [{"item_cost": {"item": "minecraft:piston", "count": 1}}],
+    "2": [{"item_cost": {"item": "minecraft:rabbit_foot", "count": 1}}]
   }
 }

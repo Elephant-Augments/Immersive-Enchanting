@@ -1,17 +1,17 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip;
 
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.resources.ResourceLocation;
+import me.alfie.alfinolib.gui.GuiGraphicsX;
+import me.alfie.alfinolib.util.ResourceId;
 
 public class NineSliceBox {
 
-    private ResourceLocation texture;
+    private ResourceId texture;
     private int x;
     private int y;
     private int width;
     private int height;
 
-    public NineSliceBox(ResourceLocation texture) {
+    public NineSliceBox(ResourceId texture) {
         this.texture = texture;
 
         //Fallback default dimensions
@@ -19,13 +19,12 @@ public class NineSliceBox {
         this.height = 16;
     }
 
-    /**Port Info: nine sliced sprites require UV OFFSET instead of .mcmeta files*/
-    public void blitNineSliceSprite(GuiGraphics graphics, int uvOffset) {
+    public void blitNineSliceSprite(GuiGraphicsX gx, int uvOffset) {
         final int textureWidth = 200;
         final int textureHeight = 26;
         final int textureBorder = 10;
-        graphics.blitNineSliced(
-                texture,
+        gx.graphics().blitNineSliced(
+                texture.mc(),
                 x, y, width, height, textureBorder, textureWidth, textureHeight, 0, uvOffset
         );
     }

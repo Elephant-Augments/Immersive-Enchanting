@@ -2,46 +2,46 @@ package me.alfie.immersiveenchanting.datapack.enchantment_cost.codec;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import me.alfie.immersiveenchanting.networking.StreamCodec;
+import me.alfie.alfinolib.networking.codec.CommonCodecs;
+import me.alfie.alfinolib.networking.codec.StreamCodec;
+import me.alfie.alfinolib.networking.codec.StreamCodecBuilder;
+import me.alfie.alfinolib.util.codec.ItemCost;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
-public record Cost(ItemOrTag itemOrTag, int amount, int xpLevels) {
+public record Cost(ItemCost itemCost, int xpLevels) {
 
     public static final Codec<Cost> CODEC = RecordCodecBuilder.create(
             instance -> instance.group(
-                    ItemOrTag.CODEC.fieldOf("item").forGetter(Cost::itemOrTag),
-                    Codec.INT.fieldOf("amount").forGetter(Cost::amount),
+                    ItemCost.CODEC.fieldOf("item_cost").forGetter(Cost::itemCost),
                     Codec.INT.optionalFieldOf("xp_levels", 0).forGetter(Cost::xpLevels)
             ).apply(instance, Cost::new)
     );
 
-    public static final StreamCodec<Cost> STREAM_CODEC = new StreamCodec<Cost>() {
-        @Override
-        public void encode(FriendlyByteBuf buf, Cost value) {
-            ItemOrTag.STREAM_CODEC.encode(buf, value.itemOrTag());
-            buf.writeInt(value.amount());
-            buf.writeInt(value.xpLevels());
-        }
+    public static final StreamCodec<FriendlyByteBuf, Cost> STREAM_CODEC =
+            StreamCodecBuilder.<FriendlyByteBuf, Cost>create()
+                    .add(ItemCost.STREAM_CODEC, Cost::itemCost)
+                    .add(CommonCodecs.VAR_INT, Cost::xpLevels)
+                    .build(Cost::new);
 
-        @Override
-        public Cost decode(FriendlyByteBuf buf) {
-            ItemOrTag itemOrTag = ItemOrTag.STREAM_CODEC.decode(buf);
-            int amount = buf.readInt();
-            int xpLevels = buf.readInt();
+    public static final Cost EMPTY = new Cost(ItemCost.EMPTY, 0);
 
-            return new Cost(itemOrTag, amount, xpLevels);
-        }
-    };
-
-    /**
-     * Returns all items found in ItemOrTag with this amount.
-     * @return
-     */
+    /**Convenience method*/
     public List<ItemStack> getItemStacks() {
-        return itemOrTag().getItemStacks(amount());
+        return itemCost.getItemStacks();
     }
 
+    /**
+     * Returns this cost if it is valid, null if none found
+     */
+    public @Nullable Cost test(ItemStack testStack, Player player) {
+        if(itemCost().isValid(testStack) && player.experienceLevel >= xpLevels) {
+            return this;
+        }
+        return null;
+    }
 }

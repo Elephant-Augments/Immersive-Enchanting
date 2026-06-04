@@ -1,14 +1,19 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.node;
 
+import me.alfie.alfinolib.gui.GuiGraphicsX;
+import me.alfie.alfinolib.gui.util.MousePos;
+import me.alfie.alfinolib.util.ResourceId;
+import me.alfie.immersiveenchanting.api.node.*;
+import me.alfie.immersiveenchanting.api.node.internal.EnchantmentNodeData;
+import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
 import me.alfie.immersiveenchanting.gui.canvas.CanvasRenderable;
-import me.alfie.immersiveenchanting.util.EnchantmentTextureHelper;
+import me.alfie.immersiveenchanting.gui.core.Sprite;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.NotNull;
+import net.minecraft.world.item.enchantment.Enchantment;
 
 import javax.annotation.Nullable;
 
@@ -35,101 +40,122 @@ public class Node extends CanvasRenderable {
     public static final int WIDTH = 26;
     public static final int HEIGHT = 26;
     public static final float DEFAULT_SCALE = 0.8f;
-    public static final float HOVER_SCALE = 1f;
 
-    private NodeState state;
-    private NodeTier tier;
-
-    private final ResourceLocation id;
-    private final int enchantmentLevel;
+    private final NodeState state;
+    private final NodeTier tier;
 
     @Nullable
-    private ResourceLocation iconTexture;
+    private NodeIcon icon;
+    private final Component title;
 
-    /**
+    private final NodeBranch parentBranch;
+    private final int position;
+    private final NodeData<?> data;
+
+     /**
      * Constructs a node that represents a real enchantment with a specific level.
      *
      * <p>This constructor should be used for standard enchantment nodes that
      * correspond to a valid enchantment ID and level.</p>
      *
-     * @param enchantmentId The identifier of the enchantment
-     * @param enchantmentLevel The level of the enchantment (must be > 0)
+     * @param position The level of the enchantment (must be > 0)
      * @param canvas The canvas this node belongs to
      * @param state The current state of the node (e.g. locked, unlocked)
      * @param tier The visual tier of the node
+     * @param parentBranch The branch this node belongs to
      */
-    public Node(@NotNull ResourceLocation enchantmentId,
-                int enchantmentLevel,
+    public Node(Component title,
+                int position,
                 Canvas canvas,
                 NodeState state,
-                NodeTier tier) {
+                NodeTier tier,
+                @Nullable NodeIcon icon,
+                NodeBranch parentBranch,
+                NodeData<?> data) {
         super(canvas);
-        this.id = enchantmentId;
-        this.enchantmentLevel = enchantmentLevel;
+
+        if(position < 0) throw new IllegalStateException("Node position can't be less than 0!");
+        this.position = position;
         this.state = state;
         this.tier = tier;
+        this.parentBranch = parentBranch;
+        this.title = title;
+        this.data = data;
 
-        setIconTexture();
+        setIcon(icon);
+    }
+
+    public void click() {
+        data.onClick(new NodeClickContext(canvas().screen(), this));
+    }
+
+    public ResourceId dataType() {
+        return data.type();
+    }
+
+    public NodeData<?> data() {
+        return data;
+    }
+
+    public boolean isDataType(ResourceId id) {
+        return data.type() == id;
     }
 
     /**
-     * Constructs a node that does not represent a traditional enchantment.
-     *
-     * <p>This is used for special-purpose nodes such as actions (e.g. transmute,
-     * replicate) that do not have an enchantment level.</p>
-     *
-     * <p>Calling {@link #getEnchantmentLevel()} on instances created with this
-     * constructor will throw an {@link IllegalStateException}.</p>
-     *
-     * @param id The identifier of the special node
-     * @param canvas The canvas this node belongs to
-     * @param state The current state of the node
-     * @param tier The visual tier of the node
+     * Returns {@code true} if this node's enchantment can currently be removed.
+     * Removal is only permitted when the node's position matches the highest level on the item
+     * (i.e. it is the top-most equipped level) and removal is enabled in server config.
      */
-    public Node(@NotNull ResourceLocation id,
-                Canvas canvas,
-                NodeState state,
-                NodeTier tier) {
-        super(canvas);
-        this.id = id;
-        this.enchantmentLevel = 1;
-        this.state = state;
-        this.tier = tier;
-
-        setIconTexture();
+    public boolean canRemove() {
+        return getPosition() + 1 == EnchantmentUtil.getEnchantmentLevel(
+                canvas().screen()
+                        .getMenu()
+                        .getToolSlot()
+                        .getItem(),
+                EnchantmentUtil.toHolder(branchId(), canvas().screen().registryAccess()))
+                && ServerConfig.isEnchantmentRemovalAllowed();
     }
 
-    /**
-     * Renders this node on the screen.
-     *
-     * <p>This method first applies the node's current scale. If no other node has
-     * requested a tooltip for this frame, and the mouse is hovering over this node,
-     * it registers itself as the next node tooltip and skips rendering the node visuals.
-     * If this node is already the pending tooltip, rendering is also skipped.</p>
-     *
-     * <p>Otherwise, the node's background sprite is drawn, and if an icon texture is
-     * set, it is rendered on top of the background.</p>
-     *
-     * @param graphics The graphics context used for rendering
-     * @param mouseX The current mouse X position
-     * @param mouseY The current mouse Y position
-     */
+    public NodeBranch getParentBranch() {
+        return parentBranch;
+    }
+
+
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY) {
+    public void render(GuiGraphicsX gx, MousePos mousePos) {
         setScaleKeepPos(BranchManager.getNodeBranchScale(), state.getSpriteForTier(tier));
 
-        if(canvas().isMouseOver(
-                canvasX(), canvasY(),
-                getScaledLength(Node.WIDTH), getScaledLength(Node.HEIGHT),
-                mouseX, mouseY)) {
+        if(canvas().isMouseOver(canvasX(), canvasY(), Node.WIDTH, Node.HEIGHT, mousePos)) {
+            if(!canvas().screen().camera().isDragging()) {
+                int priority = canvas().screen()
+                        .enchantingTab()
+                        .branchManager()
+                        .getAllNodes()
+                        .indexOf(this);
 
-            if(!canvas().screen().camera().isDragging()) canvas().screen().tooltipManager().requestTooltip(this);
+                canvas().screen().tooltipManager().requestTooltip(this, priority);
+            }
         }
 
+
         if(canvas().screen().tooltipManager().isActiveTooltipFor(this)) return;
-        blit(graphics, state.getSpriteForTier(tier), canvas().getCurrentBrightness());
-        if(iconTexture != null) {
-            blit(graphics, iconTexture, 16, 16, 4, 4, canvas().getCurrentBrightness());
+        blit(gx, state.getSpriteForTier(tier), canvas().getCurrentBrightness());
+
+        if(data().value() instanceof EnchantmentNodeData enchantmentData) {
+            Holder<Enchantment> enchantmentHolder = EnchantmentUtil.toHolder(enchantmentData.enchantmentId(), canvas().screen().registryAccess());
+
+            if(!CostRegistry.client().isRegistered(enchantmentHolder)) {
+                //Red error node for enchantments that failed to load costs
+                blit(gx, Sprite.ERROR_NODE, canvas().getCurrentBrightness());
+            }
+
+        }
+
+
+        if(getIcon() instanceof SpriteIcon sprite) {
+            blit(gx, sprite.id(), 16, 16, 4, 4, canvas().getCurrentBrightness());
+        } else if(getIcon() instanceof ItemIcon item) {
+            item(gx, item.stack(), 4, 4, canvas().getCurrentBrightness());
         }
     }
 
@@ -139,10 +165,10 @@ public class Node extends CanvasRenderable {
      * <p>Defaults to an "ancient book" texture unless the node is in a locked state,
      * in which case no icon is rendered.</p>
      */
-    private void setIconTexture() {
-        iconTexture = EnchantmentTextureHelper.getTexture(id());
+    private void setIcon(NodeIcon icon) {
+        this.icon = icon;
 
-        if(isState(NodeState.LOCKED) || isState(NodeState.ALERT)) iconTexture = null;
+        if(isState(NodeState.LOCKED) || isState(NodeState.ALERT)) this.icon = null;
     }
 
     /**
@@ -162,15 +188,15 @@ public class Node extends CanvasRenderable {
     /**
      * @return The icon texture
      */
-    public @Nullable ResourceLocation getIconTexture() {
-        return iconTexture;
+    public @Nullable NodeIcon getIcon() {
+        return icon;
     }
 
     /**
      * @return The identifier associated with this node
      */
-    public ResourceLocation id() {
-        return id;
+    public ResourceId branchId() {
+        return getParentBranch().id();
     }
 
     /**
@@ -182,20 +208,7 @@ public class Node extends CanvasRenderable {
      * @return A {@link Component} representing the node title
      */
     public Component getTitle() {
-        if(isEnchantment()) {
-            return EnchantmentUtil.toHolder(id, canvas().screen().registryAccess()).get().getFullname(enchantmentLevel);
-        } else {
-            return Component.translatable("immersiveenchanting.tooltip.title." + id().getPath());
-        }
-    }
-
-    /**
-     * Checks whether this node represents a real enchantment.
-     *
-     * @return {@code true} if this is an enchantment node, {@code false} if it is a special node
-     */
-    public boolean isEnchantment() {
-        return id != CostRegistry.TRANSMUTE && id != CostRegistry.REPLICATE;
+        return title;
     }
 
     /**
@@ -204,9 +217,8 @@ public class Node extends CanvasRenderable {
      * @return The enchantment level
      * @throws IllegalStateException if this node does not represent an enchantment
      */
-    public int getEnchantmentLevel() {
-        if(enchantmentLevel == 0) throw new IllegalStateException("This node does not have an enchantment level!");
-        return enchantmentLevel;
+    public int getPosition() {
+        return position;
     }
 
     /**

@@ -1,20 +1,19 @@
 package me.alfie.immersiveenchanting.gui.core;
 
+import me.alfie.alfinolib.util.ResourceId;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
-import net.minecraft.resources.ResourceLocation;
 
 public enum NineSliceSprite {
     TOOLTIP_WIDGETS("textures/gui/sprites/tooltip/tooltip_widgets.png");
 
-
-    private final ResourceLocation identifier;
+    private final ResourceId id;
 
     NineSliceSprite(String path) {
-        this.identifier = ResourceLocation.fromNamespaceAndPath(ImmersiveEnchanting.MODID, path);
+        this.id = new ResourceId(ImmersiveEnchanting.MODID, path);
     }
 
-    public ResourceLocation id() {
-        return identifier;
+    public ResourceId id() {
+        return id;
     }
 
 }

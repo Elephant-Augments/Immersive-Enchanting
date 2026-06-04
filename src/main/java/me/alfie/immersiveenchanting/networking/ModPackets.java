@@ -1,59 +1,33 @@
 package me.alfie.immersiveenchanting.networking;
 
-import me.alfie.immersiveenchanting.ImmersiveEnchanting;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.network.simple.SimpleChannel;
-
-import java.util.function.Supplier;
+import me.alfie.alfinolib.networking.NetworkRegisterEvent;
+import me.alfie.alfinolib.networking.Networking;
+import me.alfie.alfinolib.networking.codec.StreamCodec;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.enchantment.Enchantment;
 
 public class ModPackets {
 
-    private static final String PROTOCOL_VERSION = "1";
-    public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(
-            ResourceLocation.fromNamespaceAndPath(ImmersiveEnchanting.MODID, "main"),
-            () -> PROTOCOL_VERSION,
-            PROTOCOL_VERSION::equals,
-            PROTOCOL_VERSION::equals
-    );
+    public static final StreamCodec<FriendlyByteBuf, ResourceKey<Enchantment>> ENCHANTMENT_CODEC = new StreamCodec<FriendlyByteBuf, ResourceKey<Enchantment>>() {
+        @Override
+        public void encode(FriendlyByteBuf buf, ResourceKey<Enchantment> enchantment) {
+            buf.writeResourceKey(enchantment);
+        }
 
-    private static int packetId = 0;
+        @Override
+        public ResourceKey<Enchantment> decode(FriendlyByteBuf buf) {
+            return buf.readResourceKey(Registries.ENCHANTMENT);
+        }
+    };
 
-    public static <T extends ModNetworkPacket> void register(Class<T> type, PacketCodec<T> codec) {
-        INSTANCE.registerMessage(
-                packetId++,
-                type,
-                codec::encode,
-                codec::decode,
-                ModPackets::handle
-        );
-    }
-
-    public static <T extends ModNetworkPacket> void handle(T packet, Supplier<NetworkEvent.Context> context) {
-        context.get().enqueueWork(
-                () -> packet.exec(context.get())
-        );
-        context.get().setPacketHandled(true);
-    }
-
-    public static void register() {
-        register(AvailableEnchantmentsPacket.class, AvailableEnchantmentsPacket.CODEC);
-        register(EnchantPacket.class, EnchantPacket.CODEC);
-        register(RemoveEnchantmentPacket.class, RemoveEnchantmentPacket.CODEC);
-        register(ReplicatePacket.class, ReplicatePacket.CODEC);
-        register(SyncClientDatapackManagerPacket.class, SyncClientDatapackManagerPacket.CODEC);
-        register(TransmutePacket.class, TransmutePacket.CODEC);
-        register(UpdateToolSlotPacket.class, UpdateToolSlotPacket.CODEC);
-    }
-
-    public static <T extends ModNetworkPacket> void toServer(T packet) {
-        INSTANCE.sendToServer(packet);
-    }
-
-    public static <T extends ModNetworkPacket> void toClient(T packet, ServerPlayer serverPlayer) {
-        INSTANCE.send(PacketDistributor.PLAYER.with(() -> serverPlayer), packet);
+    public static void register(NetworkRegisterEvent event) {
+        event.register(AvailableEnchantmentsPacket.class, AvailableEnchantmentsPacket.STREAM_CODEC);
+        event.register(EnchantPacket.class, EnchantPacket.STREAM_CODEC);
+        event.register(RemoveEnchantmentPacket.class, RemoveEnchantmentPacket.STREAM_CODEC);
+        event.register(ReplicatePacket.class, ReplicatePacket.STREAM_CODEC);
+        event.register(TransmutePacket.class, TransmutePacket.STREAM_CODEC);
+        event.register(UpdateToolSlotPacket.class, UpdateToolSlotPacket.STREAM_CODEC);
     }
 }

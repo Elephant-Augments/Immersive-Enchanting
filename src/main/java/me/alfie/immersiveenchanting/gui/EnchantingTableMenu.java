@@ -3,16 +3,12 @@ package me.alfie.immersiveenchanting.gui;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.codec.Cost;
 import me.alfie.immersiveenchanting.item.ModItems;
-import me.alfie.immersiveenchanting.util.BookshelfChecker;
+import me.alfie.immersiveenchanting.util.EnchantingTableContainer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleContainer;
-import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -20,15 +16,12 @@ import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
-import net.minecraftforge.items.SlotItemHandler;
-import net.minecraftforge.network.NetworkHooks;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.EnchantmentTableBlockEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -73,7 +66,7 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
 
     private final BlockPos blockPos;
     private final ContainerLevelAccess access;
-    private final IItemHandler container;
+    private final Container container;
     private final Level level;
 
     private List<Holder<Enchantment>> availableEnchantments = new ArrayList<>();
@@ -81,7 +74,7 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
     /**
      * Client-side constructor used when the menu is opened.
      *
-     * <p>Reads the {@link BlockPos} from the network buffer and resolves the level
+     * <p>Reads the {@link BlockPos} from the network buffer and resolves the position
      * from the player instance.</p>
      *
      * @param containerId     The container ID assigned by Minecraft
@@ -100,62 +93,54 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
      *
      * @param containerId     The container ID
      * @param playerInventory The player's inventory
-     * @param level           The level the menu is operating in
+     * @param level           The position the menu is operating in
      * @param pos             The position of the enchanting table block
      */
     public EnchantingTableMenu(int containerId, Inventory playerInventory, @Nullable Level level, @Nullable BlockPos pos) {
         super(ModMenus.ENCHANTING_TABLE_MENU.get(), containerId);
-        this.container = new ItemStackHandler(3);
         this.blockPos = pos;
         this.level = level;
         this.access = ContainerLevelAccess.create(level, pos);
+
+        Container chosenContainer = null;
+        if (level != null && !level.isClientSide() && pos != null) {
+            BlockEntity be = level.getBlockEntity(pos);
+            if (be instanceof EnchantmentTableBlockEntity enchantingBE) {
+                chosenContainer = new EnchantingTableContainer(enchantingBE);
+            }
+        }
+        this.container = chosenContainer != null ? chosenContainer : new SimpleContainer(3);
+
         buildSlots(playerInventory);
     }
 
-    @SubscribeEvent
-    public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
-        Level level = event.getLevel();
-        BlockPos pos = event.getPos();
-        Player player = event.getEntity();
-        if(level.isClientSide) return;
-        if(!(player instanceof ServerPlayer serverPlayer)) return;
-
-        if (level.getBlockState(pos).getBlock() == Blocks.ENCHANTING_TABLE) {
-            event.setCanceled(true);
-            event.setCancellationResult(InteractionResult.SUCCESS);
-
-            NetworkHooks.openScreen(serverPlayer,
-                    new SimpleMenuProvider(
-                            (containerId, playerInventory, playerEntity) -> new EnchantingTableMenu(containerId, playerInventory, playerEntity.level(), pos),
-                            Component.literal("Enchanting Table")
-                    ),
-                    buf -> buf.writeBlockPos(pos)
-            );
-
-            BookshelfChecker.checkBookshelves(pos, level, serverPlayer);
-        }
-    }
-
+    /**
+     * Gets the block position of the enchanting table associated with this menu.
+     <P>
+     * @return the {@link BlockPos} of the enchanting table
+     */
     public BlockPos getBlockPos() {
         return blockPos;
     }
 
     /**
-     * Builds and registers all menu slots.
-     *
-     * <p>Includes:
+     * Builds and registers all menu slots, including internal container slots and player inventory.
+     <P>
+     * <p>Slot layout includes:</p>
+     <P>
      * <ul>
-     *     <li>Tool slot (1 item max)</li>
+     *     <li>Tool slot (max stack size 1)</li>
      *     <li>Enchanting fuel slot</li>
      *     <li>Cost slot</li>
-     *     <li>Player inventory and hotbar</li>
+     *     <li>Player inventory (3 rows)</li>
+     *     <li>Hotbar (1 row)</li>
      * </ul>
-     *
-     * @param playerInventory The player's inventory
+     <P>
+     * @param playerInventory the player's inventory used to populate inventory slots
      */
     private void buildSlots(Inventory playerInventory) {
         //Tool slot
-        this.addSlot(new SlotItemHandler(this.container, Slots.TOOL.id(), 233, 141) {
+        this.addSlot(new Slot(this.container, Slots.TOOL.id(), 233, 141) {
             @Override
             public int getMaxStackSize() {
                 return 1;
@@ -163,10 +148,10 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
         });
 
         //Enchanting fuel slot
-        this.addSlot(new SlotItemHandler(this.container, Slots.ENCHANTING_FUEL.id(), 233, 199));
+        this.addSlot(new Slot(this.container, Slots.ENCHANTING_FUEL.id(), 233, 199));
 
         //Cost slot
-        this.addSlot(new SlotItemHandler(this.container, Slots.COST.id(), 233, 170));
+        this.addSlot(new Slot(this.container, Slots.COST.id(), 233, 170));
 
         //Add player inventory slots
         int startX = 17;
@@ -186,18 +171,20 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
     }
 
     /**
-     * Handles shift-click item transfers between the menu and player inventory.
-     *
-     * <p>Rules:
+     * Handles shift-click (quick move) logic for transferring items between slots.
+     <P>
+     * <p>Behaviour:</p>
+     <P>
      * <ul>
-     *     <li>Tools go into the tool slot</li>
-     *     <li>Valid enchanting fuels go into the fuel slot</li>
-     *     <li>All other items go into the cost slot</li>
+     *     <li>Items in menu slots are moved to player inventory</li>
+     *     <li>Enchantable items and ancient books go to the tool slot</li>
+     *     <li>Valid enchanting fuels go to the fuel slot</li>
+     *     <li>All other items go to the cost slot</li>
      * </ul>
-     *
-     * @param player The player interacting with the menu
-     * @param i      The slot index
-     * @return The moved {@link ItemStack}, or {@link ItemStack#EMPTY} if transfer failed
+     <P>
+     * @param player the player performing the action
+     * @param i the index of the clicked slot
+     * @return the moved {@link ItemStack}, or {@link ItemStack#EMPTY} if the move failed
      */
     @Override
     public @NotNull ItemStack quickMoveStack(@NotNull Player player, int i) {
@@ -212,28 +199,33 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
         //Quick move into inventory
         if(i == Slots.TOOL.id()) {
             if(!this.moveItemStackTo(stack, 3, 39, true)) return ItemStack.EMPTY;
+            slot.setChanged(); // notify the BE-backed container so the renderer updates
         } else if (i == Slots.ENCHANTING_FUEL.id()) {
             if (!this.moveItemStackTo(stack, 3, 39, true)) return ItemStack.EMPTY;
+            slot.setChanged();
         } else if (i == Slots.COST.id()) {
             if (!this.moveItemStackTo(stack, 3, 39, true)) return ItemStack.EMPTY;
+            slot.setChanged();
         } else {
-            CostRegistry registry = CostRegistry.client();
+            CostRegistry registry;
             if(level != null && !level.isClientSide()) {
                 registry = CostRegistry.server();
+            } else {
+                registry = CostRegistry.client();
             }
 
             List<Cost> enchantingFuels = registry.get(CostRegistry.ENCHANTING_FUELS)
                     .levelCosts().getAllLevels();
 
             Set<Item> enchantingFuelItems = new HashSet<>();
-            for(Cost enchantmentCost : enchantingFuels) {
-                for(ItemStack fuelStack : enchantmentCost.getItemStacks()) {
+            for(Cost fuelCost : enchantingFuels) {
+                for(ItemStack fuelStack : fuelCost.getItemStacks()) {
                     enchantingFuelItems.add(fuelStack.getItem());
                 }
             }
 
             //Quick move into menu
-            if(stack.getItem().isEnchantable(stack) || stack.is(ModItems.ANCIENT_BOOK.get())) {
+            if(stack.getItem().isEnchantable(stack) || stack.is(Items.BOOK) || stack.is(Items.ENCHANTED_BOOK) || stack.is(ModItems.ANCIENT_BOOK.get()) || stack.is(ModItems.CREATIVE_BOOKSHELF_ITEM.get())) {
                 if (!this.moveItemStackTo(stack, 0, 1, false)) return ItemStack.EMPTY;
             } else if(enchantingFuelItems.contains(stack.getItem())) {
                 if (!this.moveItemStackTo(stack, 1, 2, false)) return ItemStack.EMPTY;
@@ -251,12 +243,12 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
     }
 
     /**
-     * Checks whether the player can still interact with this menu.
-     *
-     * <p>Ensures the player is within range of the enchanting table block.</p>
-     *
-     * @param player The player
-     * @return {@code true} if the menu is still valid
+     * Determines whether the player can continue interacting with this menu.
+     <P>
+     * <p>This checks that the player is still within usable distance of the enchanting table.</p>
+     <P>
+     * @param player the player interacting with the menu
+     * @return {@code true} if the menu is still valid and usable
      */
     @Override
     public boolean stillValid(@NotNull Player player) {
@@ -265,71 +257,94 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
 
     /**
      * Called when the menu is closed.
-     *
-     * <p>On the server:
-     * <ul>
-     *     <li>All items in the internal container are returned to the player</li>
-     *     <li>If the inventory is full, items are dropped</li>
-     * </ul>
-     *
-     * @param player The player closing the menu
+     <P>
+     * <p>On the server side, all items in the internal container are returned to the player.
+     * If the player's inventory is full, the items are dropped into the world.</p>
+     <P>
+     * @param player the player closing the menu
      */
     @Override
     public void removed(@NotNull Player player) {
         super.removed(player);
 
-        if (!player.level().isClientSide()) {
-            for (int i = 0; i < this.container.getSlots(); i++) {
-                ItemStack stack = this.container.extractItem(i,
-                        this.container.getStackInSlot(i).getCount(),
-                        false); //remove without triggering slot update
-                if (!stack.isEmpty()) {
-                    player.getInventory().placeItemBackInInventory(stack); //return to inventory, drop if full
-                }
-            }
+        if (player.level().isClientSide()) return;
+
+        // BE-backed container: leave the items in the block. They persist in
+        // NBT and will be visible to the next player who opens the table.
+        if (this.container instanceof EnchantingTableContainer) return;
+
+        // Fallback path: return items to the player so they aren't lost.
+        for (int i = 0; i < this.container.getContainerSize(); i++) {
+            ItemStack stack = this.container.removeItemNoUpdate(i);
+            if (!stack.isEmpty()) player.getInventory().placeItemBackInInventory(stack);
         }
     }
 
     /**
-     * Gets a slot by enum type.
-     *
-     * @param slot The slot enum
-     * @return The corresponding {@link Slot}
+     * Retrieves a slot by its enum type.
+     <P>
+     * @param slot the {@link Slots} enum representing the desired slot
+     * @return the corresponding {@link Slot}
      */
     public Slot getSlot(Slots slot) {
         return this.getSlot(slot.id());
     }
 
     /**
-     * @return The tool slot
+     * Gets the tool slot used for placing the item to be enchanted.
+     <P>
+     * @return the tool {@link Slot}
      */
     public Slot getToolSlot() {
         return this.getSlot(Slots.TOOL.id());
     }
 
     /**
-     * @return The enchanting fuel slot
+     * Gets the slot used for enchanting fuel items.
+     <P>
+     * @return the fuel {@link Slot}
      */
     public Slot getFuelSlot() {
         return this.getSlot(Slots.ENCHANTING_FUEL.id());
     }
 
     /**
-     * @return The cost slot
+     * Gets the slot used for cost payment items.
+     <P>
+     * @return the cost {@link Slot}
      */
     public Slot getCostSlot() {
         return this.getSlot(Slots.COST.id());
     }
 
+    /**
+     * Replaces the current list of available enchantments.
+     <P>
+     * <p>This is typically called when the server determines available enchantments
+     * based on nearby bookshelves or configuration rules.</p>
+     <P>
+     * @param availableEnchantments the new list of available enchantments
+     */
     public void setAvailableEnchantments(List<Holder<Enchantment>> availableEnchantments) {
         this.availableEnchantments.clear();
         this.availableEnchantments.addAll(availableEnchantments);
     }
 
+    /**
+     * Retrieves the list of enchantments currently available for use.
+     <P>
+     * @return a list of available {@link Enchantment} holders
+     */
     public List<Holder<Enchantment>> getAvailableEnchantments() {
         return availableEnchantments;
     }
 
+    /**
+     * Checks whether a specific enchantment is available in this menu.
+     <P>
+     * @param enchantmentHolder the enchantment to check
+     * @return {@code true} if the enchantment is available
+     */
     public boolean isEnchantmentAvailable(Holder<Enchantment> enchantmentHolder) {
         return getAvailableEnchantments().contains(enchantmentHolder);
     }

@@ -1,19 +1,31 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.node;
 
-import me.alfie.immersiveenchanting.config.ServerConfig;
+import me.alfie.alfinolib.datapacks.ClientDatapackManager;
+import me.alfie.alfinolib.util.ResourceId;
+import me.alfie.immersiveenchanting.ImmersiveEnchanting;
+import me.alfie.immersiveenchanting.api.node.*;
+import me.alfie.immersiveenchanting.api.node.internal.EnchantmentNodeData;
+import me.alfie.immersiveenchanting.api.node.internal.ModFilterNodeData;
+import me.alfie.immersiveenchanting.api.node.internal.ReplicateNodeData;
+import me.alfie.immersiveenchanting.api.node.internal.TransmuteNodeData;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
+import me.alfie.immersiveenchanting.datapack.mod_icons.ModIconsDatapack;
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
+import me.alfie.immersiveenchanting.gui.tab.enchanting.EnchantingTab;
 import me.alfie.immersiveenchanting.item.ModItems;
+import me.alfie.immersiveenchanting.util.EnchantmentTextureHelper;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraftforge.common.MinecraftForge;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Functions to create branches pre-filled with nodes.
@@ -21,104 +33,235 @@ import java.util.Set;
 public class BranchFactory {
 
     public static List<NodeBranch> buildBranches(ItemStack stack, CostRegistry costRegistry, Canvas canvas) {
-        if(stack.is(ModItems.ANCIENT_BOOK.get())) {
-            return buildAncientBookBranches(stack, costRegistry, canvas);
-        } else {
-            return buildEnchantingBranches(stack, costRegistry, canvas);
+        BuildBranchesEvent event = new BuildBranchesEvent(stack, costRegistry, canvas);
 
+        addDefaultBranches(event);
+
+        MinecraftForge.EVENT_BUS.post(event);
+
+        List<NodeBranch> branches = event.getBranches();
+        List<Float> angles = generateBranchAngles(branches.size());
+
+        for (int i = 0; i < branches.size(); i++) {
+            branches.get(i).setAngle(angles.get(i));
+        }
+
+        return branches;
+    }
+
+    private static void addDefaultBranches(BuildBranchesEvent event) {
+        if(event.getStack().is(ModItems.ANCIENT_BOOK.get())) {
+            buildAncientBookBranches(event);
+        } else {
+            buildEnchantingBranches(event);
         }
     }
 
-    private static List<NodeBranch> buildAncientBookBranches(ItemStack stack, CostRegistry costRegistry, Canvas canvas) {
-        List<NodeBranch> result = new ArrayList<>();
-        List<Float> angles = generateBranchAngles(2);
-
-        if(ServerConfig.isAllowTransmute()) result.add(buildTransmuteBranch(stack, angles.get(0), canvas));
-        if(ServerConfig.isAllowReplicate()) result.add(buildReplicateBranch(angles.get(1), canvas));
-
-        return result;
+    private static void buildAncientBookBranches(BuildBranchesEvent event) {
+        buildTransmuteBranch(event);
+        buildReplicateBranch(event);
     }
 
-    private static NodeBranch buildTransmuteBranch(ItemStack stack, float angle, Canvas canvas) {
-        List<Node> nodes = new ArrayList<>();
+    private static void buildEnchantingBranches(BuildBranchesEvent event) {
+        List<Holder<Enchantment>> allEnchantments = EnchantmentUtil.getAllEnchantmentsInRegistry(event.getCanvas().screen().registryAccess());
+        List<Holder<Enchantment>> applicableEnchantments = getApplicableEnchantments(event.getStack(), allEnchantments);
 
-        NodeState state = NodeState.UNOBTAINED;
-        NodeTier tier = NodeTier.ADVANCED;
+        if(event.getStack().is(ModItems.CREATIVE_BOOKSHELF_ITEM.get()) || event.getStack().is(Items.BOOK)) {
+            applicableEnchantments = allEnchantments;
+        }
 
-        if(!canvas.screen().getMenu().isEnchantmentAvailable(EnchantmentUtil.getStoredEnchantment(stack, canvas.screen().registryAccess())))
-            state = NodeState.LOCKED;
+        if(event.getCanvas().screen().enchantingTab().isDisplay(EnchantingTab.Display.ENCHANTMENTS)) {
 
-        if(EnchantmentUtil.isReplicated(stack)) state = NodeState.ALERT;
+            for (Holder<Enchantment> applicableEnchantment : applicableEnchantments) {
+                String modid = applicableEnchantment.unwrapKey().orElseThrow().location().getNamespace();
+                String filteredModid = event.getCanvas().screen().enchantingTab().getFilteredModid();
+                if(filteredModid == null || filteredModid.equals(modid)) {
+                    if(!event.costRegistry().isRegistered(applicableEnchantment)
+                        || event.costRegistry().get(applicableEnchantment).enabled()) {
 
-        nodes.add(new Node(CostRegistry.TRANSMUTE, canvas, state, tier));
+                        buildEnchantingBranch(event, applicableEnchantment);
+                    }
+                }
+            }
 
-        return new NodeBranch(canvas, nodes, angle);
+        } else if(event.getCanvas().screen().enchantingTab().isDisplay(EnchantingTab.Display.MOD_FILTERS)) {
+            buildModFilterBranches(event, applicableEnchantments);
+        }
+
     }
 
-    private static NodeBranch buildReplicateBranch(float angle, Canvas canvas) {
-        List<Node> nodes = new ArrayList<>();
-
-        NodeState state = NodeState.UNOBTAINED;
-        NodeTier tier = NodeTier.ADVANCED;
-
-        nodes.add(new Node(CostRegistry.REPLICATE, canvas, state, tier));
-
-        return new NodeBranch(canvas, nodes, angle);
+    private static ResourceId createModFilterBranchId(String modid) {
+        final String modFilterStem = "mod_filter/";
+        return new ResourceId(ImmersiveEnchanting.MODID, modFilterStem + modid);
     }
 
-    private static List<Holder<Enchantment>> getApplicableEnchantments(ItemStack stack, CostRegistry costRegistry) {
-        List<Holder<Enchantment>> sortedEnchantments = EnchantmentUtil.sortByName(costRegistry.getAllEnchantmentHolders());
+    private static void buildModFilterBranches(BuildBranchesEvent event, List<Holder<Enchantment>> applicableEnchantments) {
+        Set<String> modids = new HashSet<>();
+
+        for(Holder<Enchantment> enchantmentHolder : applicableEnchantments) {
+            String modid = enchantmentHolder.unwrapKey().orElseThrow().location().getNamespace();
+            if(modids.contains(modid)) continue;
+            modids.add(modid);
+
+
+            Component title = Component.literal(ImmersiveEnchanting.getModName(modid));
+            buildModFilterBranch(event, title, modid);
+        }
+
+        ItemIcon itemIcon = new ItemIcon(ClientDatapackManager.get(ModIconsDatapack.KEY)
+                .getAsItemStack(ModFilterNodeData.ALL_MODS));
+
+        NodeState state =
+                Objects.equals(event.getCanvas().screen().enchantingTab().getFilteredModid(), null)
+                        ? NodeState.OBTAINED
+                        : NodeState.UNOBTAINED;
+
+        event.addBranch(BranchBuilder.of(event.getCanvas(), createModFilterBranchId(ModFilterNodeData.ALL_MODS))
+                .node(new NodeTemplate(
+                        Component.translatable("immersiveenchanting.mod_filter.all"),
+                        0,
+                        state,
+                        NodeTier.ELITE,
+                        itemIcon,
+                        ModFilterNodeData.create(ModFilterNodeData.ALL_MODS)
+                )).build());
+    }
+
+
+
+    private static void buildModFilterBranch(BuildBranchesEvent event, Component modTitle, String modid) {
+        ItemIcon itemIcon = new ItemIcon(ClientDatapackManager.get(ModIconsDatapack.KEY)
+                .getAsItemStack(modid));
+
+        NodeState state =
+                Objects.equals(event.getCanvas().screen().enchantingTab().getFilteredModid(), modid)
+                        ? NodeState.OBTAINED
+                        : NodeState.UNOBTAINED;
+
+        event.addBranch(BranchBuilder.of(event.getCanvas(), createModFilterBranchId(modid))
+                .node(new NodeTemplate(
+                        modTitle,
+                        0,
+                        state,
+                        NodeTier.BASIC,
+                        itemIcon,
+                        ModFilterNodeData.create(modid)
+                )).build());
+    }
+
+    private static void buildEnchantingBranch(BuildBranchesEvent event, Holder<Enchantment> enchantmentHolder) {
+        List<NodeTemplate> nodeTemplates = new ArrayList<>();
+
+        int maxLevel;
+        if(event.costRegistry().isRegistered(enchantmentHolder)) {
+            //Use the max level from the cost registry, which may be higher than the enchantment's inherent max level if the datapack adds extra levels.
+            maxLevel = event.costRegistry().get(enchantmentHolder).levelCosts().maxLevel();
+        } else {
+            //Use the max level from the enchantment itself as a fallback if it's not in the cost registry. This allows enchantments added by datapacks to still show up.
+            maxLevel = enchantmentHolder.value().getMaxLevel();
+        }
+
+        for (int enchantmentLevel = 0; enchantmentLevel < maxLevel; enchantmentLevel++) {
+            int equippedLevel = EnchantmentUtil.getEnchantmentLevel(event.getStack(), enchantmentHolder);
+            NodeState state = equippedLevel > enchantmentLevel ? NodeState.OBTAINED : NodeState.UNOBTAINED;
+            NodeTier tier = enchantmentLevel+1 == maxLevel ? NodeTier.ELITE : NodeTier.BASIC;
+
+            if(!event.getCanvas().screen().getMenu().isEnchantmentAvailable(enchantmentHolder))
+                state = NodeState.LOCKED;
+
+
+            ResourceId enchantmentId = EnchantmentUtil.toId(enchantmentHolder);
+            nodeTemplates.add(new NodeTemplate(
+                    enchantmentHolder.get().getFullname(enchantmentLevel+1),
+                    enchantmentLevel,
+                    state,
+                    tier,
+                    new SpriteIcon(EnchantmentTextureHelper.getTexture(enchantmentId)),
+                    EnchantmentNodeData.create(enchantmentId, enchantmentLevel+1)
+            ));
+
+
+            if(equippedLevel < enchantmentLevel+1) break;
+        }
+
+        event.addBranch(BranchBuilder.of(event.getCanvas(), EnchantmentUtil.toId(enchantmentHolder))
+                .nodes(nodeTemplates)
+                .build());
+    }
+
+    private static void buildTransmuteBranch(BuildBranchesEvent event) {
+        NodeState state = event.getCanvas().screen().getMenu().isEnchantmentAvailable(EnchantmentUtil.getStoredEnchantment(event.getStack(), event.getCanvas().screen().registryAccess())) ?
+                NodeState.UNOBTAINED : NodeState.LOCKED;
+        if(EnchantmentUtil.isReplicated(event.getStack())) state = NodeState.ALERT;
+
+        NodeTemplate transmuteNode = new NodeTemplate(
+                Component.translatable("immersiveenchanting.tooltip.title.transmute"),
+                0,
+                state,
+                NodeTier.ADVANCED,
+                new SpriteIcon(EnchantmentTextureHelper.getTexture(CostRegistry.TRANSMUTE)),
+                TransmuteNodeData.create()
+        );
+
+        if(!event.costRegistry().isRegistered(CostRegistry.TRANSMUTE)
+            || event.costRegistry().get(CostRegistry.TRANSMUTE).enabled())
+            event.addBranch(BranchBuilder.of(event.getCanvas(), CostRegistry.TRANSMUTE)
+                    .node(transmuteNode)
+                    .build());
+
+    }
+
+    private static void buildReplicateBranch(BuildBranchesEvent event) {
+        NodeTemplate replicateNode = new NodeTemplate(
+                Component.translatable("immersiveenchanting.tooltip.title.replicate"),
+                0,
+                NodeState.UNOBTAINED,
+                NodeTier.ADVANCED,
+                new SpriteIcon(EnchantmentTextureHelper.getTexture(CostRegistry.REPLICATE)),
+                ReplicateNodeData.create()
+        );
+
+        if(!event.costRegistry().isRegistered(CostRegistry.REPLICATE)
+            || event.costRegistry().get(CostRegistry.REPLICATE).enabled())
+            event.addBranch(BranchBuilder.of(event.getCanvas(), CostRegistry.REPLICATE)
+                    .node(replicateNode)
+                    .build());
+    }
+
+    /**
+     * Returns all enchantments from {@code allEnchantments} that are compatible with {@code stack}
+     * (i.e. supported by the item and not conflicting with its other enchantments), sorted alphabetically.
+     * @param stack The item stack for which to find applicable enchantments.
+     * @param allEnchantments A list of enchantments to filter, typically all enchantments in the cost registry or all enchantments in the game.
+     * @return A list of enchantments from {@code allEnchantments} that are compatible with {@code stack}, sorted alphabetically.
+     */
+    private static List<Holder<Enchantment>> getApplicableEnchantments(
+            ItemStack stack,
+            List<Holder<Enchantment>> allEnchantments) {
 
         List<Holder<Enchantment>> applicableEnchantments = new ArrayList<>();
 
-        for(Holder<Enchantment> enchantmentHolder : sortedEnchantments) {
-            Set<Enchantment> itemEnchantments = new HashSet<>(stack.getAllEnchantments().keySet());
-            itemEnchantments.remove(enchantmentHolder.get());
-            if(!EnchantmentHelper.isEnchantmentCompatible(itemEnchantments, enchantmentHolder.get())) continue;
-            if (enchantmentHolder.get().canEnchant(stack)) applicableEnchantments.add(enchantmentHolder);
+        for (Holder<Enchantment> enchantmentHolder : allEnchantments) {
+            Enchantment enchantment = enchantmentHolder.get();
+
+            Set<Enchantment> itemEnchantments = new HashSet<>(EnchantmentUtil.getEnchantments(stack).keySet());
+            itemEnchantments.remove(enchantment);
+
+            if (!stack.is(Items.ENCHANTED_BOOK)) {
+                if (!EnchantmentHelper.isEnchantmentCompatible(itemEnchantments, enchantment)) continue;
+                if (enchantment.canEnchant(stack)) applicableEnchantments.add(enchantmentHolder);
+            } else {
+                applicableEnchantments.add(enchantmentHolder);
+            }
         }
 
         return applicableEnchantments;
     }
 
-    private static List<NodeBranch> buildEnchantingBranches(ItemStack stack, CostRegistry costRegistry, Canvas canvas) {
-        List<NodeBranch> result = new ArrayList<>();
-        List<Holder<Enchantment>> applicableEnchantments = getApplicableEnchantments(stack, costRegistry);
-
-        List<Float> angles = generateBranchAngles(applicableEnchantments.size());
-
-        for (int i = 0; i < applicableEnchantments.size(); i++) {
-            Holder<Enchantment> enchantment = applicableEnchantments.get(i);
-            int equippedLevel = stack.getEnchantmentLevel(enchantment.get());
-
-            result.add(buildEnchantingBranch(enchantment, costRegistry, equippedLevel, angles.get(i), canvas));
-        }
-        return result;
-    }
-
-    private static NodeBranch buildEnchantingBranch(Holder<Enchantment> enchantment,
-                                                    CostRegistry costRegistry,
-                                                    int equippedLevel,
-                                                    float angle,
-                                                    Canvas canvas) {
-        List<Node> nodes = new ArrayList<>();
-
-        int maxLevel = costRegistry.get(EnchantmentUtil.toId(enchantment)).levelCosts().maxLevel();
-        for (int enchantmentLevel = 0; enchantmentLevel < maxLevel; enchantmentLevel++) {
-            NodeState state = equippedLevel > enchantmentLevel ? NodeState.OBTAINED : NodeState.UNOBTAINED;
-            NodeTier tier = enchantmentLevel+1 == maxLevel ? NodeTier.ELITE : NodeTier.BASIC;
-
-            if(!canvas.screen().getMenu().isEnchantmentAvailable(enchantment)) state = NodeState.LOCKED;
-
-            nodes.add(new Node(EnchantmentUtil.toId(enchantment), enchantmentLevel+1, canvas, state, tier));
-
-            if(equippedLevel < enchantmentLevel+1) break;
-        }
-
-        return new NodeBranch(canvas, nodes, angle);
-    }
-
-
+    /**
+     * Generates evenly-spaced angles (in radians) for {@code totalBranches} branches,
+     * spread uniformly around a full circle.
+     */
     private static ArrayList<Float> generateBranchAngles(int totalBranches) {
         // No more than 16 branches
         ArrayList<Float> angles = new ArrayList<>();
