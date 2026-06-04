@@ -138,15 +138,15 @@ public class CanvasCamera implements ScreenEventListener {
     }
 
     @Override
-    public boolean onMouseClick(MousePos mousePos, int button) {
-        if(button != InputConstants.MOUSE_BUTTON_LEFT) return ScreenEventListener.super.onMouseClick(mousePos, button);
+    public boolean onMouseClick(MousePos mousePos, int button, int modifiers) {
+        if(button != InputConstants.MOUSE_BUTTON_LEFT) return ScreenEventListener.super.onMouseClick(mousePos, button, modifiers);
 
         if(isMouseOverViewport(mousePos) && isDraggingEnabled()) {
             dragging = true;
             return true;
         }
 
-        return ScreenEventListener.super.onMouseClick(mousePos, button);
+        return ScreenEventListener.super.onMouseClick(mousePos, button, modifiers);
     }
 
     @Override

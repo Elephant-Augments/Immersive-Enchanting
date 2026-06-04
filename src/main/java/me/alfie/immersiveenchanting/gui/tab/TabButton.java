@@ -65,7 +65,7 @@ public class TabButton implements ScreenEventListener {
     }
 
     @Override
-    public boolean onMouseClick(MousePos mousePos, int button) {
+    public boolean onMouseClick(MousePos mousePos, int button, int modifiers) {
         if(mousePos.isOver(screen.getGuiLeft() + 202, screen.getGuiTop() + 132, width, height)) {
             FxHelper.playGenericUISound(screen.player());
 
@@ -79,6 +79,6 @@ public class TabButton implements ScreenEventListener {
             return true;
         }
 
-        return ScreenEventListener.super.onMouseClick(mousePos, button);
+        return ScreenEventListener.super.onMouseClick(mousePos, button, modifiers);
     }
 }

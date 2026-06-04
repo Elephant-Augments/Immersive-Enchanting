@@ -18,7 +18,7 @@ import java.util.List;
 
 public class ModCommands {
 
-    public static void registerCommands(RegisterCommandsEvent event) {
+    public static void register(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
 
         List<ModCommand> commands = List.of(

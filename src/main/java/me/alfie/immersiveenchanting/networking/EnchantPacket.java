@@ -6,6 +6,7 @@ import me.alfie.alfinolib.util.ResourceId;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
+import me.alfie.immersiveenchanting.util.CostHelper;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import me.alfie.immersiveenchanting.util.FxHelper;
 import net.minecraft.core.Holder;
@@ -60,7 +61,7 @@ public record EnchantPacket(ResourceKey<Enchantment> enchantmentKey, int level) 
                 player.registryAccess());
 
         ItemStack stackToEnchant = menu.getToolSlot().getItem();
-        if(EnchantmentUtil.canEnchant(menu, enchantmentHolder, level, player)) {
+        if(CostHelper.canEnchant(menu, enchantmentHolder, level, player)) {
             stackToEnchant.enchant(enchantmentHolder, level);
             menu.getToolSlot().setChanged();
 

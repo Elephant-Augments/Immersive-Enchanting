@@ -23,10 +23,6 @@ import java.util.Collections;
  */
 public final class EnchantingTableBreakHandler {
 
-    private EnchantingTableBreakHandler() {
-        // utility class
-    }
-
     public static void onBlockBreak(BlockEvent.BreakEvent event) {
         if (event.isCanceled()) return;
         if (!(event.getLevel() instanceof Level level) || level.isClientSide()) return;

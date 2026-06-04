@@ -101,13 +101,13 @@ public class Scrollbar implements ScreenEventListener {
 
 
     @Override
-    public boolean onMouseClick(MousePos mousePos, int button) {
+    public boolean onMouseClick(MousePos mousePos, int button, int modifiers) {
         if(mousePos.isOver(barX, barY, Sprite.SCROLLBAR.width(), Sprite.SCROLLBAR.height())) {
             isMouseDraggingScroller = true;
             return true;
         }
 
-        return ScreenEventListener.super.onMouseClick(mousePos, button);
+        return ScreenEventListener.super.onMouseClick(mousePos, button, modifiers);
     }
 
 

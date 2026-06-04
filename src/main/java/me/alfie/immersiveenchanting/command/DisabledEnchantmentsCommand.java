@@ -24,7 +24,7 @@ public enum DisabledEnchantmentsCommand implements ModCommand {
                         Permissions.COMMANDS_ADMIN,
                         context -> {
                             List<Holder<Enchantment>> registeredEnchantments =
-                                    EnchantmentUtil.getAllRegisteredEnchantments(context.getSource().registryAccess());
+                                    EnchantmentUtil.getAllEnchantmentsInRegistry(context.getSource().registryAccess());
 
                             List<Holder<Enchantment>> all =
                                     CostRegistry.server().getAllEnchantmentHolders();
@@ -45,7 +45,6 @@ public enum DisabledEnchantmentsCommand implements ModCommand {
                             context.getSource().sendSuccess(
                                     () -> Component.translatable("immersiveenchanting.command.disabled_enchantments", disabledEnchantments)
                                             .withStyle(ChatFormatting.WHITE), false);
-
 
                             return 1;
                         }

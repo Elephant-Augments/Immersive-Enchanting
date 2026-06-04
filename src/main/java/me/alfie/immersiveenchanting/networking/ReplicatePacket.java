@@ -4,6 +4,7 @@ import me.alfie.alfinolib.networking.NetworkPacket;
 import me.alfie.alfinolib.networking.codec.StreamCodec;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
+import me.alfie.immersiveenchanting.util.CostHelper;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import me.alfie.immersiveenchanting.util.FxHelper;
 import net.minecraft.core.BlockPos;
@@ -44,7 +45,7 @@ public record ReplicatePacket() implements NetworkPacket<ReplicatePacket> {
         Level level = player.level();
         if(!(player.containerMenu instanceof EnchantingTableMenu menu)) return;
 
-        if(EnchantmentUtil.canReplicate(menu, player)) {
+        if(CostHelper.canReplicate(menu, player)) {
             ItemStack oldStack = menu.getToolSlot().getItem().copyAndClear();
             menu.getToolSlot().setChanged();
 

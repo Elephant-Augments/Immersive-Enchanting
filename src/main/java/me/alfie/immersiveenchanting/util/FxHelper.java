@@ -21,36 +21,15 @@ import net.minecraft.world.level.Level;
 
 import java.util.Optional;
 
-/**
- * Handles client and server-side sound + particle effects for the enchanting UI.
- * <p>
- * Centralizes all feedback (UI sounds, node interactions, enchanting events, etc.)
- * so behavior stays consistent and easy to tweak.
- * <p>
- * Includes:
- * - UI interaction sounds (hover, clicks, errors)
- * - Node-specific sounds (datapack-driven)
- * - Enchanting event effects (success, transmute, replicate, remove)
- * - Lightweight progression feedback (e.g. removal progress ticks)
- * <p>
- * Most methods are fire-and-forget helpers and assume valid inputs.
- */
 public class FxHelper {
 
     private static float lastRemoveSoundStep;
 
-    /** Plays the sounds for when an item is placed into or removed from the tool slot. */
     public static void playToolSlotChanged(Player player) {
         playClientUISound(player, SoundEvents.ARMOR_EQUIP_GENERIC.value(), 0.5f, 1f);
         playClientUISound(player, SoundEvents.BOOK_PAGE_TURN, 0.3f, 1.2f);
     }
 
-    /**
-     * Plays the hover sound for a node. Uses the datapack-defined sound for the node's enchantment
-     * if one is registered (pitch-shifted by level), otherwise falls back to a generic pickup sound.
-     * Plays an extra resonate chime if the node is at its maximum level.
-     * No-ops if node hover sounds are disabled in config.
-     */
     public static void playNodeHover(Player player, Node node) {
         if(!ClientConfig.areNodeHoverSoundsEnabled()) return;
 
@@ -184,10 +163,6 @@ public class FxHelper {
                 0.1);
     }
 
-    /**
-     * Plays a tick sound tied to the hold-to-remove progress. Fires once per 10% increment
-     * and lowers in pitch as progress increases, giving audio feedback during removal.
-     */
     public static void playRemoveProgress(Player player, float progress) {
         float step = (float) Math.floor(progress * 10f);
 

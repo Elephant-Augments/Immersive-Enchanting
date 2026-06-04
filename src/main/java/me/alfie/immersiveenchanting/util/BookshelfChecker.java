@@ -1,7 +1,5 @@
 package me.alfie.immersiveenchanting.util;
 
-import me.alfie.alfinolib.gui.GuiGraphicsX;
-import me.alfie.alfinolib.gui.util.GuiGraphicsApi;
 import me.alfie.alfinolib.networking.Networking;
 import me.alfie.immersiveenchanting.block.ModBlocks;
 import me.alfie.immersiveenchanting.config.ServerConfig;
@@ -15,7 +13,6 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChiseledBookShelfBlockEntity;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,28 +20,17 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class BookshelfChecker {
-    /**
-     * Scans nearby bookshelves for available enchantments and sends the result to the player
-     * via {@link me.alfie.immersiveenchanting.networking.AvailableEnchantmentsPacket}.
-     * Called server-side when the enchanting table is opened.
-     */
-    public static void checkBookshelves(BlockPos blockPos, Level level, ServerPlayer serverPlayer) {
-        List<Holder<Enchantment>> availableEnchantments = getEnchantmentsInBookshelves(blockPos, level);
+
+    public static void checkBookshelves(BlockPos tablePos, Level level, ServerPlayer serverPlayer) {
+        List<Holder<Enchantment>> availableEnchantments = getEnchantmentsInBookshelves(tablePos, level);
 
         Networking.sendToClient(serverPlayer, new AvailableEnchantmentsPacket(
                 EnchantmentUtil.toResourceKeys(availableEnchantments)));
     }
 
-    /**
-     * Returns all enchantments available from nearby bookshelves.
-     * Short-circuits to the full registry if a creative bookshelf is nearby or if
-     * ancient books are not required by config. Otherwise scans nearby chiseled bookshelves
-     * and collects enchantments from any {@link me.alfie.immersiveenchanting.item.ModItems#ANCIENT_BOOK}
-     * stacks found inside them.
-     */
     public static List<Holder<Enchantment>> getEnchantmentsInBookshelves(BlockPos blockPos, Level level) {
-        if(isCreativeBookshelfNearby(blockPos, level)) return EnchantmentUtil.getAllRegisteredEnchantments(level.registryAccess());
-        if(!ServerConfig.areAncientBooksRequired()) return EnchantmentUtil.getAllRegisteredEnchantments(level.registryAccess());
+        if(isCreativeBookshelfNearby(blockPos, level)) return EnchantmentUtil.getAllEnchantmentsInRegistry(level.registryAccess());
+        if(!ServerConfig.areAncientBooksRequired()) return EnchantmentUtil.getAllEnchantmentsInRegistry(level.registryAccess());
 
         List<ChiseledBookShelfBlockEntity> bookshelves = getNearbyBookshelves(blockPos, level);
         List<Holder<Enchantment>> result = new ArrayList<>();
@@ -63,14 +49,6 @@ public class BookshelfChecker {
         return result;
     }
 
-    /**
-     * Searches for nearby chiseled bookshelves within a predefined radius.
-     *
-     * <p>The scan forms a hollow rectangular prism around the enchanting table,
-     * similar to vanilla enchanting mechanics.</p>
-     *
-     * @return A list of nearby {@link ChiseledBookShelfBlockEntity} instances
-     */
     private static List<ChiseledBookShelfBlockEntity> getNearbyBookshelves(BlockPos pos, Level level) {
         List<ChiseledBookShelfBlockEntity> result = new ArrayList<>();
 
@@ -89,12 +67,6 @@ public class BookshelfChecker {
         return result;
     }
 
-    /**
-     * Retrieves all item stacks stored within a chiseled bookshelf.
-     *
-     * @param bookshelf The bookshelf block entity
-     * @return A list of all 6 item slots contained in the bookshelf
-     */
     private static List<ItemStack> getBooks(ChiseledBookShelfBlockEntity bookshelf) {
         List<ItemStack> result = new ArrayList<>();
 
@@ -173,12 +145,6 @@ public class BookshelfChecker {
         return false;
     }
 
-    /**
-     * Returns true if a creative bookshelf is within the 5x5 ring.
-     * @param pos
-     * @param level
-     * @return
-     */
     private static boolean isCreativeBookshelfNearby(BlockPos pos, Level level) {
         return anyInRing(pos,
                 2, ServerConfig.getBookshelfSearchRadius().x(),

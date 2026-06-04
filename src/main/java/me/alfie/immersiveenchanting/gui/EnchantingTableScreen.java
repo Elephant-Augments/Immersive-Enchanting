@@ -148,22 +148,22 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
     }
 
     @Override
-    public boolean onMouseClick(MousePos mousePos, int button) {
-        if(tabButton.onMouseClick(mousePos, button)) return true;
+    public boolean onMouseClick(MousePos mousePos, int button, int modifiers) {
+        if(tabButton.onMouseClick(mousePos, button, modifiers)) return true;
 
         if(isState(ScreenState.ENCHANTING)) {
-            if(enchantingTab.centralSlot().onMouseClick(mousePos, button)) return true;
+            if(enchantingTab.centralSlot().onMouseClick(mousePos, button, modifiers)) return true;
 
-            if(tooltipManager.hasActiveTooltip() && tooltipManager.getActiveTooltip().onMouseClick(mousePos, button)) return true;
+            if(tooltipManager.hasActiveTooltip() && tooltipManager.getActiveTooltip().onMouseClick(mousePos, button, modifiers)) return true;
 
-            if(camera.onMouseClick(mousePos, button)) return true;
+            if(camera.onMouseClick(mousePos, button, modifiers)) return true;
         } else if(isState(ScreenState.BOOKS)) {
-            if(bookTab.scrollbar().onMouseClick(mousePos, button)) return true;
+            if(bookTab.scrollbar().onMouseClick(mousePos, button, modifiers)) return true;
 
-            for(FilterCheckbox checkbox : bookTab.filterCheckboxes()) if(checkbox.onMouseClick(mousePos, button)) return true;
+            for(FilterCheckbox checkbox : bookTab.filterCheckboxes()) if(checkbox.onMouseClick(mousePos, button, modifiers)) return true;
         }
 
-        return super.onMouseClick(mousePos, button);
+        return super.onMouseClick(mousePos, button, modifiers);
     }
 
     @Override

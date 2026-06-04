@@ -55,8 +55,8 @@ public class CentralSlot extends CanvasRenderable implements ScreenEventListener
 
 
     @Override
-    public boolean onMouseClick(MousePos mousePos, int button) {
-        if(button != InputConstants.MOUSE_BUTTON_LEFT) return ScreenEventListener.super.onMouseClick(mousePos, button);
+    public boolean onMouseClick(MousePos mousePos, int button, int modifiers) {
+        if(button != InputConstants.MOUSE_BUTTON_LEFT) return ScreenEventListener.super.onMouseClick(mousePos, button, modifiers);
 
         if(canvas().isMouseOver(canvasX(), canvasY(), 32, 32, mousePos)) {
             UpdateToolSlotPacket.Mode mode = canvas().screen().getMenu().getCarried().isEmpty() ?
@@ -66,6 +66,6 @@ public class CentralSlot extends CanvasRenderable implements ScreenEventListener
             return true;
         }
 
-        return ScreenEventListener.super.onMouseClick(mousePos, button);
+        return ScreenEventListener.super.onMouseClick(mousePos, button, modifiers);
     }
 }

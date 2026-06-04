@@ -17,7 +17,6 @@ public class ServerConfig {
 
     public final ModConfigSpec.ConfigValue<Boolean> ALLOW_ENCHANTMENT_REMOVAL;
 
-    //public final ModConfigSpec.ConfigValue<Boolean> enableEnchantedBookTrades;
     public final ModConfigSpec.ConfigValue<Boolean> ENABLE_ENCHANTED_BOOK_LOOT_TABLES;
 
     public final ModConfigSpec.ConfigValue<Boolean> OBFUSCATE_LOCKED_ENCHANTMENTS;
@@ -62,7 +61,7 @@ public class ServerConfig {
                 .define("allowEnchantmentRemoval", true);
 
         OBFUSCATE_LOCKED_ENCHANTMENTS = builder
-                .comment("If enabled, enchantments that have not been found will have be obfuscated in the enchanting table.")
+                .comment("If enabled, enchantments that have not been found will be obfuscated in the enchanting table.")
                 .translation("immersiveenchanting.config.obfuscate_locked_enchantments")
                 .define("obfuscateLockedEnchantments", true);
         builder.pop();

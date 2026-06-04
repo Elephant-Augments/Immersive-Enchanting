@@ -23,17 +23,16 @@ public class ModIconsDatapack extends ModDatapack<ModIconsMap, ModIconsMap> {
         super(ModIconsMap.CODEC, KEY, ModIconsMap.STREAM_CODEC, registryAccess);
     }
 
-    @Override
-    protected void apply(Map<Identifier, ModIconsMap> input, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
-        ResourceId key = KEY.id();
-        DATA = parseOrDefault(input.get(key), new ModIconsMap(new HashMap<>()));
-
-        ImmersiveEnchanting.LOGGER.debug("Found {}", DATA);
+    @Override public ModIconsMap getData() {
+        return DATA;
     }
 
     @Override
-    public ModIconsMap getData() {
-        return DATA;
+    protected void apply(Map<Identifier, ModIconsMap> input, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
+        ResourceId key = KEY.id();
+        DATA = parseOrDefault(input.get(key.mc()), new ModIconsMap(new HashMap<>()));
+
+        ImmersiveEnchanting.LOGGER.debug("Found {}", DATA);
     }
 
     public static void register(AddServerReloadListenersEvent event) {

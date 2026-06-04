@@ -86,14 +86,14 @@ public class FilterCheckbox implements ScreenEventListener {
 
 
     @Override
-    public boolean onMouseClick(MousePos mousePos, int button) {
+    public boolean onMouseClick(MousePos mousePos, int button, int modifiers) {
         if(this.isMouseOver(mousePos)) {
             FxHelper.playGenericUISound(bookTab.screen().player());
             toggleEnabled();
             return true;
         }
 
-        return ScreenEventListener.super.onMouseClick(mousePos, button);
+        return ScreenEventListener.super.onMouseClick(mousePos, button, modifiers);
     }
 
     /**

@@ -22,8 +22,7 @@ public class ModPackets {
         }
     };
 
-
-    public static void registerPackets(NetworkRegisterEvent event) {
+    public static void register(NetworkRegisterEvent event) {
         event.register(Networking.Side.CLIENT, AvailableEnchantmentsPacket.TYPE, AvailableEnchantmentsPacket.STREAM_CODEC);
         event.register(Networking.Side.SERVER, EnchantPacket.TYPE, EnchantPacket.STREAM_CODEC);
         event.register(Networking.Side.SERVER, RemoveEnchantmentPacket.TYPE, RemoveEnchantmentPacket.STREAM_CODEC);

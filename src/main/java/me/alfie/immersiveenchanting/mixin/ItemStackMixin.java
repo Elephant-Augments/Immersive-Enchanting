@@ -95,7 +95,7 @@ public abstract class ItemStackMixin {
                             .withStyle(ChatFormatting.GRAY)
             );
 
-            ci.cancel(); //Prevent DataComponents.STORED_ENCHANTMENTS being applied normally to ancient books.
+            ci.cancel(); //Prevent DataComponents.STORED_ENCHANTMENTS tooltip being applied normally to ancient books.
         }
     }
 }

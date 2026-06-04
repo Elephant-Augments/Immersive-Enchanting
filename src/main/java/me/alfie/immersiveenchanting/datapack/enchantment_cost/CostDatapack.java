@@ -92,11 +92,9 @@ public class CostDatapack extends ModDatapack<CostData, CostRegistry> {
         DatapackRegistry.register(event, () -> new CostDatapack(event.getRegistryAccess()));
     }
 
-
-    /**Send warnings if cost files are incorrectly setup*/
     private static void sendWarningMessages(Player player) {
         List<Holder<Enchantment>> costRegistryEnchantments = CostRegistry.client().getAllEnchantmentHolders();
-        List<Holder<Enchantment>> allEnchantments = EnchantmentUtil.getAllRegisteredEnchantments(player.registryAccess());
+        List<Holder<Enchantment>> allEnchantments = EnchantmentUtil.getAllEnchantmentsInRegistry(player.registryAccess());
 
         Set<Holder<Enchantment>> costRegistrySet = new HashSet<>(costRegistryEnchantments);
         Set<Holder<Enchantment>> allEnchantmentsSet = new HashSet<>(allEnchantments);

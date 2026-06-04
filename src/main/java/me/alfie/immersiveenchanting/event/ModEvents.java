@@ -39,17 +39,14 @@ public class ModEvents {
         NeoForge.EVENT_BUS.addListener(CostDatapack::resolveClientRegistry);
         NeoForge.EVENT_BUS.addListener(CostDatapack::resolveServerRegistry);
 
-
-        NeoForge.EVENT_BUS.addListener(ModCommands::registerCommands);
+        NeoForge.EVENT_BUS.addListener(EnchantingTableBreakHandler::onBlockBreak);
+        NeoForge.EVENT_BUS.addListener(ModCommands::register);
 
         modEventBus.addListener(ImmersiveEnchantingClient::registerBlockEntityRenderers);
-        NeoForge.EVENT_BUS.addListener(EnchantingTableBreakHandler::onBlockBreak);
 
         modEventBus.addListener(ModMenus::registerScreens);
-
-        modEventBus.addListener(ModPackets::registerPackets);
-
-        modEventBus.addListener(ModCreativeTab::buildCreativeTab);
+        modEventBus.addListener(ModPackets::register);
+        modEventBus.addListener(ModCreativeTab::build);
 
         registerPostEvents(modEventBus);
         registerInternalApiEvents(modEventBus);
@@ -62,7 +59,4 @@ public class ModEvents {
     private static void registerInternalApiEvents(IEventBus modEventBus) {
         modEventBus.addListener(TooltipDescriptionExtensions::registerInternalTooltipDescriptions);
     }
-
-
-
 }

@@ -19,11 +19,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Loot modifier that adds enchanted Ancient Books to generated loot.
- *
- * <p>Supports multiple modes for selecting enchantments during generation.</p>
- */
 public class InjectAncientBookLootModifier extends LootModifier {
 
     public static final MapCodec<InjectAncientBookLootModifier> CODEC =
@@ -46,6 +41,11 @@ public class InjectAncientBookLootModifier extends LootModifier {
                             )
                     ).apply(instance, InjectAncientBookLootModifier::new)
             );
+
+    @Override public MapCodec<? extends IGlobalLootModifier> codec() {
+        return CODEC;
+    }
+
 
     private final String mode;
     private final List<Holder<Enchantment>> enchantments;
@@ -110,8 +110,4 @@ public class InjectAncientBookLootModifier extends LootModifier {
         return generatedLoot;
     }
 
-    @Override
-    public MapCodec<? extends IGlobalLootModifier> codec() {
-        return CODEC;
-    }
 }

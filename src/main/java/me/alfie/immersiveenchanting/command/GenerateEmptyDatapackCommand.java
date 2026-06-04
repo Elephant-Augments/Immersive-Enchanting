@@ -119,7 +119,7 @@ public enum GenerateEmptyDatapackCommand implements ModCommand {
      * {@code enchantment_costs/<namespace>/<enchantment_name>.json}.
      */
     private static void createEnchantmentJsonFiles(RegistryAccess registryAccess, File enchantmentCostsDir) {
-        List<Holder<Enchantment>> enchantments = EnchantmentUtil.getAllRegisteredEnchantments(registryAccess);
+        List<Holder<Enchantment>> enchantments = EnchantmentUtil.getAllEnchantmentsInRegistry(registryAccess);
         for(Holder<Enchantment> enchantmentHolder : enchantments) {
             File jsonFile = getOrCreateFile(enchantmentHolder, enchantmentCostsDir);
 
@@ -153,7 +153,7 @@ public enum GenerateEmptyDatapackCommand implements ModCommand {
 
     /**
      * Builds a cost JSON object with {@code maxLevel} level entries, each containing a single
-     * no-op cost (air × 0, 0 XP levels). The resulting structure matches the schema expected
+     * no-op cost (air × 1, 0 XP levels). The resulting structure matches the schema expected
      * by {@link me.alfie.immersiveenchanting.datapack.enchantment_cost.CostDatapack}.
      */
     private static JsonObject buildEmptyCostJson(int maxLevel) {
@@ -162,15 +162,15 @@ public enum GenerateEmptyDatapackCommand implements ModCommand {
         for (int i = 1; i <= maxLevel; i++) {
             JsonArray costArray = new JsonArray();
 
-            JsonObject itemStack = new JsonObject();
-            itemStack.addProperty("item_or_tag_id", "minecraft:air");
-            itemStack.addProperty("count", 0);
-            itemStack.addProperty("xp_levels", 0);
+            JsonObject itemCost = new JsonObject();
+            itemCost.addProperty("item", "minecraft:air");
+            itemCost.addProperty("count", 1);
 
-            JsonObject wrapper = new JsonObject();
-            wrapper.add("item_stack", itemStack);
+            JsonObject cost = new JsonObject();
+            cost.add("item_cost", itemCost);
+            cost.addProperty("xp_levels", 0);
 
-            costArray.add(wrapper);
+            costArray.add(cost);
 
             levels.add(String.valueOf(i), costArray);
         }

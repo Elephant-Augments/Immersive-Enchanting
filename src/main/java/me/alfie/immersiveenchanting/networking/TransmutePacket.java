@@ -5,6 +5,7 @@ import me.alfie.alfinolib.networking.codec.StreamCodec;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
+import me.alfie.immersiveenchanting.util.CostHelper;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import me.alfie.immersiveenchanting.util.FxHelper;
 import net.minecraft.ChatFormatting;
@@ -70,7 +71,7 @@ public record TransmutePacket() implements NetworkPacket<TransmutePacket> {
         Holder<Enchantment> newEnchantment = allEnchantments.get(randomIndex);
         Holder<Enchantment> oldEnchantment = EnchantmentUtil.getStoredEnchantment(ancientBookStack);
 
-        if(EnchantmentUtil.canTransmute(menu, oldEnchantment, player)) {
+        if(CostHelper.canTransmute(menu, oldEnchantment, player)) {
             EnchantmentUtil.setStoredEnchantment(ancientBookStack, newEnchantment);
             BlockPos tablePos = menu.getBlockPos();
 

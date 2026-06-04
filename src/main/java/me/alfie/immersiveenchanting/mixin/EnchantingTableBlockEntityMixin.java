@@ -20,24 +20,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/**
- * Adds a persistent 3-slot inventory to the vanilla
- * {@link EnchantingTableBlockEntity} so items dropped in the table by the
- * Immersive Enchanting menu stay in the world after the menu is closed.
- *
- * <p>The inventory:</p>
- * <ul>
- *     <li>is stored in the BE's NBT (so it survives chunk unload / world save)</li>
- *     <li>is sent to the client whenever the BE updates (so the floating-items
- *         renderer can show them)</li>
- *     <li>is dropped to the world when the block is broken (handled by
- *         {@code EnchantingTableBreakHandler}).</li>
- * </ul>
- *
- * <p>Applied as a Mixin onto the vanilla block entity rather than via a
- * custom subclass, so the rest of the mod (and any other mods) keep seeing
- * the standard {@code EnchantingTableBlockEntity} type.</p>
- */
 @Mixin(EnchantingTableBlockEntity.class)
 public abstract class EnchantingTableBlockEntityMixin extends BlockEntity implements IEnchantingTableInventory {
 
@@ -77,7 +59,6 @@ public abstract class EnchantingTableBlockEntityMixin extends BlockEntity implem
     }
 
     // ---- NBT persistence ----
-
     @Inject(method = "saveAdditional", at = @At("TAIL"))
     private void immersive$saveAdditional(ValueOutput output, CallbackInfo ci) {
         ContainerHelper.saveAllItems(output, this.immersive$items, true);
@@ -91,7 +72,6 @@ public abstract class EnchantingTableBlockEntityMixin extends BlockEntity implem
     }
 
     // ---- Client sync ----
-    //
     // Vanilla EnchantingTableBlockEntity does not override getUpdatePacket /
     // getUpdateTag. By default these return null on a base BlockEntity, so the
     // client never receives our items. We override both here so the items are

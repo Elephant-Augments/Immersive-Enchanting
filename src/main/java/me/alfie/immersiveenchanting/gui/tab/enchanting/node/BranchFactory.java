@@ -60,7 +60,7 @@ public class BranchFactory {
     }
 
     private static void buildEnchantingBranches(BuildBranchesEvent event) {
-        List<Holder<Enchantment>> allEnchantments = EnchantmentUtil.getAllRegisteredEnchantments(event.getCanvas().screen().registryAccess());
+        List<Holder<Enchantment>> allEnchantments = EnchantmentUtil.getAllEnchantmentsInRegistry(event.getCanvas().screen().registryAccess());
         List<Holder<Enchantment>> applicableEnchantments = getApplicableEnchantments(event.getStack(), allEnchantments);
 
         if(event.getStack().is(ModItems.CREATIVE_BOOKSHELF_ITEM)) {

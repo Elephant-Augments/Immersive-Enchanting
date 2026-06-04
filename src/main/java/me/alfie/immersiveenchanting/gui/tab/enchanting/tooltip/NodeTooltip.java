@@ -115,7 +115,7 @@ public class NodeTooltip implements ScreenEventListener {
 
 
     @Override
-    public boolean onMouseClick(MousePos mousePos, int button) {
+    public boolean onMouseClick(MousePos mousePos, int button, int modifiers) {
         if(mousePos.isOver((int) screenPos.x(), (int) screenPos.y(), Node.WIDTH, Node.HEIGHT)) {
             if(button == InputConstants.MOUSE_BUTTON_LEFT) {
                 node().click();
@@ -137,7 +137,7 @@ public class NodeTooltip implements ScreenEventListener {
             return true;
         }
 
-        return ScreenEventListener.super.onMouseClick(mousePos, button);
+        return ScreenEventListener.super.onMouseClick(mousePos, button, modifiers);
     }
 
     @Override

@@ -45,6 +45,11 @@ public class FillChiseledBookshelfProcessor extends StructureProcessor {
         this.simpleLootTable = simpleLootTable;
     }
 
+    protected static MapCodec<FillChiseledBookshelfProcessor> codec() {
+        return CODEC;
+    }
+    @Override protected @NotNull StructureProcessorType<?> getType() {return ModStructureProcessors.FILL_CHISELED_BOOKSHELF.get();}
+
     /**
      * Post-processes structure generation by filling chiseled bookshelves with loot.
      *
@@ -154,14 +159,5 @@ public class FillChiseledBookshelfProcessor extends StructureProcessor {
             return stack;
         }
         return ItemStack.EMPTY;
-    }
-
-    protected static MapCodec<FillChiseledBookshelfProcessor> codec() {
-        return CODEC;
-    }
-
-    @Override
-    protected @NotNull StructureProcessorType<?> getType() {
-        return ModStructureProcessors.FILL_CHISELED_BOOKSHELF.get();
     }
 }
