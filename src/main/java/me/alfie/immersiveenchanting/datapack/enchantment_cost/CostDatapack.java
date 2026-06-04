@@ -3,7 +3,9 @@ package me.alfie.immersiveenchanting.datapack.enchantment_cost;
 import me.alfie.alfinolib.datapacks.*;
 import me.alfie.alfinolib.util.ResourceId;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.codec.Cost;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.codec.CostData;
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.codec.CostLevels;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
@@ -17,10 +19,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
 
-import java.util.HashSet;
+import java.awt.*;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class CostDatapack extends ModDatapack<CostData, CostRegistry> {
@@ -113,6 +114,28 @@ public class CostDatapack extends ModDatapack<CostData, CostRegistry> {
 
             ImmersiveEnchanting.LOGGER.error("There are missing enchantment cost files for the following enchantments: {}", missingIds);
         }
+
+        //Check if any in costs are null
+        List<String> brokenIds = new ArrayList<>();
+        for (Holder<Enchantment> enchantmentHolder : CostRegistry.server().getAllEnchantmentHolders()) {
+            CostData enchantmentCost = CostRegistry.server().get(enchantmentHolder);
+            CostLevels levelCosts = enchantmentCost.levelCosts();
+
+            for (int level = 0; level < levelCosts.maxLevel(); level++) {
+                if (levelCosts.getLevel(level+1).costs().isEmpty()) {
+                    brokenIds.add(enchantmentHolder.getRegisteredName());
+                }
+            }
+        }
+
+        if(!brokenIds.isEmpty()) {
+            String result = String.join(", ", brokenIds);
+            player.sendSystemMessage(
+                    modIdComponent.append(Component.translatable("immersiveenchanting.warn.invalid_cost_file", result)
+                            .withStyle(ChatFormatting.RED))
+            );
+        }
+
 
         //Check enchanting fuels
         if(!CostRegistry.client().isRegistered(CostRegistry.ENCHANTING_FUELS)) {
