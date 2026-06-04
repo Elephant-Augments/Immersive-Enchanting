@@ -6,13 +6,13 @@
     "minecraft:blast_protection",
     "minecraft:knockback",
     "minecraft:looting",
-    "minecraft:lunge",
+
     "minecraft:projectile_protection",
     "minecraft:protection",
     "minecraft:sharpness",
     "minecraft:silk_touch",
     "minecraft:smite",
-    "minecraft:sweeping_edge",
+    "minecraft:sweeping",
     "minecraft:unbreaking"
   ],
   "min_rolls": 1,
