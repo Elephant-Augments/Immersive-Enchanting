@@ -1,13 +1,5 @@
 {
   "enabled": false,
   "levels": {
-    "1": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:air",
-          "count": 0
-        }
-      }
-    ]
-  }
+    "1": [{"item_cost": {"item": "minecraft:air", "count": 0}}]}
 }

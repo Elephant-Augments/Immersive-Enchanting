@@ -4,10 +4,10 @@ import net.minecraft.network.chat.Component;
 
 /**
  * Enum representing filter categories used in the book tab UI.
- * <P>
+ <P>
  * <p>Each filter corresponds to a specific subset of enchantments
  * based on their availability state.</p>
- * <p>
+ <P>
  * <ul>
  *     <li>UNLOCKED → enchantments currently available to the player</li>
  *     <li>LOCKED → enchantments not currently available</li>
@@ -25,8 +25,7 @@ public enum BookFilters {
 
     /**
      * Retrieves the display label for this filter.
-     * <p>
-     *
+     <P>
      * @return the localized {@link Component} representing this filter
      */
     public Component getLabel() {

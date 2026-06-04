@@ -17,4 +17,6 @@ public class AncientBook extends Item {
     public boolean isFoil(@NotNull ItemStack itemStack) {
         return true;
     }
+
+
 }

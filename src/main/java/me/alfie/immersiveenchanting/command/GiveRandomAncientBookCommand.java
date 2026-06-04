@@ -24,7 +24,7 @@ public enum GiveRandomAncientBookCommand implements ModCommand {
                         EntityArgument.players(),
                         context -> {
                             Collection<ServerPlayer> players = EntityArgument.getPlayers(context, "target");
-                            for (ServerPlayer player : players) {
+                            for(ServerPlayer player : players) {
                                 ItemStack ancientBook = new ItemStack(ModItems.ANCIENT_BOOK.get(), 1);
                                 EnchantmentUtil.setStoredEnchantment(
                                         ancientBook,

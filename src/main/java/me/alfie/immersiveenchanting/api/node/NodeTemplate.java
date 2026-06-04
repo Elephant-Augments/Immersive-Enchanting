@@ -18,5 +18,4 @@ public record NodeTemplate(
         NodeTier tier,
         NodeIcon icon,
         NodeData<?> data
-) {
-}
+) {}

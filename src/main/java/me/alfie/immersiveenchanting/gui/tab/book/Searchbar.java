@@ -1,12 +1,13 @@
 package me.alfie.immersiveenchanting.gui.tab.book;
 
+import me.alfie.alfinolib.gui.GuiGraphicsX;
+import me.alfie.alfinolib.gui.util.GuiGraphicsApi;
 import me.alfie.immersiveenchanting.gui.core.Sprite;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.Holder;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.enchantment.Enchantment;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,8 +29,9 @@ import java.util.List;
  */
 public class Searchbar {
 
-    private final StringBuilder searchString = new StringBuilder();
     BookTab bookTab;
+
+    private final StringBuilder searchString = new StringBuilder();
     private int caretPosition = 0;
     private long lastCaretTime = 0;
     private boolean caretVisible;
@@ -38,52 +40,39 @@ public class Searchbar {
         this.bookTab = bookTab;
     }
 
-    /**
-     * Renders the search bar background, current input text, and caret.
-     *
-     * @param graphics Rendering context
-     */
-    public void render(GuiGraphics graphics) {
+
+    public void render(GuiGraphicsX gx) {
         int xPos = bookTab.screen().getGuiLeft() + 138;
         int yPos = bookTab.screen().getGuiTop() + 100;
 
-        graphics.blit(
+        GuiGraphicsApi.blit(
+                gx,
                 Sprite.SEARCH.id(),
                 xPos, yPos,
-                0f, 0f,
-                Sprite.SEARCH.width(), Sprite.SEARCH.height(),
                 Sprite.SEARCH.width(), Sprite.SEARCH.height()
         );
 
-        final int padding = 4;
-        graphics.drawString(Minecraft.getInstance().font,
-                searchString.toString(),
-                xPos + padding, yPos + padding + 2, Color.WHITE.hashCode());
 
-        renderCaret(graphics, xPos + padding, yPos + padding + 2);
+        final int padding = 4;
+        GuiGraphicsApi.text(gx, bookTab.screen().getFont(),
+                Component.literal(searchString.toString()),
+                xPos + padding, yPos + padding + 2, true);
+
+        renderCaret(gx, xPos + padding, yPos + padding + 2);
     }
 
-    /**
-     * Renders a blinking caret at the end of the current search string.
-     *
-     * <p>The caret visibility toggles at a fixed interval to simulate
-     * a standard text cursor.</p>
-     *
-     * @param graphics Rendering context
-     * @param x        Base X position of the text
-     * @param y        Base Y position of the text
-     */
-    private void renderCaret(GuiGraphics graphics, int x, int y) {
+    private void renderCaret(GuiGraphicsX gx, int x, int y) {
         long currentTime = System.currentTimeMillis();
         final int caretSpeed = 500;
-        if (currentTime - lastCaretTime > caretSpeed) {
+        if(currentTime - lastCaretTime > caretSpeed) {
             caretVisible = !caretVisible;
             lastCaretTime = currentTime;
         }
 
-        if (caretVisible) {
+        if(caretVisible) {
             int textWidth = Minecraft.getInstance().font.width(searchString.toString());
-            graphics.drawString(Minecraft.getInstance().font, "_", x + textWidth, y, Color.WHITE.hashCode());
+            GuiGraphicsApi.text(gx, bookTab.screen().getFont(), Component.literal("_"),
+                    x + textWidth, y, true);
         }
     }
 
@@ -108,10 +97,10 @@ public class Searchbar {
      * does not become negative. Also resets the scrollbar.</p>
      */
     public void removeCharFromSearch() {
-        if (!searchString.isEmpty()) {
-            searchString.deleteCharAt(caretPosition - 1);
+        if(!searchString.isEmpty()) {
+            searchString.deleteCharAt(caretPosition-1);
             caretPosition--;
-            if (caretPosition < 0) caretPosition = 0;
+            if(caretPosition < 0) caretPosition = 0;
             bookTab.scrollbar().resetScrollIndex();
         }
     }

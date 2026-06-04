@@ -2,8 +2,6 @@ package me.alfie.immersiveenchanting.event;
 
 import me.alfie.immersiveenchanting.ImmersiveEnchantingClient;
 import me.alfie.immersiveenchanting.api.ApiPostEvents;
-import me.alfie.immersiveenchanting.api.datapack.manager.ServerDatapackManager;
-import me.alfie.immersiveenchanting.api.description.RegisterDescriptionLayoutEvent;
 import me.alfie.immersiveenchanting.api.description.TooltipDescriptionExtensions;
 import me.alfie.immersiveenchanting.command.ModCommands;
 import me.alfie.immersiveenchanting.creativetab.ModCreativeTab;
@@ -13,7 +11,6 @@ import me.alfie.immersiveenchanting.datapack.node_sounds.NodeSoundsDatapack;
 import me.alfie.immersiveenchanting.gui.ModMenus;
 import me.alfie.immersiveenchanting.networking.ModPackets;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.neoforge.common.NeoForge;
 
 public class ModEvents {
@@ -39,26 +36,17 @@ public class ModEvents {
         NeoForge.EVENT_BUS.addListener(NodeSoundsDatapack::register);
         NeoForge.EVENT_BUS.addListener(ModIconsDatapack::register);
 
-        NeoForge.EVENT_BUS.addListener(ServerDatapackManager::onServerStart);
-        NeoForge.EVENT_BUS.addListener(ServerDatapackManager::onServerFinished);
-        NeoForge.EVENT_BUS.addListener(ServerDatapackManager::onServerReload);
-        NeoForge.EVENT_BUS.addListener(ServerDatapackManager::onServerStop);
-
         NeoForge.EVENT_BUS.addListener(CostDatapack::resolveClientRegistry);
         NeoForge.EVENT_BUS.addListener(CostDatapack::resolveServerRegistry);
 
-
-        NeoForge.EVENT_BUS.addListener(ModCommands::registerCommands);
+        NeoForge.EVENT_BUS.addListener(EnchantingTableBreakHandler::onBlockBreak);
+        NeoForge.EVENT_BUS.addListener(ModCommands::register);
 
         modEventBus.addListener(ImmersiveEnchantingClient::registerBlockEntityRenderers);
-        NeoForge.EVENT_BUS.addListener(EnchantingTableBreakHandler::onBlockBreak);
 
         modEventBus.addListener(ModMenus::registerScreens);
-
-        modEventBus.addListener(ModPackets::registerClient);
-        modEventBus.addListener(ModPackets::registerServer);
-
-        modEventBus.addListener(ModCreativeTab::buildCreativeTab);
+        modEventBus.addListener(ModPackets::register);
+        modEventBus.addListener(ModCreativeTab::build);
 
         registerPostEvents(modEventBus);
         registerInternalApiEvents(modEventBus);
@@ -71,6 +59,4 @@ public class ModEvents {
     private static void registerInternalApiEvents(IEventBus modEventBus) {
         modEventBus.addListener(TooltipDescriptionExtensions::registerInternalTooltipDescriptions);
     }
-
-
 }

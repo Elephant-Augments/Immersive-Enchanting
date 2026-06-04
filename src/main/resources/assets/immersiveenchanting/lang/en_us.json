@@ -77,7 +77,7 @@
   "immersiveenchanting.config.allow_enchantment_removal": "Allow Enchantment Removal",
   "immersiveenchanting.config.item_carousel_speed": "Item Carousel Speed",
   "immersiveenchanting.config.play_node_hover_sounds": "Play Node Hover Sounds",
-  "immersiveenchanting.config.enable_enchanted_book_loot_tables": "Enable Enchanted Book Loot Tables",
-  "immersiveenchanting.config.enable_enchanted_book_trades": "Enable Enchanted Book Villager Trades",
-  "immersiveenchanting.config.obfuscate_locked_enchantments": "Obfuscate Locked Enchantments"
+  "immersiveenchanting.config.enchanted_book_loot_mode": "Enchanted Book Loot Mode",
+  "immersiveenchanting.config.obfuscate_locked_enchantments": "Obfuscate Locked Enchantments",
+  "immersiveenchanting.config.disable_enchanted_book_trades": "Disable Enchanted Book Villager Trades"
 }

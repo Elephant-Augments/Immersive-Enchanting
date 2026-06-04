@@ -1,8 +1,7 @@
 package me.alfie.immersiveenchanting.gui.core;
 
+import me.alfie.alfinolib.util.ResourceId;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.resources.ResourceLocation;
 
 public enum Sprite {
     ENCHANTING_TABLE_GUI("textures/gui/container/enchanting_table.png", 256, 256),
@@ -41,27 +40,17 @@ public enum Sprite {
     ALERT_NODE("textures/gui/sprites/node/alert_node.png", 26, 26),
     ERROR_NODE("textures/gui/sprites/node/error_node.png", 26, 26);
 
-    private final ResourceLocation id;
+    private final ResourceId id;
     private final int width;
     private final int height;
 
     Sprite(String path, int width, int height) {
-        this.id = ResourceLocation.fromNamespaceAndPath(ImmersiveEnchanting.MODID, path);
+        this.id = new ResourceId(ImmersiveEnchanting.MODID, path);
         this.width = width;
         this.height = height;
     }
 
-    public void draw(GuiGraphics graphics, int x, int y) {
-        graphics.blit(
-                id(),
-                x, y,
-                0, 0,
-                width(), height(),
-                width(), height()
-        );
-    }
-
-    public ResourceLocation id() {
+    public ResourceId id() {
         return id;
     }
 

@@ -1,10 +1,12 @@
 package me.alfie.immersiveenchanting.datapack.mod_icons;
 
 import com.google.gson.JsonElement;
+import me.alfie.alfinolib.datapacks.DatapackKey;
+import me.alfie.alfinolib.datapacks.DatapackRegistry;
+import me.alfie.alfinolib.datapacks.ModDatapack;
+import me.alfie.alfinolib.util.ResourceId;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
-import me.alfie.immersiveenchanting.api.datapack.DatapackRegistry;
-import me.alfie.immersiveenchanting.api.datapack.ModDatapack;
-import me.alfie.immersiveenchanting.api.datapack.internal.DatapackKeys;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -15,26 +17,26 @@ import java.util.Map;
 
 public class ModIconsDatapack extends ModDatapack<ModIconsMap, ModIconsMap> {
 
-    private ModIconsMap data = new ModIconsMap(new HashMap<>());
+    public static final DatapackKey<ModIconsMap> KEY = new DatapackKey<>(ImmersiveEnchanting.MODID, "mod_icons");
+    private ModIconsMap DATA = new ModIconsMap(new HashMap<>());
+
+    protected ModIconsDatapack(RegistryAccess registryAccess) {
+        super(ModIconsMap.CODEC, KEY, ModIconsMap.STREAM_CODEC, registryAccess);
+    }
+
+    @Override public ModIconsMap getData() {
+        return DATA;
+    }
+
+    @Override
+    protected void apply(Map<ResourceLocation, JsonElement> input, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
+        ResourceId key = KEY.id();
+        DATA = parseOrDefault(input.get(key.mc()), new ModIconsMap(new HashMap<>()));
+
+        ImmersiveEnchanting.LOGGER.debug("Found {}", DATA);
+    }
 
     public static void register(AddReloadListenerEvent event) {
-        DatapackRegistry.register(event, ModIconsDatapack::new);
-    }
-
-    protected ModIconsDatapack() {
-        super(ModIconsMap.CODEC, DatapackKeys.MOD_ICONS, ModIconsMap.STREAM_CODEC);
-    }
-
-    @Override
-    public ModIconsMap getData() {
-        return data;
-    }
-
-    @Override
-    protected void apply(Map<ResourceLocation, JsonElement> map, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
-        ResourceLocation key = DatapackKeys.MOD_ICONS.identifier();
-        data = parseOrDefault(map.get(key), new ModIconsMap(new HashMap<>()));
-
-        ImmersiveEnchanting.LOGGER.debug("Found {}", data);
+        DatapackRegistry.register(event, () -> new ModIconsDatapack(event.getRegistryAccess()));
     }
 }

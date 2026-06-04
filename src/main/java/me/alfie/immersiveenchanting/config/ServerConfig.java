@@ -9,6 +9,25 @@ public class ServerConfig {
     public static final ServerConfig CONFIG;
     public static final ModConfigSpec CONFIG_SPEC;
 
+    public final ModConfigSpec.ConfigValue<Boolean> DISABLE_ANCIENT_BOOK_REQUIREMENT;
+
+    public final ModConfigSpec.ConfigValue<Integer> BOOKSHELF_SEARCH_X;
+    public final ModConfigSpec.ConfigValue<Integer> BOOKSHELF_SEARCH_Y;
+    public final ModConfigSpec.ConfigValue<Integer> BOOKSHELF_SEARCH_Z;
+
+    public final ModConfigSpec.ConfigValue<Boolean> ALLOW_ENCHANTMENT_REMOVAL;
+
+    public final ModConfigSpec.ConfigValue<Boolean> OBFUSCATE_LOCKED_ENCHANTMENTS;
+
+    public final ModConfigSpec.ConfigValue<Boolean> DISABLE_ENCHANTED_BOOK_TRADES;
+
+    public enum EnchantedBookLootMode {
+        REPLACE,
+        REMOVE
+    }
+
+    public final ModConfigSpec.EnumValue<EnchantedBookLootMode> ENCHANTED_BOOK_LOOT_MODE;
+
     static {
         Pair<ServerConfig, ModConfigSpec> pair =
                 new ModConfigSpec.Builder().configure(ServerConfig::new);
@@ -16,15 +35,6 @@ public class ServerConfig {
         CONFIG = pair.getLeft();
         CONFIG_SPEC = pair.getRight();
     }
-
-    public final ModConfigSpec.ConfigValue<Boolean> disableAncientBookRequirement;
-    public final ModConfigSpec.ConfigValue<Integer> BOOKSHELF_SEARCH_X;
-    public final ModConfigSpec.ConfigValue<Integer> BOOKSHELF_SEARCH_Y;
-    public final ModConfigSpec.ConfigValue<Integer> BOOKSHELF_SEARCH_Z;
-    public final ModConfigSpec.ConfigValue<Boolean> ALLOW_ENCHANTMENT_REMOVAL;
-    //public final ModConfigSpec.ConfigValue<Boolean> enableEnchantedBookTrades;
-    public final ModConfigSpec.ConfigValue<Boolean> ENABLE_ENCHANTED_BOOK_LOOT_TABLES;
-    public final ModConfigSpec.ConfigValue<Boolean> OBFUSCATE_LOCKED_ENCHANTMENTS;
 
     // Constructor takes only the builder
     public ServerConfig(ModConfigSpec.Builder builder) {
@@ -43,12 +53,7 @@ public class ServerConfig {
                 .defineInRange("bookshelfSearchZ", 2, 2, 8);
         builder.pop();
 
-        builder.push("ancientbooks");
-        disableAncientBookRequirement = builder
-                .comment("If enabled, Ancient Books are no longer required to unlock enchantments at the enchanting table. Enchantments still cost experience and materials as usual.")
-                .translation("immersiveenchanting.config.disable_ancient_book_requirement")
-                .define("disableAncientBookRequirement", false);
-        builder.pop();
+
 
         builder.push("enchantingtable");
         ALLOW_ENCHANTMENT_REMOVAL = builder
@@ -57,20 +62,30 @@ public class ServerConfig {
                 .define("allowEnchantmentRemoval", true);
 
         OBFUSCATE_LOCKED_ENCHANTMENTS = builder
-                .comment("If enabled, enchantments that have not been found will have be obfuscated in the enchanting table.")
+                .comment("If enabled, enchantments that have not been found will be obfuscated in the enchanting table.")
                 .translation("immersiveenchanting.config.obfuscate_locked_enchantments")
                 .define("obfuscateLockedEnchantments", true);
+
+        DISABLE_ANCIENT_BOOK_REQUIREMENT = builder
+                .comment("If enabled, Ancient Books are no longer required to unlock enchantments at the enchanting table. Enchantments still cost experience and materials as usual.")
+                .translation("immersiveenchanting.config.disable_ancient_book_requirement")
+                .define("disableAncientBookRequirement", false);
         builder.pop();
 
         builder.push("enchantedbooks");
-        ENABLE_ENCHANTED_BOOK_LOOT_TABLES = builder
-                .comment("If enabled, vanilla enchanted books will spawn normally in loot tables such as chests.")
-                .translation("immersiveenchanting.config.enable_enchanted_book_loot_tables")
-                .define("enableEnchantedBookLootTables", false);
+        ENCHANTED_BOOK_LOOT_MODE = builder
+                .comment("Choose whether enchanted books should be removed completely or replaced with ancient books. Ancient books still spawn as normal.")
+                .translation("immersiveenchanting.config.enchanted_book_loot_mode")
+                .defineEnum("enchantedBookLootMode", EnchantedBookLootMode.REPLACE);
+
+        DISABLE_ENCHANTED_BOOK_TRADES = builder
+                .comment("If enabled, vanilla enchanted books will not appear in villager trades.")
+                .translation("immersiveenchanting.config.disable_enchanted_book_trades")
+                .define("disableEnchantedBookTrades", true);
     }
 
     public static boolean areAncientBooksRequired() {
-        return !ServerConfig.CONFIG.disableAncientBookRequirement.get();
+        return !ServerConfig.CONFIG.DISABLE_ANCIENT_BOOK_REQUIREMENT.get();
     }
 
     public static Vector3i getBookshelfSearchRadius() {
@@ -83,8 +98,12 @@ public class ServerConfig {
         return ServerConfig.CONFIG.ALLOW_ENCHANTMENT_REMOVAL.get();
     }
 
-    public static boolean isAllowEnchantedBookLootTables() {
-        return ServerConfig.CONFIG.ENABLE_ENCHANTED_BOOK_LOOT_TABLES.get();
+    public static boolean isEnchantedBookLootMode(EnchantedBookLootMode mode) {
+        return ServerConfig.CONFIG.ENCHANTED_BOOK_LOOT_MODE.get() == mode;
+    }
+
+    public static boolean areEnchantedBookTradesDisabled() {
+        return ServerConfig.CONFIG.DISABLE_ENCHANTED_BOOK_TRADES.get();
     }
 
     public static boolean isObfuscateLockedEnchantments() {

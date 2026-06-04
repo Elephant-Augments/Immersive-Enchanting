@@ -6,6 +6,7 @@ import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.util.EnchantingTableContainer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -16,6 +17,7 @@ import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -47,11 +49,28 @@ import java.util.Set;
  */
 public class EnchantingTableMenu extends AbstractContainerMenu {
 
+    public enum Slots {
+        TOOL(0),
+        ENCHANTING_FUEL(1),
+        COST(2);
+
+        private final int id;
+
+        Slots(int id) {
+            this.id = id;
+        }
+
+        public int id() {
+            return id;
+        }
+    }
+
     private final BlockPos blockPos;
     private final ContainerLevelAccess access;
     private final Container container;
     private final Level level;
-    private final List<Holder<Enchantment>> availableEnchantments = new ArrayList<>();
+
+    private List<Holder<Enchantment>> availableEnchantments = new ArrayList<>();
 
     /**
      * Client-side constructor used when the menu is opened.
@@ -97,10 +116,19 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
     }
 
     /**
+     * Gets the block position of the enchanting table associated with this menu.
+     <P>
+     * @return the {@link BlockPos} of the enchanting table
+     */
+    public BlockPos getBlockPos() {
+        return blockPos;
+    }
+
+    /**
      * Builds and registers all menu slots, including internal container slots and player inventory.
-     * <P>
+     <P>
      * <p>Slot layout includes:</p>
-     * <p>
+     <P>
      * <ul>
      *     <li>Tool slot (max stack size 1)</li>
      *     <li>Enchanting fuel slot</li>
@@ -108,8 +136,7 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
      *     <li>Player inventory (3 rows)</li>
      *     <li>Hotbar (1 row)</li>
      * </ul>
-     * <p>
-     *
+     <P>
      * @param playerInventory the player's inventory used to populate inventory slots
      */
     private void buildSlots(Inventory playerInventory) {
@@ -145,45 +172,34 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
     }
 
     /**
-     * Gets the block position of the enchanting table associated with this menu.
-     * <p>
-     *
-     * @return the {@link BlockPos} of the enchanting table
-     */
-    public BlockPos getBlockPos() {
-        return blockPos;
-    }
-
-    /**
      * Handles shift-click (quick move) logic for transferring items between slots.
-     * <P>
+     <P>
      * <p>Behaviour:</p>
-     * <p>
+     <P>
      * <ul>
      *     <li>Items in menu slots are moved to player inventory</li>
      *     <li>Enchantable items and ancient books go to the tool slot</li>
      *     <li>Valid enchanting fuels go to the fuel slot</li>
      *     <li>All other items go to the cost slot</li>
      * </ul>
-     * <p>
-     *
+     <P>
      * @param player the player performing the action
-     * @param i      the index of the clicked slot
+     * @param i the index of the clicked slot
      * @return the moved {@link ItemStack}, or {@link ItemStack#EMPTY} if the move failed
      */
     @Override
     public @NotNull ItemStack quickMoveStack(@NotNull Player player, int i) {
         ItemStack stack = ItemStack.EMPTY;
-        if (level == null) return stack;
+        if(level == null) return stack;
 
         Slot slot = getSlot(i);
 
-        if (!slot.hasItem()) return stack;
+        if(!slot.hasItem()) return stack;
         stack = slot.getItem();
 
         //Quick move into inventory
-        if (i == Slots.TOOL.id()) {
-            if (!this.moveItemStackTo(stack, 3, 39, true)) return ItemStack.EMPTY;
+        if(i == Slots.TOOL.id()) {
+            if(!this.moveItemStackTo(stack, 3, 39, true)) return ItemStack.EMPTY;
             slot.setChanged(); // notify the BE-backed container so the renderer updates
         } else if (i == Slots.ENCHANTING_FUEL.id()) {
             if (!this.moveItemStackTo(stack, 3, 39, true)) return ItemStack.EMPTY;
@@ -193,7 +209,7 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
             slot.setChanged();
         } else {
             CostRegistry registry;
-            if (level != null && !level.isClientSide()) {
+            if(level != null && !level.isClientSide()) {
                 registry = CostRegistry.server();
             } else {
                 registry = CostRegistry.client();
@@ -203,22 +219,22 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
                     .levelCosts().getAllLevels();
 
             Set<Item> enchantingFuelItems = new HashSet<>();
-            for (Cost fuelCost : enchantingFuels) {
-                for (ItemStack fuelStack : fuelCost.getItemStacks()) {
+            for(Cost fuelCost : enchantingFuels) {
+                for(ItemStack fuelStack : fuelCost.getItemStacks()) {
                     enchantingFuelItems.add(fuelStack.getItem());
                 }
             }
 
             //Quick move into menu
-            if (stack.getItem().isEnchantable(stack) || stack.is(ModItems.ANCIENT_BOOK.get()) || stack.is(ModItems.CREATIVE_BOOKSHELF_ITEM)) {
+            if(stack.getItem().isEnchantable(stack) || stack.is(Items.ENCHANTED_BOOK) || stack.is(ModItems.ANCIENT_BOOK.get()) || stack.is(ModItems.CREATIVE_BOOKSHELF_ITEM)) {
                 if (!this.moveItemStackTo(stack, 0, 1, false)) return ItemStack.EMPTY;
-            } else if (enchantingFuelItems.contains(stack.getItem())) {
+            } else if(enchantingFuelItems.contains(stack.getItem())) {
                 if (!this.moveItemStackTo(stack, 1, 2, false)) return ItemStack.EMPTY;
             } else {
                 if (!this.moveItemStackTo(stack, 2, 3, false)) return ItemStack.EMPTY;
             }
 
-            if (stack.isEmpty()) {
+            if(stack.isEmpty()) {
                 slot.set(ItemStack.EMPTY);
             } else {
                 slot.setChanged();
@@ -228,12 +244,24 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
     }
 
     /**
+     * Determines whether the player can continue interacting with this menu.
+     <P>
+     * <p>This checks that the player is still within usable distance of the enchanting table.</p>
+     <P>
+     * @param player the player interacting with the menu
+     * @return {@code true} if the menu is still valid and usable
+     */
+    @Override
+    public boolean stillValid(@NotNull Player player) {
+        return AbstractContainerMenu.stillValid(this.access, player, Blocks.ENCHANTING_TABLE);
+    }
+
+    /**
      * Called when the menu is closed.
-     * <P>
+     <P>
      * <p>On the server side, all items in the internal container are returned to the player.
      * If the player's inventory is full, the items are dropped into the world.</p>
-     * <p>
-     *
+     <P>
      * @param player the player closing the menu
      */
     @Override
@@ -254,23 +282,8 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
     }
 
     /**
-     * Determines whether the player can continue interacting with this menu.
-     * <P>
-     * <p>This checks that the player is still within usable distance of the enchanting table.</p>
-     * <p>
-     *
-     * @param player the player interacting with the menu
-     * @return {@code true} if the menu is still valid and usable
-     */
-    @Override
-    public boolean stillValid(@NotNull Player player) {
-        return AbstractContainerMenu.stillValid(this.access, player, Blocks.ENCHANTING_TABLE);
-    }
-
-    /**
      * Retrieves a slot by its enum type.
-     * <p>
-     *
+     <P>
      * @param slot the {@link Slots} enum representing the desired slot
      * @return the corresponding {@link Slot}
      */
@@ -280,8 +293,7 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
 
     /**
      * Gets the tool slot used for placing the item to be enchanted.
-     * <p>
-     *
+     <P>
      * @return the tool {@link Slot}
      */
     public Slot getToolSlot() {
@@ -290,8 +302,7 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
 
     /**
      * Gets the slot used for enchanting fuel items.
-     * <p>
-     *
+     <P>
      * @return the fuel {@link Slot}
      */
     public Slot getFuelSlot() {
@@ -300,8 +311,7 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
 
     /**
      * Gets the slot used for cost payment items.
-     * <p>
-     *
+     <P>
      * @return the cost {@link Slot}
      */
     public Slot getCostSlot() {
@@ -309,33 +319,11 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
     }
 
     /**
-     * Checks whether a specific enchantment is available in this menu.
-     * <p>
-     *
-     * @param enchantmentHolder the enchantment to check
-     * @return {@code true} if the enchantment is available
-     */
-    public boolean isEnchantmentAvailable(Holder<Enchantment> enchantmentHolder) {
-        return getAvailableEnchantments().contains(enchantmentHolder);
-    }
-
-    /**
-     * Retrieves the list of enchantments currently available for use.
-     * <p>
-     *
-     * @return a list of available {@link Enchantment} holders
-     */
-    public List<Holder<Enchantment>> getAvailableEnchantments() {
-        return availableEnchantments;
-    }
-
-    /**
      * Replaces the current list of available enchantments.
-     * <P>
+     <P>
      * <p>This is typically called when the server determines available enchantments
      * based on nearby bookshelves or configuration rules.</p>
-     * <p>
-     *
+     <P>
      * @param availableEnchantments the new list of available enchantments
      */
     public void setAvailableEnchantments(List<Holder<Enchantment>> availableEnchantments) {
@@ -343,19 +331,22 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
         this.availableEnchantments.addAll(availableEnchantments);
     }
 
-    public enum Slots {
-        TOOL(0),
-        ENCHANTING_FUEL(1),
-        COST(2);
+    /**
+     * Retrieves the list of enchantments currently available for use.
+     <P>
+     * @return a list of available {@link Enchantment} holders
+     */
+    public List<Holder<Enchantment>> getAvailableEnchantments() {
+        return availableEnchantments;
+    }
 
-        private final int id;
-
-        Slots(int id) {
-            this.id = id;
-        }
-
-        public int id() {
-            return id;
-        }
+    /**
+     * Checks whether a specific enchantment is available in this menu.
+     <P>
+     * @param enchantmentHolder the enchantment to check
+     * @return {@code true} if the enchantment is available
+     */
+    public boolean isEnchantmentAvailable(Holder<Enchantment> enchantmentHolder) {
+        return getAvailableEnchantments().contains(enchantmentHolder);
     }
 }

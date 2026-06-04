@@ -1,12 +1,5 @@
 {
   "levels": {
-    "1": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:nether_star",
-          "count": 1
-        }
-      }
-    ]
+    "1": [{"item_cost": {"item": "minecraft:nether_star", "count": 1}}]
   }
 }

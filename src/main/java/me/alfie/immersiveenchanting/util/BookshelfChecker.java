@@ -1,5 +1,6 @@
 package me.alfie.immersiveenchanting.util;
 
+import me.alfie.alfinolib.networking.Networking;
 import me.alfie.immersiveenchanting.block.ModBlocks;
 import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.item.ModItems;
@@ -12,7 +13,6 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChiseledBookShelfBlockEntity;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,40 +20,28 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class BookshelfChecker {
-    /**
-     * Scans nearby bookshelves for available enchantments and sends the result to the player
-     * via {@link me.alfie.immersiveenchanting.networking.AvailableEnchantmentsPacket}.
-     * Called server-side when the enchanting table is opened.
-     */
-    public static void checkBookshelves(BlockPos blockPos, Level level, ServerPlayer serverPlayer) {
-        List<Holder<Enchantment>> availableEnchantments = getEnchantmentsInBookshelves(blockPos, level);
 
-        PacketDistributor.sendToPlayer(serverPlayer, new AvailableEnchantmentsPacket(availableEnchantments));
+    public static void checkBookshelves(BlockPos tablePos, Level level, ServerPlayer serverPlayer) {
+        List<Holder<Enchantment>> availableEnchantments = getEnchantmentsInBookshelves(tablePos, level);
+
+        Networking.sendToClient(serverPlayer, new AvailableEnchantmentsPacket(
+                EnchantmentUtil.toResourceKeys(availableEnchantments)));
     }
 
-    /**
-     * Returns all enchantments available from nearby bookshelves.
-     * Short-circuits to the full registry if a creative bookshelf is nearby or if
-     * ancient books are not required by config. Otherwise scans nearby chiseled bookshelves
-     * and collects enchantments from any {@link me.alfie.immersiveenchanting.item.ModItems#ANCIENT_BOOK}
-     * stacks found inside them.
-     */
     public static List<Holder<Enchantment>> getEnchantmentsInBookshelves(BlockPos blockPos, Level level) {
-        if (isCreativeBookshelfNearby(blockPos, level))
-            return EnchantmentUtil.getAllRegisteredEnchantments(level.registryAccess());
-        if (!ServerConfig.areAncientBooksRequired())
-            return EnchantmentUtil.getAllRegisteredEnchantments(level.registryAccess());
+        if(isCreativeBookshelfNearby(blockPos, level)) return EnchantmentUtil.getAllEnchantmentsInRegistry(level.registryAccess());
+        if(!ServerConfig.areAncientBooksRequired()) return EnchantmentUtil.getAllEnchantmentsInRegistry(level.registryAccess());
 
         List<ChiseledBookShelfBlockEntity> bookshelves = getNearbyBookshelves(blockPos, level);
         List<Holder<Enchantment>> result = new ArrayList<>();
 
-        for (ChiseledBookShelfBlockEntity bookshelf : bookshelves) {
+        for(ChiseledBookShelfBlockEntity bookshelf : bookshelves) {
             List<ItemStack> books = getBooks(bookshelf);
 
-            for (ItemStack stack : books) {
-                if (stack.getItem() == ModItems.ANCIENT_BOOK.get()) {
+            for(ItemStack stack : books) {
+                if(stack.getItem() == ModItems.ANCIENT_BOOK.get()) {
                     Holder<Enchantment> enchantmentHolder = EnchantmentUtil.getStoredEnchantment(stack);
-                    if (enchantmentHolder != null) result.add(enchantmentHolder);
+                    if(enchantmentHolder != null) result.add(enchantmentHolder);
                 }
             }
         }
@@ -61,32 +49,6 @@ public class BookshelfChecker {
         return result;
     }
 
-    /**
-     * Returns true if a creative bookshelf is within the 5x5 ring.
-     *
-     * @param pos
-     * @param level
-     * @return
-     */
-    private static boolean isCreativeBookshelfNearby(BlockPos pos, Level level) {
-        return anyInRing(pos,
-                2, ServerConfig.getBookshelfSearchRadius().x(),
-                0, ServerConfig.getBookshelfSearchRadius().y(),
-                2, ServerConfig.getBookshelfSearchRadius().z(),
-                checkPos ->
-                        level.getBlockState(checkPos).getBlock()
-                                .equals(ModBlocks.CREATIVE_BOOKSHELF_BLOCK.get())
-        );
-    }
-
-    /**
-     * Searches for nearby chiseled bookshelves within a predefined radius.
-     *
-     * <p>The scan forms a hollow rectangular prism around the enchanting table,
-     * similar to vanilla enchanting mechanics.</p>
-     *
-     * @return A list of nearby {@link ChiseledBookShelfBlockEntity} instances
-     */
     private static List<ChiseledBookShelfBlockEntity> getNearbyBookshelves(BlockPos pos, Level level) {
         List<ChiseledBookShelfBlockEntity> result = new ArrayList<>();
 
@@ -95,22 +57,16 @@ public class BookshelfChecker {
                 0, ServerConfig.getBookshelfSearchRadius().y(),
                 2, ServerConfig.getBookshelfSearchRadius().z(),
                 checkPos -> {
-                    BlockEntity be = level.getBlockEntity(checkPos);
+            BlockEntity be = level.getBlockEntity(checkPos);
 
-                    if (be instanceof ChiseledBookShelfBlockEntity shelf) {
-                        result.add(shelf);
-                    }
-                });
+            if (be instanceof ChiseledBookShelfBlockEntity shelf) {
+                result.add(shelf);
+            }
+        });
 
         return result;
     }
 
-    /**
-     * Retrieves all item stacks stored within a chiseled bookshelf.
-     *
-     * @param bookshelf The bookshelf block entity
-     * @return A list of all 6 item slots contained in the bookshelf
-     */
     private static List<ItemStack> getBooks(ChiseledBookShelfBlockEntity bookshelf) {
         List<ItemStack> result = new ArrayList<>();
 
@@ -119,41 +75,6 @@ public class BookshelfChecker {
         }
 
         return result;
-    }
-
-    /**
-     * Returns {@code true} as soon as {@code predicate} matches any block in the hollow ring,
-     * using the same ring geometry as {@link #forEachRingPos} but stopping early on the first
-     * match. Y range is {@code minRadiusY} to {@code maxRadiusY - 1} (exclusive upper bound).
-     */
-    private static boolean anyInRing(
-            BlockPos center,
-            int minRadiusX, int maxRadiusX,
-            int minRadiusY, int maxRadiusY,
-            int minRadiusZ, int maxRadiusZ,
-            Predicate<BlockPos> predicate
-    ) {
-        for (int dy = minRadiusY; dy <= maxRadiusY - 1; dy++) {
-            for (int dx = -maxRadiusX; dx <= maxRadiusX; dx++) {
-                for (int dz = -maxRadiusZ; dz <= maxRadiusZ; dz++) {
-
-                    int absX = Math.abs(dx);
-                    int absZ = Math.abs(dz);
-
-                    //skip inside inner ring
-                    if (absX < minRadiusX && absZ < minRadiusZ) continue;
-
-                    //skip max bounds
-                    if (absX > maxRadiusX || absZ > maxRadiusZ) continue;
-
-                    if (predicate.test(center.offset(dx, dy, dz))) {
-                        return true;
-                    }
-                }
-            }
-        }
-
-        return false;
     }
 
     /**
@@ -187,5 +108,51 @@ public class BookshelfChecker {
                 }
             }
         }
+    }
+
+    /**
+     * Returns {@code true} as soon as {@code predicate} matches any block in the hollow ring,
+     * using the same ring geometry as {@link #forEachRingPos} but stopping early on the first
+     * match. Y range is {@code minRadiusY} to {@code maxRadiusY - 1} (exclusive upper bound).
+     */
+    private static boolean anyInRing(
+            BlockPos center,
+            int minRadiusX, int maxRadiusX,
+            int minRadiusY, int maxRadiusY,
+            int minRadiusZ, int maxRadiusZ,
+            Predicate<BlockPos> predicate
+    ) {
+        for (int dy = minRadiusY; dy <= maxRadiusY-1; dy++) {
+            for (int dx = -maxRadiusX; dx <= maxRadiusX; dx++) {
+                for (int dz = -maxRadiusZ; dz <= maxRadiusZ; dz++) {
+
+                    int absX = Math.abs(dx);
+                    int absZ = Math.abs(dz);
+
+                    //skip inside inner ring
+                    if (absX < minRadiusX && absZ < minRadiusZ) continue;
+
+                    //skip max bounds
+                    if (absX > maxRadiusX || absZ > maxRadiusZ) continue;
+
+                    if (predicate.test(center.offset(dx, dy, dz))) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static boolean isCreativeBookshelfNearby(BlockPos pos, Level level) {
+        return anyInRing(pos,
+                2, ServerConfig.getBookshelfSearchRadius().x(),
+                0, ServerConfig.getBookshelfSearchRadius().y(),
+                2, ServerConfig.getBookshelfSearchRadius().z(),
+                checkPos ->
+                level.getBlockState(checkPos).getBlock()
+                        .equals(ModBlocks.CREATIVE_BOOKSHELF_BLOCK.get())
+        );
     }
 }

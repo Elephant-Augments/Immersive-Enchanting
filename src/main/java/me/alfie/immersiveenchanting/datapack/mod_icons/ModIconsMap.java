@@ -1,11 +1,10 @@
 package me.alfie.immersiveenchanting.datapack.mod_icons;
 
 import com.mojang.serialization.Codec;
+import me.alfie.alfinolib.networking.codec.StreamCodec;
 import me.alfie.immersiveenchanting.item.ModItems;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
@@ -18,26 +17,44 @@ public record ModIconsMap(Map<String, ResourceLocation> map) {
             Codec.unboundedMap(Codec.STRING, ResourceLocation.CODEC)
                     .xmap(ModIconsMap::new, ModIconsMap::map);
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, ModIconsMap> STREAM_CODEC =
-            StreamCodec.composite(
-                    ByteBufCodecs.map(
-                            HashMap::new,
-                            ByteBufCodecs.STRING_UTF8,
-                            ResourceLocation.STREAM_CODEC
-                    ),
-                    ModIconsMap::map,
-                    ModIconsMap::new
-            );
+
+    public static final StreamCodec<RegistryFriendlyByteBuf, ModIconsMap> STREAM_CODEC = new StreamCodec<RegistryFriendlyByteBuf, ModIconsMap>() {
+        @Override
+        public void encode(RegistryFriendlyByteBuf buf, ModIconsMap modIconsMap) {
+            Map<String, ResourceLocation> map = modIconsMap.map();
+
+            buf.writeVarInt(map.size());
+
+            for (Map.Entry<String, ResourceLocation> entry : map.entrySet()) {
+                buf.writeUtf(entry.getKey());
+                ResourceLocation.STREAM_CODEC.encode(buf, entry.getValue());
+            }
+        }
+
+        @Override
+        public ModIconsMap decode(RegistryFriendlyByteBuf buf) {
+            int size = buf.readVarInt();
+
+            Map<String, ResourceLocation> map = new HashMap<>(size);
+
+            for (int i = 0; i < size; i++) {
+                String key = buf.readUtf();
+                ResourceLocation value = ResourceLocation.STREAM_CODEC.decode(buf);
+
+                map.put(key, value);
+            }
+
+            return new ModIconsMap(map);
+        }
+    };
 
     /**
      * Returns the id as an item stack. If there is none defined, falls back to ancient book.
-     *
      * @param modid
      * @return
      */
     public ItemStack getAsItemStack(String modid) {
         ResourceLocation id = map().get(modid);
-
         if (id == null) return new ItemStack(ModItems.ANCIENT_BOOK.get());
 
         return BuiltInRegistries.ITEM.containsKey(id)

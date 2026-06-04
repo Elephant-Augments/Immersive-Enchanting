@@ -21,12 +21,12 @@ import net.minecraft.network.chat.Component;
 public class TransmuteLayoutExtension implements DescriptionLayoutExtension {
     @Override
     public void extendLayout(DescriptionLayout description, NodeTooltip tooltip) {
-        if (!tooltip.node().branchId().equals(CostRegistry.TRANSMUTE)) return;
+        if(!tooltip.node().branchId().equals(CostRegistry.TRANSMUTE)) return;
 
         description.widthPadding = 16;
 
         int linesCreated = 0;
-        if (tooltip.node().isState(NodeState.UNOBTAINED)) {
+        if(tooltip.node().isState(NodeState.UNOBTAINED)) {
             linesCreated = DescriptionHelper.lineWrapComponent(
                     Component.translatable("immersiveenchanting.tooltip.desc.transmute")
                             .withStyle(ChatFormatting.GRAY),
@@ -43,8 +43,7 @@ public class TransmuteLayoutExtension implements DescriptionLayoutExtension {
                     DescriptionHelper.DEFAULT_LINE_WIDTH, description, 0);
         }
 
-        if (tooltip.node().isState(NodeState.UNOBTAINED))
-            DescriptionHelper.insertCostLines(tooltip, description, linesCreated + 1);
+        if(tooltip.node().isState(NodeState.UNOBTAINED)) DescriptionHelper.insertCostLines(tooltip, description, linesCreated+1);
 
     }
 }

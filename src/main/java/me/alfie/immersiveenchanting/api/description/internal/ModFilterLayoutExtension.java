@@ -12,17 +12,17 @@ import net.minecraft.network.chat.Component;
 public class ModFilterLayoutExtension implements DescriptionLayoutExtension {
     @Override
     public void extendLayout(DescriptionLayout description, NodeTooltip tooltip) {
-        if (!tooltip.node().isDataType(ModFilterNodeData.TYPE)) return;
+        if(!tooltip.node().isDataType(ModFilterNodeData.TYPE)) return;
         tooltip.setLockingAllowed(false);
 
 
         Component title = tooltip.node().getTitle();
         Component component = Component.empty();
-        if (tooltip.node().isState(NodeState.OBTAINED)) {
+        if(tooltip.node().isState(NodeState.OBTAINED)) {
             component = Component.translatable("immersiveenchanting.mod_filter.selected",
                     title).withStyle(ChatFormatting.LIGHT_PURPLE);
 
-        } else if (tooltip.node().isState(NodeState.UNOBTAINED)) {
+        } else if(tooltip.node().isState(NodeState.UNOBTAINED)) {
             component = Component.translatable("immersiveenchanting.mod_filter.desc", title);
         }
 

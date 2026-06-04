@@ -1,32 +1,34 @@
 package me.alfie.immersiveenchanting.gui.tab.book;
 
+import me.alfie.alfinolib.gui.GuiGraphicsX;
+import me.alfie.alfinolib.gui.util.GuiGraphicsApi;
+import me.alfie.alfinolib.gui.util.MousePos;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.core.Sprite;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.enchantment.Enchantment;
 
-import java.awt.*;
-import java.util.List;
 import java.util.*;
 
 public class BookTab {
-    public final int MAX_BOXES_RENDERED = 6;
     private final EnchantingTableScreen screen;
+
     private final List<Holder<Enchantment>> renderedEnchantments = new ArrayList<>();
+
     private final List<FilterCheckbox> filterCheckboxes = new ArrayList<>();
     private final Scrollbar scrollbar;
     private final Searchbar searchbar;
 
+
+    public final int MAX_BOXES_RENDERED = 6;
+
     /**
      * Creates a new book tab instance for the enchanting screen.
-     * <P>
+     <P>
      * <p>Initializes filter checkboxes, scrollbar, and search bar components.</p>
-     * <p>
-     *
+     <P>
      * @param screen the parent {@link EnchantingTableScreen}
      */
     public BookTab(EnchantingTableScreen screen) {
@@ -40,7 +42,7 @@ public class BookTab {
 
     /**
      * Initializes the book tab state.
-     * <P>
+     <P>
      * <p>Resets all filters, scroll position, and search input.</p>
      */
     public void init() {
@@ -50,30 +52,8 @@ public class BookTab {
     }
 
     /**
-     * Resets all filters to their default enabled state.
-     * <P>
-     * <p>All filter checkboxes are set to enabled.</p>
-     */
-    private void resetFilters() {
-        for (FilterCheckbox filterCheckbox : filterCheckboxes) {
-            filterCheckbox.setEnabled(true);
-        }
-    }
-
-    /**
-     * Gets the scrollbar component for this tab.
-     * <p>
-     *
-     * @return the {@link Scrollbar}
-     */
-    public Scrollbar scrollbar() {
-        return scrollbar;
-    }
-
-    /**
      * Gets the parent enchanting table screen.
-     * <p>
-     *
+     <P>
      * @return the {@link EnchantingTableScreen} associated with this tab
      */
     public EnchantingTableScreen screen() {
@@ -81,95 +61,23 @@ public class BookTab {
     }
 
     /**
-     * Renders the entire book tab UI.
-     * <P>
-     * <p>Includes filter checkboxes, enchantment list, scrollbar, and search bar.</p>
-     * <p>
-     *
-     * @param graphics the GUI rendering context
-     * @param mouseX   the current mouse X position
-     * @param mouseY   the current mouse Y position
+     * Retrieves all currently enabled filters.
+     <P>
+     * @return a list of active {@link BookFilters}
      */
-    public void render(GuiGraphics graphics, double mouseX, double mouseY) {
-        renderFilterCheckboxes(graphics, mouseX, mouseY);
-        renderEnchantmentBoxes(graphics);
-        scrollbar.render(graphics, mouseX, mouseY);
-        searchbar.render(graphics);
-    }
-
-    /**
-     * Renders filter checkboxes and the total enchantment count label.
-     * <P>
-     * <p>Checkbox positions are dynamically calculated based on index.</p>
-     * <p>
-     *
-     * @param graphics the GUI rendering context
-     * @param mouseX   the current mouse X position
-     * @param mouseY   the current mouse Y position
-     */
-    private void renderFilterCheckboxes(GuiGraphics graphics, double mouseX, double mouseY) {
-        int count = 0;
-        final int spacing = 18;
-
-        for (FilterCheckbox filterCheckbox : filterCheckboxes()) {
-            filterCheckbox.setX(138);
-            filterCheckbox.setY(12 + (count * spacing));
-            filterCheckbox.render(graphics, mouseX, mouseY);
-            count++;
+    public List<BookFilters> getEnabledFilters() {
+        List<BookFilters> bookFilters = new ArrayList<>();
+        for(FilterCheckbox checkbox : filterCheckboxes) {
+            if(checkbox.isEnabled()) bookFilters.add(checkbox.filterType);
         }
-
-        final int xPos = screen.getGuiLeft() + 138;
-        final int yPos = screen.getGuiTop() + (count * spacing) + 16;
-        graphics.drawString(Minecraft.getInstance().font,
-                Component.translatable("immersiveenchanting.label.total_enchantments", renderedEnchantments.size()),
-                xPos, yPos, Color.WHITE.getRGB());
-    }
-
-    /**
-     * Renders the list of enchantment boxes.
-     * <P>
-     * <p>Displays up to {@code MAX_BOXES_RENDERED} entries based on the current scroll position.</p>
-     * <P>
-     * <p>Empty boxes are rendered when there are fewer enchantments than available slots.</p>
-     * <p>
-     *
-     * @param graphics the GUI rendering context
-     */
-    private void renderEnchantmentBoxes(GuiGraphics graphics) {
-        int x = screen.getGuiLeft() + 13;
-        int y = screen.getGuiTop() + 6;
-
-        for (int i = 0; i < MAX_BOXES_RENDERED; i++) {
-            applyFilters();
-
-            if (scrollbar.scrollIndex + i < renderedEnchantments.size()) {
-                Holder<Enchantment> enchantmentHolder = renderedEnchantments.get(scrollbar.scrollIndex + i);
-                EnchantmentBox box = new EnchantmentBox(this, enchantmentHolder);
-                box.render(graphics, x, y);
-            } else {
-                EnchantmentBox box = new EnchantmentBox(this, null);
-                box.render(graphics, x, y);
-            }
-
-            y += Sprite.ENCHANTMENT_BOX_LOCKED.height();
-        }
-    }
-
-    /**
-     * Gets the list of filter checkbox components.
-     * <p>
-     *
-     * @return the list of {@link FilterCheckbox} instances
-     */
-    public List<FilterCheckbox> filterCheckboxes() {
-        return filterCheckboxes;
+        return bookFilters;
     }
 
     /**
      * Applies active filters and search criteria to determine which enchantments are rendered.
-     * <P>
+     <P>
      * <p>This method:</p>
-     * <p>
+     <P>
      * <ul>
      *     <li>Clears the current rendered enchantment list</li>
      *     <li>Adds unlocked enchantments if enabled</li>
@@ -182,7 +90,7 @@ public class BookTab {
         renderedEnchantments.clear();
         List<BookFilters> enabledFilters = getEnabledFilters();
 
-        if (enabledFilters.contains(BookFilters.UNLOCKED)) {
+        if(enabledFilters.contains(BookFilters.UNLOCKED)) {
             renderedEnchantments.addAll(screen.getMenu().getAvailableEnchantments());
         }
 
@@ -202,23 +110,87 @@ public class BookTab {
     }
 
     /**
-     * Retrieves all currently enabled filters.
-     * <p>
-     *
-     * @return a list of active {@link BookFilters}
+     * Resets all filters to their default enabled state.
+     <P>
+     * <p>All filter checkboxes are set to enabled.</p>
      */
-    public List<BookFilters> getEnabledFilters() {
-        List<BookFilters> bookFilters = new ArrayList<>();
-        for (FilterCheckbox checkbox : filterCheckboxes) {
-            if (checkbox.isEnabled()) bookFilters.add(checkbox.filterType);
+    private void resetFilters() {
+        for(FilterCheckbox filterCheckbox : filterCheckboxes) {
+            filterCheckbox.setEnabled(true);
         }
-        return bookFilters;
+    }
+
+
+    public void render(GuiGraphicsX gx, MousePos mousePos) {
+        renderFilterCheckboxes(gx, mousePos);
+        renderEnchantmentBoxes(gx);
+        scrollbar.render(gx, mousePos);
+        searchbar.render(gx);
+    }
+
+
+    private void renderEnchantmentBoxes(GuiGraphicsX gx) {
+        int x = screen.getGuiLeft() + 13;
+        int y = screen.getGuiTop() + 6;
+
+        for (int i = 0; i < MAX_BOXES_RENDERED; i++) {
+            applyFilters();
+
+            if (scrollbar.scrollIndex+i < renderedEnchantments.size()) {
+                Holder<Enchantment> enchantmentHolder = renderedEnchantments.get(scrollbar.scrollIndex + i);
+                EnchantmentBox box = new EnchantmentBox(this, enchantmentHolder);
+                box.render(gx, x, y);
+            } else {
+                EnchantmentBox box = new EnchantmentBox(this, null);
+                box.render(gx, x, y);
+            }
+
+            y += Sprite.ENCHANTMENT_BOX_LOCKED.height();
+        }
+    }
+
+
+    private void renderFilterCheckboxes(GuiGraphicsX gx, MousePos mousePos) {
+        int count = 0;
+        final int spacing = 18;
+
+        for(FilterCheckbox filterCheckbox : filterCheckboxes()) {
+            filterCheckbox.setX(138);
+            filterCheckbox.setY(12 + (count*spacing));
+            filterCheckbox.render(gx, mousePos);
+            count++;
+        }
+
+        final int xPos = screen.getGuiLeft() + 138;
+        final int yPos = screen.getGuiTop() + (count * spacing) + 16;
+
+        GuiGraphicsApi.text(
+                gx, screen().getFont(),
+                Component.translatable("immersiveenchanting.label.total_enchantments", renderedEnchantments.size()),
+                xPos, yPos, true);
+    }
+
+    /**
+     * Gets the list of filter checkbox components.
+     <P>
+     * @return the list of {@link FilterCheckbox} instances
+     */
+    public List<FilterCheckbox> filterCheckboxes() {
+        return filterCheckboxes;
+    }
+
+    /**
+     * Gets the scrollbar component for this tab.
+     <P>
+     * @return the {@link Scrollbar}
+     */
+    public Scrollbar scrollbar() {
+        return scrollbar;
     }
 
     /**
      * Gets the search bar component.
-     * <p>
-     *
+     <P>
      * @return the {@link Searchbar}
      */
     public Searchbar searchbar() {
@@ -227,8 +199,7 @@ public class BookTab {
 
     /**
      * Gets the list of enchantments currently being rendered.
-     * <p>
-     *
+     <P>
      * @return the filtered and sorted list of {@link Enchantment} holders
      */
     public List<Holder<Enchantment>> getRenderedEnchantments() {

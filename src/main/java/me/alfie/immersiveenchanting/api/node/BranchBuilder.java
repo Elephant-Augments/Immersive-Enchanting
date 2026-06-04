@@ -1,8 +1,8 @@
 package me.alfie.immersiveenchanting.api.node;
 
+import me.alfie.alfinolib.util.ResourceId;
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeBranch;
-import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,15 +17,15 @@ import java.util.List;
 public class BranchBuilder {
 
     private final Canvas canvas;
-    private final ResourceLocation id;
+    private final ResourceId id;
     private final List<NodeTemplate> nodeTemplates = new ArrayList<>();
 
-    private BranchBuilder(Canvas canvas, ResourceLocation id) {
+    private BranchBuilder(Canvas canvas, ResourceId id) {
         this.canvas = canvas;
         this.id = id;
     }
 
-    public static BranchBuilder of(Canvas canvas, ResourceLocation id) {
+    public static BranchBuilder of(Canvas canvas, ResourceId id) {
         return new BranchBuilder(canvas, id);
     }
 

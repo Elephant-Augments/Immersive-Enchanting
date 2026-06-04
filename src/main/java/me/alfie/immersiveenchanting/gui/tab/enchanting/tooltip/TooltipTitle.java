@@ -1,5 +1,7 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip;
 
+import me.alfie.alfinolib.gui.GuiGraphicsX;
+import me.alfie.alfinolib.gui.util.GuiGraphicsApi;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.api.node.ItemIcon;
 import me.alfie.immersiveenchanting.api.node.NodeIcon;
@@ -10,7 +12,6 @@ import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeState;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 
 import java.awt.*;
@@ -24,8 +25,8 @@ import java.awt.*;
  */
 public class TooltipTitle extends TooltipComponent {
 
-    private final NodeTooltip tooltip;
     private Component titleText;
+    private final NodeTooltip tooltip;
 
     /**
      * Constructs a TooltipTitle for the given NodeTooltip.
@@ -46,15 +47,6 @@ public class TooltipTitle extends TooltipComponent {
     }
 
     /**
-     * Returns the current title text of this tooltip.
-     *
-     * @return The styled title Component
-     */
-    public Component getTitleText() {
-        return titleText;
-    }
-
-    /**
      * Sets the title text for this tooltip title, applying the appropriate style.
      *
      * <p>All titles are styled white by default. If the node is locked, an alternate
@@ -65,10 +57,19 @@ public class TooltipTitle extends TooltipComponent {
     private void setTitleText(Component component) {
         component = component.copy().withStyle(ChatFormatting.WHITE);
 
-        if (tooltip.node().isState(NodeState.LOCKED) && ServerConfig.isObfuscateLockedEnchantments())
+        if(tooltip.node().isState(NodeState.LOCKED) && ServerConfig.isObfuscateLockedEnchantments())
             component = ImmersiveEnchanting.styleWithAltFont(component);
 
         this.titleText = component;
+    }
+
+    /**
+     * Returns the current title text of this tooltip.
+     *
+     * @return The styled title Component
+     */
+    public Component getTitleText() {
+        return titleText;
     }
 
     /**
@@ -78,41 +79,38 @@ public class TooltipTitle extends TooltipComponent {
      * and finally the title text. The title text is vertically centered relative to the node
      * sprite. A small horizontal offset is applied to position the title correctly.</p>
      *
-     * @param graphics The graphics context used for rendering
      */
     @Override
-    public void blitNineSliceSprite(GuiGraphics graphics) {
-        setPos(x() + 2, y());
-        super.blitNineSliceSprite(graphics);
-        setPos(x() - 2, y());
+    public void blitNineSliceSprite(GuiGraphicsX gx) {
+        setPos(x()+2, y());
+        super.blitNineSliceSprite(gx);
+        setPos(x()-2, y());
 
         Node node = tooltip.node();
-        graphics.blit(
+
+        GuiGraphicsApi.blit(
+                gx,
                 node.getState().getSpriteForTier(node.getTier()).id(),
                 x(), y(),
-                0, 0,
-                Node.WIDTH, Node.HEIGHT,
                 Node.WIDTH, Node.HEIGHT
         );
 
         NodeIcon icon = node.getIcon();
-        if (icon instanceof SpriteIcon(net.minecraft.resources.ResourceLocation id)) {
-            graphics.blit(
-                    id,
-                    x() + 4, y() + 4,
-                    0, 0,
-                    16, 16,
+        if(icon instanceof SpriteIcon sprite) {
+            GuiGraphicsApi.blit(
+                    gx,
+                    sprite.id(),
+                    x()+4, y()+4,
                     16, 16
             );
-        } else if (icon instanceof ItemIcon(net.minecraft.world.item.ItemStack stack)) {
-            graphics.renderItem(stack, x() + 4, y() + 4);
+        } else if (icon instanceof ItemIcon item) {
+            GuiGraphicsApi.itemStack(gx, item.stack(), tooltip.screen().getFont(), x()+4, y()+4);
         }
 
         int xo = Node.WIDTH;
-        int yo = Node.HEIGHT / 2 - Minecraft.getInstance().font.lineHeight / 2;
+        int yo = Node.HEIGHT/2 - Minecraft.getInstance().font.lineHeight/2;
         setTextStartPos(x() + xo, y() + yo);
-        graphics.drawString(Minecraft.getInstance().font, titleText,
-                getTextStartPos().x(), getTextStartPos().y(),
-                Color.WHITE.getRGB());
+        GuiGraphicsApi.text(gx, tooltip.screen().getFont(), titleText,
+                getTextStartPos().x(), getTextStartPos().y(), true);
     }
 }

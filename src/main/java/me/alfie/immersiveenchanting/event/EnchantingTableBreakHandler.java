@@ -23,10 +23,6 @@ import java.util.Collections;
  */
 public final class EnchantingTableBreakHandler {
 
-    private EnchantingTableBreakHandler() {
-        // utility class
-    }
-
     public static void onBlockBreak(BlockEvent.BreakEvent event) {
         if (event.isCanceled()) return;
         if (!(event.getLevel() instanceof Level level) || level.isClientSide()) return;
@@ -40,10 +36,7 @@ public final class EnchantingTableBreakHandler {
 
         boolean anything = false;
         for (ItemStack stack : items) {
-            if (!stack.isEmpty()) {
-                anything = true;
-                break;
-            }
+            if (!stack.isEmpty()) { anything = true; break; }
         }
         if (!anything) return;
 

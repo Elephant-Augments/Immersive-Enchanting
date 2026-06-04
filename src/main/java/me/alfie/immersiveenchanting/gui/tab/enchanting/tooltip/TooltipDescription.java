@@ -1,11 +1,13 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip;
 
+import me.alfie.alfinolib.gui.GuiGraphicsX;
+import me.alfie.alfinolib.gui.util.GuiGraphicsApi;
+import me.alfie.alfinolib.gui.util.MousePos;
 import me.alfie.immersiveenchanting.api.description.DescriptionLayout;
 import me.alfie.immersiveenchanting.api.description.TooltipDescriptionExtensions;
 import me.alfie.immersiveenchanting.gui.core.NineSliceSprite;
 import me.alfie.immersiveenchanting.gui.core.Sprite;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
-import net.minecraft.client.gui.GuiGraphics;
 
 public class TooltipDescription extends TooltipComponent {
 
@@ -20,26 +22,24 @@ public class TooltipDescription extends TooltipComponent {
         TooltipDescriptionExtensions.rebuild(tooltip, layout); //Prevents flicker
     }
 
-    public void render(GuiGraphics graphics, double mouseX, double mouseY) {
+    public void render(GuiGraphicsX gx, MousePos mousePos) {
         TooltipDescriptionExtensions.rebuild(tooltip, layout);
 
-        int yOffset = Node.HEIGHT - 10;
-        setPos(x() + 1, y() + yOffset);
-        super.blitNineSliceSprite(graphics);
+        int yOffset = Node.HEIGHT-10;
+        setPos(x()+1, y()+yOffset);
+        super.blitNineSliceSprite(gx);
 
         setTextStartPos(x() + 4, y() + 12);
-        layout.render(graphics, getTextStartPos().x(), getTextStartPos().y(), mouseX, mouseY);
+        layout.render(gx, getTextStartPos().x(), getTextStartPos().y(), mousePos);
 
 
-        if (!tooltip.isLockingAllowed()) return;
+        if(!tooltip.isLockingAllowed()) return;
         Sprite mouseSprite = tooltip.screen().tooltipManager().isTooltipLocked() ? Sprite.MOUSE_HINT_ON : Sprite.MOUSE_HINT_OFF;
-        graphics.blit(
+
+        GuiGraphicsApi.blit(gx,
                 mouseSprite.id(),
                 x() + getWidth() - 10, y() + getHeight() - 14,
-                0, 0,
-                mouseSprite.width(), mouseSprite.height(),
-                mouseSprite.width(), mouseSprite.height()
-        );
+                mouseSprite.width(), mouseSprite.height());
     }
 
     public DescriptionLayout getDescriptionLayout() {

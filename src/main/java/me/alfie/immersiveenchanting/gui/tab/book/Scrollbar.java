@@ -1,8 +1,10 @@
 package me.alfie.immersiveenchanting.gui.tab.book;
 
-import me.alfie.immersiveenchanting.gui.core.ScreenEventListener;
+import me.alfie.alfinolib.gui.GuiGraphicsX;
+import me.alfie.alfinolib.gui.ScreenEventListener;
+import me.alfie.alfinolib.gui.util.GuiGraphicsApi;
+import me.alfie.alfinolib.gui.util.MousePos;
 import me.alfie.immersiveenchanting.gui.core.Sprite;
-import net.minecraft.client.gui.GuiGraphics;
 
 /**
  * A vertical scrollbar component used within the {@link BookTab}.
@@ -28,37 +30,28 @@ public class Scrollbar implements ScreenEventListener {
 
     private final int scrollbarWidth = 14;
     private final int scrollbarHeight = 114;
-    public boolean isMouseDraggingScroller;
+
     protected int scrollIndex = 0;
+
     private int barX;
     private int barY;
+
     private int scrollerX;
     private int scrollerY;
+    public boolean isMouseDraggingScroller;
 
     public Scrollbar(BookTab bookTab) {
         this.bookTab = bookTab;
     }
 
-    /**
-     * Renders the scrollbar track and draggable scroller.
-     *
-     * <p>Also updates internal positioning used for mouse interaction
-     * and changes the cursor when hovered.</p>
-     *
-     * @param graphics Rendering context
-     * @param mouseX   Current mouse X
-     * @param mouseY   Current mouse Y
-     */
-    public void render(GuiGraphics graphics, double mouseX, double mouseY) {
+    public void render(GuiGraphicsX gx, MousePos mousePos) {
         barX = bookTab.screen().getGuiLeft() + 121;
         barY = bookTab.screen().getGuiTop() + 6;
 
-        graphics.blit(
+        GuiGraphicsApi.blit(
+                gx,
                 Sprite.SCROLLBAR.id(),
-                barX,
-                barY,
-                0f, 0f,
-                Sprite.SCROLLBAR.width(), Sprite.SCROLLBAR.height(),
+                barX, barY,
                 Sprite.SCROLLBAR.width(), Sprite.SCROLLBAR.height()
         );
 
@@ -67,12 +60,10 @@ public class Scrollbar implements ScreenEventListener {
         scrollerX = barX + 1;
 
 
-        graphics.blit(
+        GuiGraphicsApi.blit(
+                gx,
                 Sprite.SCROLLER.id(),
-                scrollerX,
-                scrollerY,
-                0f, 0f,
-                Sprite.SCROLLER.width(), Sprite.SCROLLER.height(),
+                scrollerX, scrollerY,
                 Sprite.SCROLLER.width(), Sprite.SCROLLER.height()
         );
     }
@@ -104,57 +95,38 @@ public class Scrollbar implements ScreenEventListener {
         scrollIndex = 0;
     }
 
-    /**
-     * Handles mouse click interaction.
-     *
-     * <p>If the scrollbar is clicked, dragging mode is enabled,
-     * allowing the scroller to follow mouse movement.</p>
-     *
-     * @param mouse Mouse event
-     * @return {@code true} if the click was handled
-     */
+
     @Override
-    public boolean onMouseClick(double mouseX, double mouseY, int button) {
-        if (isMouseOver(mouseX, mouseY)) {
+    public boolean onMouseClick(MousePos mousePos, int button) {
+        if(mousePos.isOver(barX, barY, Sprite.SCROLLBAR.width(), Sprite.SCROLLBAR.height())) {
             isMouseDraggingScroller = true;
             return true;
         }
 
-        return ScreenEventListener.super.onMouseClick(mouseX, mouseY, button);
+        return ScreenEventListener.super.onMouseClick(mousePos, button);
     }
 
-    /**
-     * Checks whether the mouse is hovering over the scrollbar track.
-     *
-     * @param mouseX Current mouse X
-     * @param mouseY Current mouse Y
-     * @return {@code true} if the mouse is within the scrollbar bounds
-     */
-    private boolean isMouseOver(double mouseX, double mouseY) {
-        return bookTab.screen().isMouseOver(
-                barX, barY,
-                Sprite.SCROLLBAR.width(), (Sprite.SCROLLBAR.height()),
-                mouseX, mouseY);
-    }
 
-    /**
-     * Handles mouse dragging for the scroller.
-     *
-     * <p>When dragging is active, updates the scroll position
-     * based on the mouse's vertical position.</p>
-     *
-     * @param mouse Mouse event
-     * @param dx    Delta X
-     * @param dy    Delta Y
-     * @return {@code true} if dragging affected the scrollbar
-     */
     @Override
-    public boolean onMouseDrag(double mouseX, double mouseY, int button, double dx, double dy) {
-        if (isMouseDraggingScroller) {
+    public boolean onMouseScrolled(MousePos mousePos, double scrollY) {
+        scrollIndex -= (int) scrollY;
+
+        int max = Math.max(0, bookTab.getRenderedEnchantments().size() - bookTab.MAX_BOXES_RENDERED);
+        scrollIndex = Math.clamp(scrollIndex, 0, max);
+
+        if(scrollIndex < 0) scrollIndex = 0;
+
+        return ScreenEventListener.super.onMouseScrolled(mousePos, scrollY);
+    }
+
+    @Override
+    public boolean onMouseDrag(MousePos mousePos, int button, double dx, double dy) {
+
+        if(isMouseDraggingScroller) {
             int minY = barY + 1;
             int maxY = barY + scrollbarHeight - scrollerHeight - 1;
 
-            int clamped = Math.max(minY, Math.min((int) mouseY - scrollerHeight / 2, maxY));
+            int clamped = Math.max(minY, Math.min((int) mousePos.y() - scrollerHeight / 2, maxY));
 
             double percent = (double) (clamped - minY) / (maxY - minY);
 
@@ -163,43 +135,12 @@ public class Scrollbar implements ScreenEventListener {
             return true;
         }
 
-        return ScreenEventListener.super.onMouseDrag(mouseX, mouseY, button, dx, dy);
+        return ScreenEventListener.super.onMouseDrag(mousePos, button, dx, dy);
     }
 
-    /**
-     * Handles mouse release events.
-     *
-     * <p>Disables dragging mode when the mouse button is released.</p>
-     *
-     * @param mouse Mouse event
-     * @return {@code true} if handled
-     */
     @Override
-    public boolean onMouseRelease(double mouseX, double mouseY, int button) {
+    public boolean onMouseRelease(MousePos mousePos, int button) {
         isMouseDraggingScroller = false;
-        return ScreenEventListener.super.onMouseRelease(mouseX, mouseY, button);
-    }
-
-    /**
-     * Handles mouse wheel scrolling.
-     *
-     * <p>Adjusts {@code scrollIndex} based on scroll input and clamps
-     * the result within valid bounds.</p>
-     *
-     * @param mouseX  Mouse X
-     * @param mouseY  Mouse Y
-     * @param scrollY Scroll delta
-     * @return {@code true} if handled
-     */
-    @Override
-    public boolean onMouseScrolled(double mouseX, double mouseY, double scrollY) {
-        scrollIndex -= (int) scrollY;
-
-        int max = Math.max(0, bookTab.getRenderedEnchantments().size() - bookTab.MAX_BOXES_RENDERED);
-        scrollIndex = Math.clamp(scrollIndex, 0, max);
-
-        if (scrollIndex < 0) scrollIndex = 0;
-
-        return ScreenEventListener.super.onMouseScrolled(mouseX, mouseY, scrollY);
+        return ScreenEventListener.super.onMouseRelease(mousePos, button);
     }
 }

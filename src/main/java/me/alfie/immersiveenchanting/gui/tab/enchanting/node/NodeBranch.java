@@ -1,10 +1,11 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.node;
 
+import me.alfie.alfinolib.gui.GuiGraphicsX;
+import me.alfie.alfinolib.gui.util.MousePos;
+import me.alfie.alfinolib.util.ResourceId;
 import me.alfie.immersiveenchanting.api.node.NodeTemplate;
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
 import me.alfie.immersiveenchanting.gui.canvas.CanvasRenderable;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,22 +13,21 @@ import java.util.List;
 public class NodeBranch extends CanvasRenderable {
 
     private final List<Node> nodes;
-    private final ResourceLocation id;
     private float angle;
-    private final BranchTexture texture;
+    private BranchTexture texture;
+    private final ResourceId id;
 
     /**
      * Constructor for API users - angles are automatically calculated by ImmersiveEnchanting.
-     *
      * @param canvas
      * @param nodeTemplates
      */
-    public NodeBranch(Canvas canvas, ResourceLocation id, List<NodeTemplate> nodeTemplates) {
+    public NodeBranch(Canvas canvas, ResourceId id, List<NodeTemplate> nodeTemplates) {
         super(canvas);
         this.id = id;
 
         List<Node> builtNodes = new ArrayList<>();
-        for (NodeTemplate nodeTemplate : nodeTemplates) {
+        for(NodeTemplate nodeTemplate : nodeTemplates) {
             builtNodes.add(new Node(
                     nodeTemplate.title(),
                     nodeTemplate.level(),
@@ -48,6 +48,10 @@ public class NodeBranch extends CanvasRenderable {
         this.angle = angle;
     }
 
+    public List<Node> nodes() {
+        return nodes;
+    }
+
     public float angle() {
         return angle;
     }
@@ -61,8 +65,8 @@ public class NodeBranch extends CanvasRenderable {
         double stepY = Math.sin(angle) * BranchManager.getNodeStep();
 
         for (int i = 0; i < nodes.size(); i++) {
-            int x = (int) Math.round(canvas().getCenter().x() + stepX * (i + 1));
-            int y = (int) Math.round(canvas().getCenter().y() + stepY * (i + 1));
+            int x = (int) Math.round(canvas().getCenter().x() + stepX * (i+1));
+            int y = (int) Math.round(canvas().getCenter().y() + stepY * (i+1));
 
             Node node = nodes().get(i);
             node.setCanvasPos(x - (float) Node.WIDTH / 2, y - (float) Node.HEIGHT / 2);
@@ -73,21 +77,17 @@ public class NodeBranch extends CanvasRenderable {
         texture.calculateNodeConnections();
     }
 
-    public List<Node> nodes() {
-        return nodes;
-    }
-
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY) {
-        texture.render(graphics, mouseX, mouseY);
+    public void render(GuiGraphicsX gx, MousePos mousePos) {
+        texture.render(gx, mousePos);
 
-        for (Node node : nodes) {
-            node.render(graphics, mouseX, mouseY);
+        for(Node node : nodes) {
+            node.render(gx, mousePos);
         }
     }
 
 
-    public ResourceLocation id() {
+    public ResourceId id() {
         return id;
     }
 }

@@ -1,36 +1,8 @@
 {
   "levels": {
-    "1": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:firework_rocket",
-          "count": 1
-        }
-      }
-    ],
-    "2": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:spectral_arrow",
-          "count": 1
-        }
-      }
-    ],
-    "3": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:goat_horn",
-          "count": 1
-        }
-      }
-    ],
-    "4": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:echo_shard",
-          "count": 1
-        }
-      }
-    ]
+    "1": [{"item_cost": {"item": "minecraft:firework_rocket", "count": 1}}],
+    "2": [{"item_cost": {"item": "minecraft:spectral_arrow", "count": 1}}],
+    "3": [{"item_cost": {"item": "minecraft:goat_horn", "count": 1}}],
+    "4": [{"item_cost": {"item": "minecraft:echo_shard", "count": 1}}]
   }
 }

@@ -1,36 +1,8 @@
 {
   "levels": {
-    "1": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:water_bucket",
-          "count": 1
-        }
-      }
-    ],
-    "2": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:nether_brick",
-          "count": 1
-        }
-      }
-    ],
-    "3": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:blaze_rod",
-          "count": 1
-        }
-      }
-    ],
-    "4": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:torchflower",
-          "count": 1
-        }
-      }
-    ]
+    "1": [{"item_cost": {"item": "minecraft:water_bucket", "count": 1}}],
+    "2": [{"item_cost": {"item": "minecraft:nether_brick", "count": 1}}],
+    "3": [{"item_cost": {"item": "minecraft:blaze_rod", "count": 1}}],
+    "4": [{"item_cost": {"item": "minecraft:torchflower", "count": 1}}]
   }
 }

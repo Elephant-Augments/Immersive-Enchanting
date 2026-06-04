@@ -15,9 +15,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
-import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.ModList;
-import net.neoforged.fml.loading.moddiscovery.ModInfo;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -53,11 +50,10 @@ public abstract class ItemStackMixin {
      * <p>This injection cancels vanilla tooltip processing for stored enchantments
      * on affected items.</p>
      *
-     * @param type     data component type being processed
-     * @param context  tooltip rendering context
-     * @param display  tooltip display configuration
+     * @param type data component type being processed
+     * @param context tooltip rendering context
      * @param consumer output consumer for tooltip lines
-     * @param flag     tooltip visibility flags
+     * @param flag tooltip visibility flags
      */
     @Inject(
             method = "addToTooltip(Lnet/minecraft/core/component/DataComponentType;Lnet/minecraft/world/item/Item$TooltipContext;Ljava/util/function/Consumer;Lnet/minecraft/world/item/TooltipFlag;)V",
@@ -84,13 +80,9 @@ public abstract class ItemStackMixin {
                     consumer.accept(component.withStyle(ChatFormatting.GOLD));
 
                     if(ClientConfig.isShowAddedByTooltipEnabled()) {
-                        String modNamespace = enchantmentHolder.getKey().location().getNamespace();
-
-                        ModInfo modInfo = (ModInfo) ModList.get().getModContainerById(modNamespace)
-                                .map(ModContainer::getModInfo)
-                                .orElse(null);
-
-                        String modName = modInfo != null ? modInfo.getDisplayName() : modNamespace;
+                        String modName = ImmersiveEnchanting.getModName(enchantmentHolder.getKey()
+                                .location()
+                                .getNamespace());
 
                         consumer.accept(
                                 Component.translatable("item.immersiveenchanting.ancient_book.desc.enchantment_added_by", modName)
@@ -105,7 +97,7 @@ public abstract class ItemStackMixin {
                             .withStyle(ChatFormatting.GRAY)
             );
 
-            ci.cancel(); //Prevent DataComponents.STORED_ENCHANTMENTS being applied normally to ancient books.
+            ci.cancel(); //Prevent DataComponents.STORED_ENCHANTMENTS tooltip being applied normally to ancient books.
         }
     }
 }

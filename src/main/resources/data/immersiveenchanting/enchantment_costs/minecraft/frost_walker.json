@@ -1,20 +1,6 @@
 {
   "levels": {
-    "1": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:powder_snow_bucket",
-          "count": 1
-        }
-      }
-    ],
-    "2": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:blue_ice",
-          "count": 16
-        }
-      }
-    ]
+    "1": [{"item_cost": {"item": "minecraft:powder_snow_bucket", "count": 1}}],
+    "2": [{"item_cost": {"item": "minecraft:blue_ice", "count": 16}}]
   }
 }

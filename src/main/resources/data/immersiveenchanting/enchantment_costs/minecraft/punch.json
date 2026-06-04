@@ -1,20 +1,6 @@
 {
   "levels": {
-    "1": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:piston",
-          "count": 1
-        }
-      }
-    ],
-    "2": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:wind_charge",
-          "count": 1
-        }
-      }
-    ]
+    "1": [{"item_cost": {"item": "minecraft:piston", "count": 1}}],
+    "2": [{"item_cost": {"item": "minecraft:wind_charge", "count": 1}}]
   }
 }

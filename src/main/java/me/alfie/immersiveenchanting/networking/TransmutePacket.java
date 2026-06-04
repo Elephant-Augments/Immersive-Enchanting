@@ -1,8 +1,11 @@
 package me.alfie.immersiveenchanting.networking;
 
+import me.alfie.alfinolib.networking.NetworkPacket;
+import me.alfie.alfinolib.networking.codec.StreamCodec;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
+import me.alfie.immersiveenchanting.util.CostHelper;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import me.alfie.immersiveenchanting.util.FxHelper;
 import net.minecraft.ChatFormatting;
@@ -10,7 +13,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
@@ -41,26 +43,20 @@ import java.util.List;
  * <p>On success, the item is updated, feedback is shown to the player, and
  * visual/audio effects are played at the enchanting table.</p>
  */
-public record TransmutePacket() implements ModNetworkPacket<TransmutePacket> {
+public record TransmutePacket() implements NetworkPacket<TransmutePacket> {
 
     public static final Type<@NotNull TransmutePacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(ImmersiveEnchanting.MODID, "transmute"));
-    public static final StreamCodec<RegistryFriendlyByteBuf, TransmutePacket> STREAM_CODEC = StreamCodec.unit(new TransmutePacket());
-
-    @Override
-    public Type<@NotNull TransmutePacket> typeId() {
+    @Override public Type<@NotNull TransmutePacket> type() {
         return TYPE;
     }
 
-    @Override
-    public StreamCodec<RegistryFriendlyByteBuf, TransmutePacket> codec() {
-        return STREAM_CODEC;
-    }
+    public static final StreamCodec<RegistryFriendlyByteBuf, TransmutePacket> STREAM_CODEC = StreamCodec.unit(new TransmutePacket());
 
     @Override
-    public void exec(TransmutePacket packet, IPayloadContext context) {
+    public void exec(IPayloadContext context) {
         Player player = context.player();
         Level level = player.level();
-        if (!(player.containerMenu instanceof EnchantingTableMenu menu)) return;
+        if(!(player.containerMenu instanceof EnchantingTableMenu menu)) return;
 
         ItemStack ancientBookStack = menu.getToolSlot().getItem();
         List<Holder<Enchantment>> availableEnchantments = menu.getAvailableEnchantments();
@@ -68,16 +64,14 @@ public record TransmutePacket() implements ModNetworkPacket<TransmutePacket> {
 
         allEnchantments.removeIf(holder ->
                 availableEnchantments.stream().anyMatch(av -> av.value().equals(holder.value())));
-        if (allEnchantments.isEmpty()) allEnchantments = CostRegistry.server().getAllEnabledEnchantmentHolders();
+        if(allEnchantments.isEmpty()) allEnchantments = CostRegistry.server().getAllEnabledEnchantmentHolders();
 
         RandomSource random = level.getRandom();
         int randomIndex = random.nextInt(allEnchantments.size());
         Holder<Enchantment> newEnchantment = allEnchantments.get(randomIndex);
         Holder<Enchantment> oldEnchantment = EnchantmentUtil.getStoredEnchantment(ancientBookStack);
 
-        if (EnchantmentUtil.canTransmute(menu, oldEnchantment, context)) {
-            EnchantmentUtil.deductValidCost(menu, CostRegistry.TRANSMUTE, 1, player, CostRegistry.server());
-
+        if(CostHelper.canTransmute(menu, oldEnchantment, player)) {
             EnchantmentUtil.setStoredEnchantment(ancientBookStack, newEnchantment);
             BlockPos tablePos = menu.getBlockPos();
 
@@ -98,7 +92,7 @@ public record TransmutePacket() implements ModNetworkPacket<TransmutePacket> {
             Component actionBarMessage = Component.translatable("immersiveenchanting.action_bar.transmute_success",
                     newEnchantmentName).withStyle(ChatFormatting.GRAY);
 
-            player.displayClientMessage(actionBarMessage, true);
+            player.sendSystemMessage(actionBarMessage);
             player.closeContainer();
 
             FxHelper.playTransmute((ServerLevel) level, tablePos);

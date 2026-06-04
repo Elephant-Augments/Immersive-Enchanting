@@ -1,13 +1,18 @@
 package me.alfie.immersiveenchanting.networking;
 
+import me.alfie.alfinolib.networking.NetworkPacket;
+import me.alfie.alfinolib.networking.codec.StreamCodec;
+import me.alfie.alfinolib.util.ResourceId;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
+import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import net.minecraft.core.Holder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
@@ -26,28 +31,27 @@ import java.util.List;
  *
  * <p>Used to keep the enchanting screen in sync with server-side bookshelf state.</p>
  */
-public record AvailableEnchantmentsPacket(
-        List<Holder<Enchantment>> availableEnchantments) implements ModNetworkPacket<AvailableEnchantmentsPacket> {
+public record AvailableEnchantmentsPacket(List<ResourceKey<Enchantment>> availableEnchantments) implements NetworkPacket<AvailableEnchantmentsPacket> {
 
-    public static final Type<@NotNull AvailableEnchantmentsPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(ImmersiveEnchanting.MODID, "available_enchantments"));
-
+    public static final Type<@NotNull AvailableEnchantmentsPacket> TYPE = new Type<>(new ResourceId(ImmersiveEnchanting.MODID, "available_enchantments").mc());
+    @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
 
     public static final StreamCodec<RegistryFriendlyByteBuf, AvailableEnchantmentsPacket> STREAM_CODEC = new StreamCodec<>() {
         @Override
         public void encode(@NotNull RegistryFriendlyByteBuf buf, AvailableEnchantmentsPacket packet) {
             buf.writeInt(packet.availableEnchantments.size());
 
-            for (Holder<Enchantment> enchantmentHolder : packet.availableEnchantments) {
-                ModPackets.ENCHANTMENT_HOLDER_CODEC.encode(buf, enchantmentHolder);
+            for (ResourceKey<Enchantment> enchantmentKey : packet.availableEnchantments) {
+                ModPackets.ENCHANTMENT_CODEC.encode(buf, enchantmentKey);
             }
         }
 
         @Override
         public @NotNull AvailableEnchantmentsPacket decode(@NotNull RegistryFriendlyByteBuf buf) {
             int size = buf.readInt();
-            List<Holder<Enchantment>> result = new ArrayList<>(size);
+            List<ResourceKey<Enchantment>> result = new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
-                result.add(ModPackets.ENCHANTMENT_HOLDER_CODEC.decode(buf));
+                result.add(ModPackets.ENCHANTMENT_CODEC.decode(buf));
             }
 
             return new AvailableEnchantmentsPacket(result);
@@ -56,28 +60,18 @@ public record AvailableEnchantmentsPacket(
     };
 
     @Override
-    public StreamCodec<RegistryFriendlyByteBuf, AvailableEnchantmentsPacket> codec() {
-        return STREAM_CODEC;
-    }
+    public void exec(IPayloadContext context) {
+        Player player = context.player();
+        if(!(player.containerMenu instanceof EnchantingTableMenu menu)) return;
 
-    @Override
-    public Type<@NotNull AvailableEnchantmentsPacket> typeId() {
-        return TYPE;
-    }
+        List<Holder<Enchantment>> enchantmentHolders = EnchantmentUtil.toHolders(
+                availableEnchantments, player.registryAccess());
 
-    @Override
-    public void exec(AvailableEnchantmentsPacket packet, IPayloadContext context) {
-        if (context.player().containerMenu instanceof EnchantingTableMenu menu) {
-
-            if (ServerConfig.areAncientBooksRequired()) {
-                menu.setAvailableEnchantments(packet.availableEnchantments());
-            } else {
-                menu.setAvailableEnchantments(CostRegistry.server().getAllEnabledEnchantmentHolders());
-            }
-
-
+        if(ServerConfig.areAncientBooksRequired()) {
+            menu.setAvailableEnchantments(enchantmentHolders);
+        } else {
+            menu.setAvailableEnchantments(CostRegistry.server().getAllEnabledEnchantmentHolders());
         }
     }
-
 
 }

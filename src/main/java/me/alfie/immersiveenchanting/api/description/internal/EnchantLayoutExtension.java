@@ -23,28 +23,28 @@ public class EnchantLayoutExtension implements DescriptionLayoutExtension {
 
     @Override
     public void extendLayout(DescriptionLayout description, NodeTooltip tooltip) {
-        if (!tooltip.node().isDataType(EnchantmentNodeData.TYPE)) return;
+        if(!tooltip.node().isDataType(EnchantmentNodeData.TYPE)) return;
 
         description.widthPadding = 16;
 
         Node node = tooltip.node();
         EnchantingTableScreen screen = tooltip.screen();
 
-        if (node.isState(NodeState.UNOBTAINED)) {
+        if(node.isState(NodeState.UNOBTAINED)) {
             DescriptionHelper.insertCostLines(tooltip, description, 0);
-        } else if (node.isState(NodeState.OBTAINED)) {
-            if (screen.tooltipManager().isHoldingTooltip()) {
+        } else if(node.isState(NodeState.OBTAINED)) {
+            if(screen.tooltipManager().isHoldingTooltip()) {
                 description.insertLine(0, new RemovingLine(tooltip));
                 description.insertLine(1, new RemoveProgressLine(tooltip));
             } else {
                 description.insertLine(0, new EquippedLine(tooltip));
 
-                if (tooltip.node().canRemove()) {
+                if(tooltip.node().canRemove()) {
                     description.insertLine(1, new RemoveHintLine(tooltip));
                 }
 
             }
-        } else if (node.isState(NodeState.LOCKED)) {
+        } else if(node.isState(NodeState.LOCKED)) {
             description.insertLine(0, new UnavailableEnchantmentLine(tooltip));
         }
     }

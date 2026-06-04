@@ -16,7 +16,7 @@ import net.minecraft.network.chat.Component;
 public class ReplicateLayoutExtension implements DescriptionLayoutExtension {
     @Override
     public void extendLayout(DescriptionLayout description, NodeTooltip tooltip) {
-        if (!tooltip.node().branchId().equals(CostRegistry.REPLICATE)) return;
+        if(!tooltip.node().branchId().equals(CostRegistry.REPLICATE)) return;
 
         description.widthPadding = 16;
 
@@ -25,7 +25,7 @@ public class ReplicateLayoutExtension implements DescriptionLayoutExtension {
                         .withStyle(ChatFormatting.GRAY),
                 DescriptionHelper.DEFAULT_LINE_WIDTH, description, 0);
 
-        DescriptionHelper.insertCostLines(tooltip, description, linesCreated + 1);
+        DescriptionHelper.insertCostLines(tooltip, description, linesCreated+1);
 
     }
 }

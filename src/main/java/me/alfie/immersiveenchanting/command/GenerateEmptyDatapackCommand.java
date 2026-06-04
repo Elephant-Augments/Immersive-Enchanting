@@ -79,21 +79,19 @@ public enum GenerateEmptyDatapackCommand implements ModCommand {
 
     }
 
-    /**
-     * Iterates every registered enchantment and writes an empty cost JSON file for each one,
-     * one level slot per max level of that enchantment. Files are placed under
-     * {@code enchantment_costs/<namespace>/<enchantment_name>.json}.
-     */
-    private static void createEnchantmentJsonFiles(RegistryAccess registryAccess, File enchantmentCostsDir) {
-        List<Holder<Enchantment>> enchantments = EnchantmentUtil.getAllRegisteredEnchantments(registryAccess);
-        for (Holder<Enchantment> enchantmentHolder : enchantments) {
-            File jsonFile = getOrCreateFile(enchantmentHolder, enchantmentCostsDir);
+    /** Writes {@code pack.mcmeta} into the datapack root with a fixed pack format and description. */
+    private static void createPackMcMeta(File rootDir) {
+        JsonObject pack = new JsonObject();
+        pack.addProperty("description", "Datapack generated from /immersiveenchanting generateEmptyDatapack.");
+        pack.addProperty("pack_format", PACK_FORMAT);
+        pack.addProperty("min_format", PACK_FORMAT);
+        pack.addProperty("max_format", PACK_FORMAT);
 
-            int maxLevel = enchantmentHolder.value().getMaxLevel();
-            JsonObject jsonObject = buildEmptyCostJson(maxLevel);
+        JsonObject root = new JsonObject();
+        root.add("pack", pack);
+        File packmcmeta = new File(rootDir, "pack.mcmeta");
 
-            writeJsonFile(jsonFile, jsonObject);
-        }
+        writeJsonFile(packmcmeta, root);
     }
 
     /**
@@ -117,20 +115,20 @@ public enum GenerateEmptyDatapackCommand implements ModCommand {
     }
 
     /**
-     * Writes {@code pack.mcmeta} into the datapack root with a fixed pack format and description.
+     * Iterates every registered enchantment and writes an empty cost JSON file for each one,
+     * one level slot per max level of that enchantment. Files are placed under
+     * {@code enchantment_costs/<namespace>/<enchantment_name>.json}.
      */
-    private static void createPackMcMeta(File rootDir) {
-        JsonObject pack = new JsonObject();
-        pack.addProperty("description", "Datapack generated from /immersiveenchanting generateEmptyDatapack.");
-        pack.addProperty("pack_format", PACK_FORMAT);
-        pack.addProperty("min_format", PACK_FORMAT);
-        pack.addProperty("max_format", PACK_FORMAT);
+    private static void createEnchantmentJsonFiles(RegistryAccess registryAccess, File enchantmentCostsDir) {
+        List<Holder<Enchantment>> enchantments = EnchantmentUtil.getAllEnchantmentsInRegistry(registryAccess);
+        for(Holder<Enchantment> enchantmentHolder : enchantments) {
+            File jsonFile = getOrCreateFile(enchantmentHolder, enchantmentCostsDir);
 
-        JsonObject root = new JsonObject();
-        root.add("pack", pack);
-        File packmcmeta = new File(rootDir, "pack.mcmeta");
+            int maxLevel = enchantmentHolder.value().getMaxLevel();
+            JsonObject jsonObject = buildEmptyCostJson(maxLevel);
 
-        writeJsonFile(packmcmeta, root);
+            writeJsonFile(jsonFile, jsonObject);
+        }
     }
 
     /**
@@ -149,14 +147,14 @@ public enum GenerateEmptyDatapackCommand implements ModCommand {
         File enchantmentFile = new File(namespaceDir, enchantName + ".json");
 
         File parent = enchantmentFile.getParentFile();
-        if (!parent.exists()) parent.mkdirs();
+        if(!parent.exists()) parent.mkdirs();
 
         return enchantmentFile;
     }
 
     /**
      * Builds a cost JSON object with {@code maxLevel} level entries, each containing a single
-     * no-op cost (air × 0, 0 XP levels). The resulting structure matches the schema expected
+     * no-op cost (air × 1, 0 XP levels). The resulting structure matches the schema expected
      * by {@link me.alfie.immersiveenchanting.datapack.enchantment_cost.CostDatapack}.
      */
     private static JsonObject buildEmptyCostJson(int maxLevel) {
@@ -165,15 +163,15 @@ public enum GenerateEmptyDatapackCommand implements ModCommand {
         for (int i = 1; i <= maxLevel; i++) {
             JsonArray costArray = new JsonArray();
 
-            JsonObject itemStack = new JsonObject();
-            itemStack.addProperty("item_or_tag_id", "minecraft:air");
-            itemStack.addProperty("count", 0);
-            itemStack.addProperty("xp_levels", 0);
+            JsonObject itemCost = new JsonObject();
+            itemCost.addProperty("item", "minecraft:air");
+            itemCost.addProperty("count", 1);
 
-            JsonObject wrapper = new JsonObject();
-            wrapper.add("item_stack", itemStack);
+            JsonObject cost = new JsonObject();
+            cost.add("item_cost", itemCost);
+            cost.addProperty("xp_levels", 0);
 
-            costArray.add(wrapper);
+            costArray.add(cost);
 
             levels.add(String.valueOf(i), costArray);
         }
@@ -185,12 +183,10 @@ public enum GenerateEmptyDatapackCommand implements ModCommand {
         return root;
     }
 
-    /**
-     * Serializes {@code json} to {@code file} with pretty-printing, silently printing the stack trace on failure.
-     */
+    /** Serializes {@code json} to {@code file} with pretty-printing, silently printing the stack trace on failure. */
     private static void writeJsonFile(File file, JsonObject json) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        try (FileWriter writer = new FileWriter(file)) {
+        try(FileWriter writer = new FileWriter(file)) {
             gson.toJson(json, writer);
         } catch (IOException e) {
             e.printStackTrace();

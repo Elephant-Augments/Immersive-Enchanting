@@ -1,10 +1,8 @@
 package me.alfie.immersiveenchanting.datapack.enchantment_cost.codec;
 
 import com.mojang.serialization.Codec;
+import me.alfie.alfinolib.networking.codec.StreamCodec;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,26 +10,35 @@ import java.util.List;
 public record CostHolder(List<Cost> costs) {
 
     public static final Codec<CostHolder> CODEC = Codec.list(
-                    Cost.CODEC)
+            Cost.CODEC)
             .xmap(
                     CostHolder::new,
                     CostHolder::costs
             );
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, CostHolder> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.collection(ArrayList::new, Cost.STREAM_CODEC),
-            CostHolder::costs,
-            CostHolder::new);
+    public static final StreamCodec<RegistryFriendlyByteBuf, CostHolder> STREAM_CODEC = new StreamCodec<RegistryFriendlyByteBuf, CostHolder>() {
+        @Override
+        public void encode(RegistryFriendlyByteBuf buf, CostHolder costHolder) {
+            List<Cost> costs = costHolder.costs;
 
-    public static final CostHolder EMPTY = new CostHolder(List.of());
-
-    public List<ItemStack> getAllItemStacks() {
-        List<ItemStack> result = new ArrayList<>();
-        for (Cost cost : costs()) {
-            result.addAll(cost.getItemStacks());
+            buf.writeVarInt(costs.size());
+            for (Cost cost : costs) {
+                Cost.STREAM_CODEC.encode(buf, cost);
+            }
         }
 
-        return result;
-    }
+        @Override
+        public CostHolder decode(RegistryFriendlyByteBuf buf) {
+            int size = buf.readVarInt();
 
+            List<Cost> costs = new ArrayList<>(size);
+            for (int i = 0; i < size; i++) {
+                costs.add(Cost.STREAM_CODEC.decode(buf));
+            }
+
+            return new CostHolder(costs);
+        }
+    };
+
+    public static final CostHolder EMPTY = new CostHolder(List.of());
 }

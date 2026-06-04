@@ -34,7 +34,6 @@ public class BuildBranchesEvent extends Event {
 
     /**
      * Get the current ItemStack in the tool slot.
-     *
      * @return
      */
     public ItemStack getStack() {

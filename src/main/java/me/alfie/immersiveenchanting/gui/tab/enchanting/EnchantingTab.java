@@ -1,9 +1,10 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting;
 
+import me.alfie.alfinolib.gui.GuiGraphicsX;
+import me.alfie.alfinolib.gui.util.MousePos;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.BranchManager;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeBranch;
-import net.minecraft.client.gui.GuiGraphics;
 
 import javax.annotation.Nullable;
 
@@ -23,12 +24,20 @@ import javax.annotation.Nullable;
  */
 public class EnchantingTab {
 
+    public enum Display {
+        ENCHANTMENTS,
+        MOD_FILTERS
+    }
+
     private final CentralSlot centralSlot;
+
     private final EnchantingTableScreen screen;
     private final BranchManager branchManager;
     private Display currentDisplay = Display.ENCHANTMENTS;
+
     @Nullable
     private String filteredModid;
+
 
     /**
      * Constructs the enchanting tab and initializes its core components.
@@ -57,16 +66,13 @@ public class EnchantingTab {
      *     <li>The central item slot</li>
      * </ul>
      *
-     * @param graphics Rendering context
-     * @param mouseX   Current mouse X
-     * @param mouseY   Current mouse Y
      */
-    public void render(GuiGraphics graphics, int mouseX, int mouseY) {
-        for (NodeBranch branch : branchManager.branches()) {
-            branch.render(graphics, mouseX, mouseY);
+    public void render(GuiGraphicsX gx, MousePos mousePos) {
+        for(NodeBranch branch : branchManager.branches()) {
+            branch.render(gx, mousePos);
         }
 
-        centralSlot.render(graphics, mouseX, mouseY);
+        centralSlot.render(gx, mousePos);
     }
 
     /**
@@ -83,34 +89,28 @@ public class EnchantingTab {
         return branchManager;
     }
 
-    public Display getDisplay() {
-        return currentDisplay;
-    }
-
     public void setDisplay(Display display) {
         currentDisplay = display;
+    }
+
+    public Display getDisplay() {
+        return currentDisplay;
     }
 
     public boolean isDisplay(Display display) {
         return currentDisplay == display;
     }
 
-    @Nullable
-    public String getFilteredModid() {
-        return filteredModid;
-    }
-
     /**
      * Set to null for all enchantments.
-     *
      * @param modid
      */
     public void setFilteredModid(@Nullable String modid) {
         this.filteredModid = modid;
     }
 
-    public enum Display {
-        ENCHANTMENTS,
-        MOD_FILTERS
+    @Nullable
+    public String getFilteredModid() {
+        return filteredModid;
     }
 }

@@ -1,12 +1,13 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import me.alfie.alfinolib.gui.GuiGraphicsX;
+import me.alfie.alfinolib.gui.ScreenEventListener;
+import me.alfie.alfinolib.gui.util.MousePos;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
-import me.alfie.immersiveenchanting.gui.core.ScreenEventListener;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
 import me.alfie.immersiveenchanting.util.FxHelper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import org.joml.Vector2f;
 
 /**
@@ -43,7 +44,7 @@ public class NodeTooltip implements ScreenEventListener {
      * Creates a tooltip for a specific node on the enchanting screen.
      *
      * @param screen the parent screen
-     * @param node   the node this tooltip represents
+     * @param node the node this tooltip represents
      */
     public NodeTooltip(EnchantingTableScreen screen, Node node) {
         this.node = node;
@@ -52,20 +53,6 @@ public class NodeTooltip implements ScreenEventListener {
 
         this.title = new TooltipTitle(this);
         this.description = new TooltipDescription(this);
-    }
-
-    /**
-     * @return the parent enchanting table screen
-     */
-    public EnchantingTableScreen screen() {
-        return screen;
-    }
-
-    /**
-     * @return the node associated with this tooltip
-     */
-    public Node node() {
-        return node;
     }
 
     /**
@@ -81,11 +68,8 @@ public class NodeTooltip implements ScreenEventListener {
      *     <li>Detects mouse hover and schedules this tooltip for display</li>
      * </ul>
      *
-     * @param graphics the rendering context
-     * @param mouseX   current mouse X position
-     * @param mouseY   current mouse Y position
      */
-    public void render(GuiGraphics graphics, int mouseX, int mouseY) {
+    public void render(GuiGraphicsX gx, MousePos mousePos) {
         screenPos = screen.canvas().canvasToScreen(node.canvasX(), node.canvasY());
 
         title.setPos((int) screenPos.x(), (int) screenPos.y());
@@ -95,37 +79,36 @@ public class NodeTooltip implements ScreenEventListener {
         int descWidth = description.getDescriptionLayout().getRenderedWidth();
         int sharedWidth = Math.max(titleWidth, descWidth);
         title.setWidth(sharedWidth);
-        description.setWidth(sharedWidth + 1);
+        description.setWidth(sharedWidth+1);
 
         int titleHeight = Node.HEIGHT;
         int descHeight = description.getDescriptionLayout().getRenderedHeight() + 8;
         title.setHeight(titleHeight);
         description.setHeight(descHeight);
 
-        description.render(graphics, mouseX, mouseY);
-        title.blitNineSliceSprite(graphics);
+        description.render(gx, mousePos);
+        title.blitNineSliceSprite(gx);
 
         boolean locked = screen().tooltipManager().isTooltipLockedFor(node());
         hoverWidth = locked ? sharedWidth : Node.WIDTH;
-        hoverHeight = locked ? titleHeight + descHeight - 13 : Node.HEIGHT;
+        hoverHeight = locked ? titleHeight+descHeight-13 : Node.HEIGHT;
 
-        if (screen().isMouseOver(screenPos.x(), screenPos.y(), hoverWidth, hoverHeight, mouseX, mouseY)) {
+        if(mousePos.isOver((int) screenPos.x(), (int) screenPos.y(), hoverWidth, hoverHeight)) {
             screen().tooltipManager().requestTooltip(node(), 0);
 
-            if (screen().tooltipManager().isHoldingTooltip()) screen().tooltipManager().updateHold();
+            if(screen().tooltipManager().isHoldingTooltip()) screen().tooltipManager().updateHold();
         } else {
             screen().tooltipManager().unlockTooltip();
 
             screen().tooltipManager().resetHold();
         }
-
-
     }
 
+
     @Override
-    public boolean onMouseClick(double mouseX, double mouseY, int button) {
-        if (screen().isMouseOver(screenPos.x(), screenPos.y(), Node.WIDTH, Node.HEIGHT, mouseX, mouseY)) {
-            if (button == InputConstants.MOUSE_BUTTON_LEFT) {
+    public boolean onMouseClick(MousePos mousePos, int button) {
+        if(mousePos.isOver((int) screenPos.x(), (int) screenPos.y(), Node.WIDTH, Node.HEIGHT)) {
+            if(button == InputConstants.MOUSE_BUTTON_LEFT) {
                 node().click();
                 screen().tooltipManager().unlockTooltip();
                 return true;
@@ -133,9 +116,9 @@ public class NodeTooltip implements ScreenEventListener {
         }
 
 
-        if (screen().isMouseOver(screenPos.x(), screenPos.y(), hoverWidth, hoverHeight, mouseX, mouseY)) {
-            if (button == InputConstants.MOUSE_BUTTON_RIGHT && isLockingAllowed()) {
-                if (screen().tooltipManager().isTooltipLockedFor(node())) {
+        if(mousePos.isOver((int) screenPos.x(), (int) screenPos.y(), hoverWidth, hoverHeight)) {
+            if(button == InputConstants.MOUSE_BUTTON_RIGHT && isLockingAllowed()) {
+                if(screen().tooltipManager().isTooltipLockedFor(node())) {
                     screen().tooltipManager().unlockTooltip();
                 } else {
                     screen().tooltipManager().lockTooltip(node());
@@ -145,22 +128,35 @@ public class NodeTooltip implements ScreenEventListener {
             return true;
         }
 
-
-        return ScreenEventListener.super.onMouseClick(mouseX, mouseY, button);
+        return ScreenEventListener.super.onMouseClick(mousePos, button);
     }
 
     @Override
-    public boolean onMouseRelease(double mouseX, double mouseY, int button) {
+    public boolean onMouseRelease(MousePos mousePos, int button) {
         screen().tooltipManager().resetHold();
 
-        return ScreenEventListener.super.onMouseRelease(mouseX, mouseY, button);
+        return ScreenEventListener.super.onMouseRelease(mousePos, button);
     }
 
-    public boolean isLockingAllowed() {
-        return lockingAllowed;
+    /**
+     * @return the node associated with this tooltip
+     */
+    public Node node() {
+        return node;
+    }
+
+    /**
+     * @return the parent enchanting table screen
+     */
+    public EnchantingTableScreen screen() {
+        return screen;
     }
 
     public void setLockingAllowed(boolean allowed) {
         lockingAllowed = allowed;
+    }
+
+    public boolean isLockingAllowed() {
+        return lockingAllowed;
     }
 }

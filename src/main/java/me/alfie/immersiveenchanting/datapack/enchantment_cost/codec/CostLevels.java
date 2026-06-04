@@ -1,8 +1,8 @@
 package me.alfie.immersiveenchanting.datapack.enchantment_cost.codec;
 
 import com.mojang.serialization.Codec;
+import me.alfie.alfinolib.networking.codec.StreamCodec;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -32,34 +32,39 @@ public record CostLevels(Map<Integer, CostHolder> levelCostMap) {
                     }
             );
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, CostLevels> STREAM_CODEC = StreamCodec.of(
-            (buf, levels) -> {
-                Map<Integer, CostHolder> map = levels.levelCostMap();
 
-                buf.writeVarInt(map.size());
 
-                for (Map.Entry<Integer, CostHolder> entry : map.entrySet()) {
-                    buf.writeVarInt(entry.getKey());
-                    CostHolder.STREAM_CODEC.encode(buf, entry.getValue());
-                }
-            },
-            buf -> {
-                int size = buf.readVarInt();
-                Map<Integer, CostHolder> map = new HashMap<>();
+    public static final StreamCodec<RegistryFriendlyByteBuf, CostLevels> STREAM_CODEC = new me.alfie.alfinolib.networking.codec.StreamCodec<RegistryFriendlyByteBuf, CostLevels>() {
+        @Override
+        public void encode(RegistryFriendlyByteBuf buf, CostLevels costLevels) {
+            Map<Integer, CostHolder> map = costLevels.levelCostMap();
 
-                for (int i = 0; i < size; i++) {
-                    int key = buf.readVarInt();
-                    CostHolder value = CostHolder.STREAM_CODEC.decode(buf);
+            buf.writeVarInt(map.size());
 
-                    map.put(key, value);
-                }
-
-                return new CostLevels(map);
+            for(Map.Entry<Integer, CostHolder> entry : map.entrySet()) {
+                buf.writeVarInt(entry.getKey());
+                CostHolder.STREAM_CODEC.encode(buf, entry.getValue());
             }
-    );
+        }
+
+        @Override
+        public CostLevels decode(RegistryFriendlyByteBuf buf) {
+            int size = buf.readVarInt();
+            Map<Integer, CostHolder> map = new HashMap<>();
+
+            for (int i = 0; i < size; i++) {
+                int key = buf.readVarInt();
+                CostHolder value = CostHolder.STREAM_CODEC.decode(buf);
+
+                map.put(key, value);
+            }
+
+            return new CostLevels(map);
+        }
+    };
 
     public CostHolder getLevel(int level) {
-        if (!levelCostMap.containsKey(level)) return CostHolder.EMPTY;
+        if(!levelCostMap.containsKey(level)) return CostHolder.EMPTY;
         return levelCostMap.get(level);
     }
 
@@ -69,13 +74,12 @@ public record CostLevels(Map<Integer, CostHolder> levelCostMap) {
 
     /**
      * Returns a list of all valid costs for this enchantment, ignoring the position.
-     *
      * @return
      */
     public List<Cost> getAllLevels() {
         List<Cost> result = new ArrayList<>();
 
-        for (CostHolder holder : levelCostMap().values()) {
+        for(CostHolder holder : levelCostMap().values()) {
             result.addAll(holder.costs());
         }
 

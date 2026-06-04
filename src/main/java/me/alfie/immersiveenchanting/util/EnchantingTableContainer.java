@@ -39,6 +39,19 @@ public class EnchantingTableContainer extends SimpleContainer {
     }
 
     @Override
+    public int getContainerSize() {
+        return IEnchantingTableInventory.IMMERSIVE_INVENTORY_SIZE;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        for (ItemStack stack : inventoryView.immersive$getItems()) {
+            if (!stack.isEmpty()) return false;
+        }
+        return true;
+    }
+
+    @Override
     public ItemStack getItem(int slot) {
         return inventoryView.immersive$getItem(slot);
     }
@@ -69,19 +82,6 @@ public class EnchantingTableContainer extends SimpleContainer {
     public void setItem(int slot, ItemStack stack) {
         inventoryView.immersive$setItem(slot, stack);
         this.setChanged();
-    }
-
-    @Override
-    public int getContainerSize() {
-        return IEnchantingTableInventory.IMMERSIVE_INVENTORY_SIZE;
-    }
-
-    @Override
-    public boolean isEmpty() {
-        for (ItemStack stack : inventoryView.immersive$getItems()) {
-            if (!stack.isEmpty()) return false;
-        }
-        return true;
     }
 
     @Override

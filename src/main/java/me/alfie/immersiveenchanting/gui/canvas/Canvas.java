@@ -1,25 +1,30 @@
 package me.alfie.immersiveenchanting.gui.canvas;
 
+import me.alfie.alfinolib.gui.GuiGraphicsX;
+import me.alfie.alfinolib.gui.ScreenEventListener;
+import me.alfie.alfinolib.gui.util.GuiGraphicsApi;
+import me.alfie.alfinolib.gui.util.MousePos;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
-import me.alfie.immersiveenchanting.gui.core.ScreenEventListener;
 import me.alfie.immersiveenchanting.gui.core.ScreenState;
 import me.alfie.immersiveenchanting.gui.core.Sprite;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.EnchantingTab;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.BranchManager;
-import net.minecraft.client.gui.GuiGraphics;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 
 public class Canvas implements ScreenEventListener {
 
-    public static final int FULL_BRIGHTNESS = 0xFFFFFFFF;
-    public static final int TINTED_BRIGHTNESS = 0xFF353535;
-    private static final int TILE_SIZE = 16;
     private final EnchantingTableScreen screen;
     public boolean DEBUG_DISABLE_CULLING = false;
+
     private int backgroundTileCount;
     private int width;
     private int height;
+
+    private static final int TILE_SIZE = 16;
+
+    public static final int FULL_BRIGHTNESS = 0xFFFFFFFF;
+    public static final int TINTED_BRIGHTNESS = 0xFF353535;
     private int currentBrightness = TINTED_BRIGHTNESS;
 
     public Canvas(EnchantingTableScreen screen) {
@@ -28,10 +33,14 @@ public class Canvas implements ScreenEventListener {
         setSize(32);
     }
 
-    public void render(GuiGraphics graphics) {
+    public EnchantingTableScreen screen() {
+        return screen;
+    }
+
+    public void render(GuiGraphicsX gx) {
         updateBrightness(screen().tooltipManager().hasActiveTooltip(),
                 0.02f);
-        if (screen.isState(ScreenState.BOOKS)) currentBrightness = FULL_BRIGHTNESS;
+        if(screen.isState(ScreenState.BOOKS)) currentBrightness = FULL_BRIGHTNESS;
 
         float viewportLeft = screen().camera().VIEWPORT_X;
         float viewportTop = screen().camera().VIEWPORT_Y;
@@ -52,91 +61,28 @@ public class Canvas implements ScreenEventListener {
                 float right = left + size;
                 float bottom = top + size;
 
-                if (right < viewportLeft || left > viewportRight
+                if(right < viewportLeft || left > viewportRight
                         || bottom < viewportTop || top > viewportBottom) continue;
 
                 Sprite tile;
-                if (screen().enchantingTab().isDisplay(EnchantingTab.Display.ENCHANTMENTS)) {
+                if(screen().enchantingTab().isDisplay(EnchantingTab.Display.ENCHANTMENTS)) {
                     tile = Sprite.BACKGROUND_TILE;
                 } else {
                     tile = Sprite.ALT_BACKGROUND_TILE;
                 }
 
-                CanvasRenderable.setColor(graphics, currentBrightness);
-                graphics.blit(
-                        tile.id(),
+                CanvasRenderable.setColor(gx.graphics(), currentBrightness);
+                gx.graphics().blit(
+                        tile.id().mc(),
                         x * TILE_SIZE, y * TILE_SIZE,
                         0, 0,
                         Sprite.BACKGROUND_TILE.width(), Sprite.BACKGROUND_TILE.height(),
                         Sprite.BACKGROUND_TILE.width(), Sprite.BACKGROUND_TILE.height()
                 );
-                CanvasRenderable.resetColor(graphics);
+                CanvasRenderable.resetColor(gx.graphics());
 
             }
         }
-    }
-
-    /**
-     * Smoothly lerps the canvas tint color toward a target brightness.
-     * When a tooltip is active ({@code hovered = true}) the canvas dims to {@link #TINTED_BRIGHTNESS};
-     * otherwise it fades back to {@link #FULL_BRIGHTNESS}.
-     *
-     * @param hovered   whether a tooltip is currently being shown
-     * @param deltaTime time delta used to scale the interpolation speed
-     */
-    public void updateBrightness(boolean hovered, float deltaTime) {
-        int targetBrightness = hovered ? TINTED_BRIGHTNESS : FULL_BRIGHTNESS;
-        if (screen().getMenu().getToolSlot().getItem().isEmpty()) targetBrightness = TINTED_BRIGHTNESS;
-
-        // Split ARGB components
-        int aCurr = (currentBrightness >> 24) & 0xFF;
-        int rCurr = (currentBrightness >> 16) & 0xFF;
-        int gCurr = (currentBrightness >> 8) & 0xFF;
-        int bCurr = currentBrightness & 0xFF;
-
-        int aTarget = (targetBrightness >> 24) & 0xFF;
-        int rTarget = (targetBrightness >> 16) & 0xFF;
-        int gTarget = (targetBrightness >> 8) & 0xFF;
-        int bTarget = targetBrightness & 0xFF;
-
-        // Interpolation speed (adjust for faster/slower fade)
-        float speed = 5f; // higher = faster transition
-
-        // Lerp each channel
-        aCurr += (int) ((aTarget - aCurr) * speed * deltaTime);
-        rCurr += (int) ((rTarget - rCurr) * speed * deltaTime);
-        gCurr += (int) ((gTarget - gCurr) * speed * deltaTime);
-        bCurr += (int) ((bTarget - bCurr) * speed * deltaTime);
-
-        // Recombine into a single ARGB int
-        currentBrightness = (aCurr << 24) | (rCurr << 16) | (gCurr << 8) | bCurr;
-    }
-
-    public EnchantingTableScreen screen() {
-        return screen;
-    }
-
-    public Vector2f canvasToScreen(float x, float y) {
-        return canvasToScreen(new Vector2f(x, y));
-    }
-
-    private float getScaledLength(float length) {
-        return length * screen().camera().zoom();
-    }
-
-    public int getCurrentBrightness() {
-        return currentBrightness;
-    }
-
-    /**
-     * Converts a canvas-space position to a screen-space position, accounting for
-     * the camera's current scroll offset and zoom level.
-     */
-    public Vector2f canvasToScreen(Vector2f pos) {
-        return new Vector2f(
-                (pos.x() - screen().camera().x()) * screen().camera().zoom() + screen().camera().VIEWPORT_X,
-                (pos.y() - screen().camera().y()) * screen().camera().zoom() + screen().camera().VIEWPORT_Y
-        );
     }
 
     /**
@@ -153,22 +99,33 @@ public class Canvas implements ScreenEventListener {
         setSize(tileCount + tileMargin);
     }
 
-    public int getSize() {
-        return backgroundTileCount * TILE_SIZE;
-    }
-
     public void setSize(int tileCount) {
         this.backgroundTileCount = tileCount;
         this.width = backgroundTileCount * TILE_SIZE;
         this.height = backgroundTileCount * TILE_SIZE;
     }
 
+    public int getSize() {
+        return backgroundTileCount * TILE_SIZE;
+    }
+
     public Vector2i getCenter() {
         return new Vector2i(width / 2, height / 2);
     }
 
-    public Vector2f screenToCanvas(float x, float y) {
-        return screenToCanvas(new Vector2f(x, y));
+    /**
+     * Converts a canvas-space position to a screen-space position, accounting for
+     * the camera's current scroll offset and zoom level.
+     */
+    public Vector2f canvasToScreen(Vector2f pos) {
+        return new Vector2f(
+                (pos.x() - screen().camera().x()) * screen().camera().zoom() + screen().camera().VIEWPORT_X,
+                (pos.y() - screen().camera().y()) * screen().camera().zoom() + screen().camera().VIEWPORT_Y
+        );
+    }
+
+    public Vector2f canvasToScreen(float x, float y) {
+        return canvasToScreen(new Vector2f(x, y));
     }
 
     /**
@@ -182,20 +139,65 @@ public class Canvas implements ScreenEventListener {
         );
     }
 
+    public Vector2f screenToCanvas(float x, float y) {
+        return screenToCanvas(new Vector2f(x, y));
+    }
+
+    private float getScaledLength(float length) {
+        return length * screen().camera().zoom();
+    }
+
+    /**
+     * Smoothly lerps the canvas tint color toward a target brightness.
+     * When a tooltip is active ({@code hovered = true}) the canvas dims to {@link #TINTED_BRIGHTNESS};
+     * otherwise it fades back to {@link #FULL_BRIGHTNESS}.
+     *
+     * @param hovered   whether a tooltip is currently being shown
+     * @param deltaTime time delta used to scale the interpolation speed
+     */
+    public void updateBrightness(boolean hovered, float deltaTime) {
+        int targetBrightness = hovered ? TINTED_BRIGHTNESS : FULL_BRIGHTNESS;
+        if(screen().getMenu().getToolSlot().getItem().isEmpty()) targetBrightness = TINTED_BRIGHTNESS;
+
+        // Split ARGB components
+        int aCurr = (currentBrightness >> 24) & 0xFF;
+        int rCurr = (currentBrightness >> 16) & 0xFF;
+        int gCurr = (currentBrightness >> 8) & 0xFF;
+        int bCurr = currentBrightness & 0xFF;
+
+        int aTarget = (targetBrightness >> 24) & 0xFF;
+        int rTarget = (targetBrightness >> 16) & 0xFF;
+        int gTarget = (targetBrightness >> 8) & 0xFF;
+        int bTarget = targetBrightness & 0xFF;
+
+        // Interpolation speed (adjust for faster/slower fade)
+        float speed = 5f; // higher = faster transition
+
+        // Lerp each channel
+        aCurr += (int)((aTarget - aCurr) * speed * deltaTime);
+        rCurr += (int)((rTarget - rCurr) * speed * deltaTime);
+        gCurr += (int)((gTarget - gCurr) * speed * deltaTime);
+        bCurr += (int)((bTarget - bCurr) * speed * deltaTime);
+
+        // Recombine into a single ARGB int
+        currentBrightness = (aCurr << 24) | (rCurr << 16) | (gCurr << 8) | bCurr;
+    }
+
+    public int getCurrentBrightness() {
+        return currentBrightness;
+    }
+
     /**
      * Returns true if the mouse is over the specified canvas coordinates.
-     *
      * @param canvasX
      * @param canvasY
      * @param width
      * @param height
-     * @param mouseX
-     * @param mouseY
      * @return
      */
     public boolean isMouseOver(float canvasX, float canvasY,
                                float width, float height,
-                               double mouseX, double mouseY) {
+                               MousePos mousePos) {
         Vector2f screenPos = canvasToScreen(canvasX, canvasY);
         float scaledWidth = getScaledLength(width);
         float scaledHeight = getScaledLength(height);
@@ -215,9 +217,9 @@ public class Canvas implements ScreenEventListener {
         float visibleRight = Math.min(right, viewportRight);
         float visibleBottom = Math.min(bottom, viewportBottom);
 
-        if (visibleLeft >= visibleRight || visibleTop >= visibleBottom) return false;
+        if(visibleLeft >= visibleRight || visibleTop >= visibleBottom) return false;
 
-        return mouseX >= visibleLeft && mouseX <= visibleRight
-                && mouseY >= visibleTop && mouseY <= visibleBottom;
+        return mousePos.x() >= visibleLeft && mousePos.x() <= visibleRight
+                && mousePos.y() >= visibleTop && mousePos.y() <= visibleBottom;
     }
 }

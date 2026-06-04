@@ -1,28 +1,7 @@
 {
   "levels": {
-    "1": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:sculk",
-          "count": 1
-        }
-      }
-    ],
-    "2": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:rabbit_foot",
-          "count": 1
-        }
-      }
-    ],
-    "3": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:popped_chorus_fruit",
-          "count": 1
-        }
-      }
-    ]
+    "1": [{"item_cost": {"item": "minecraft:sculk", "count": 1}}],
+    "2": [{"item_cost": {"item": "minecraft:rabbit_foot", "count": 1}}],
+    "3": [{"item_cost": {"item": "minecraft:popped_chorus_fruit", "count": 1}}]
   }
 }

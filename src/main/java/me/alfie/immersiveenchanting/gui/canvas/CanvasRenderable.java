@@ -1,8 +1,11 @@
 package me.alfie.immersiveenchanting.gui.canvas;
 
+import me.alfie.alfinolib.gui.GuiGraphicsX;
+import me.alfie.alfinolib.gui.util.GuiGraphicsApi;
+import me.alfie.alfinolib.gui.util.MousePos;
+import me.alfie.alfinolib.util.ResourceId;
 import me.alfie.immersiveenchanting.gui.core.Sprite;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 /**
@@ -32,12 +35,8 @@ public abstract class CanvasRenderable {
 
     /**
      * Render this object on the canvas. Called every frame.
-     *
-     * @param graphics The graphics context
-     * @param mouseX Current mouse X position relative to GUI
-     * @param mouseY Current mouse Y position relative to GUI
      */
-    public abstract void render(GuiGraphics graphics, int mouseX, int mouseY);
+    public abstract void render(GuiGraphicsX gx, MousePos mousePos);
 
     /**
      * Gets the canvas this object is attached to.
@@ -147,25 +146,17 @@ public abstract class CanvasRenderable {
 
     /**
      * Draws a {@link Sprite} at the object’s canvas position.
-     *
-     * @param graphics The graphics context
-     * @param sprite The sprite to draw
      */
-    public void blit(GuiGraphics graphics, Sprite sprite, int color) {
-        blit(graphics, sprite.id(), sprite.width(), sprite.height(), color);
+    public void blit(GuiGraphicsX gx, Sprite sprite, int color) {
+        blit(gx, sprite.id(), sprite.width(), sprite.height(), color);
     }
 
     /**
      * Draws a texture at the object’s canvas position.
-     *
-     * @param graphics The graphics context
-     * @param id The texture identifier
-     * @param width Width of the texture
-     * @param height Height of the texture
      */
-    public void blit(GuiGraphics graphics, ResourceLocation id,
+    public void blit(GuiGraphicsX gx, ResourceId id,
                      int width, int height, int color) {
-        blit(graphics, id, width, height, 0, 0, color);
+        blit(gx, id, width, height, 0, 0, color);
     }
 
     /**
@@ -174,43 +165,44 @@ public abstract class CanvasRenderable {
      * WARNING: Offsets modify the transform matrix directly. Do NOT use this for
      * objects that rely on logical canvasX/Y (like mouse hover checks).
      * Use the other blit() overloads for those.
-     *
-     * @param graphics The graphics context
-     * @param id The texture identifier
-     * @param width Width of the texture
-     * @param height Height of the texture
-     * @param offsetX Pixel offset on the X axis
-     * @param offsetY Pixel offset on the Y axis
      */
-    public void blit(GuiGraphics graphics, ResourceLocation id,
-                     int width, int height,
-                     int offsetX, int offsetY, int color) {
-        graphics.pose().pushPose();
+    public void blit(GuiGraphicsX gx, ResourceId id,
+                           int width, int height,
+                           int offsetX, int offsetY, int color) {
+        gx.graphics().pose().pushPose();
 
-        graphics.pose().translate(canvasX(), canvasY(), 0);
-        graphics.pose().scale(scale(), scale(), 1);
-        graphics.pose().translate(-canvasX(), -canvasY(), 0);
+        gx.graphics().pose().translate(canvasX(), canvasY(), 0);
+        gx.graphics().pose().scale(scale(), scale(), 1);
+        gx.graphics().pose().translate(-canvasX(), -canvasY(), 0);
 
-        setColor(graphics, color);
+        setColor(gx.graphics(), color);
 
-        graphics.blit(
+        GuiGraphicsApi.blit(
+                gx,
                 id,
                 (int) canvasX() + offsetX, (int) canvasY() + offsetY,
-                0, 0,
-                width, height,
                 width, height
         );
 
-        resetColor(graphics);
+        resetColor(gx.graphics());
 
-        graphics.pose().popPose();
+        gx.graphics().pose().popPose();
     }
 
-    /**
-     * Helper to set brightness in older ports. Ensure to resetColor().
-     * @param graphics
-     * @param color
-     */
+    public void item(GuiGraphicsX gx, ItemStack stack,
+                     int offsetX, int offsetY, int color) {
+        gx.graphics().pose().pushPose();
+
+        gx.graphics().pose().translate(canvasX(), canvasY(), 0);
+        gx.graphics().pose().scale(scale(), scale(), 1);
+        gx.graphics().pose().translate(-canvasX(), -canvasY(), 0);
+
+        GuiGraphicsApi.itemStack(gx, stack, canvas.screen().getFont(),
+                (int) canvasX() + offsetX, (int) canvasY() + offsetY);
+
+        gx.graphics().pose().popPose();
+    }
+
     public static void setColor(GuiGraphics graphics, int color) {
         float r = ((color >> 16) & 0XFF) / 255f;
         float g = ((color >> 8) & 0XFF) / 255f;
@@ -224,16 +216,4 @@ public abstract class CanvasRenderable {
         graphics.setColor(1f, 1f, 1f, 1f);
     }
 
-    public void item(GuiGraphics graphics, ItemStack stack,
-                     int offsetX, int offsetY, int color) {
-        graphics.pose().pushPose();
-
-        graphics.pose().translate(canvasX(), canvasY(), 1);
-        graphics.pose().scale(scale(), scale(), 1);
-        graphics.pose().translate(-canvasX(), -canvasY(), 1);
-
-        graphics.renderItem(stack, (int) canvasX() + offsetX, (int) canvasY() + offsetY);
-
-        graphics.pose().popPose();
-    }
 }

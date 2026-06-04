@@ -1,28 +1,7 @@
 {
   "levels": {
-    "1": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:cake",
-          "count": 1
-        }
-      }
-    ],
-    "2": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:slime_ball",
-          "count": 1
-        }
-      }
-    ],
-    "3": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:pufferfish_bucket",
-          "count": 1
-        }
-      }
-    ]
+    "1": [{"item_cost": {"item": "minecraft:cake", "count": 1}}],
+    "2": [{"item_cost": {"item": "minecraft:slime_ball", "count": 1}}],
+    "3": [{"item_cost": {"item": "minecraft:pufferfish_bucket", "count": 1}}]
   }
 }

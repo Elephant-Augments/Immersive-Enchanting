@@ -1,44 +1,9 @@
 {
   "levels": {
-    "1": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:string",
-          "count": 8
-        }
-      }
-    ],
-    "2": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:spider_eye",
-          "count": 8
-        }
-      }
-    ],
-    "3": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:honey_bottle",
-          "count": 8
-        }
-      }
-    ],
-    "4": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:fermented_spider_eye",
-          "count": 8
-        }
-      }
-    ],
-    "5": [
-      {
-        "item_stack": {
-          "item_or_tag_id": "minecraft:honey_block",
-          "count": 8
-        }
-      }
-    ]
+    "1": [{"item_cost": {"item": "minecraft:string", "count": 8}}],
+    "2": [{"item_cost": {"item": "minecraft:spider_eye", "count": 8}}],
+    "3": [{"item_cost": {"item": "minecraft:honey_bottle", "count": 8}}],
+    "4": [{"item_cost": {"item": "minecraft:fermented_spider_eye", "count": 8}}],
+    "5": [{"item_cost": {"item": "minecraft:honey_block", "count": 8}}]
   }
 }
