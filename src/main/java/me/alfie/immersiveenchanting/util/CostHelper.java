@@ -88,6 +88,7 @@ public class CostHelper {
 
         validCost.itemCost().tryConsume(menu.getCostSlot().getItem());
         validFuel.itemCost().tryConsume(menu.getFuelSlot().getItem());
+        player.giveExperienceLevels(-validCost.xpLevels());
         return true;
     }
 }
