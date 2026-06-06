@@ -14,6 +14,7 @@ import me.alfie.immersiveenchanting.structure.ModStructureProcessors;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
@@ -21,6 +22,8 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
+import net.minecraftforge.fml.DistExecutor;
+
 import org.slf4j.Logger;
 
 @Mod(ImmersiveEnchanting.MODID)
@@ -39,6 +42,11 @@ public class ImmersiveEnchanting {
         ModCreativeTab.register(modEventBus);
         ModGlobalLootModifiers.register(modEventBus);
         ModStructureProcessors.register(modEventBus);
+
+        DistExecutor.unsafeRunWhenOn(
+                Dist.CLIENT,
+                () -> () -> ImmersiveEnchantingClient.init(modEventBus)
+        );
 
         context.registerConfig(ModConfig.Type.CLIENT, ClientConfig.CONFIG_SPEC);
         context.registerConfig(ModConfig.Type.SERVER, ServerConfig.CONFIG_SPEC);

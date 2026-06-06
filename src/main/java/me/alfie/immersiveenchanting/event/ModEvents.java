@@ -55,9 +55,6 @@ public class ModEvents {
         MinecraftForge.EVENT_BUS.addListener(ModCommands::register);
         MinecraftForge.EVENT_BUS.addListener(ModEvents::onRightClickEnchantmentTable);
 
-
-        modEventBus.addListener(ImmersiveEnchantingClient::registerBlockEntityRenderers);
-
         modEventBus.addListener(ModMenus::registerScreens);
         modEventBus.addListener(ModPackets::register);
         modEventBus.addListener(ModCreativeTab::build);
