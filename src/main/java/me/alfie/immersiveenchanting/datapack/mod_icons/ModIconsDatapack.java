@@ -1,6 +1,7 @@
 package me.alfie.immersiveenchanting.datapack.mod_icons;
 
 import com.google.gson.JsonElement;
+import me.alfie.alfinolib.datapacks.DatapackDefinition;
 import me.alfie.alfinolib.datapacks.DatapackKey;
 import me.alfie.alfinolib.datapacks.DatapackRegistry;
 import me.alfie.alfinolib.datapacks.ModDatapack;
@@ -18,10 +19,11 @@ import java.util.Map;
 public class ModIconsDatapack extends ModDatapack<ModIconsMap, ModIconsMap> {
 
     public static final DatapackKey<ModIconsMap> KEY = new DatapackKey<>(ImmersiveEnchanting.MODID, "mod_icons");
+    public static final DatapackDefinition<ModIconsMap> DEFINITION = new DatapackDefinition<>(KEY, ModIconsMap.STREAM_CODEC);
     private ModIconsMap DATA = new ModIconsMap(new HashMap<>());
 
-    protected ModIconsDatapack(RegistryAccess registryAccess) {
-        super(ModIconsMap.CODEC, KEY, ModIconsMap.STREAM_CODEC, registryAccess);
+    public ModIconsDatapack(RegistryAccess registryAccess) {
+        super(ModIconsMap.CODEC, DEFINITION, registryAccess);
     }
 
     @Override public ModIconsMap getData() {
@@ -34,9 +36,5 @@ public class ModIconsDatapack extends ModDatapack<ModIconsMap, ModIconsMap> {
         DATA = parseOrDefault(input.get(key.mc()), new ModIconsMap(new HashMap<>()));
 
         ImmersiveEnchanting.LOGGER.debug("Found {}", DATA);
-    }
-
-    public static void register(AddReloadListenerEvent event) {
-        DatapackRegistry.register(event, () -> new ModIconsDatapack(event.getRegistryAccess()));
     }
 }
