@@ -1,6 +1,8 @@
 package me.alfie.immersiveenchanting.mixin;
 
 import com.google.common.collect.Lists;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import me.alfie.immersiveenchanting.config.ServerConfig;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.npc.VillagerTrades;
@@ -22,21 +24,21 @@ import java.util.ArrayList;
 @Mixin(AbstractVillager.class)
 public class VillagerTradeMixin {
 
-    @Redirect(
+    @WrapOperation(
             method = "addOffersFromItemListings",
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/world/item/trading/MerchantOffers;add(Ljava/lang/Object;)Z"
             )
     )
-    private boolean immersiveenchanting$removeEnchantedBookTrades(MerchantOffers offers, Object offerObj) {
+    private boolean immersiveenchanting$removeEnchantedBookTrades(MerchantOffers offers, Object offerObj, Operation<Boolean> original) {
         MerchantOffer offer = (MerchantOffer) offerObj;
 
         if (ServerConfig.areEnchantedBookTradesDisabled() && offer.getResult().is(Items.ENCHANTED_BOOK)) {
             return false;
         }
 
-        return offers.add(offer);
+        return original.call(offers, offerObj);
     }
 }
 
