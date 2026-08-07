@@ -119,6 +119,10 @@ dependencies {
     //implementation "curse.maven:bookshelf-228525:7335846"
     //implementation "curse.maven:prickle-1023259:6961457"
     implementation "curse.maven:alfinolib-1554698:8596074" //1.2.0
+
+    //implementation "curse.maven:rhino-416294:8218748"
+    //implementation "curse.maven:kubejs-238086:8083208"
+    //implementation "curse.maven:morejs-666198:7103440"
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
