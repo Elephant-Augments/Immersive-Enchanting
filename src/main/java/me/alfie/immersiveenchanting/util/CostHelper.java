@@ -84,7 +84,7 @@ public class CostHelper {
             validFuel = cost.test(menu.getFuelSlot().getItem(), player);
         }
 
-        if(validCost == null || validFuel == null) return false;
+        if(validCost == null || validFuel == null || player.experienceLevel < validCost.xpLevels()) return false;
 
         validCost.itemCost().tryConsume(menu.getCostSlot().getItem());
         validFuel.itemCost().tryConsume(menu.getFuelSlot().getItem());
