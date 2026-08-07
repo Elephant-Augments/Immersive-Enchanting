@@ -1,10 +1,16 @@
 package me.alfie.immersiveenchanting;
 
 import com.mojang.logging.LogUtils;
+import me.alfie.alfinolib.datapacks.DatapackRegistry;
 import me.alfie.immersiveenchanting.block.ModBlocks;
 import me.alfie.immersiveenchanting.config.ClientConfig;
 import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.creativetab.ModCreativeTab;
+import me.alfie.immersiveenchanting.datacomponent.ModDataComponents;
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostDatapack;
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.codec.CostData;
+import me.alfie.immersiveenchanting.datapack.mod_icons.ModIconsDatapack;
+import me.alfie.immersiveenchanting.datapack.node_sounds.NodeSoundsDatapack;
 import me.alfie.immersiveenchanting.event.ModEvents;
 import me.alfie.immersiveenchanting.gui.ModMenus;
 import me.alfie.immersiveenchanting.item.ModItems;
@@ -50,6 +56,9 @@ public class ImmersiveEnchanting {
 
         context.registerConfig(ModConfig.Type.CLIENT, ClientConfig.CONFIG_SPEC);
         context.registerConfig(ModConfig.Type.SERVER, ServerConfig.CONFIG_SPEC);
+        DatapackRegistry.register(CostDatapack.DEFINITION, CostDatapack::new);
+        DatapackRegistry.register(NodeSoundsDatapack.DEFINITION, NodeSoundsDatapack::new);
+        DatapackRegistry.register(ModIconsDatapack.DEFINITION, ModIconsDatapack::new);
     }
 
     /**

@@ -1,6 +1,7 @@
 package me.alfie.immersiveenchanting.datapack.node_sounds;
 
 import com.google.gson.JsonElement;
+import me.alfie.alfinolib.datapacks.DatapackDefinition;
 import me.alfie.alfinolib.datapacks.DatapackKey;
 import me.alfie.alfinolib.datapacks.DatapackRegistry;
 import me.alfie.alfinolib.datapacks.ModDatapack;
@@ -17,10 +18,13 @@ import java.util.Map;
 public class NodeSoundsDatapack extends ModDatapack<NodeSoundMap, NodeSoundMap> {
 
     public static DatapackKey<NodeSoundMap> KEY = new DatapackKey<>(ImmersiveEnchanting.MODID, "sounds");
+    public static DatapackDefinition<NodeSoundMap> DEFINITION = new DatapackDefinition<>(KEY, NodeSoundMap.STREAM_CODEC);
+
     private NodeSoundMap DATA = new NodeSoundMap(new HashMap<>());
 
-    protected NodeSoundsDatapack(RegistryAccess registryAccess) {
-        super(NodeSoundMap.CODEC, KEY, NodeSoundMap.STREAM_CODEC, registryAccess);
+
+    public NodeSoundsDatapack(RegistryAccess registryAccess) {
+        super(NodeSoundMap.CODEC, DEFINITION, registryAccess);
     }
 
     @Override public NodeSoundMap getData() {
@@ -34,9 +38,5 @@ public class NodeSoundsDatapack extends ModDatapack<NodeSoundMap, NodeSoundMap> 
         DATA = parseOrDefault(input.get(key), new NodeSoundMap(new HashMap<>()));
 
         ImmersiveEnchanting.LOGGER.debug("Found {}", String.valueOf(DATA));
-    }
-
-    public static void register(AddReloadListenerEvent event) {
-        DatapackRegistry.register(event, () -> new NodeSoundsDatapack(event.getRegistryAccess()));
     }
 }

@@ -2,6 +2,8 @@ package me.alfie.immersiveenchanting.datapack.enchantment_cost;
 
 import com.google.gson.JsonElement;
 import me.alfie.alfinolib.datapacks.*;
+import me.alfie.alfinolib.datapacks.client.ClientDatapackUpdatedEvent;
+import me.alfie.alfinolib.datapacks.server.ServerDatapackUpdatedEvent;
 import me.alfie.alfinolib.util.ResourceId;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.codec.Cost;
@@ -29,10 +31,12 @@ import java.util.stream.Collectors;
 public class CostDatapack extends ModDatapack<CostData, CostRegistry> {
 
     public static final DatapackKey<CostRegistry> KEY = new DatapackKey<>(ImmersiveEnchanting.MODID, "enchantment_costs");
+    public static final DatapackDefinition<CostRegistry> DEFINITION = new DatapackDefinition<>(KEY, CostRegistry.STREAM_CODEC);
+
     private CostRegistry DATA;
 
-    protected CostDatapack(RegistryAccess registryAccess) {
-        super(CostData.CODEC, KEY, CostRegistry.STREAM_CODEC, registryAccess);
+    public CostDatapack(RegistryAccess registryAccess) {
+        super(CostData.CODEC, DEFINITION, registryAccess);
     }
 
     @Override
@@ -89,10 +93,6 @@ public class CostDatapack extends ModDatapack<CostData, CostRegistry> {
         CostRegistry.client().printRegistry();
 
         sendWarningMessages(event.getPlayer());
-    }
-
-    public static void register(AddReloadListenerEvent event) {
-        DatapackRegistry.register(event, () -> new CostDatapack(event.getRegistryAccess()));
     }
 
     private static void sendWarningMessages(Player player) {
