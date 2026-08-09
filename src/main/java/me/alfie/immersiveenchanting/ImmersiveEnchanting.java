@@ -6,7 +6,6 @@ import me.alfie.immersiveenchanting.block.ModBlocks;
 import me.alfie.immersiveenchanting.config.ClientConfig;
 import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.creativetab.ModCreativeTab;
-import me.alfie.immersiveenchanting.datacomponent.ModDataComponents;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostDatapack;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.codec.CostData;
 import me.alfie.immersiveenchanting.datapack.mod_icons.ModIconsDatapack;

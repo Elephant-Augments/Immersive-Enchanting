@@ -44,10 +44,6 @@ public class ModEvents {
      * </ul>
      */
     public static void register(IEventBus modEventBus) {
-        MinecraftForge.EVENT_BUS.addListener(CostDatapack::register);
-        MinecraftForge.EVENT_BUS.addListener(NodeSoundsDatapack::register);
-        MinecraftForge.EVENT_BUS.addListener(ModIconsDatapack::register);
-
         MinecraftForge.EVENT_BUS.addListener(CostDatapack::resolveClientRegistry);
         MinecraftForge.EVENT_BUS.addListener(CostDatapack::resolveServerRegistry);
 
