@@ -1,5 +1,6 @@
 package me.alfie.immersiveenchanting.mixin;
 
+import me.alfie.immersiveenchanting.compat.enchdesc.EnchantmentDescriptionsCompat;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.config.ClientConfig;
 import me.alfie.immersiveenchanting.item.ModItems;
@@ -78,6 +79,7 @@ public abstract class ItemStackMixin {
                             .append(" ")
                             .append(enchantmentHolder.value().description());
                     consumer.accept(component.withStyle(ChatFormatting.GOLD));
+                    EnchantmentDescriptionsCompat.appendDescription(enchantmentHolder, consumer);
 
                     if(ClientConfig.isShowAddedByTooltipEnabled()) {
                         String modName = ImmersiveEnchanting.getModName(enchantmentHolder.getKey()

@@ -9,6 +9,11 @@ import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeState;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.NodeTooltip;
+import me.alfie.immersiveenchanting.util.EnchantmentDescriptionHelper;
+import me.alfie.immersiveenchanting.util.EnchantmentUtil;
+import net.minecraft.core.Holder;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.enchantment.Enchantment;
 
 /**
  * Populates the tooltip description for enchantment nodes based on their current state:
@@ -31,21 +36,42 @@ public class EnchantLayoutExtension implements DescriptionLayoutExtension {
         EnchantingTableScreen screen = tooltip.screen();
 
         if(node.isState(NodeState.UNOBTAINED)) {
-            DescriptionHelper.insertCostLines(tooltip, description, 0);
+            int linesCreated = insertEnchantmentDescription(description, tooltip, 0);
+            DescriptionHelper.insertCostLines(tooltip, description, linesCreated);
         } else if(node.isState(NodeState.OBTAINED)) {
             if(screen.tooltipManager().isHoldingTooltip()) {
                 description.insertLine(0, new RemovingLine(tooltip));
                 description.insertLine(1, new RemoveProgressLine(tooltip));
             } else {
-                description.insertLine(0, new EquippedLine(tooltip));
+                int linesCreated = insertEnchantmentDescription(description, tooltip, 0);
+                description.insertLine(linesCreated, new EquippedLine(tooltip));
 
                 if(tooltip.node().canRemove()) {
-                    description.insertLine(1, new RemoveHintLine(tooltip));
+                    description.insertLine(linesCreated + 1, new RemoveHintLine(tooltip));
                 }
 
             }
         } else if(node.isState(NodeState.LOCKED)) {
             description.insertLine(0, new UnavailableEnchantmentLine(tooltip));
         }
+    }
+
+    private static int insertEnchantmentDescription(DescriptionLayout description, NodeTooltip tooltip, int lineStart) {
+        if(!(tooltip.node().data().value() instanceof EnchantmentNodeData enchantmentData)) {
+            return lineStart;
+        }
+
+        Holder<Enchantment> holder = EnchantmentUtil.toHolder(enchantmentData.enchantmentId(), tooltip.screen().registryAccess());
+        Component descriptionText = EnchantmentDescriptionHelper.getDescription(holder);
+        if(descriptionText == null) {
+            return lineStart;
+        }
+
+        return lineStart + DescriptionHelper.lineWrapComponent(
+                descriptionText,
+                DescriptionHelper.DEFAULT_LINE_WIDTH,
+                description,
+                lineStart
+        );
     }
 }
