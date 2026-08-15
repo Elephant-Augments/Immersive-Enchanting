@@ -1,0 +1,6 @@
+{
+  "levels": {
+    "1": [{"item_cost": {"item": "minecraft:armadillo_scute", "count": 1}}],
+    "2": [{"item_cost": {"item": "minecraft:turtle_scute", "count": 1}}]
+  }
+}

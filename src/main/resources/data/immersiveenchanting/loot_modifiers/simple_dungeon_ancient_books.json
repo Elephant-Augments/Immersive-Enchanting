@@ -6,13 +6,18 @@
     "minecraft:blast_protection",
     "minecraft:knockback",
     "minecraft:looting",
-
     "minecraft:projectile_protection",
     "minecraft:protection",
     "minecraft:sharpness",
     "minecraft:smite",
     "minecraft:sweeping_edge",
-    "minecraft:thorns"
+    "minecraft:thorns",
+    "nova_structures:illagers_bane",
+    "dungeons_arise:ensnaring",
+    "apothic_enchanting:berserkers_fury",
+    "farmersdelight:backstabbing",
+    "betterarcheology:penetrating_strike",
+    "dungeonsdelight:serrated_strike"
   ],
   "min_rolls": 1,
   "max_rolls": 1,
@@ -23,8 +28,14 @@
         {
           "condition": "minecraft:all_of",
           "terms": [
-            {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/simple_dungeon"},
-            {"condition": "minecraft:random_chance", "chance": 0.25}
+            {
+              "condition": "neoforge:loot_table_id",
+              "loot_table_id": "minecraft:chests/simple_dungeon"
+            },
+            {
+              "condition": "minecraft:random_chance",
+              "chance": 0.25
+            }
           ]
         }
       ]

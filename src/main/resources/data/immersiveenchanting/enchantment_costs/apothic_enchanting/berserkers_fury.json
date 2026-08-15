@@ -1,0 +1,7 @@
+{
+  "levels": {
+    "1": [{"item_cost": {"item": "minecraft:iron_sword", "count": 1}, "xp_levels": 2}],
+    "2": [{"item_cost": {"item": "minecraft:diamond_sword", "count": 1}, "xp_levels": 5}],
+    "3": [{"item_cost": {"item": "minecraft:netherite_scrap", "count": 2}, "xp_levels": 10}]
+  }
+}

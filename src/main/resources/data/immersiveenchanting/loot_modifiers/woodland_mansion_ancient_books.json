@@ -7,7 +7,12 @@
     "minecraft:piercing",
     "minecraft:power",
     "minecraft:punch",
-    "minecraft:quick_charge"
+    "minecraft:quick_charge",
+    "nova_structures:illagers_bane",
+    "nova_structures:multishot",
+    "apothic_enchanting:crescendo_of_bolts",
+    "apothic_enchanting:endless_quiver",
+    "spell_power:critical_chance"
   ],
   "min_rolls": 1,
   "max_rolls": 1,
@@ -18,8 +23,14 @@
         {
           "condition": "minecraft:all_of",
           "terms": [
-            {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/woodland_mansion"},
-            {"condition": "minecraft:random_chance", "chance": 0.25}
+            {
+              "condition": "neoforge:loot_table_id",
+              "loot_table_id": "minecraft:chests/woodland_mansion"
+            },
+            {
+              "condition": "minecraft:random_chance",
+              "chance": 0.25
+            }
           ]
         }
       ]

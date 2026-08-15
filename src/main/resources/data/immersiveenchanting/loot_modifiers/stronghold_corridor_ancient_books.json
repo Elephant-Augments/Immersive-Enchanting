@@ -5,7 +5,11 @@
     "minecraft:blast_protection",
     "minecraft:projectile_protection",
     "minecraft:protection",
-    "minecraft:thorns"
+    "minecraft:thorns",
+    "spell_power:spell_power",
+    "spell_power:magic_protection",
+    "apothic_enchanting:reflective_defenses",
+    "unusualend:arcane_recovery"
   ],
   "min_rolls": 1,
   "max_rolls": 1,
@@ -16,8 +20,14 @@
         {
           "condition": "minecraft:all_of",
           "terms": [
-            {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/stronghold_corridor"},
-            {"condition": "minecraft:random_chance", "chance": 0.25}
+            {
+              "condition": "neoforge:loot_table_id",
+              "loot_table_id": "minecraft:chests/stronghold_corridor"
+            },
+            {
+              "condition": "minecraft:random_chance",
+              "chance": 0.25
+            }
           ]
         }
       ]

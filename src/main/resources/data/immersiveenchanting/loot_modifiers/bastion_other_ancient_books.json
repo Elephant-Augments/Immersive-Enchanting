@@ -5,7 +5,10 @@
     "minecraft:fire_aspect",
     "minecraft:fire_protection",
     "minecraft:flame",
-    "minecraft:soul_speed"
+    "minecraft:soul_speed",
+    "eternal_starlight:soul_snatcher",
+    "spore:corrosive_potency",
+    "hollowmarch:malefic_touch"
   ],
   "min_rolls": 1,
   "max_rolls": 1,
@@ -16,8 +19,14 @@
         {
           "condition": "minecraft:all_of",
           "terms": [
-            {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/bastion_other"},
-            {"condition": "minecraft:random_chance", "chance": 0.25}
+            {
+              "condition": "neoforge:loot_table_id",
+              "loot_table_id": "minecraft:chests/bastion_other"
+            },
+            {
+              "condition": "minecraft:random_chance",
+              "chance": 0.25
+            }
           ]
         }
       ]

@@ -5,7 +5,12 @@
     "minecraft:efficiency",
     "minecraft:fortune",
     "minecraft:silk_touch",
-    "minecraft:unbreaking"
+    "minecraft:unbreaking",
+    "apothic_enchanting:miners_fervor",
+    "betterarcheology:tunneling",
+    "create:capacity",
+    "hollowmarch:miners_hunger",
+    "galosphere:sifting"
   ],
   "min_rolls": 1,
   "max_rolls": 1,
@@ -16,8 +21,14 @@
         {
           "condition": "minecraft:all_of",
           "terms": [
-            {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/desert_pyramid"},
-            {"condition": "minecraft:random_chance", "chance": 0.25}
+            {
+              "condition": "neoforge:loot_table_id",
+              "loot_table_id": "minecraft:chests/desert_pyramid"
+            },
+            {
+              "condition": "minecraft:random_chance",
+              "chance": 0.25
+            }
           ]
         }
       ]

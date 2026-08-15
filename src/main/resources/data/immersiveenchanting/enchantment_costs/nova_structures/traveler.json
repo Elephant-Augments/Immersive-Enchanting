@@ -1,0 +1,7 @@
+{
+  "levels": {
+    "1": [{"item_cost": {"item": "minecraft:ender_pearl", "count": 4}}],
+    "2": [{"item_cost": {"item": "minecraft:chorus_fruit", "count": 8}}],
+    "3": [{"item_cost": {"item": "minecraft:elytra", "count": 1}, "xp_levels": 15}]
+  }
+}

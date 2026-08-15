@@ -1,0 +1,7 @@
+{
+  "levels": {
+    "1": [{"item_cost": {"item": "minecraft:experience_bottle", "count": 8}}],
+    "2": [{"item_cost": {"item": "minecraft:lapis_block", "count": 2}}],
+    "3": [{"item_cost": {"item": "minecraft:enchanted_golden_apple", "count": 1}}]
+  }
+}

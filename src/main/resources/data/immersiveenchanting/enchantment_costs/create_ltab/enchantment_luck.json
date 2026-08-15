@@ -1,0 +1,7 @@
+{
+  "levels": {
+    "1": [{"item_cost": {"item": "minecraft:golden_apple", "count": 1}}],
+    "2": [{"item_cost": {"item": "minecraft:emerald_block", "count": 1}}],
+    "3": [{"item_cost": {"item": "minecraft:pitcher_plant", "count": 1}}]
+  }
+}

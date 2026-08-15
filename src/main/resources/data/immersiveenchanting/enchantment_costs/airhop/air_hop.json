@@ -1,0 +1,8 @@
+{
+  "levels": {
+    "1": [{"item_cost": {"item": "minecraft:feather", "count": 4}}],
+    "2": [{"item_cost": {"item": "minecraft:phantom_membrane", "count": 1}}],
+    "3": [{"item_cost": {"item": "minecraft:wind_charge", "count": 4}}],
+    "4": [{"item_cost": {"item": "minecraft:breeze_rod", "count": 1}}]
+  }
+}

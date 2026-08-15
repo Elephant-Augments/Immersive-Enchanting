@@ -4,7 +4,12 @@
   "enchantments": [
     "minecraft:looting",
     "minecraft:fortune",
-    "minecraft:luck_of_the_sea"
+    "minecraft:luck_of_the_sea",
+    "eternal_starlight:abyssal_touch",
+    "hollowmarch:blessing_of_the_tides",
+    "kattersstructures:ocean_heart",
+    "nova_structures:antidote",
+    "netherdepthsupgrade:hell_strider"
   ],
   "min_rolls": 1,
   "max_rolls": 1,
@@ -15,8 +20,14 @@
         {
           "condition": "minecraft:all_of",
           "terms": [
-            {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/shipwreck_treasure"},
-            {"condition": "minecraft:random_chance", "chance": 0.25}
+            {
+              "condition": "neoforge:loot_table_id",
+              "loot_table_id": "minecraft:chests/shipwreck_treasure"
+            },
+            {
+              "condition": "minecraft:random_chance",
+              "chance": 0.25
+            }
           ]
         }
       ]

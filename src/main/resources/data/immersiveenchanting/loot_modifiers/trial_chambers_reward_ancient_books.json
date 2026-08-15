@@ -4,7 +4,11 @@
   "enchantments": [
     "minecraft:breach",
     "minecraft:density",
-    "minecraft:wind_burst"
+    "minecraft:wind_burst",
+    "apothic_enchanting:berserkers_fury",
+    "more_rpg_classes:typhoon",
+    "spell_power:haste",
+    "dungeons_arise:discharge"
   ],
   "min_rolls": 1,
   "max_rolls": 1,
@@ -15,8 +19,14 @@
         {
           "condition": "minecraft:all_of",
           "terms": [
-            {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/trial_chambers/reward"},
-            {"condition": "minecraft:random_chance", "chance": 0.25}
+            {
+              "condition": "neoforge:loot_table_id",
+              "loot_table_id": "minecraft:chests/trial_chambers/reward"
+            },
+            {
+              "condition": "minecraft:random_chance",
+              "chance": 0.25
+            }
           ]
         }
       ]

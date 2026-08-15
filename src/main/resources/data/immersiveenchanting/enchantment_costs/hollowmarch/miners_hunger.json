@@ -1,0 +1,12 @@
+{
+  "levels": {
+    "1": [{"item_cost": {"item": "minecraft:coal", "count": 16}}],
+    "2": [{"item_cost": {"item": "minecraft:iron_ingot", "count": 4}}],
+    "3": [{"item_cost": {"item": "minecraft:gold_ingot", "count": 4}, "xp_levels": 2}],
+    "4": [{"item_cost": {"item": "minecraft:diamond", "count": 1}, "xp_levels": 4}],
+    "5": [{"item_cost": {"item": "minecraft:emerald", "count": 4}, "xp_levels": 6}],
+    "6": [{"item_cost": {"item": "minecraft:ancient_debris", "count": 1}, "xp_levels": 8}],
+    "7": [{"item_cost": {"item": "minecraft:netherite_ingot", "count": 1}, "xp_levels": 10}],
+    "8": [{"item_cost": {"item": "minecraft:nether_star", "count": 1}, "xp_levels": 12}]
+  }
+}

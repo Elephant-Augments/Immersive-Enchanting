@@ -6,7 +6,10 @@
     "minecraft:depth_strider",
     "minecraft:luck_of_the_sea",
     "minecraft:lure",
-    "minecraft:respiration"
+    "minecraft:respiration",
+    "eternal_starlight:abyssal_touch",
+    "kattersstructures:ocean_heart",
+    "nova_structures:antidote"
   ],
   "min_rolls": 1,
   "max_rolls": 1,
@@ -17,8 +20,14 @@
         {
           "condition": "minecraft:all_of",
           "terms": [
-            {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/underwater_ruin_small"},
-            {"condition": "minecraft:random_chance", "chance": 0.25}
+            {
+              "condition": "neoforge:loot_table_id",
+              "loot_table_id": "minecraft:chests/underwater_ruin_small"
+            },
+            {
+              "condition": "minecraft:random_chance",
+              "chance": 0.25
+            }
           ]
         }
       ]

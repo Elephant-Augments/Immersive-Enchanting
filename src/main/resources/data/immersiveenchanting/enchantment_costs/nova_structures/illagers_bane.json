@@ -1,0 +1,9 @@
+{
+  "levels": {
+    "1": [{"item_cost": {"item": "minecraft:emerald", "count": 4}}],
+    "2": [{"item_cost": {"item": "minecraft:emerald_block", "count": 1}}],
+    "3": [{"item_cost": {"item": "minecraft:ominous_bottle", "count": 1}, "xp_levels": 5}],
+    "4": [{"item_cost": {"item": "minecraft:totem_of_undying", "count": 1}, "xp_levels": 10}],
+    "5": [{"item_cost": {"item": "minecraft:netherite_ingot", "count": 1}, "xp_levels": 15}]
+  }
+}

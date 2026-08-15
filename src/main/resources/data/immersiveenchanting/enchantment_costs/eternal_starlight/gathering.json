@@ -1,0 +1,6 @@
+{
+  "levels": {
+    "1": [{"item_cost": {"item": "minecraft:cake", "count": 1}}],
+    "2": [{"item_cost": {"item": "minecraft:redstone_block", "count": 1}}]
+  }
+}

@@ -6,14 +6,19 @@
     "minecraft:blast_protection",
     "minecraft:knockback",
     "minecraft:looting",
-
     "minecraft:projectile_protection",
     "minecraft:protection",
     "minecraft:sharpness",
     "minecraft:silk_touch",
     "minecraft:smite",
     "minecraft:sweeping_edge",
-    "minecraft:unbreaking"
+    "minecraft:unbreaking",
+    "apothic_enchanting:miners_fervor",
+    "apothic_enchanting:boon_of_the_earth",
+    "betterarcheology:tunneling",
+    "hollowmarch:miners_hunger",
+    "create:capacity",
+    "galosphere:sifting"
   ],
   "min_rolls": 1,
   "max_rolls": 1,
@@ -24,8 +29,14 @@
         {
           "condition": "minecraft:all_of",
           "terms": [
-            {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/abandoned_mineshaft"},
-            {"condition": "minecraft:random_chance", "chance": 0.25}
+            {
+              "condition": "neoforge:loot_table_id",
+              "loot_table_id": "minecraft:chests/abandoned_mineshaft"
+            },
+            {
+              "condition": "minecraft:random_chance",
+              "chance": 0.25
+            }
           ]
         }
       ]

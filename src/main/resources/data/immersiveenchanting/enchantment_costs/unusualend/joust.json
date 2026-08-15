@@ -1,0 +1,6 @@
+{
+  "levels": {
+    "1": [{"item_cost": {"item": "minecraft:cactus", "count": 1}}],
+    "2": [{"item_cost": {"item": "minecraft:amethyst_shard", "count": 1}}]
+  }
+}

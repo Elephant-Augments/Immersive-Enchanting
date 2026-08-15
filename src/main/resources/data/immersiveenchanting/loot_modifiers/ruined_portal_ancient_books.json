@@ -8,11 +8,12 @@
     "minecraft:flame",
     "minecraft:knockback",
     "minecraft:looting",
-
     "minecraft:sharpness",
     "minecraft:smite",
     "minecraft:soul_speed",
-    "minecraft:sweeping_edge"
+    "minecraft:sweeping_edge",
+    "eternal_starlight:overheat",
+    "kattersstructures:enlightning"
   ],
   "min_rolls": 1,
   "max_rolls": 1,
@@ -23,8 +24,14 @@
         {
           "condition": "minecraft:all_of",
           "terms": [
-            {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/ruined_portal"},
-            {"condition": "minecraft:random_chance", "chance": 0.25}
+            {
+              "condition": "neoforge:loot_table_id",
+              "loot_table_id": "minecraft:chests/ruined_portal"
+            },
+            {
+              "condition": "minecraft:random_chance",
+              "chance": 0.25
+            }
           ]
         }
       ]

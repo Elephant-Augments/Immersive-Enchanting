@@ -4,7 +4,11 @@
   "enchantments": [
     "minecraft:looting",
     "minecraft:fortune",
-    "minecraft:luck_of_the_sea"
+    "minecraft:luck_of_the_sea",
+    "eternal_starlight:abyssal_touch",
+    "hollowmarch:blessing_of_the_tides",
+    "apothic_enchanting:scavenger",
+    "create_ltab:enchantment_luck"
   ],
   "min_rolls": 1,
   "max_rolls": 1,
@@ -15,8 +19,14 @@
         {
           "condition": "minecraft:all_of",
           "terms": [
-            {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/buried_treasure"},
-            {"condition": "minecraft:random_chance", "chance": 0.25}
+            {
+              "condition": "neoforge:loot_table_id",
+              "loot_table_id": "minecraft:chests/buried_treasure"
+            },
+            {
+              "condition": "minecraft:random_chance",
+              "chance": 0.25
+            }
           ]
         }
       ]

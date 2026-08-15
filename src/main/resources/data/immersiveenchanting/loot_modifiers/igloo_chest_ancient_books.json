@@ -2,7 +2,12 @@
   "type": "immersiveenchanting:ancient_book_loot_modifier",
   "mode": "random_enchantment_from_list",
   "enchantments": [
-    "minecraft:frost_walker"
+    "minecraft:frost_walker",
+    "eternal_starlight:glacial_sowing",
+    "combat_roll:longfooted",
+    "darkerdepths:quick_dash",
+    "nova_structures:wax_wings",
+    "airhop:air_hop"
   ],
   "min_rolls": 1,
   "max_rolls": 1,
@@ -13,8 +18,14 @@
         {
           "condition": "minecraft:all_of",
           "terms": [
-            {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/igloo_chest"},
-            {"condition": "minecraft:random_chance", "chance": 0.25}
+            {
+              "condition": "neoforge:loot_table_id",
+              "loot_table_id": "minecraft:chests/igloo_chest"
+            },
+            {
+              "condition": "minecraft:random_chance",
+              "chance": 0.25
+            }
           ]
         }
       ]

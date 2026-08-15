@@ -1,0 +1,12 @@
+{
+  "levels": {
+    "1": [{"item_cost": {"item": "minecraft:fermented_spider_eye", "count": 2}}],
+    "2": [{"item_cost": {"item": "minecraft:wither_rose", "count": 1}, "xp_levels": 2}],
+    "3": [{"item_cost": {"item": "minecraft:soul_sand", "count": 8}, "xp_levels": 4}],
+    "4": [{"item_cost": {"item": "minecraft:soul_soil", "count": 8}, "xp_levels": 6}],
+    "5": [{"item_cost": {"item": "minecraft:wither_skeleton_skull", "count": 1}, "xp_levels": 8}],
+    "6": [{"item_cost": {"item": "minecraft:nether_star", "count": 1}, "xp_levels": 10}],
+    "7": [{"item_cost": {"item": "minecraft:netherite_ingot", "count": 1}, "xp_levels": 12}],
+    "8": [{"item_cost": {"item": "minecraft:echo_shard", "count": 4}, "xp_levels": 14}]
+  }
+}

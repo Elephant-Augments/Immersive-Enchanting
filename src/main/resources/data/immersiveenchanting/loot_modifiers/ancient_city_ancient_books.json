@@ -6,11 +6,13 @@
     "minecraft:feather_falling",
     "minecraft:knockback",
     "minecraft:looting",
-
     "minecraft:sharpness",
     "minecraft:smite",
     "minecraft:sweeping_edge",
-    "minecraft:swift_sneak"
+    "minecraft:swift_sneak",
+    "nova_structures:gravity",
+    "eternal_starlight:swift_lash",
+    "spell_power:soulfrost"
   ],
   "min_rolls": 1,
   "max_rolls": 1,
@@ -21,8 +23,14 @@
         {
           "condition": "minecraft:all_of",
           "terms": [
-            {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/ancient_city"},
-            {"condition": "minecraft:random_chance", "chance": 0.25}
+            {
+              "condition": "neoforge:loot_table_id",
+              "loot_table_id": "minecraft:chests/ancient_city"
+            },
+            {
+              "condition": "minecraft:random_chance",
+              "chance": 0.25
+            }
           ]
         }
       ]

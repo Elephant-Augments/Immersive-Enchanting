@@ -5,7 +5,11 @@
     "minecraft:channeling",
     "minecraft:impaling",
     "minecraft:loyalty",
-    "minecraft:riptide"
+    "minecraft:riptide",
+    "eternal_starlight:abyssal_touch",
+    "kattersstructures:ocean_heart",
+    "nova_structures:antidote",
+    "hollowmarch:blessing_of_the_tides"
   ],
   "min_rolls": 1,
   "max_rolls": 1,
@@ -16,8 +20,14 @@
         {
           "condition": "minecraft:all_of",
           "terms": [
-            {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/underwater_ruin_big"},
-            {"condition": "minecraft:random_chance", "chance": 0.25}
+            {
+              "condition": "neoforge:loot_table_id",
+              "loot_table_id": "minecraft:chests/underwater_ruin_big"
+            },
+            {
+              "condition": "minecraft:random_chance",
+              "chance": 0.25
+            }
           ]
         }
       ]

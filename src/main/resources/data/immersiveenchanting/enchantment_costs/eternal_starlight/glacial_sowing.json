@@ -1,0 +1,6 @@
+{
+  "levels": {
+    "1": [{"item_cost": {"item": "minecraft:snowball", "count": 16}}],
+    "2": [{"item_cost": {"item": "minecraft:blue_ice", "count": 1}, "xp_levels": 3}]
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "levels": {
+    "1": [{"item_cost": {"item": "minecraft:experience_bottle", "count": 8}, "xp_levels": 5}],
+    "2": [{"item_cost": {"item": "minecraft:golden_apple", "count": 1}, "xp_levels": 15}],
+    "3": [{"item_cost": {"item": "minecraft:nether_star", "count": 1}, "xp_levels": 30}]
+  }
+}
