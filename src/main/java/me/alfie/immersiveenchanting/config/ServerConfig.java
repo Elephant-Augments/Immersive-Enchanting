@@ -11,6 +11,8 @@ public class ServerConfig {
 
     public final ModConfigSpec.ConfigValue<Boolean> DISABLE_ANCIENT_BOOK_REQUIREMENT;
 
+    public final ModConfigSpec.ConfigValue<Boolean> SHOW_ALL_ENCHANTMENT_LEVELS;
+
     public final ModConfigSpec.ConfigValue<Integer> BOOKSHELF_SEARCH_X;
     public final ModConfigSpec.ConfigValue<Integer> BOOKSHELF_SEARCH_Y;
     public final ModConfigSpec.ConfigValue<Integer> BOOKSHELF_SEARCH_Z;
@@ -70,6 +72,11 @@ public class ServerConfig {
                 .comment("If enabled, Ancient Books are no longer required to unlock enchantments at the enchanting table. Enchantments still cost experience and materials as usual.")
                 .translation("immersiveenchanting.config.disable_ancient_book_requirement")
                 .define("disableAncientBookRequirement", false);
+
+        SHOW_ALL_ENCHANTMENT_LEVELS = builder
+                .comment("If enabled, every level of an enchantment is shown on the enchanting tree. If disabled, only obtained levels and the next unlearned level are shown.")
+                .translation("immersiveenchanting.config.show_all_enchantment_levels")
+                .define("showAllEnchantmentLevels", false);
         builder.pop();
 
         builder.push("enchantedbooks");
@@ -108,5 +115,9 @@ public class ServerConfig {
 
     public static boolean isObfuscateLockedEnchantments() {
         return ServerConfig.CONFIG.OBFUSCATE_LOCKED_ENCHANTMENTS.get();
+    }
+
+    public static boolean showAllEnchantmentLevels() {
+        return ServerConfig.CONFIG.SHOW_ALL_ENCHANTMENT_LEVELS.get();
     }
 }

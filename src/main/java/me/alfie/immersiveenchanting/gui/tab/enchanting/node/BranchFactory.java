@@ -8,6 +8,7 @@ import me.alfie.immersiveenchanting.api.node.internal.EnchantmentNodeData;
 import me.alfie.immersiveenchanting.api.node.internal.ModFilterNodeData;
 import me.alfie.immersiveenchanting.api.node.internal.ReplicateNodeData;
 import me.alfie.immersiveenchanting.api.node.internal.TransmuteNodeData;
+import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.datapack.mod_icons.ModIconsDatapack;
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
@@ -180,7 +181,7 @@ public class BranchFactory {
             ));
 
 
-            if(equippedLevel < enchantmentLevel+1) break;
+            if(equippedLevel < enchantmentLevel+1 && !ServerConfig.showAllEnchantmentLevels()) break;
         }
 
         event.addBranch(BranchBuilder.of(event.getCanvas(), EnchantmentUtil.toId(enchantmentHolder))
