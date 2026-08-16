@@ -2,8 +2,9 @@
 build/
 .gradle/
 
-# Idea
+# IDE
 .idea/
+.vscode/
 
 # Run
 run/
