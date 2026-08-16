@@ -1,0 +1,6 @@
+{
+  "levels": {
+    "1": [{"item_cost": {"item": "minecraft:string", "count": 8}}],
+    "2": [{"item_cost": {"item": "minecraft:cobweb", "count": 1}}]
+  }
+}
