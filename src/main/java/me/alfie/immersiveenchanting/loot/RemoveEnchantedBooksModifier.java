@@ -4,6 +4,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.alfie.immersiveenchanting.config.ServerConfig;
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import net.minecraft.core.Holder;
@@ -53,6 +54,9 @@ public class RemoveEnchantedBooksModifier extends LootModifier {
                     if (enchantments == null) continue;
 
                     for (Holder<Enchantment> enchantment : enchantments.keySet()) {
+                        //REPLACE mode now respects cost files set to enabled: false
+                        if(!CostRegistry.server().isEnabled(enchantment)) continue;
+
                         ItemStack ancientBook = new ItemStack(ModItems.ANCIENT_BOOK.get());
                         EnchantmentUtil.setStoredEnchantment(ancientBook, enchantment);
                         generatedLoot.add(ancientBook);

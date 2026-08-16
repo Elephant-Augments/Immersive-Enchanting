@@ -102,6 +102,11 @@ public class CostRegistry {
         return ID_REGISTRY.containsKey(id);
     }
 
+    //Registered in a cost file *and* not flagged enabled: false
+    public boolean isEnabled(Holder<Enchantment> enchantmentHolder) {
+        return isRegistered(enchantmentHolder) && get(enchantmentHolder).enabled();
+    }
+
     public CostData get(Holder<Enchantment> enchantmentHolder) {
         return ENCHANTMENT_HOLDER_REGISTRY.get(enchantmentHolder);
     }
@@ -133,7 +138,7 @@ public class CostRegistry {
     }
     public List<Holder<Enchantment>> getAllEnabledEnchantmentHolders() {
         List<Holder<Enchantment>> result = getAllEnchantmentHolders();
-        result.removeIf(holder -> !get(holder).enabled());
+        result.removeIf(holder -> !isEnabled(holder));
         return result;
     }
 
