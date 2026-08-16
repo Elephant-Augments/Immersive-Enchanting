@@ -21,12 +21,14 @@ import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.TooltipManager;
 import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.util.FxHelper;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.util.List;
@@ -60,9 +62,12 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
     private final TooltipManager tooltipManager;
 
     private boolean isTabKeyDown;
+    private ItemStack deferredCentralItemTooltip = ItemStack.EMPTY;
+    @Nullable
+    private Component deferredTabTooltip;
 
     public EnchantingTableScreen(EnchantingTableMenu menu, Inventory inventory, Component title) {
-        super(menu, inventory, title, 256, 256);
+        super(menu, inventory, title, EnchantingTableLayout.GUI_WIDTH, EnchantingTableLayout.GUI_HEIGHT);
         registryAccess = inventory.player.registryAccess();
         this.player = inventory.player;
         this.scrollableCanvas = new Canvas(this);
@@ -138,22 +143,66 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
         if(tooltipManager.hasActiveTooltip() && !renderedNodes.contains(tooltipManager.getActiveTooltipNode()))
             tooltipManager.clearActiveTooltip();
 
-        if(tooltipManager.hasActiveTooltip())
+        // Workaround to call custom overlays first, as AlfinoLib's render(GuiGraphics) is final and this screen never
+        // reaches a vanilla render() override that would call renderTooltip itself.
+        if(tooltipManager.hasActiveTooltip()) {
             tooltipManager.getActiveTooltip().render(gx, mousePos);
-
-        if(!tooltipManager.isTooltipLocked()) this.renderTooltip(gx.graphics(), mousePos.x(), mousePos.y());
+        } else if(!deferredCentralItemTooltip.isEmpty()) {
+            gx.graphics().renderTooltip(this.font, deferredCentralItemTooltip, mousePos.x(), mousePos.y());
+        } else if(deferredTabTooltip != null) {
+            gx.graphics().renderTooltip(this.font, deferredTabTooltip, mousePos.x(), mousePos.y());
+        } else if(!tooltipManager.isTooltipLocked()) {
+            this.renderTooltip(gx.graphics(), mousePos.x(), mousePos.y());
+        }
 
         if(!tooltipManager.isTooltipRequestedThisFrame() && !tooltipManager.isTooltipLocked())
             tooltipManager.clearActiveTooltip();
 
         tooltipManager.resetFrameState();
+        deferredCentralItemTooltip = ItemStack.EMPTY;
+        deferredTabTooltip = null;
         gx.graphics().pose().popPose();
+    }
+
+    /**
+     * Suppresses vanilla menu-slot tooltips if AbstractContainerScreen also invokes this
+     * during {@code super.render}, so an overlay isn't drawn underneath.
+     */
+    @Override
+    protected void renderTooltip(GuiGraphics guiGraphics, int x, int y) {
+        if(tooltipManager.hasActiveTooltip()
+                || !deferredCentralItemTooltip.isEmpty()
+                || deferredTabTooltip != null
+                || tooltipManager.isTooltipLocked()) {
+            return;
+        }
+        super.renderTooltip(guiGraphics, x, y);
+    }
+
+    /**
+     * Requests that the tool-slot item tooltip be drawn once at end-of-frame in screen space.
+     */
+    public void requestCentralItemTooltip(ItemStack stack) {
+        this.deferredCentralItemTooltip = stack;
+    }
+
+    /**
+     * Requests that the tab-button label tooltip be drawn once at end-of-frame in screen space.
+     */
+    public void requestTabTooltip(Component tooltip) {
+        this.deferredTabTooltip = tooltip;
     }
 
     @Override
     public void renderLabels(GuiGraphicsX gx, MousePos mousePos) {
-        this.inventoryLabelX = 16;
-        GuiGraphicsApi.text(gx, this.font, this.playerInventoryTitle.copy().withColor(-12566464), this.inventoryLabelX, this.inventoryLabelY - 33, false);
+        GuiGraphicsApi.text(
+                gx,
+                this.font,
+                this.playerInventoryTitle.copy().withColor(-12566464),
+                EnchantingTableLayout.inventoryLabelX(menu),
+                EnchantingTableLayout.inventoryLabelY(menu),
+                false
+        );
     }
 
     @Override

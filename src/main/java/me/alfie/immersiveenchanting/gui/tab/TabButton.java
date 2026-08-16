@@ -57,7 +57,10 @@ public class TabButton implements ScreenEventListener {
 
         final int x = screen.getGuiLeft() + 202;
         final int y = screen.getGuiTop() + 132;
-        GuiGraphicsApi.itemStackWithTooltip(gx, icon, screen.getFont(), x, y, mousePos);
+        GuiGraphicsApi.itemStack(gx, icon, screen.getFont(), x, y);
+        if(mousePos.isOver(x, y, width, height)) {
+            screen.requestTabTooltip(label);
+        }
     }
 
     @Override

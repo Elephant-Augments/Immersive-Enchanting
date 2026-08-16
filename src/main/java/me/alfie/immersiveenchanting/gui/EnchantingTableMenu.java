@@ -154,20 +154,20 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
         //Cost slot
         this.addSlot(new Slot(this.container, Slots.COST.id(), 233, 170));
 
-        //Add player inventory slots
-        int startX = 17;
-        int startY = 140;
+        int startX = EnchantingTableLayout.PLAYER_INVENTORY_GRID_X;
+        int startY = EnchantingTableLayout.PLAYER_INVENTORY_GRID_Y;
+        int slotSize = EnchantingTableLayout.PLAYER_INVENTORY_SLOT_SIZE;
 
         //Player inventory
         for (int row = 0; row < 3; ++row) {
             for (int col = 0; col < 9; ++col) {
-                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, startX + col * 18, startY + row * 18));
+                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, startX + col * slotSize, startY + row * slotSize));
             }
         }
 
         //Hotbar slots
         for (int col = 0; col < 9; ++col) {
-            this.addSlot(new Slot(playerInventory, col, startX + col * 18, startY + 58));
+            this.addSlot(new Slot(playerInventory, col, startX + col * slotSize, EnchantingTableLayout.PLAYER_HOTBAR_GRID_Y));
         }
     }
 

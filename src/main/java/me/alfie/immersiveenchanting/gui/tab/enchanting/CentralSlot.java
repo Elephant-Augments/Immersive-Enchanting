@@ -1,7 +1,6 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.systems.RenderSystem;
 import me.alfie.alfinolib.gui.GuiGraphicsX;
 import me.alfie.alfinolib.gui.ScreenEventListener;
 import me.alfie.alfinolib.gui.util.GuiGraphicsApi;
@@ -39,14 +38,10 @@ public class CentralSlot extends CanvasRenderable implements ScreenEventListener
         GuiGraphicsApi.itemStack(gx, stack, canvas().screen().getFont(), (int) canvasX(), (int) canvasY());
         setCenterPos(Sprite.ENCHANTING_TABLE_TOP);
 
-        gx.graphics().pose().pushPose();
-        gx.graphics().pose().setIdentity();
-        RenderSystem.disableScissor();;
+        // Defer tooltip to end-of-frame so other tooltip mods get a clean screen-space pass.
         if(canvas().isMouseOver(canvasX() + 8, canvasY() + 8, 16, 16, mousePos)) {
-            gx.graphics().renderTooltip(canvas().screen().getFont(), stack,
-                    mousePos.x(), mousePos.y());
+            canvas().screen().requestCentralItemTooltip(stack);
         }
-        gx.graphics().pose().popPose();
     }
 
 
