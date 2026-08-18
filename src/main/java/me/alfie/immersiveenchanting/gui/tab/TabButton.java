@@ -4,6 +4,7 @@ import me.alfie.alfinolib.gui.GuiGraphicsX;
 import me.alfie.alfinolib.gui.ScreenEventListener;
 import me.alfie.alfinolib.gui.util.GuiGraphicsApi;
 import me.alfie.alfinolib.gui.util.MousePos;
+import me.alfie.immersiveenchanting.gui.EnchantingTableLayout;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.core.ScreenState;
 import me.alfie.immersiveenchanting.item.ModItems;
@@ -17,10 +18,8 @@ public class TabButton implements ScreenEventListener {
 
     public final EnchantingTableScreen screen;
 
-    private final int width = 20;
-    private final int height = 25;
-    private final int x = 200;
-    private final int y = 126;
+    private final int width = EnchantingTableLayout.TAB_BUTTON_WIDTH;
+    private final int height = EnchantingTableLayout.TAB_BUTTON_HEIGHT;
 
     private ItemStack icon = new ItemStack(ModItems.ANCIENT_BOOK.get(), 1);
     private Component label = Component.empty();
@@ -55,8 +54,8 @@ public class TabButton implements ScreenEventListener {
             icon = new ItemStack(Items.ENCHANTING_TABLE, 1);
         }
 
-        final int x = screen.getGuiLeft() + 202;
-        final int y = screen.getGuiTop() + 132;
+        final int x = screen.getGuiLeft() + EnchantingTableLayout.TAB_BUTTON_X;
+        final int y = screen.getGuiTop() + EnchantingTableLayout.TAB_BUTTON_Y;
         GuiGraphicsApi.itemStack(gx, icon, screen.getFont(), x, y);
         if(mousePos.isOver(x, y, width, height)) {
             screen.requestTabTooltip(label);
@@ -65,7 +64,7 @@ public class TabButton implements ScreenEventListener {
 
     @Override
     public boolean onMouseClick(MousePos mousePos, int button) {
-        if(mousePos.isOver(screen.getGuiLeft() + 202, screen.getGuiTop() + 132, width, height)) {
+        if(mousePos.isOver(screen.getGuiLeft() + EnchantingTableLayout.TAB_BUTTON_X, screen.getGuiTop() + EnchantingTableLayout.TAB_BUTTON_Y, width, height)) {
             FxHelper.playGenericUISound(screen.player());
 
             if(screen.isState(ScreenState.ENCHANTING)) {

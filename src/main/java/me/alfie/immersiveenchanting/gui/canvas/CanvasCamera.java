@@ -31,8 +31,8 @@ public class CanvasCamera implements ScreenEventListener {
 
     public final int VIEWPORT_X;
     public final int VIEWPORT_Y;
-    public final int VIEWPORT_WIDTH = 248;
-    public final int VIEWPORT_HEIGHT = 118;
+    public final int VIEWPORT_WIDTH;
+    public final int VIEWPORT_HEIGHT;
 
     /**
      * Creates a new camera tied to a specific screen and viewport position.
@@ -41,9 +41,11 @@ public class CanvasCamera implements ScreenEventListener {
      * @param viewportX X position of the viewport on screen
      * @param viewportY Y position of the viewport on screen
      */
-    public CanvasCamera(EnchantingTableScreen screen, int viewportX, int viewportY) {
+    public CanvasCamera(EnchantingTableScreen screen, int viewportX, int viewportY, int viewportWidth, int viewportHeight) {
         this.VIEWPORT_X = viewportX;
         this.VIEWPORT_Y = viewportY;
+        this.VIEWPORT_WIDTH = viewportWidth;
+        this.VIEWPORT_HEIGHT = viewportHeight;
         this.screen = screen;
     }
 

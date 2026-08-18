@@ -23,6 +23,7 @@ import me.alfie.immersiveenchanting.util.FxHelper;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -89,7 +90,10 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
     @Override
     protected void init() {
         super.init();
-        this.camera = new CanvasCamera(this,getGuiLeft()+4, getGuiTop()+4);
+        this.leftPos = EnchantingTableLayout.guiLeft(this.width, EnchantingTableLayout.isJeiLoaded());
+        this.topPos = EnchantingTableLayout.guiTop(this.height);
+        EnchantingTableLayout.CanvasViewport viewport = EnchantingTableLayout.canvasViewport(getGuiLeft(), getGuiTop());
+        this.camera = new CanvasCamera(this, viewport.x(), viewport.y(), viewport.width(), viewport.height());
         camera.centerCameraOnCanvas();
     }
 
@@ -119,12 +123,7 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
         if(!canvas().DEBUG_DISABLE_CULLING) gx.graphics().disableScissor();
 
         RenderSystem.enableBlend();
-        GuiGraphicsApi.blit(
-                gx,
-                Sprite.ENCHANTING_TABLE_GUI.id(),
-                getGuiLeft(), getGuiTop(),
-                imageWidth, imageHeight
-        );
+        drawGUI(gx.graphics(), getGuiLeft(), getGuiTop());
         RenderSystem.disableBlend();
 
 
@@ -432,5 +431,146 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
 
     public Font getFont() {
         return font;
+    }
+
+    /**
+     * Composites the full GUI from the original textures.
+     */
+    private static void drawGUI(GuiGraphics graphics, int guiLeft, int guiTop) {
+        ResourceLocation texture = Sprite.ENCHANTING_TABLE_GUI.id().mc();
+        drawViewportFrame(graphics, texture, guiLeft, guiTop);
+        drawInventory(graphics, texture, guiLeft, guiTop);
+        drawTabs(graphics, texture, guiLeft, guiTop);
+        drawCostPanel(graphics, texture, guiLeft, guiTop);
+    }
+
+    /**
+     * Draws the enchanting viewport and its chrome border.
+     */
+    private static void drawViewportFrame(
+            GuiGraphics graphics, ResourceLocation texture, int guiLeft, int guiTop
+    ) {
+        int x = guiLeft;
+        int y = guiTop;
+        int w = EnchantingTableLayout.GUI_WIDTH;
+        int h = EnchantingTableLayout.VIEWPORT_BOTTOM_IN_GUI;
+        int tex = EnchantingTableLayout.TEXTURE_SIZE;
+        int holeBottom = EnchantingTableLayout.TEXTURE_VIEWPORT_BOTTOM;
+        int border = EnchantingTableLayout.CANVAS_INSET;
+        int innerW = w - border * 2;
+        int innerH = h - border * 2;
+        int innerUW = tex - border * 2;
+        int innerVH = holeBottom - border * 2;
+
+        blitRegion(graphics, texture, x, y, border, border, 0, 0, border, border, tex, tex);
+        blitRegion(graphics, texture, x + w - border, y, border, border, tex - border, 0, border, border, tex, tex);
+        blitRegionVFlip(graphics, texture, x, y + h - border, border, border, 0, 0, border, border, tex, tex);
+        blitRegionVFlip(graphics, texture, x + w - border, y + h - border, border, border, tex - border, 0, border, border, tex, tex);
+
+        blitRegion(graphics, texture, x + border, y, innerW, border, border, 0, innerUW, border, tex, tex);
+        blitRegion(
+                graphics, texture,
+                x + border, y + h - border, innerW, border - 1,
+                EnchantingTableLayout.TEXTURE_TAB_FILL_U, EnchantingTableLayout.TEXTURE_TAB_FILL_V,
+                1, 1, tex, tex
+        );
+        blitRegion(
+                graphics, texture,
+                x + border, y + h - 1, innerW, 1,
+                EnchantingTableLayout.TEXTURE_FRAME_BLACK_U, EnchantingTableLayout.TEXTURE_FRAME_BLACK_V,
+                1, 1, tex, tex
+        );
+
+        blitRegion(graphics, texture, x, y + border, border, innerH, 0, border, border, innerVH, tex, tex);
+        blitRegion(graphics, texture, x + w - border, y + border, border, innerH, tex - border, border, border, innerVH, tex, tex);
+
+        drawViewport(graphics, texture, x + border, y + border, innerW, innerH, border, innerUW, innerVH, tex);
+    }
+
+    /**
+     * Draws only the inner hole of the viewport, where the enchanting screen is rendered.
+     */
+    private static void drawViewport(
+            GuiGraphics graphics, ResourceLocation texture,
+            int x, int y, int w, int h,
+            int border, int innerUW, int innerVH, int tex
+    ) {
+        blitRegion(graphics, texture, x, y, w, h, border, border, innerUW, innerVH, tex, tex);
+    }
+
+    /**
+     * Draws the bottom inventory panel under the viewport.
+     */
+    private static void drawInventory(
+            GuiGraphics graphics, ResourceLocation texture, int guiLeft, int guiTop
+    ) {
+        int tex = EnchantingTableLayout.TEXTURE_SIZE;
+        int bottomY = guiTop + EnchantingTableLayout.VIEWPORT_BOTTOM_IN_GUI;
+        int chromeV = EnchantingTableLayout.TEXTURE_VIEWPORT_FRAME_BOTTOM;
+        int chromeH = EnchantingTableLayout.BOTTOM_CHROME_HEIGHT;
+        blitRegion(
+                graphics, texture,
+                guiLeft + EnchantingTableLayout.INVENTORY_PANEL_X, bottomY,
+                EnchantingTableLayout.TEXTURE_INVENTORY_WIDTH, chromeH,
+                EnchantingTableLayout.TEXTURE_INVENTORY_U, chromeV,
+                EnchantingTableLayout.TEXTURE_INVENTORY_WIDTH, chromeH,
+                tex, tex
+        );
+    }
+
+    /**
+     * Draws the left-side tab buttons.
+     */
+    private static void drawTabs(
+            GuiGraphics graphics, ResourceLocation texture, int guiLeft, int guiTop
+    ) {
+        int tex = EnchantingTableLayout.TEXTURE_SIZE;
+        blitRegion(
+                graphics, texture,
+                guiLeft + EnchantingTableLayout.TAB_SPRITE_X,
+                guiTop + EnchantingTableLayout.TAB_SPRITE_Y,
+                EnchantingTableLayout.TEXTURE_TAB_WIDTH, EnchantingTableLayout.TEXTURE_TAB_HEIGHT,
+                EnchantingTableLayout.TEXTURE_TAB_U, EnchantingTableLayout.TEXTURE_TAB_V,
+                EnchantingTableLayout.TEXTURE_TAB_WIDTH, EnchantingTableLayout.TEXTURE_TAB_HEIGHT,
+                tex, tex
+        );
+    }
+
+    /**
+     * Draws the right-side cost/gear panel under the viewport.
+     */
+    private static void drawCostPanel(
+            GuiGraphics graphics, ResourceLocation texture, int guiLeft, int guiTop
+    ) {
+        int tex = EnchantingTableLayout.TEXTURE_SIZE;
+        int bottomY = guiTop + EnchantingTableLayout.VIEWPORT_BOTTOM_IN_GUI;
+        int chromeV = EnchantingTableLayout.TEXTURE_VIEWPORT_FRAME_BOTTOM;
+        int chromeH = EnchantingTableLayout.BOTTOM_CHROME_HEIGHT;
+        blitRegion(
+                graphics, texture,
+                guiLeft + EnchantingTableLayout.COST_PANEL_X, bottomY,
+                EnchantingTableLayout.TEXTURE_COST_WIDTH, chromeH,
+                EnchantingTableLayout.TEXTURE_COST_U, chromeV,
+                EnchantingTableLayout.TEXTURE_COST_WIDTH, chromeH,
+                tex, tex
+        );
+    }
+
+    private static void blitRegionVFlip(
+            GuiGraphics graphics, ResourceLocation texture,
+            int x, int y, int w, int h,
+            int u, int v, int uW, int vH,
+            int texW, int texH
+    ) {
+        blitRegion(graphics, texture, x, y, w, h, u, v + vH, uW, -vH, texW, texH);
+    }
+
+    private static void blitRegion(
+            GuiGraphics graphics, ResourceLocation texture,
+            int x, int y, int w, int h,
+            int u, int v, int uW, int vH,
+            int texW, int texH
+    ) {
+        graphics.blit(texture, x, y, w, h, (float) u, (float) v, uW, vH, texW, texH);
     }
 }

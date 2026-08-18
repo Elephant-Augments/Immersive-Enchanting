@@ -141,7 +141,7 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
      */
     private void buildSlots(Inventory playerInventory) {
         //Tool slot
-        this.addSlot(new Slot(this.container, Slots.TOOL.id(), 233, 141) {
+        this.addSlot(new Slot(this.container, Slots.TOOL.id(), EnchantingTableLayout.COST_COLUMN_X, EnchantingTableLayout.TOOL_SLOT_Y) {
             @Override
             public int getMaxStackSize() {
                 return 1;
@@ -149,10 +149,10 @@ public class EnchantingTableMenu extends AbstractContainerMenu {
         });
 
         //Enchanting fuel slot
-        this.addSlot(new Slot(this.container, Slots.ENCHANTING_FUEL.id(), 233, 199));
+        this.addSlot(new Slot(this.container, Slots.ENCHANTING_FUEL.id(), EnchantingTableLayout.COST_COLUMN_X, EnchantingTableLayout.FUEL_SLOT_Y));
 
         //Cost slot
-        this.addSlot(new Slot(this.container, Slots.COST.id(), 233, 170));
+        this.addSlot(new Slot(this.container, Slots.COST.id(), EnchantingTableLayout.COST_COLUMN_X, EnchantingTableLayout.COST_SLOT_Y));
 
         int startX = EnchantingTableLayout.PLAYER_INVENTORY_GRID_X;
         int startY = EnchantingTableLayout.PLAYER_INVENTORY_GRID_Y;
