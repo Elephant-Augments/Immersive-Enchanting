@@ -112,13 +112,15 @@ public class Searchbar {
      * <p>Any enchantment whose name does not contain the search string
      * (case-insensitive) is removed from the rendered list.</p>
      *
-     * <p>This method mutates the list returned by
-     * {@link BookTab#getRenderedEnchantments()}.</p>
+     * <p>This method mutates the in-progress list from {@link BookTab#applyFilters()}
+     * and must not call {@link BookTab#getRenderedEnchantments()}, which would re-enter
+     * filtering.</p>
      */
     protected void checkSearch() {
+        List<Holder<Enchantment>> rendered = bookTab.currentRenderedEnchantments();
         List<Holder<Enchantment>> toRemove = new ArrayList<>();
 
-        for (Holder<Enchantment> enchantmentHolder : bookTab.getRenderedEnchantments()) {
+        for (Holder<Enchantment> enchantmentHolder : rendered) {
             String enchantmentName = enchantmentHolder.value().description().getString();
 
             if (!enchantmentName.toLowerCase().contains(searchString.toString().toLowerCase())) {
@@ -126,7 +128,7 @@ public class Searchbar {
             }
         }
 
-        bookTab.getRenderedEnchantments().removeAll(toRemove);
+        rendered.removeAll(toRemove);
     }
 
     /**

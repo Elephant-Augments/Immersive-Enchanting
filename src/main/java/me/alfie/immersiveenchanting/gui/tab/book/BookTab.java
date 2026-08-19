@@ -115,6 +115,7 @@ public class BookTab {
      * </ul>
      */
     public void render(GuiGraphicsX gx, MousePos mousePos) {
+        applyFilters();
         searchbar.render(gx);
         renderTotalLabel(gx);
         renderEnchantmentBoxes(gx);
@@ -129,8 +130,6 @@ public class BookTab {
         int y = screen.getGuiTop() + EnchantingTableLayout.BOOK_LIST_Y;
 
         for (int i = 0; i < MAX_BOXES_RENDERED; i++) {
-            applyFilters();
-
             if (scrollbar.scrollIndex + i < renderedEnchantments.size()) {
                 Holder<Enchantment> enchantmentHolder = renderedEnchantments.get(scrollbar.scrollIndex + i);
                 EnchantmentBox box = new EnchantmentBox(this, enchantmentHolder);
@@ -148,7 +147,6 @@ public class BookTab {
      * Draws the total number of enchantments matching the current filters.
      */
     private void renderTotalLabel(GuiGraphicsX gx) {
-        applyFilters();
         int x = screen.getGuiLeft() + EnchantingTableLayout.BOOK_LIST_X;
         int y = screen.getGuiTop() + EnchantingTableLayout.BOOK_TOTAL_LABEL_Y;
         GuiGraphicsApi.text(
@@ -162,6 +160,13 @@ public class BookTab {
      */
     public List<Holder<Enchantment>> getRenderedEnchantments() {
         applyFilters();
+        return renderedEnchantments;
+    }
+
+    /**
+     * Current list while filters are being applied. Does not rebuild the list.
+     */
+    List<Holder<Enchantment>> currentRenderedEnchantments() {
         return renderedEnchantments;
     }
 
