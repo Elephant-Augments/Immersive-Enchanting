@@ -17,7 +17,11 @@
     "eternal_starlight:overheat",
     "nova_structures:ghasted",
     "netherdepthsupgrade:hell_strider",
-    "mynethersdelight:poaching"
+    "mynethersdelight:poaching",
+    "enchantencore:bane_of_netherborn",
+    "enchantencore:fire_alloy",
+    "enchantencore:magma_walker",
+    "enchantencore:wither_aspect"
   ],
   "min_rolls": 1,
   "max_rolls": 1,

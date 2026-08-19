@@ -9,7 +9,9 @@
     "minecraft:soul_fire_aspect",
     "eternal_starlight:soul_snatcher",
     "spore:corrosive_potency",
-    "hollowmarch:malefic_touch"
+    "hollowmarch:malefic_touch",
+    "enchantencore:wither_aspect",
+    "enchantencore:magma_walker"
   ],
   "min_rolls": 1,
   "max_rolls": 1,

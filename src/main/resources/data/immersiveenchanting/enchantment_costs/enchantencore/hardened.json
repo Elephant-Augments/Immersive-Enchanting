@@ -1,0 +1,11 @@
+{
+  "levels": {
+    "1": [{"item_cost": {"item": "minecraft:iron_ingot", "count": 8}}],
+    "2": [{"item_cost": {"item": "minecraft:iron_block", "count": 1}}],
+    "3": [{"item_cost": {"item": "minecraft:obsidian", "count": 4}}],
+    "4": [{"item_cost": {"item": "minecraft:crying_obsidian", "count": 2}}],
+    "5": [{"item_cost": {"item": "minecraft:netherite_scrap", "count": 1}}],
+    "6": [{"item_cost": {"item": "minecraft:redstone_block", "count": 1}}],
+    "7": [{"item_cost": {"item": "minecraft:gold_ingot", "count": 8}}]
+  }
+}

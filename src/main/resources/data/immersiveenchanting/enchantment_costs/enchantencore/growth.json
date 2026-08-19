@@ -1,0 +1,13 @@
+{
+  "levels": {
+    "1": [{"item_cost": {"item": "minecraft:bone_meal", "count": 16}}],
+    "2": [{"item_cost": {"item": "minecraft:bone_block", "count": 4}}],
+    "3": [{"item_cost": {"item": "minecraft:pitcher_pod", "count": 2}}],
+    "4": [{"item_cost": {"item": "minecraft:torchflower_seeds", "count": 2}}],
+    "5": [{"item_cost": {"item": "minecraft:pitcher_plant", "count": 1}}],
+    "6": [{"item_cost": {"item": "minecraft:redstone_block", "count": 1}}],
+    "7": [{"item_cost": {"item": "minecraft:gold_ingot", "count": 8}}],
+    "8": [{"item_cost": {"item": "minecraft:diamond", "count": 1}}],
+    "9": [{"item_cost": {"item": "minecraft:emerald", "count": 4}}]
+  }
+}

@@ -12,7 +12,11 @@
     "minecraft:swift_sneak",
     "nova_structures:gravity",
     "eternal_starlight:swift_lash",
-    "spell_power:soulfrost"
+    "spell_power:soulfrost",
+    "enchantencore:sonic",
+    "enchantencore:darkness_alloy",
+    "enchantencore:night_protection",
+    "enchantencore:night_vision"
   ],
   "min_rolls": 1,
   "max_rolls": 1,

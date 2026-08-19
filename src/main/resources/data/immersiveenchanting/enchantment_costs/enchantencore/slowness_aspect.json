@@ -1,0 +1,9 @@
+{
+  "levels": {
+    "1": [{"item_cost": {"item": "minecraft:cobweb", "count": 2}}],
+    "2": [{"item_cost": {"item": "minecraft:soul_sand", "count": 8}}],
+    "3": [{"item_cost": {"item": "minecraft:packed_ice", "count": 4}}],
+    "4": [{"item_cost": {"item": "minecraft:redstone_block", "count": 1}}],
+    "5": [{"item_cost": {"item": "minecraft:gold_ingot", "count": 8}}]
+  }
+}

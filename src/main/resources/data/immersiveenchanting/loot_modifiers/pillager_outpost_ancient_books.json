@@ -12,7 +12,10 @@
     "nova_structures:power",
     "nova_structures:piercing",
     "dungeons_arise:purification",
-    "apothic_enchanting:shield_bash"
+    "apothic_enchanting:shield_bash",
+    "enchantencore:bane_of_raiders",
+    "enchantencore:evokers_wrath",
+    "enchantencore:pickpocket"
   ],
   "min_rolls": 1,
   "max_rolls": 1,

@@ -8,7 +8,11 @@
     "apothic_enchanting:berserkers_fury",
     "more_rpg_classes:typhoon",
     "spell_power:haste",
-    "dungeons_arise:discharge"
+    "dungeons_arise:discharge",
+    "enchantencore:ominous_healing",
+    "enchantencore:ominous_rain",
+    "enchantencore:boltbringer",
+    "enchantencore:wind_aspect"
   ],
   "min_rolls": 1,
   "max_rolls": 1,

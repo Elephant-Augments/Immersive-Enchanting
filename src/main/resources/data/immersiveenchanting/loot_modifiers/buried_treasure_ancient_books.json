@@ -8,7 +8,9 @@
     "eternal_starlight:abyssal_touch",
     "hollowmarch:blessing_of_the_tides",
     "apothic_enchanting:scavenger",
-    "create_ltab:enchantment_luck"
+    "create_ltab:enchantment_luck",
+    "enchantencore:sea_breeze",
+    "enchantencore:crab_claw"
   ],
   "min_rolls": 1,
   "max_rolls": 1,

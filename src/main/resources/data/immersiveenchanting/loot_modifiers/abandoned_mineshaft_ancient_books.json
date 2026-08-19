@@ -18,7 +18,11 @@
     "betterarcheology:tunneling",
     "hollowmarch:miners_hunger",
     "create:capacity",
-    "galosphere:sifting"
+    "galosphere:sifting",
+    "enchantencore:haste",
+    "enchantencore:handyman",
+    "enchantencore:scholar_of_blocks",
+    "enchantencore:bedrocker"
   ],
   "min_rolls": 1,
   "max_rolls": 1,

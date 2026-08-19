@@ -9,7 +9,10 @@
     "eternal_starlight:abyssal_touch",
     "kattersstructures:ocean_heart",
     "nova_structures:antidote",
-    "hollowmarch:blessing_of_the_tides"
+    "hollowmarch:blessing_of_the_tides",
+    "enchantencore:sea_breeze",
+    "enchantencore:lightning_bolt",
+    "enchantencore:electric_walker"
   ],
   "min_rolls": 1,
   "max_rolls": 1,

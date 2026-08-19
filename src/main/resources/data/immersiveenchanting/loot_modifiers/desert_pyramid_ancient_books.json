@@ -10,7 +10,10 @@
     "betterarcheology:tunneling",
     "create:capacity",
     "hollowmarch:miners_hunger",
-    "galosphere:sifting"
+    "galosphere:sifting",
+    "enchantencore:sand_speed",
+    "enchantencore:summer_walker",
+    "enchantencore:day_protection"
   ],
   "min_rolls": 1,
   "max_rolls": 1,

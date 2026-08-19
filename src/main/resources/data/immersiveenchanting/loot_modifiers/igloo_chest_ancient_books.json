@@ -7,7 +7,10 @@
     "combat_roll:longfooted",
     "darkerdepths:quick_dash",
     "nova_structures:wax_wings",
-    "airhop:air_hop"
+    "airhop:air_hop",
+    "enchantencore:ice_alloy",
+    "enchantencore:bunny_hop",
+    "enchantencore:moonwalk"
   ],
   "min_rolls": 1,
   "max_rolls": 1,

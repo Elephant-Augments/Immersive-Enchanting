@@ -9,7 +9,9 @@
     "minecraft:soul_fire_aspect",
     "eternal_starlight:overheat",
     "nova_structures:wither_coated",
-    "dungeons_arise:voltaic_shot"
+    "dungeons_arise:voltaic_shot",
+    "enchantencore:forge_shot",
+    "enchantencore:flare"
   ],
   "min_rolls": 1,
   "max_rolls": 1,

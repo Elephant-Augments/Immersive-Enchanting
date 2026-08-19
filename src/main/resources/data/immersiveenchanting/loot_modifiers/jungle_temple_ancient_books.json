@@ -10,7 +10,11 @@
     "betterarcheology:tunneling",
     "hollowmarch:bountiful_harvest",
     "create:potato_recovery",
-    "mushroomquest:sporestep"
+    "mushroomquest:sporestep",
+    "enchantencore:growth",
+    "enchantencore:crop_dance",
+    "enchantencore:grass_walker",
+    "enchantencore:replenish"
   ],
   "min_rolls": 1,
   "max_rolls": 1,
