@@ -42,19 +42,19 @@
   "immersiveenchanting.tab.book": "Ancient Books",
   "immersiveenchanting.tab.enchanting": "Enchanting",
 
-  "immersiveenchanting.filter.unlocked": "Show unlocked",
-  "immersiveenchanting.filter.locked": "Show locked",
-  "immersiveenchanting.label.total_enchantments": "%d enchantment(s)",
+  "immersiveenchanting.filter.unlocked": "Show Unlocked",
+  "immersiveenchanting.filter.locked": "Show Locked",
+  "immersiveenchanting.label.total_enchantments": "%d Enchantment(s)",
 
   "immersiveenchanting.mod_filter.all": "All",
   "immersiveenchanting.mod_filter.unlocked": "Unlocked",
   "immersiveenchanting.mod_filter.cosmetics": "Cosmetics",
-  "immersiveenchanting.mod_filter.desc": "Click to show %s enchantments",
-  "immersiveenchanting.mod_filter.selected": "Showing %s enchantments",
+  "immersiveenchanting.mod_filter.desc": "Click to show only %s enchantments.",
+  "immersiveenchanting.mod_filter.selected": "Showing only %s enchantments.",
 
   "key.categories.immersiveenchanting": "Immersive Enchanting",
-  "key.immersiveenchanting.mod_filter": "Hold Mod Filter",
-  "immersiveenchanting.tooltip.hold_mod_filter": "Hold %s to filter by mod.",
+  "key.immersiveenchanting.mod_filter": "Hold-To-Filter",
+  "immersiveenchanting.tooltip.hold_mod_filter": "Hold %s to apply filters.",
 
 
   "immersiveenchanting.command.disabled_enchantments": "The following enchantments are disabled OR do not have an enchantment cost file: %s",
