@@ -92,11 +92,20 @@ public class Canvas implements ScreenEventListener {
      *                                used to determine how far branches can extend
      */
     public void setSizeToFitNodes(int highestEnchantmentLevel) {
+        Vector2i oldCenter = getCenter();
         highestEnchantmentLevel = Math.max(5, highestEnchantmentLevel); //Prevent canvas too small
 
-        int tileCount = ((BranchManager.getNodeStep() * 2) * highestEnchantmentLevel + TILE_SIZE - 1) / TILE_SIZE;
+        // Size against the maximum node spacing so apply/remove rebuilds don't
+        // shrink or grow the canvas when branch density (and nodeStep) changes.
+        int tileCount = ((BranchManager.MAX_NODE_STEP * 2) * highestEnchantmentLevel + TILE_SIZE - 1) / TILE_SIZE;
         int tileMargin = 2;
         setSize(tileCount + tileMargin);
+
+        if (screen.camera() != null) {
+            Vector2i newCenter = getCenter();
+            screen.camera().move(newCenter.x() - oldCenter.x(), newCenter.y() - oldCenter.y());
+            screen.camera().clampPosition();
+        }
     }
 
     public void setSize(int tileCount) {
