@@ -12,7 +12,9 @@
     "hollowmarch:blessing_of_the_tides",
     "enchantencore:sea_breeze",
     "enchantencore:lightning_bolt",
-    "enchantencore:electric_walker"
+    "enchantencore:electric_walker",
+    "enchantplus:trident/gungnir_breath",
+    "enchantplus:leggings/fast_swim"
   ],
   "min_rolls": 1,
   "max_rolls": 1,

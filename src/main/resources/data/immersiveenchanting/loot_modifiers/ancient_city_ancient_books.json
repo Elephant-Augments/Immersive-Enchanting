@@ -16,7 +16,10 @@
     "enchantencore:sonic",
     "enchantencore:darkness_alloy",
     "enchantencore:night_protection",
-    "enchantencore:night_vision"
+    "enchantencore:night_vision",
+    "enchantplus:bow/echo_shot",
+    "enchantplus:helmet/voidless",
+    "enchantplus:leggings/dwarfed"
   ],
   "min_rolls": 1,
   "max_rolls": 1,

@@ -1,0 +1,8 @@
+{
+  "levels": {
+    "1": [{"item_cost": {"item": "minecraft:magma_cream", "count": 4}}],
+    "2": [{"item_cost": {"item": "minecraft:magma_block", "count": 4}}],
+    "3": [{"item_cost": {"item": "minecraft:netherite_scrap", "count": 1}}],
+    "4": [{"item_cost": {"item": "minecraft:redstone_block", "count": 1}}]
+  }
+}

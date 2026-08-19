@@ -14,7 +14,10 @@
     "enchantencore:growth",
     "enchantencore:crop_dance",
     "enchantencore:grass_walker",
-    "enchantencore:replenish"
+    "enchantencore:replenish",
+    "enchantplus:hoe/harvest",
+    "enchantplus:hoe/scyther",
+    "enchantplus:axe/timber"
   ],
   "min_rolls": 1,
   "max_rolls": 1,

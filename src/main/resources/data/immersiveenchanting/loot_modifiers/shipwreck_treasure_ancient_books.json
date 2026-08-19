@@ -12,7 +12,9 @@
     "netherdepthsupgrade:hell_strider",
     "enchantencore:sea_breeze",
     "enchantencore:crab_claw",
-    "enchantencore:pufferfish"
+    "enchantencore:pufferfish",
+    "enchantplus:leggings/fast_swim",
+    "enchantplus:trident/gungnir_breath"
   ],
   "min_rolls": 1,
   "max_rolls": 1,

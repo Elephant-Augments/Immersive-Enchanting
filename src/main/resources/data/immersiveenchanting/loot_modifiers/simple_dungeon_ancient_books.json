@@ -20,7 +20,10 @@
     "dungeonsdelight:serrated_strike",
     "enchantencore:weaving_aspect",
     "enchantencore:poison_aspect",
-    "enchantencore:swift_slash"
+    "enchantencore:swift_slash",
+    "enchantplus:sword/life_steal",
+    "enchantplus:sword/poison_aspect",
+    "enchantplus:sword/critical"
   ],
   "min_rolls": 1,
   "max_rolls": 1,

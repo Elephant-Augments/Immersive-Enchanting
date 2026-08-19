@@ -15,7 +15,11 @@
     "apothic_enchanting:shield_bash",
     "enchantencore:bane_of_raiders",
     "enchantencore:evokers_wrath",
-    "enchantencore:pickpocket"
+    "enchantencore:pickpocket",
+    "enchantplus:bow/explosive_arrow",
+    "enchantplus:bow/accuracy_shot",
+    "enchantplus:bow/rebound",
+    "enchantplus:bow/storm_arrow"
   ],
   "min_rolls": 1,
   "max_rolls": 1,

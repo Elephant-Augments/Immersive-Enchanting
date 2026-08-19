@@ -1,0 +1,13 @@
+{
+  "levels": {
+    "1": [{"item_cost": {"item": "minecraft:phantom_membrane", "count": 4}}],
+    "2": [{"item_cost": {"item": "minecraft:wind_charge", "count": 8}}],
+    "3": [{"item_cost": {"item": "minecraft:shulker_shell", "count": 1}}],
+    "4": [{"item_cost": {"item": "minecraft:redstone_block", "count": 1}}],
+    "5": [{"item_cost": {"item": "minecraft:gold_ingot", "count": 8}}],
+    "6": [{"item_cost": {"item": "minecraft:diamond", "count": 1}}],
+    "7": [{"item_cost": {"item": "minecraft:emerald", "count": 4}}],
+    "8": [{"item_cost": {"item": "minecraft:netherite_scrap", "count": 1}}],
+    "9": [{"item_cost": {"item": "minecraft:echo_shard", "count": 1}}]
+  }
+}

@@ -11,7 +11,9 @@
     "nova_structures:wither_coated",
     "dungeons_arise:voltaic_shot",
     "enchantencore:forge_shot",
-    "enchantencore:flare"
+    "enchantencore:flare",
+    "enchantplus:boots/lava_walker",
+    "enchantplus:bow/explosive_arrow"
   ],
   "min_rolls": 1,
   "max_rolls": 1,
