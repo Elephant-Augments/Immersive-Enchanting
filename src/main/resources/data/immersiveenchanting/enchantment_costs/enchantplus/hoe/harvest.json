@@ -1,0 +1,12 @@
+{
+  "levels": {
+    "1": [{"item_cost": {"item": "minecraft:wheat", "count": 16}}],
+    "2": [{"item_cost": {"item": "minecraft:hay_block", "count": 4}}],
+    "3": [{"item_cost": {"item": "minecraft:golden_hoe", "count": 1}}],
+    "4": [{"item_cost": {"item": "minecraft:redstone_block", "count": 1}}],
+    "5": [{"item_cost": {"item": "minecraft:gold_ingot", "count": 8}}],
+    "6": [{"item_cost": {"item": "minecraft:diamond", "count": 1}}],
+    "7": [{"item_cost": {"item": "minecraft:emerald", "count": 4}}],
+    "8": [{"item_cost": {"item": "minecraft:netherite_scrap", "count": 1}}]
+  }
+}

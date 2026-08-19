@@ -13,7 +13,9 @@
     "spore:cryogenic_aspect",
     "enchantencore:fire_alloy",
     "enchantencore:nether_protection",
-    "enchantencore:midas_touch"
+    "enchantencore:midas_touch",
+    "enchantplus:midas_touch",
+    "enchantplus:boots/lava_walker"
   ],
   "min_rolls": 1,
   "max_rolls": 1,

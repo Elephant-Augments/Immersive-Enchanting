@@ -11,7 +11,9 @@
     "spore:corrosive_potency",
     "hollowmarch:malefic_touch",
     "enchantencore:wither_aspect",
-    "enchantencore:magma_walker"
+    "enchantencore:magma_walker",
+    "enchantplus:armor/fury",
+    "enchantplus:tools/auto_smelt"
   ],
   "min_rolls": 1,
   "max_rolls": 1,

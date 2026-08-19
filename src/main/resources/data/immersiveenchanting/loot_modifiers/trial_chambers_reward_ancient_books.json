@@ -12,7 +12,11 @@
     "enchantencore:ominous_healing",
     "enchantencore:ominous_rain",
     "enchantencore:boltbringer",
-    "enchantencore:wind_aspect"
+    "enchantencore:wind_aspect",
+    "enchantplus:mace/striker",
+    "enchantplus:mace/teluric_wave",
+    "enchantplus:mace/wind_propulsion",
+    "enchantplus:bow/breezing_arrow"
   ],
   "min_rolls": 1,
   "max_rolls": 1,

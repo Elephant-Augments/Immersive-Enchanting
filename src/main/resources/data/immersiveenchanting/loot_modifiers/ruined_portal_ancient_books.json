@@ -17,7 +17,10 @@
     "kattersstructures:enlightning",
     "enchantencore:fire_alloy",
     "enchantencore:flare",
-    "enchantencore:magma_walker"
+    "enchantencore:magma_walker",
+    "enchantplus:boots/lava_walker",
+    "enchantplus:tools/auto_smelt",
+    "enchantplus:armor/fury"
   ],
   "min_rolls": 1,
   "max_rolls": 1,

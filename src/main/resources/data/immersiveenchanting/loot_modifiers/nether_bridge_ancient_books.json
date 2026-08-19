@@ -21,7 +21,11 @@
     "enchantencore:bane_of_netherborn",
     "enchantencore:fire_alloy",
     "enchantencore:magma_walker",
-    "enchantencore:wither_aspect"
+    "enchantencore:wither_aspect",
+    "enchantplus:boots/lava_walker",
+    "enchantplus:tools/auto_smelt",
+    "enchantplus:armor/fury",
+    "enchantplus:sword/death_touch"
   ],
   "min_rolls": 1,
   "max_rolls": 1,

@@ -16,7 +16,11 @@
     "enchantencore:evokers_wrath",
     "enchantencore:invisibility_cloak",
     "enchantencore:leech",
-    "enchantencore:bane_of_bosses"
+    "enchantencore:bane_of_bosses",
+    "enchantplus:bow/echo_shot",
+    "enchantplus:sword/fear",
+    "enchantplus:sword/runic_despair",
+    "enchantplus:sword/last_hope"
   ],
   "min_rolls": 1,
   "max_rolls": 1,

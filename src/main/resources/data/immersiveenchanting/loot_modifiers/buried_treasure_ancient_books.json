@@ -10,7 +10,9 @@
     "apothic_enchanting:scavenger",
     "create_ltab:enchantment_luck",
     "enchantencore:sea_breeze",
-    "enchantencore:crab_claw"
+    "enchantencore:crab_claw",
+    "enchantplus:leggings/fast_swim",
+    "enchantplus:sword/pull"
   ],
   "min_rolls": 1,
   "max_rolls": 1,

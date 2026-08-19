@@ -13,7 +13,10 @@
     "enchantencore:end_protection",
     "enchantencore:enderscape",
     "enchantencore:shulker_shell",
-    "enchantencore:hardened"
+    "enchantencore:hardened",
+    "enchantplus:sword/dimensional_hit",
+    "enchantplus:helmet/voidless",
+    "enchantplus:trident/gungnir_breath"
   ],
   "min_rolls": 1,
   "max_rolls": 1,

@@ -1,0 +1,10 @@
+{
+  "levels": {
+    "1": [{"item_cost": {"item": "minecraft:sugar", "count": 16}}],
+    "2": [{"item_cost": {"item": "minecraft:redstone", "count": 16}}],
+    "3": [{"item_cost": {"item": "minecraft:rabbit_foot", "count": 1}}],
+    "4": [{"item_cost": {"item": "minecraft:redstone_block", "count": 1}}],
+    "5": [{"item_cost": {"item": "minecraft:gold_ingot", "count": 8}}],
+    "6": [{"item_cost": {"item": "minecraft:diamond", "count": 1}}]
+  }
+}

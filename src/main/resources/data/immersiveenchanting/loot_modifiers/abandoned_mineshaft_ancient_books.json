@@ -22,7 +22,11 @@
     "enchantencore:haste",
     "enchantencore:handyman",
     "enchantencore:scholar_of_blocks",
-    "enchantencore:bedrocker"
+    "enchantencore:bedrocker",
+    "enchantplus:pickaxe/vein_miner",
+    "enchantplus:tools/miningplus",
+    "enchantplus:pickaxe/bedrock_breaker",
+    "enchantplus:chestplate/magnet"
   ],
   "min_rolls": 1,
   "max_rolls": 1,

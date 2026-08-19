@@ -13,7 +13,10 @@
     "galosphere:sifting",
     "enchantencore:sand_speed",
     "enchantencore:summer_walker",
-    "enchantencore:day_protection"
+    "enchantencore:day_protection",
+    "enchantplus:tools/miningplus",
+    "enchantplus:pickaxe/vein_miner",
+    "enchantplus:chestplate/builder_arm"
   ],
   "min_rolls": 1,
   "max_rolls": 1,

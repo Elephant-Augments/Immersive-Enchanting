@@ -11,7 +11,9 @@
     "kattersstructures:ocean_heart",
     "nova_structures:antidote",
     "enchantencore:pufferfish",
-    "enchantencore:crab_claw"
+    "enchantencore:crab_claw",
+    "enchantplus:leggings/fast_swim",
+    "enchantplus:trident/gungnir_breath"
   ],
   "min_rolls": 1,
   "max_rolls": 1,

@@ -10,7 +10,10 @@
     "airhop:air_hop",
     "enchantencore:ice_alloy",
     "enchantencore:bunny_hop",
-    "enchantencore:moonwalk"
+    "enchantencore:moonwalk",
+    "enchantplus:bow/eternal_frost",
+    "enchantplus:leggings/leaping",
+    "enchantplus:boots/agility"
   ],
   "min_rolls": 1,
   "max_rolls": 1,
