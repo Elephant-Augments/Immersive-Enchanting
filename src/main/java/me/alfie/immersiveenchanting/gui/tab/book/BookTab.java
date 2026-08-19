@@ -88,16 +88,10 @@ public class BookTab {
      */
     private void applyFilters() {
         renderedEnchantments.clear();
-        if (screen.isShowingUnlockedOnly()) {
-            renderedEnchantments.addAll(screen.getMenu().getAvailableEnchantments());
-        } else {
-            String modid = screen.filteredModid();
-            renderedEnchantments.addAll(
-                    CostRegistry.client().getAllEnabledEnchantmentHolders().stream()
-                            .filter(e -> modid == null || modid.equals(e.getKey().location().getNamespace()))
-                            .toList()
-            );
-        }
+        var source = screen.isShowingUnlockedOnly()
+                ? screen.getMenu().getAvailableEnchantments().stream()
+                : CostRegistry.client().getAllEnabledEnchantmentHolders().stream();
+        renderedEnchantments.addAll(source.filter(screen::matchesCurrentFilter).toList());
 
         searchbar.checkSearch();
         renderedEnchantments.sort(Comparator.comparing(e -> e.value().description().getString()));

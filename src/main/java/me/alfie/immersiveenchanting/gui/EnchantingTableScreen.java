@@ -8,6 +8,7 @@ import me.alfie.alfinolib.gui.util.GuiGraphicsApi;
 import me.alfie.alfinolib.gui.util.MousePos;
 import me.alfie.immersiveenchanting.client.ModKeyMappings;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
+import me.alfie.immersiveenchanting.api.node.internal.ModFilterNodeData;
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
 import me.alfie.immersiveenchanting.gui.canvas.CanvasCamera;
 import me.alfie.immersiveenchanting.gui.core.ScreenState;
@@ -19,15 +20,18 @@ import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.CostRenderer;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.TooltipManager;
 import me.alfie.immersiveenchanting.item.ModItems;
+import me.alfie.immersiveenchanting.tags.ModEnchantmentTags;
 import me.alfie.immersiveenchanting.util.FxHelper;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -199,21 +203,48 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
     }
 
     /**
-     * @return {@code true} if the picker is showing every enchantment
+     * @return {@code true} if the picker is showing every enchantment.
      */
     public boolean isShowingAll() {
         return !unlockedOnly && filteredModid == null;
     }
 
     /**
-     * @return {@code true} if the picker is showing only unlocked enchantments
+     * @return {@code true} if the picker is showing only unlocked enchantments.
      */
     public boolean isShowingUnlockedOnly() {
         return unlockedOnly;
     }
 
     /**
-     * @return the selected mod namespace, or {@code null} when showing all
+     * @return {@code true} if the picker is showing cosmetic enchantments.
+     */
+    public boolean isShowingCosmeticsOnly() {
+        return !unlockedOnly && ModFilterNodeData.COSMETICS.equals(filteredModid);
+    }
+
+    /**
+     * @return {@code true} if this enchantment should appear under the current filter.
+     */
+    public boolean matchesCurrentFilter(Holder<Enchantment> enchantment) {
+        boolean cosmetic = ModEnchantmentTags.isCosmetic(enchantment);
+        if (unlockedOnly) {
+            return !cosmetic && getMenu().isEnchantmentAvailable(enchantment);
+        }
+        if (isShowingCosmeticsOnly()) {
+            return cosmetic;
+        }
+        if (cosmetic) {
+            return false;
+        }
+        String namespace = enchantment.unwrapKey()
+                .map(key -> key.location().getNamespace())
+                .orElse(null);
+        return filteredModid == null || filteredModid.equals(namespace);
+    }
+
+    /**
+     * @return the selected mod namespace, or {@code null} when showing all.
      */
     public @Nullable String filteredModid() {
         return filteredModid;

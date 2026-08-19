@@ -12,6 +12,9 @@ import java.util.List;
  * Functions to calculate node step/angles and position.
  */
 public class BranchManager {
+    public static final int MAX_NODE_STEP = 120;
+    private static final int MIN_NODE_STEP = 40;
+
     private static int nodeStep = 100;
     private static float nodeBranchScale = 1f;
 
@@ -63,9 +66,9 @@ public class BranchManager {
      * If even the maximum step size would cause overlap, nodes are scaled down instead.
      */
     private void calculateNodeAnglesAndStep() {
-        final int baseStep = 40;
-        final int minStep = 40;
-        final int maxStep = 120;
+        final int baseStep = MIN_NODE_STEP;
+        final int minStep = MIN_NODE_STEP;
+        final int maxStep = MAX_NODE_STEP;
         final float minScale = 0.3f;
         final float maxScale = 1f;
         final int margin = 4;

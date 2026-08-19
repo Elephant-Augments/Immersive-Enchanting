@@ -48,6 +48,7 @@
 
   "immersiveenchanting.mod_filter.all": "All",
   "immersiveenchanting.mod_filter.unlocked": "Unlocked",
+  "immersiveenchanting.mod_filter.cosmetics": "Cosmetics",
   "immersiveenchanting.mod_filter.desc": "Click to show %s enchantments",
   "immersiveenchanting.mod_filter.selected": "Showing %s enchantments",
 
