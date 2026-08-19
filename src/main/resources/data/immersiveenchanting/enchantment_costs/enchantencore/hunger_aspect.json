@@ -1,0 +1,9 @@
+{
+  "levels": {
+    "1": [{"item_cost": {"item": "minecraft:rotten_flesh", "count": 16}}],
+    "2": [{"item_cost": {"item": "minecraft:pufferfish", "count": 2}}],
+    "3": [{"item_cost": {"item": "minecraft:spider_eye", "count": 8}}],
+    "4": [{"item_cost": {"item": "minecraft:redstone_block", "count": 1}}],
+    "5": [{"item_cost": {"item": "minecraft:gold_ingot", "count": 8}}]
+  }
+}

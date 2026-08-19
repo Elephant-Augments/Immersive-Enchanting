@@ -1,0 +1,13 @@
+{
+  "levels": {
+    "1": [{"item_cost": {"item": "minecraft:phantom_membrane", "count": 2}}],
+    "2": [{"item_cost": {"item": "minecraft:arrow", "count": 32}}],
+    "3": [{"item_cost": {"item": "minecraft:spectral_arrow", "count": 8}}],
+    "4": [{"item_cost": {"item": "minecraft:glowstone_dust", "count": 8}}],
+    "5": [{"item_cost": {"item": "minecraft:echo_shard", "count": 1}}],
+    "6": [{"item_cost": {"item": "minecraft:redstone_block", "count": 1}}],
+    "7": [{"item_cost": {"item": "minecraft:gold_ingot", "count": 8}}],
+    "8": [{"item_cost": {"item": "minecraft:diamond", "count": 1}}],
+    "9": [{"item_cost": {"item": "minecraft:emerald", "count": 4}}]
+  }
+}

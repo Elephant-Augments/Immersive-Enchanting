@@ -1,0 +1,11 @@
+{
+  "levels": {
+    "1": [{"item_cost": {"item": "minecraft:short_grass", "count": 32}}],
+    "2": [{"item_cost": {"item": "minecraft:moss_block", "count": 4}}],
+    "3": [{"item_cost": {"item": "minecraft:wheat_seeds", "count": 16}}],
+    "4": [{"item_cost": {"item": "minecraft:redstone_block", "count": 1}}],
+    "5": [{"item_cost": {"item": "minecraft:gold_ingot", "count": 8}}],
+    "6": [{"item_cost": {"item": "minecraft:diamond", "count": 1}}],
+    "7": [{"item_cost": {"item": "minecraft:emerald", "count": 4}}]
+  }
+}

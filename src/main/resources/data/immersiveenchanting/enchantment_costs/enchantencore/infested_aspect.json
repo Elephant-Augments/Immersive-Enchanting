@@ -1,0 +1,9 @@
+{
+  "levels": {
+    "1": [{"item_cost": {"item": "minecraft:stone_bricks", "count": 16}}],
+    "2": [{"item_cost": {"item": "minecraft:infested_stone", "count": 8}}],
+    "3": [{"item_cost": {"item": "minecraft:iron_nugget", "count": 16}}],
+    "4": [{"item_cost": {"item": "minecraft:redstone_block", "count": 1}}],
+    "5": [{"item_cost": {"item": "minecraft:gold_ingot", "count": 8}}]
+  }
+}

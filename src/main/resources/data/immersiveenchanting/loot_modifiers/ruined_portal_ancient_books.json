@@ -14,7 +14,10 @@
     "minecraft:soul_fire_aspect",
     "minecraft:sweeping_edge",
     "eternal_starlight:overheat",
-    "kattersstructures:enlightning"
+    "kattersstructures:enlightning",
+    "enchantencore:fire_alloy",
+    "enchantencore:flare",
+    "enchantencore:magma_walker"
   ],
   "min_rolls": 1,
   "max_rolls": 1,

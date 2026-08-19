@@ -10,7 +10,10 @@
     "minecraft:soul_flame",
     "eternal_starlight:overheat",
     "nova_structures:ghasted",
-    "spore:cryogenic_aspect"
+    "spore:cryogenic_aspect",
+    "enchantencore:fire_alloy",
+    "enchantencore:nether_protection",
+    "enchantencore:midas_touch"
   ],
   "min_rolls": 1,
   "max_rolls": 1,

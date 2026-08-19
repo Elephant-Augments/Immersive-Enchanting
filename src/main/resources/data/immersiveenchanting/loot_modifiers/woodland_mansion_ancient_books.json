@@ -12,7 +12,11 @@
     "nova_structures:multishot",
     "apothic_enchanting:crescendo_of_bolts",
     "apothic_enchanting:endless_quiver",
-    "spell_power:critical_chance"
+    "spell_power:critical_chance",
+    "enchantencore:evokers_wrath",
+    "enchantencore:invisibility_cloak",
+    "enchantencore:leech",
+    "enchantencore:bane_of_bosses"
   ],
   "min_rolls": 1,
   "max_rolls": 1,
