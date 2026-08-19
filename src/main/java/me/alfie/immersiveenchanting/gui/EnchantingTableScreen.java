@@ -26,6 +26,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
@@ -67,8 +68,11 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
     private final CostRenderer enchantmentCostRenderer;
     private final TooltipManager tooltipManager;
 
-    private @Nullable String filteredModid = "minecraft";
-    private boolean unlockedOnly;
+    private static @Nullable String rememberedFilteredModid = "minecraft";
+    private static boolean rememberedUnlockedOnly;
+
+    private @Nullable String filteredModid = rememberedFilteredModid;
+    private boolean unlockedOnly = rememberedUnlockedOnly;
     private boolean isTabKeyDown;
     private ItemStack deferredCentralItemTooltip = ItemStack.EMPTY;
     @Nullable
@@ -88,6 +92,15 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
 
         this.enchantmentCostRenderer = new CostRenderer(CostRegistry.client());
         this.tooltipManager = new TooltipManager(this);
+
+        if (isShowingCosmeticsOnly()
+                && registryAccess.lookupOrThrow(Registries.ENCHANTMENT)
+                        .listElements()
+                        .noneMatch(ModEnchantmentTags::isCosmetic)) {
+            this.filteredModid = "minecraft";
+            this.unlockedOnly = false;
+            rememberCurrentFilter();
+        }
 
         onToolSlotUpdate(ItemStack.EMPTY);
     }
@@ -256,14 +269,21 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
     public void selectModFromPicker(@Nullable String modid) {
         this.unlockedOnly = false;
         this.filteredModid = modid;
+        rememberCurrentFilter();
         bookTab.scrollbar().resetScrollIndex();
         rebuildBranches();
     }
 
     public void selectUnlockedFromPicker() {
         this.unlockedOnly = true;
+        rememberCurrentFilter();
         bookTab.scrollbar().resetScrollIndex();
         rebuildBranches();
+    }
+
+    private void rememberCurrentFilter() {
+        rememberedFilteredModid = filteredModid;
+        rememberedUnlockedOnly = unlockedOnly;
     }
 
     @Override
