@@ -1,5 +1,6 @@
 {
   "type": "immersiveenchanting:ancient_book_loot_modifier",
+  "pool": "all",
   "mode": "random_enchantment_from_enabled",
   "min_rolls": 1,
   "max_rolls": 2,
@@ -11,14 +12,14 @@
           "condition": "minecraft:all_of",
           "terms": [
             {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/abandoned_mineshaft"},
-            {"condition": "minecraft:random_chance", "chance": 0.1}
+            {"condition": "minecraft:random_chance", "chance": 1.0}
           ]
         },
         {
           "condition": "minecraft:all_of",
           "terms": [
             {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/ancient_city"},
-            {"condition": "minecraft:random_chance", "chance": 0.1}
+            {"condition": "minecraft:random_chance", "chance": 1.0}
           ]
         },
 
@@ -26,35 +27,35 @@
           "condition": "minecraft:all_of",
           "terms": [
             {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/bastion_treasure"},
-            {"condition": "minecraft:random_chance", "chance": 0.1}
+            {"condition": "minecraft:random_chance", "chance": 1.0}
           ]
         },
         {
           "condition": "minecraft:all_of",
           "terms": [
             {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/nether_bridge"},
-            {"condition": "minecraft:random_chance", "chance": 0.1}
+            {"condition": "minecraft:random_chance", "chance": 1.0}
           ]
         },
         {
           "condition": "minecraft:all_of",
           "terms": [
             {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/bastion_bridge"},
-            {"condition": "minecraft:random_chance", "chance": 0.1}
+            {"condition": "minecraft:random_chance", "chance": 1.0}
           ]
         },
         {
           "condition": "minecraft:all_of",
           "terms": [
             {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/bastion_other"},
-            {"condition": "minecraft:random_chance", "chance": 0.1}
+            {"condition": "minecraft:random_chance", "chance": 1.0}
           ]
         },
         {
           "condition": "minecraft:all_of",
           "terms": [
             {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/ruined_portal"},
-            {"condition": "minecraft:random_chance", "chance": 0.1}
+            {"condition": "minecraft:random_chance", "chance": 1.0}
           ]
         },
 
@@ -62,28 +63,28 @@
           "condition": "minecraft:all_of",
           "terms": [
             {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/end_city_treasure"},
-            {"condition": "minecraft:random_chance", "chance": 0.5}
+            {"condition": "minecraft:random_chance", "chance": 1.0}
           ]
         },
         {
           "condition": "minecraft:all_of",
           "terms": [
             {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/simple_dungeon"},
-            {"condition": "minecraft:random_chance", "chance": 0.1}
+            {"condition": "minecraft:random_chance", "chance": 1.0}
           ]
         },
         {
           "condition": "minecraft:all_of",
           "terms": [
             {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/stronghold_library"},
-            {"condition": "minecraft:random_chance", "chance": 0.5}
+            {"condition": "minecraft:random_chance", "chance": 1.0}
           ]
         },
         {
           "condition": "minecraft:all_of",
           "terms": [
             {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/stronghold_corridor"},
-            {"condition": "minecraft:random_chance", "chance": 0.1}
+            {"condition": "minecraft:random_chance", "chance": 1.0}
           ]
         },
 
@@ -91,14 +92,14 @@
           "condition": "minecraft:all_of",
           "terms": [
             {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/desert_pyramid"},
-            {"condition": "minecraft:random_chance", "chance": 0.1}
+            {"condition": "minecraft:random_chance", "chance": 1.0}
           ]
         },
         {
           "condition": "minecraft:all_of",
           "terms": [
             {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/jungle_temple"},
-            {"condition": "minecraft:random_chance", "chance": 0.1}
+            {"condition": "minecraft:random_chance", "chance": 1.0}
           ]
         },
 
@@ -107,21 +108,21 @@
           "condition": "minecraft:all_of",
           "terms": [
             {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/pillager_outpost"},
-            {"condition": "minecraft:random_chance", "chance": 0.1}
+            {"condition": "minecraft:random_chance", "chance": 1.0}
           ]
         },
         {
           "condition": "minecraft:all_of",
           "terms": [
             {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/igloo_chest"},
-            {"condition": "minecraft:random_chance", "chance": 0.1}
+            {"condition": "minecraft:random_chance", "chance": 1.0}
           ]
         },
         {
           "condition": "minecraft:all_of",
           "terms": [
             {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/woodland_mansion"},
-            {"condition": "minecraft:random_chance", "chance": 0.1}
+            {"condition": "minecraft:random_chance", "chance": 1.0}
           ]
         },
 
@@ -129,7 +130,7 @@
           "condition": "minecraft:all_of",
           "terms": [
             {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/trial_chambers/reward"},
-            {"condition": "minecraft:random_chance", "chance": 0.1}
+            {"condition": "minecraft:random_chance", "chance": 1.0}
           ]
         },
 
@@ -138,14 +139,14 @@
           "condition": "minecraft:all_of",
           "terms": [
             {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/village/village_temple"},
-            {"condition": "minecraft:random_chance", "chance": 0.1}
+            {"condition": "minecraft:random_chance", "chance": 1.0}
           ]
         },
         {
           "condition": "minecraft:all_of",
           "terms": [
             {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/village/village_cartographer"},
-            {"condition": "minecraft:random_chance", "chance": 0.1}
+            {"condition": "minecraft:random_chance", "chance": 1.0}
           ]
         },
 
@@ -153,28 +154,28 @@
           "condition": "minecraft:all_of",
           "terms": [
             {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/underwater_ruin_big"},
-            {"condition": "minecraft:random_chance", "chance": 0.1}
+            {"condition": "minecraft:random_chance", "chance": 1.0}
           ]
         },
         {
           "condition": "minecraft:all_of",
           "terms": [
             {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/underwater_ruin_small"},
-            {"condition": "minecraft:random_chance", "chance": 0.1}
+            {"condition": "minecraft:random_chance", "chance": 1.0}
           ]
         },
         {
           "condition": "minecraft:all_of",
           "terms": [
             {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/buried_treasure"},
-            {"condition": "minecraft:random_chance", "chance": 0.1}
+            {"condition": "minecraft:random_chance", "chance": 1.0}
           ]
         },
         {
           "condition": "minecraft:all_of",
           "terms": [
             {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/shipwreck_treasure"},
-            {"condition": "minecraft:random_chance", "chance": 0.1}
+            {"condition": "minecraft:random_chance", "chance": 1.0}
           ]
         }
       ]

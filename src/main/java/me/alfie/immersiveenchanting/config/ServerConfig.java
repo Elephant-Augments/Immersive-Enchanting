@@ -30,6 +30,9 @@ public class ServerConfig {
 
     public final ModConfigSpec.EnumValue<EnchantedBookLootMode> ENCHANTED_BOOK_LOOT_MODE;
 
+    public final ModConfigSpec.DoubleValue ALL_TABLES_CHANCE;
+    public final ModConfigSpec.DoubleValue THEMED_TABLES_CHANCE;
+
     static {
         Pair<ServerConfig, ModConfigSpec> pair =
                 new ModConfigSpec.Builder().configure(ServerConfig::new);
@@ -89,6 +92,17 @@ public class ServerConfig {
                 .comment("If enabled, vanilla enchanted books will not appear in villager trades.")
                 .translation("immersiveenchanting.config.disable_enchanted_book_trades")
                 .define("disableEnchantedBookTrades", true);
+
+        ALL_TABLES_CHANCE = builder
+                .comment("Chance for the generic ancient-book loot pool to roll on chests. Default 0.1 (10%). End city and stronghold library use five times this value (50% at default).")
+                .translation("immersiveenchanting.config.all_tables_chance")
+                .defineInRange("allTablesChance", 0.1d, 0.0d, 1.0d);
+
+        THEMED_TABLES_CHANCE = builder
+                .comment("Chance for a themed ancient-book loot pool to roll on its matching chests. Default 0.25 (25%).")
+                .translation("immersiveenchanting.config.themed_tables_chance")
+                .defineInRange("themedTablesChance", 0.25d, 0.0d, 1.0d);
+        builder.pop();
     }
 
     public static boolean areAncientBooksRequired() {
@@ -119,5 +133,13 @@ public class ServerConfig {
 
     public static boolean showAllEnchantmentLevels() {
         return ServerConfig.CONFIG.SHOW_ALL_ENCHANTMENT_LEVELS.get();
+    }
+
+    public static double getAllTablesChance() {
+        return ServerConfig.CONFIG.ALL_TABLES_CHANCE.get();
+    }
+
+    public static double getThemedTablesChance() {
+        return ServerConfig.CONFIG.THEMED_TABLES_CHANCE.get();
     }
 }

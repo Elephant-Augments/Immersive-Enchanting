@@ -1,5 +1,6 @@
 {
   "type": "immersiveenchanting:ancient_book_loot_modifier",
+  "pool": "themed",
   "mode": "random_enchantment_from_list",
   "enchantments": [
     "minecraft:efficiency",
@@ -33,7 +34,7 @@
             },
             {
               "condition": "minecraft:random_chance",
-              "chance": 0.25
+              "chance": 1.0
             }
           ]
         }

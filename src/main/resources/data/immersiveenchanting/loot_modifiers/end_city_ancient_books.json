@@ -1,5 +1,6 @@
 {
   "type": "immersiveenchanting:ancient_book_loot_modifier",
+  "pool": "themed",
   "mode": "random_enchantment_from_enabled",
   "min_rolls": 1,
   "max_rolls": 2,
@@ -11,7 +12,7 @@
           "condition": "minecraft:all_of",
           "terms": [
             {"condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/end_city_treasure"},
-            {"condition": "minecraft:random_chance", "chance": 0.25}
+            {"condition": "minecraft:random_chance", "chance": 1.0}
           ]
         }
       ]
