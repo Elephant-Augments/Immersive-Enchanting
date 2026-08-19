@@ -6,6 +6,7 @@ import me.alfie.alfinolib.gui.CommonAbstractContainerScreen;
 import me.alfie.alfinolib.gui.GuiGraphicsX;
 import me.alfie.alfinolib.gui.util.GuiGraphicsApi;
 import me.alfie.alfinolib.gui.util.MousePos;
+import me.alfie.immersiveenchanting.client.ModKeyMappings;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
 import me.alfie.immersiveenchanting.gui.canvas.CanvasCamera;
@@ -13,7 +14,6 @@ import me.alfie.immersiveenchanting.gui.core.ScreenState;
 import me.alfie.immersiveenchanting.gui.core.Sprite;
 import me.alfie.immersiveenchanting.gui.tab.TabButton;
 import me.alfie.immersiveenchanting.gui.tab.book.BookTab;
-import me.alfie.immersiveenchanting.gui.tab.book.FilterCheckbox;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.EnchantingTab;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.CostRenderer;
@@ -53,6 +53,7 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
     private final EnchantingTab enchantingTab;
     private final BookTab bookTab;
     private final TabButton tabButton;
+    private final ModFilterHelpHint modFilterHelpHint;
 
     private ItemStack lastToolSlotStack = ItemStack.EMPTY;
 
@@ -62,6 +63,8 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
     private final CostRenderer enchantmentCostRenderer;
     private final TooltipManager tooltipManager;
 
+    private @Nullable String filteredModid = "minecraft";
+    private boolean unlockedOnly;
     private boolean isTabKeyDown;
     private ItemStack deferredCentralItemTooltip = ItemStack.EMPTY;
     @Nullable
@@ -77,6 +80,7 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
         enchantingTab = new EnchantingTab(this);
         bookTab = new BookTab(this);
         tabButton = new TabButton(this);
+        modFilterHelpHint = new ModFilterHelpHint(this);
 
         this.enchantmentCostRenderer = new CostRenderer(CostRegistry.client());
         this.tooltipManager = new TooltipManager(this);
@@ -112,12 +116,13 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
 
         canvas().render(gx);
 
-        if(isState(ScreenState.ENCHANTING)) enchantingTab.render(gx, mousePos);
+        boolean showModPicker = enchantingTab.isDisplay(EnchantingTab.Display.MOD_FILTERS);
+        if(isState(ScreenState.ENCHANTING) || showModPicker) enchantingTab.render(gx, mousePos);
         gx.graphics().pose().popPose();
 
         gx.graphics().pose().pushPose();
         gx.graphics().pose().translate(0, 0, 2);
-        if(isState(ScreenState.BOOKS)) bookTab.render(gx, mousePos);
+        if(isState(ScreenState.BOOKS) && !showModPicker) bookTab.render(gx, mousePos);
         gx.graphics().pose().popPose();
 
         if(!canvas().DEBUG_DISABLE_CULLING) gx.graphics().disableScissor();
@@ -139,6 +144,7 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
 
         gx.graphics().pose().pushPose();
         gx.graphics().pose().translate(0, 0, 400);
+        modFilterHelpHint.render(gx, mousePos);
         if(tooltipManager.hasActiveTooltip() && !renderedNodes.contains(tooltipManager.getActiveTooltipNode()))
             tooltipManager.clearActiveTooltip();
 
@@ -192,6 +198,43 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
         this.deferredTabTooltip = tooltip;
     }
 
+    /**
+     * @return {@code true} if the picker is showing every enchantment
+     */
+    public boolean isShowingAll() {
+        return !unlockedOnly && filteredModid == null;
+    }
+
+    /**
+     * @return {@code true} if the picker is showing only unlocked enchantments
+     */
+    public boolean isShowingUnlockedOnly() {
+        return unlockedOnly;
+    }
+
+    /**
+     * @return the selected mod namespace, or {@code null} when showing all
+     */
+    public @Nullable String filteredModid() {
+        return filteredModid;
+    }
+
+    /**
+     * Applies a selection from the hold-to-filter picker.
+     */
+    public void selectModFromPicker(@Nullable String modid) {
+        this.unlockedOnly = false;
+        this.filteredModid = modid;
+        bookTab.scrollbar().resetScrollIndex();
+        rebuildBranches();
+    }
+
+    public void selectUnlockedFromPicker() {
+        this.unlockedOnly = true;
+        bookTab.scrollbar().resetScrollIndex();
+        rebuildBranches();
+    }
+
     @Override
     public void renderLabels(GuiGraphicsX gx, MousePos mousePos) {
         GuiGraphicsApi.text(
@@ -208,7 +251,7 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
     public boolean onMouseClick(MousePos mousePos, int button) {
         if(tabButton.onMouseClick(mousePos, button)) return true;
 
-        if(isState(ScreenState.ENCHANTING)) {
+        if(isState(ScreenState.ENCHANTING) || enchantingTab.isDisplay(EnchantingTab.Display.MOD_FILTERS)) {
             if(enchantingTab.centralSlot().onMouseClick(mousePos, button)) return true;
 
             if(tooltipManager.hasActiveTooltip() && tooltipManager.getActiveTooltip().onMouseClick(mousePos, button)) return true;
@@ -216,8 +259,6 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
             if(camera.onMouseClick(mousePos, button)) return true;
         } else if(isState(ScreenState.BOOKS)) {
             if(bookTab.scrollbar().onMouseClick(mousePos, button)) return true;
-
-            for(FilterCheckbox checkbox : bookTab.filterCheckboxes()) if(checkbox.onMouseClick(mousePos, button)) return true;
         }
 
         return super.onMouseClick(mousePos, button);
@@ -245,7 +286,7 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
 
     @Override
     public boolean onMouseScrolled(MousePos mousePos, double scrollY) {
-        if(isState(ScreenState.ENCHANTING)) {
+        if(isState(ScreenState.ENCHANTING) || enchantingTab.isDisplay(EnchantingTab.Display.MOD_FILTERS)) {
             if(camera.onMouseScrolled(mousePos, scrollY)) return true;
         } else if(isState(ScreenState.BOOKS)) {
             if(bookTab.scrollbar().onMouseScrolled(mousePos, scrollY)) return true;
@@ -256,6 +297,11 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
 
     @Override
     public boolean onKeyPress(int keyCode, int scanCode, int modifiers) {
+        if(ModKeyMappings.isModFilterKey(keyCode, scanCode)) {
+            isTabKeyDown = true;
+            return true;
+        }
+
         if(isState(ScreenState.BOOKS)) {
             if(keyCode == InputConstants.KEY_BACKSPACE) {
                 bookTab.searchbar().removeCharFromSearch();
@@ -268,19 +314,12 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
             }
         }
 
-        if(isState(ScreenState.ENCHANTING)) {
-            if(keyCode == InputConstants.KEY_TAB) {
-                isTabKeyDown = true;
-                return true;
-            }
-        }
-
         return super.onKeyPress(keyCode, scanCode, modifiers);
     }
 
     @Override
     public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-        if(keyCode == InputConstants.KEY_TAB) {
+        if(ModKeyMappings.isModFilterKey(keyCode, scanCode)) {
             isTabKeyDown = false;
             return true;
         }
@@ -310,27 +349,30 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
             lastToolSlotStack = stack.copy();
         }
 
-        if(isTabKeyDown) {
-            if (enchantingTab().isDisplay(EnchantingTab.Display.ENCHANTMENTS)
-            && getMenu().getToolSlot().hasItem()
-            && !getMenu().getToolSlot().getItem().is(ModItems.ANCIENT_BOOK.get())) {
+        updateModPickerDisplay();
+    }
+
+    private boolean canShowModPicker() {
+        if(isState(ScreenState.BOOKS)) return true;
+        return getMenu().getToolSlot().hasItem()
+                && !getMenu().getToolSlot().getItem().is(ModItems.ANCIENT_BOOK.get());
+    }
+
+    private void updateModPickerDisplay() {
+        if(isTabKeyDown && canShowModPicker()) {
+            if(enchantingTab.isDisplay(EnchantingTab.Display.ENCHANTMENTS)) {
                 enchantingTab.setDisplay(EnchantingTab.Display.MOD_FILTERS);
                 FxHelper.playTabDown(player());
                 rebuildBranches();
                 resetCamera();
                 tooltipManager().unlockTooltip();
             }
-        } else {
-            if(enchantingTab().isDisplay(EnchantingTab.Display.MOD_FILTERS)) {
-                enchantingTab.setDisplay(EnchantingTab.Display.ENCHANTMENTS);
-                FxHelper.playTabUp(player());
-                rebuildBranches();
-                resetCamera();
-            }
+        } else if(enchantingTab.isDisplay(EnchantingTab.Display.MOD_FILTERS)) {
+            enchantingTab.setDisplay(EnchantingTab.Display.ENCHANTMENTS);
+            FxHelper.playTabUp(player());
+            rebuildBranches();
+            resetCamera();
         }
-
-
-
     }
 
     /**
@@ -425,10 +467,12 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
         return bookTab;
     }
 
+    /** @return enchanting tab UI controller */
     public EnchantingTab enchantingTab() {
         return enchantingTab;
     }
 
+    /** @return the screen font */
     public Font getFont() {
         return font;
     }
@@ -457,28 +501,31 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
         int tex = EnchantingTableLayout.TEXTURE_SIZE;
         int holeBottom = EnchantingTableLayout.TEXTURE_VIEWPORT_BOTTOM;
         int border = EnchantingTableLayout.CANVAS_INSET;
+        int bottomBorder = EnchantingTableLayout.VIEWPORT_BOTTOM_BORDER;
         int innerW = w - border * 2;
-        int innerH = h - border * 2;
+        int innerH = h - border - bottomBorder;
         int innerUW = tex - border * 2;
-        int innerVH = holeBottom - border * 2;
+        int innerVH = holeBottom - border - bottomBorder;
+        int fillU = EnchantingTableLayout.TEXTURE_TAB_FILL_U;
+        int fillV = EnchantingTableLayout.TEXTURE_TAB_FILL_V;
+        int blackU = EnchantingTableLayout.TEXTURE_FRAME_BLACK_U;
+        int blackV = EnchantingTableLayout.TEXTURE_FRAME_BLACK_V;
 
         blitRegion(graphics, texture, x, y, border, border, 0, 0, border, border, tex, tex);
         blitRegion(graphics, texture, x + w - border, y, border, border, tex - border, 0, border, border, tex, tex);
-        blitRegionVFlip(graphics, texture, x, y + h - border, border, border, 0, 0, border, border, tex, tex);
-        blitRegionVFlip(graphics, texture, x + w - border, y + h - border, border, border, tex - border, 0, border, border, tex, tex);
+        blitRegionVFlip(graphics, texture, x, y + h - bottomBorder, border, bottomBorder, 0, 0, border, bottomBorder, tex, tex);
+        blitRegionVFlip(graphics, texture, x + w - border, y + h - bottomBorder, border, bottomBorder, tex - border, 0, border, bottomBorder, tex, tex);
 
         blitRegion(graphics, texture, x + border, y, innerW, border, border, 0, innerUW, border, tex, tex);
         blitRegion(
                 graphics, texture,
-                x + border, y + h - border, innerW, border - 1,
-                EnchantingTableLayout.TEXTURE_TAB_FILL_U, EnchantingTableLayout.TEXTURE_TAB_FILL_V,
-                1, 1, tex, tex
+                x + 3, y + h - bottomBorder, w - 6, bottomBorder - 1,
+                fillU, fillV, 1, 1, tex, tex
         );
         blitRegion(
                 graphics, texture,
                 x + border, y + h - 1, innerW, 1,
-                EnchantingTableLayout.TEXTURE_FRAME_BLACK_U, EnchantingTableLayout.TEXTURE_FRAME_BLACK_V,
-                1, 1, tex, tex
+                blackU, blackV, 1, 1, tex, tex
         );
 
         blitRegion(graphics, texture, x, y + border, border, innerH, 0, border, border, innerVH, tex, tex);
@@ -519,12 +566,19 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
     }
 
     /**
-     * Draws the left-side tab buttons.
+     * Draws the book/enchanting tab.
      */
     private static void drawTabs(
             GuiGraphics graphics, ResourceLocation texture, int guiLeft, int guiTop
     ) {
         int tex = EnchantingTableLayout.TEXTURE_SIZE;
+        blitTabSprite(graphics, texture, guiLeft, guiTop, tex);
+    }
+
+    private static void blitTabSprite(
+            GuiGraphics graphics, ResourceLocation texture,
+            int guiLeft, int guiTop, int tex
+    ) {
         blitRegion(
                 graphics, texture,
                 guiLeft + EnchantingTableLayout.TAB_SPRITE_X,

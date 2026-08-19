@@ -6,8 +6,6 @@ import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.BranchManager;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeBranch;
 
-import javax.annotation.Nullable;
-
 /**
  * Represents the main "Enchanting" tab in the {@link EnchantingTableScreen}.
  *
@@ -34,9 +32,6 @@ public class EnchantingTab {
     private final EnchantingTableScreen screen;
     private final BranchManager branchManager;
     private Display currentDisplay = Display.ENCHANTMENTS;
-
-    @Nullable
-    private String filteredModid;
 
 
     /**
@@ -99,18 +94,5 @@ public class EnchantingTab {
 
     public boolean isDisplay(Display display) {
         return currentDisplay == display;
-    }
-
-    /**
-     * Set to null for all enchantments.
-     * @param modid
-     */
-    public void setFilteredModid(@Nullable String modid) {
-        this.filteredModid = modid;
-    }
-
-    @Nullable
-    public String getFilteredModid() {
-        return filteredModid;
     }
 }

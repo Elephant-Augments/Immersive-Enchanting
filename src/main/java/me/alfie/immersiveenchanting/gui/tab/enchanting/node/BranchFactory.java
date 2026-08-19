@@ -12,12 +12,12 @@ import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.datapack.mod_icons.ModIconsDatapack;
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
+import me.alfie.immersiveenchanting.gui.core.ScreenState;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.EnchantingTab;
 import me.alfie.immersiveenchanting.item.ModItems;
 import me.alfie.immersiveenchanting.util.EnchantmentTextureHelper;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import net.minecraft.core.Holder;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -40,17 +40,22 @@ public class BranchFactory {
         NeoForge.EVENT_BUS.post(event);
 
         List<NodeBranch> branches = event.getBranches();
-        List<Float> angles = generateBranchAngles(branches.size());
-
-        for (int i = 0; i < branches.size(); i++) {
-            branches.get(i).setAngle(angles.get(i));
+        if(event.getCanvas().screen().enchantingTab().isDisplay(EnchantingTab.Display.MOD_FILTERS)) {
+            assignFilterBranchAngles(branches);
+        } else {
+            List<Float> angles = generateBranchAngles(branches.size());
+            for (int i = 0; i < branches.size(); i++) {
+                branches.get(i).setAngle(angles.get(i));
+            }
         }
 
         return branches;
     }
 
     private static void addDefaultBranches(BuildBranchesEvent event) {
-        if(event.getStack().is(ModItems.ANCIENT_BOOK.get())) {
+        if(event.getCanvas().screen().enchantingTab().isDisplay(EnchantingTab.Display.MOD_FILTERS)) {
+            buildEnchantingBranches(event);
+        } else if(event.getStack().is(ModItems.ANCIENT_BOOK.get())) {
             buildAncientBookBranches(event);
         } else {
             buildEnchantingBranches(event);
@@ -66,28 +71,40 @@ public class BranchFactory {
         List<Holder<Enchantment>> allEnchantments = EnchantmentUtil.getAllEnchantmentsInRegistry(event.getCanvas().screen().registryAccess());
         List<Holder<Enchantment>> applicableEnchantments = getApplicableEnchantments(event.getStack(), allEnchantments);
 
-        if(event.getStack().is(ModItems.CREATIVE_BOOKSHELF_ITEM) || event.getStack().is(Items.BOOK)) {
+        if(event.getStack().is(ModItems.CREATIVE_BOOKSHELF_ITEM)
+                || event.getStack().is(Items.BOOK)
+                || event.getCanvas().screen().isState(ScreenState.BOOKS)
+                || event.getStack().isEmpty()) {
             applicableEnchantments = allEnchantments;
         }
 
-        if(event.getCanvas().screen().enchantingTab().isDisplay(EnchantingTab.Display.ENCHANTMENTS)) {
-
-            for (Holder<Enchantment> applicableEnchantment : applicableEnchantments) {
-                String modid = applicableEnchantment.getKey().location().getNamespace();
-                String filteredModid = event.getCanvas().screen().enchantingTab().getFilteredModid();
-                if(filteredModid == null || filteredModid.equals(modid)) {
-                    if(!event.costRegistry().isRegistered(applicableEnchantment)
-                        || event.costRegistry().get(applicableEnchantment).enabled()) {
-
-                        buildEnchantingBranch(event, applicableEnchantment);
-                    }
-                }
-            }
-
-        } else if(event.getCanvas().screen().enchantingTab().isDisplay(EnchantingTab.Display.MOD_FILTERS)) {
+        if(event.getCanvas().screen().enchantingTab().isDisplay(EnchantingTab.Display.MOD_FILTERS)) {
             buildModFilterBranches(event, applicableEnchantments);
+            return;
         }
 
+        var screen = event.getCanvas().screen();
+        String filteredModid = screen.filteredModid();
+
+        for (Holder<Enchantment> applicableEnchantment : applicableEnchantments) {
+            String modid = applicableEnchantment.getKey().location().getNamespace();
+
+            if (!screen.isShowingUnlockedOnly()
+                    && filteredModid != null
+                    && !filteredModid.equals(modid)) {
+                continue;
+            }
+
+            if (screen.isShowingUnlockedOnly()
+                    && !screen.getMenu().isEnchantmentAvailable(applicableEnchantment)) {
+                continue;
+            }
+
+            if(!event.costRegistry().isRegistered(applicableEnchantment)
+                    || event.costRegistry().get(applicableEnchantment).enabled()) {
+                buildEnchantingBranch(event, applicableEnchantment);
+            }
+        }
     }
 
     private static ResourceId createModFilterBranchId(String modid) {
@@ -96,45 +113,64 @@ public class BranchFactory {
     }
 
     private static void buildModFilterBranches(BuildBranchesEvent event, List<Holder<Enchantment>> applicableEnchantments) {
-        Set<String> modids = new HashSet<>();
+        Set<String> modids = new TreeSet<>();
 
         for(Holder<Enchantment> enchantmentHolder : applicableEnchantments) {
             String modid = enchantmentHolder.getKey().location().getNamespace();
-            if(modids.contains(modid)) continue;
             modids.add(modid);
+        }
 
-
+        for(String modid : modids) {
             Component title = Component.literal(ImmersiveEnchanting.getModName(modid));
             buildModFilterBranch(event, title, modid);
         }
 
-        ItemIcon itemIcon = new ItemIcon(ClientDatapackManager.get(ModIconsDatapack.KEY)
-                .getAsItemStack(ModFilterNodeData.ALL_MODS));
-
-        NodeState state =
-                Objects.equals(event.getCanvas().screen().enchantingTab().getFilteredModid(), null)
-                        ? NodeState.OBTAINED
-                        : NodeState.UNOBTAINED;
-
-        event.addBranch(BranchBuilder.of(event.getCanvas(), createModFilterBranchId(ModFilterNodeData.ALL_MODS))
-                .node(new NodeTemplate(
-                        Component.translatable("immersiveenchanting.mod_filter.all"),
-                        0,
-                        state,
-                        NodeTier.ELITE,
-                        itemIcon,
-                        ModFilterNodeData.create(ModFilterNodeData.ALL_MODS)
-                )).build());
+        buildSpecialFilterBranch(
+                event,
+                ModFilterNodeData.ALL_MODS,
+                Component.translatable("immersiveenchanting.mod_filter.all"),
+                NodeTier.ELITE,
+                new ItemIcon(ClientDatapackManager.get(ModIconsDatapack.KEY)
+                        .getAsItemStack(ModFilterNodeData.ALL_MODS)),
+                event.getCanvas().screen().isShowingAll()
+        );
+        buildSpecialFilterBranch(
+                event,
+                ModFilterNodeData.UNLOCKED_ONLY,
+                Component.translatable("immersiveenchanting.mod_filter.unlocked"),
+                NodeTier.ADVANCED,
+                new ItemIcon(new ItemStack(Items.CHISELED_BOOKSHELF)),
+                event.getCanvas().screen().isShowingUnlockedOnly()
+        );
     }
 
-
+    private static void buildSpecialFilterBranch(
+            BuildBranchesEvent event,
+            String filterId,
+            Component title,
+            NodeTier tier,
+            ItemIcon itemIcon,
+            boolean selected
+    ) {
+        NodeState state = selected ? NodeState.OBTAINED : NodeState.UNOBTAINED;
+        event.addBranch(BranchBuilder.of(event.getCanvas(), createModFilterBranchId(filterId))
+                .node(new NodeTemplate(
+                        title,
+                        0,
+                        state,
+                        tier,
+                        itemIcon,
+                        ModFilterNodeData.create(filterId)
+                )).build());
+    }
 
     private static void buildModFilterBranch(BuildBranchesEvent event, Component modTitle, String modid) {
         ItemIcon itemIcon = new ItemIcon(ClientDatapackManager.get(ModIconsDatapack.KEY)
                 .getAsItemStack(modid));
 
         NodeState state =
-                Objects.equals(event.getCanvas().screen().enchantingTab().getFilteredModid(), modid)
+                !event.getCanvas().screen().isShowingUnlockedOnly()
+                        && Objects.equals(event.getCanvas().screen().filteredModid(), modid)
                         ? NodeState.OBTAINED
                         : NodeState.UNOBTAINED;
 
@@ -245,6 +281,66 @@ public class BranchFactory {
             if(stack.supportsEnchantment(enchantment)) applicableEnchantments.add(enchantment);
         }
         return applicableEnchantments;
+    }
+
+    /**
+     * Places Minecraft, All, and Unlocked at the top of the wheel:
+     * Minecraft left of All, Unlocked right of All.
+     */
+    private static void assignFilterBranchAngles(List<NodeBranch> branches) {
+        if (branches.isEmpty()) {
+            return;
+        }
+
+        ResourceId allId = createModFilterBranchId(ModFilterNodeData.ALL_MODS);
+        ResourceId unlockedId = createModFilterBranchId(ModFilterNodeData.UNLOCKED_ONLY);
+        ResourceId minecraftId = createModFilterBranchId("minecraft");
+        List<NodeBranch> remaining = new ArrayList<>();
+        NodeBranch allBranch = null;
+        NodeBranch unlockedBranch = null;
+        NodeBranch minecraftBranch = null;
+
+        for (NodeBranch branch : branches) {
+            if (branch.id().equals(allId)) {
+                allBranch = branch;
+            } else if (branch.id().equals(unlockedId)) {
+                unlockedBranch = branch;
+            } else if (branch.id().equals(minecraftId)) {
+                minecraftBranch = branch;
+            } else {
+                remaining.add(branch);
+            }
+        }
+
+        float step = (float) (2 * Math.PI / branches.size());
+        float allAngle = (float) -Math.PI / 2f;
+        if (allBranch != null) {
+            allBranch.setAngle(allAngle);
+        }
+        if (minecraftBranch != null) {
+            minecraftBranch.setAngle(allAngle - step);
+        }
+        if (unlockedBranch != null) {
+            unlockedBranch.setAngle(allAngle + step);
+        }
+
+        float nextAngle = minecraftBranch != null ? allAngle + step * 2 : allAngle - step;
+        for (NodeBranch branch : remaining) {
+            while (anglesNear(nextAngle, allAngle)
+                    || (unlockedBranch != null && anglesNear(nextAngle, allAngle + step))) {
+                nextAngle += step;
+            }
+            branch.setAngle(nextAngle);
+            nextAngle += step;
+        }
+    }
+
+    private static boolean anglesNear(float a, float b) {
+        float delta = Math.abs(a - b) % (float) (2 * Math.PI);
+        if (delta > Math.PI) {
+            delta = (float) (2 * Math.PI) - delta;
+        }
+        return delta < 0.0001f;
     }
 
     /**

@@ -10,6 +10,7 @@ import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 public record ModFilterNodeData(String modid) implements NodePayload {
 
     public static final String ALL_MODS = "all";
+    public static final String UNLOCKED_ONLY = "unlocked";
     public static final ResourceId TYPE = new ResourceId(ImmersiveEnchanting.MODID, "mod_filter");
     @Override public ResourceId type() {
         return TYPE;
@@ -18,8 +19,9 @@ public record ModFilterNodeData(String modid) implements NodePayload {
     /**
      * Creates a {@link NodeData} for a mod-filter node.
      *
-     * <p>On click, sets the enchanting tab's active mod filter to {@code modid}
-     * (or clears it when {@code modid} is {@link #ALL_MODS}) and rebuilds the branch list.
+     * <p>On click, sets the shared view filter: {@link #ALL_MODS} shows every
+     * enchantment, {@link #UNLOCKED_ONLY} shows unlocked ones, and any other
+     * value filters to that mod id.</p>
      */
     public static NodeData<ModFilterNodeData> create(String modid) {
         return new NodeData<>(
@@ -28,10 +30,13 @@ public record ModFilterNodeData(String modid) implements NodePayload {
                 (data, context) -> {
                     EnchantingTableScreen screen = context.screen();
 
-                    String id = ALL_MODS.equals(data.modid()) ? null : data.modid();
-
-                    screen.enchantingTab().setFilteredModid(id);
-                    screen.rebuildBranches();
+                    if (ALL_MODS.equals(data.modid())) {
+                        screen.selectModFromPicker(null);
+                    } else if (UNLOCKED_ONLY.equals(data.modid())) {
+                        screen.selectUnlockedFromPicker();
+                    } else {
+                        screen.selectModFromPicker(data.modid());
+                    }
                 }
         );
     }
