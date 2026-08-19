@@ -2,6 +2,7 @@ package me.alfie.immersiveenchanting.gui.tab.book;
 
 import me.alfie.alfinolib.gui.GuiGraphicsX;
 import me.alfie.alfinolib.gui.util.GuiGraphicsApi;
+import me.alfie.immersiveenchanting.gui.EnchantingTableLayout;
 import me.alfie.immersiveenchanting.gui.core.Sprite;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
@@ -42,8 +43,8 @@ public class Searchbar {
 
 
     public void render(GuiGraphicsX gx) {
-        int xPos = bookTab.screen().getGuiLeft() + 138;
-        int yPos = bookTab.screen().getGuiTop() + 100;
+        int xPos = bookTab.screen().getGuiLeft() + EnchantingTableLayout.BOOK_LIST_X;
+        int yPos = bookTab.screen().getGuiTop() + EnchantingTableLayout.BOOK_SEARCH_Y;
 
         GuiGraphicsApi.blit(
                 gx,

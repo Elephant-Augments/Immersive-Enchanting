@@ -4,6 +4,7 @@ import me.alfie.alfinolib.gui.GuiGraphicsX;
 import me.alfie.alfinolib.gui.ScreenEventListener;
 import me.alfie.alfinolib.gui.util.GuiGraphicsApi;
 import me.alfie.alfinolib.gui.util.MousePos;
+import me.alfie.immersiveenchanting.gui.EnchantingTableLayout;
 import me.alfie.immersiveenchanting.gui.core.Sprite;
 
 /**
@@ -29,7 +30,7 @@ public class Scrollbar implements ScreenEventListener {
     private final int scrollerHeight = 15;
 
     private final int scrollbarWidth = 14;
-    private final int scrollbarHeight = 114;
+    private final int scrollbarHeight = EnchantingTableLayout.BOOK_SCROLLBAR_HEIGHT;
 
     protected int scrollIndex = 0;
 
@@ -45,14 +46,14 @@ public class Scrollbar implements ScreenEventListener {
     }
 
     public void render(GuiGraphicsX gx, MousePos mousePos) {
-        barX = bookTab.screen().getGuiLeft() + 121;
-        barY = bookTab.screen().getGuiTop() + 6;
+        barX = bookTab.screen().getGuiLeft() + EnchantingTableLayout.BOOK_SCROLLBAR_X;
+        barY = bookTab.screen().getGuiTop() + EnchantingTableLayout.BOOK_LIST_Y;
 
         GuiGraphicsApi.blit(
                 gx,
                 Sprite.SCROLLBAR.id(),
                 barX, barY,
-                Sprite.SCROLLBAR.width(), Sprite.SCROLLBAR.height()
+                Sprite.SCROLLBAR.width(), EnchantingTableLayout.BOOK_SCROLLBAR_HEIGHT
         );
 
         int scrollerOffset = getScrollwheelOffset();
@@ -98,7 +99,7 @@ public class Scrollbar implements ScreenEventListener {
 
     @Override
     public boolean onMouseClick(MousePos mousePos, int button) {
-        if(mousePos.isOver(barX, barY, Sprite.SCROLLBAR.width(), Sprite.SCROLLBAR.height())) {
+        if(mousePos.isOver(barX, barY, Sprite.SCROLLBAR.width(), EnchantingTableLayout.BOOK_SCROLLBAR_HEIGHT)) {
             isMouseDraggingScroller = true;
             return true;
         }
