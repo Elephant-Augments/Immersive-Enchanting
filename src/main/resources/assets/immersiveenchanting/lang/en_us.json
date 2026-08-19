@@ -47,8 +47,13 @@
   "immersiveenchanting.label.total_enchantments": "%d enchantment(s)",
 
   "immersiveenchanting.mod_filter.all": "All",
+  "immersiveenchanting.mod_filter.unlocked": "Unlocked",
   "immersiveenchanting.mod_filter.desc": "Click to show %s enchantments",
   "immersiveenchanting.mod_filter.selected": "Showing %s enchantments",
+
+  "key.categories.immersiveenchanting": "Immersive Enchanting",
+  "key.immersiveenchanting.mod_filter": "Hold Mod Filter",
+  "immersiveenchanting.tooltip.hold_mod_filter": "Hold %s to filter by mod.",
 
 
   "immersiveenchanting.command.disabled_enchantments": "The following enchantments are disabled OR do not have an enchantment cost file: %s",
