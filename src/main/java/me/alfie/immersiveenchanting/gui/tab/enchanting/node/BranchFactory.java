@@ -1,21 +1,20 @@
 package me.alfie.immersiveenchanting.gui.tab.enchanting.node;
 
-import me.alfie.alfinolib.datapacks.client.ClientDatapackManager;
 import me.alfie.alfinolib.util.ResourceId;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
+import me.alfie.immersiveenchanting.api.filter.FilterBranches;
+import me.alfie.immersiveenchanting.api.filter.IsolatedFilterBranch;
 import me.alfie.immersiveenchanting.api.node.*;
 import me.alfie.immersiveenchanting.api.node.internal.EnchantmentNodeData;
-import me.alfie.immersiveenchanting.api.node.internal.ModFilterNodeData;
+import me.alfie.immersiveenchanting.api.node.internal.FilterNodeData;
 import me.alfie.immersiveenchanting.api.node.internal.ReplicateNodeData;
 import me.alfie.immersiveenchanting.api.node.internal.TransmuteNodeData;
 import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
-import me.alfie.immersiveenchanting.datapack.mod_icons.ModIconsDatapack;
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
 import me.alfie.immersiveenchanting.gui.core.ScreenState;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.EnchantingTab;
 import me.alfie.immersiveenchanting.item.ModItems;
-import me.alfie.immersiveenchanting.tags.ModEnchantmentTags;
 import me.alfie.immersiveenchanting.util.EnchantmentTextureHelper;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import net.minecraft.core.Holder;
@@ -33,6 +32,10 @@ import java.util.*;
  */
 public class BranchFactory {
 
+    /**
+     * Builds the full set of tree branches for the given tool stack, posts {@link BuildBranchesEvent},
+     * then assigns angles (filter-picker layout or evenly spaced).
+     */
     public static List<NodeBranch> buildBranches(ItemStack stack, CostRegistry costRegistry, Canvas canvas) {
         BuildBranchesEvent event = new BuildBranchesEvent(stack, costRegistry, canvas);
 
@@ -53,6 +56,9 @@ public class BranchFactory {
         return branches;
     }
 
+    /**
+     * Adds the default branches for the current tab/item before {@link BuildBranchesEvent} listeners run.
+     */
     private static void addDefaultBranches(BuildBranchesEvent event) {
         if(event.getCanvas().screen().enchantingTab().isDisplay(EnchantingTab.Display.MOD_FILTERS)) {
             buildEnchantingBranches(event);
@@ -63,11 +69,18 @@ public class BranchFactory {
         }
     }
 
+    /**
+     * Adds the ancient-book Transmute and Replicate branches.
+     */
     private static void buildAncientBookBranches(BuildBranchesEvent event) {
         buildTransmuteBranch(event);
         buildReplicateBranch(event);
     }
 
+    /**
+     * In hold-to-filter mode, delegates to {@link FilterBranches#addPickerBranches}; otherwise
+     * builds one enchanting branch per applicable, filter-matching enchantment.
+     */
     private static void buildEnchantingBranches(BuildBranchesEvent event) {
         List<Holder<Enchantment>> allEnchantments = EnchantmentUtil.getAllEnchantmentsInRegistry(event.getCanvas().screen().registryAccess());
         List<Holder<Enchantment>> applicableEnchantments = getApplicableEnchantments(event.getStack(), allEnchantments);
@@ -80,7 +93,7 @@ public class BranchFactory {
         }
 
         if(event.getCanvas().screen().enchantingTab().isDisplay(EnchantingTab.Display.MOD_FILTERS)) {
-            buildModFilterBranches(event, applicableEnchantments);
+            FilterBranches.addPickerBranches(event, applicableEnchantments);
             return;
         }
 
@@ -96,98 +109,18 @@ public class BranchFactory {
         }
     }
 
+    /**
+     * @return the picker branch id {@code immersiveenchanting:mod_filter/<filterId>}.
+     */
     private static ResourceId createModFilterBranchId(String modid) {
         final String modFilterStem = "mod_filter/";
         return new ResourceId(ImmersiveEnchanting.MODID, modFilterStem + modid);
     }
 
-    private static void buildModFilterBranches(BuildBranchesEvent event, List<Holder<Enchantment>> applicableEnchantments) {
-        Set<String> modids = new TreeSet<>();
-
-        for(Holder<Enchantment> enchantmentHolder : applicableEnchantments) {
-            if (ModEnchantmentTags.isCosmetic(enchantmentHolder)) {
-                continue;
-            }
-            String modid = enchantmentHolder.getKey().location().getNamespace();
-            modids.add(modid);
-        }
-
-        for(String modid : modids) {
-            Component title = Component.literal(ImmersiveEnchanting.getModName(modid));
-            buildModFilterBranch(event, title, modid);
-        }
-
-        buildSpecialFilterBranch(
-            event,
-            ModFilterNodeData.ALL_MODS,
-            Component.translatable("immersiveenchanting.mod_filter.all"),
-            NodeTier.ELITE,
-            new ItemIcon(ClientDatapackManager.get(ModIconsDatapack.KEY)
-                    .getAsItemStack(ModFilterNodeData.ALL_MODS)),
-            event.getCanvas().screen().isShowingAll()
-        );
-        buildSpecialFilterBranch(
-            event,
-            ModFilterNodeData.UNLOCKED_ONLY,
-            Component.translatable("immersiveenchanting.mod_filter.unlocked"),
-            NodeTier.ADVANCED,
-            new ItemIcon(new ItemStack(Items.CHISELED_BOOKSHELF)),
-            event.getCanvas().screen().isShowingUnlockedOnly()
-        );
-        if (ModEnchantmentTags.hasCosmetics(applicableEnchantments)) {
-            buildSpecialFilterBranch(
-                event,
-                ModFilterNodeData.COSMETICS,
-                Component.translatable("immersiveenchanting.mod_filter.cosmetics"),
-                NodeTier.ADVANCED,
-                new ItemIcon(new ItemStack(Items.FIREWORK_ROCKET)),
-                event.getCanvas().screen().isShowingCosmeticsOnly()
-            );
-        }
-    }
-
-    private static void buildSpecialFilterBranch(
-            BuildBranchesEvent event,
-            String filterId,
-            Component title,
-            NodeTier tier,
-            ItemIcon itemIcon,
-            boolean selected
-    ) {
-        NodeState state = selected ? NodeState.OBTAINED : NodeState.UNOBTAINED;
-        event.addBranch(BranchBuilder.of(event.getCanvas(), createModFilterBranchId(filterId))
-                .node(new NodeTemplate(
-                        title,
-                        0,
-                        state,
-                        tier,
-                        itemIcon,
-                        ModFilterNodeData.create(filterId)
-                )).build());
-    }
-
-    private static void buildModFilterBranch(BuildBranchesEvent event, Component modTitle, String modid) {
-        ItemIcon itemIcon = new ItemIcon(ClientDatapackManager.get(ModIconsDatapack.KEY)
-                .getAsItemStack(modid));
-
-        NodeState state =
-                !event.getCanvas().screen().isShowingUnlockedOnly()
-                        && !event.getCanvas().screen().isShowingCosmeticsOnly()
-                        && Objects.equals(event.getCanvas().screen().filteredModid(), modid)
-                        ? NodeState.OBTAINED
-                        : NodeState.UNOBTAINED;
-
-        event.addBranch(BranchBuilder.of(event.getCanvas(), createModFilterBranchId(modid))
-                .node(new NodeTemplate(
-                        modTitle,
-                        0,
-                        state,
-                        NodeTier.BASIC,
-                        itemIcon,
-                        ModFilterNodeData.create(modid)
-                )).build());
-    }
-
+    /**
+     * Builds a single enchantment branch with one node per level (respecting cost registry and
+     * {@link ServerConfig#showAllEnchantmentLevels()}).
+     */
     private static void buildEnchantingBranch(BuildBranchesEvent event, Holder<Enchantment> enchantmentHolder) {
         List<NodeTemplate> nodeTemplates = new ArrayList<>();
 
@@ -228,6 +161,9 @@ public class BranchFactory {
                 .build());
     }
 
+    /**
+     * Adds the Transmute branch for an ancient book, if that cost entry is enabled.
+     */
     private static void buildTransmuteBranch(BuildBranchesEvent event) {
         NodeState state = event.getCanvas().screen().getMenu().isEnchantmentAvailable(EnchantmentUtil.getStoredEnchantment(event.getStack())) ?
                 NodeState.UNOBTAINED : NodeState.LOCKED;
@@ -250,6 +186,9 @@ public class BranchFactory {
 
     }
 
+    /**
+     * Adds the Replicate branch for an ancient book, if that cost entry is enabled.
+     */
     private static void buildReplicateBranch(BuildBranchesEvent event) {
         NodeTemplate replicateNode = new NodeTemplate(
                 Component.translatable("immersiveenchanting.tooltip.title.replicate"),
@@ -288,21 +227,20 @@ public class BranchFactory {
 
     /**
      * Places All at the top center, Unlocked to its right, and Minecraft to its left.
-     * Adds a Cosmetics branch to the left if a mod with cosmetic enchantments is loaded.
+     * Registered isolated filter branches (e.g. Cosmetics) appear to the left of All when present.
      */
     private static void assignFilterBranchAngles(List<NodeBranch> branches) {
         if (branches.isEmpty()) {
             return;
         }
 
-        ResourceId allId = createModFilterBranchId(ModFilterNodeData.ALL_MODS);
-        ResourceId unlockedId = createModFilterBranchId(ModFilterNodeData.UNLOCKED_ONLY);
-        ResourceId cosmeticsId = createModFilterBranchId(ModFilterNodeData.COSMETICS);
+        ResourceId allId = createModFilterBranchId(FilterNodeData.ALL_MODS);
+        ResourceId unlockedId = createModFilterBranchId(FilterNodeData.UNLOCKED_ONLY);
         ResourceId minecraftId = createModFilterBranchId("minecraft");
         List<NodeBranch> remaining = new ArrayList<>();
+        List<NodeBranch> isolatedBranches = new ArrayList<>();
         NodeBranch allBranch = null;
         NodeBranch unlockedBranch = null;
-        NodeBranch cosmeticsBranch = null;
         NodeBranch minecraftBranch = null;
 
         for (NodeBranch branch : branches) {
@@ -310,10 +248,10 @@ public class BranchFactory {
                 allBranch = branch;
             } else if (branch.id().equals(unlockedId)) {
                 unlockedBranch = branch;
-            } else if (branch.id().equals(cosmeticsId)) {
-                cosmeticsBranch = branch;
             } else if (branch.id().equals(minecraftId)) {
                 minecraftBranch = branch;
+            } else if (isIsolatedPickerBranch(branch.id())) {
+                isolatedBranches.add(branch);
             } else {
                 remaining.add(branch);
             }
@@ -322,8 +260,11 @@ public class BranchFactory {
         float step = (float) (2 * Math.PI / branches.size());
         float allAngle = (float) -Math.PI / 2f;
         float unlockedAngle = allAngle + step;
-        float leftOfAll = allAngle - step;
-        float minecraftAngle = cosmeticsBranch != null ? allAngle - step * 2 : leftOfAll;
+        List<Float> isolatedAngles = new ArrayList<>(isolatedBranches.size());
+        for (int i = 0; i < isolatedBranches.size(); i++) {
+            isolatedAngles.add(allAngle - step * (i + 1));
+        }
+        float minecraftAngle = allAngle - step * (isolatedBranches.size() + 1);
 
         if (allBranch != null) {
             allBranch.setAngle(allAngle);
@@ -331,8 +272,8 @@ public class BranchFactory {
         if (unlockedBranch != null) {
             unlockedBranch.setAngle(unlockedAngle);
         }
-        if (cosmeticsBranch != null) {
-            cosmeticsBranch.setAngle(leftOfAll);
+        for (int i = 0; i < isolatedBranches.size(); i++) {
+            isolatedBranches.get(i).setAngle(isolatedAngles.get(i));
         }
         if (minecraftBranch != null) {
             minecraftBranch.setAngle(minecraftAngle);
@@ -342,8 +283,8 @@ public class BranchFactory {
         for (NodeBranch branch : remaining) {
             while (anglesNear(nextAngle, allAngle)
                     || (unlockedBranch != null && anglesNear(nextAngle, unlockedAngle))
-                    || (cosmeticsBranch != null && anglesNear(nextAngle, leftOfAll))
-                    || (minecraftBranch != null && anglesNear(nextAngle, minecraftAngle))) {
+                    || (minecraftBranch != null && anglesNear(nextAngle, minecraftAngle))
+                    || isNearAny(nextAngle, isolatedAngles)) {
                 nextAngle += step;
             }
             branch.setAngle(nextAngle);
@@ -351,6 +292,33 @@ public class BranchFactory {
         }
     }
 
+    /**
+     * @return {@code true} if {@code branchId} matches a registered {@link IsolatedFilterBranch} picker id.
+     */
+    private static boolean isIsolatedPickerBranch(ResourceId branchId) {
+        for (IsolatedFilterBranch isolated : FilterBranches.isolated()) {
+            if (isolated.pickerBranchId().equals(branchId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @return {@code true} if {@code angle} is nearly equal to any value in {@code angles}.
+     */
+    private static boolean isNearAny(float angle, List<Float> angles) {
+        for (float other : angles) {
+            if (anglesNear(angle, other)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @return {@code true} if two angles are nearly equal on the unit circle.
+     */
     private static boolean anglesNear(float a, float b) {
         float delta = Math.abs(a - b) % (float) (2 * Math.PI);
         if (delta > Math.PI) {

@@ -3,6 +3,7 @@ package me.alfie.immersiveenchanting.event;
 import me.alfie.immersiveenchanting.ImmersiveEnchantingClient;
 import me.alfie.immersiveenchanting.api.ApiPostEvents;
 import me.alfie.immersiveenchanting.api.description.TooltipDescriptionExtensions;
+import me.alfie.immersiveenchanting.api.filter.RegisterFilterBranchesEvent;
 import me.alfie.immersiveenchanting.command.ModCommands;
 import me.alfie.immersiveenchanting.creativetab.ModCreativeTab;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostDatapack;
@@ -50,9 +51,11 @@ public class ModEvents {
 
     private static void registerPostEvents(IEventBus modEventBus) {
         modEventBus.addListener(ApiPostEvents::postRegisterTooltipDescriptionsEvent);
+        modEventBus.addListener(ApiPostEvents::postRegisterFilterBranchesEvent);
     }
 
     private static void registerInternalApiEvents(IEventBus modEventBus) {
         modEventBus.addListener(TooltipDescriptionExtensions::registerInternalTooltipDescriptions);
+        modEventBus.addListener(RegisterFilterBranchesEvent::registerInternalFilterBranches);
     }
 }

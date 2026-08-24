@@ -6,9 +6,10 @@ import me.alfie.alfinolib.gui.CommonAbstractContainerScreen;
 import me.alfie.alfinolib.gui.GuiGraphicsX;
 import me.alfie.alfinolib.gui.util.GuiGraphicsApi;
 import me.alfie.alfinolib.gui.util.MousePos;
+import me.alfie.immersiveenchanting.api.filter.EnchantmentFilterSelection;
+import me.alfie.immersiveenchanting.api.filter.FilterBranches;
 import me.alfie.immersiveenchanting.client.ModKeyMappings;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
-import me.alfie.immersiveenchanting.api.node.internal.ModFilterNodeData;
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
 import me.alfie.immersiveenchanting.gui.canvas.CanvasCamera;
 import me.alfie.immersiveenchanting.gui.core.ScreenState;
@@ -20,7 +21,6 @@ import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.CostRenderer;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.TooltipManager;
 import me.alfie.immersiveenchanting.item.ModItems;
-import me.alfie.immersiveenchanting.tags.ModEnchantmentTags;
 import me.alfie.immersiveenchanting.util.FxHelper;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -68,11 +68,10 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
     private final CostRenderer enchantmentCostRenderer;
     private final TooltipManager tooltipManager;
 
-    private static @Nullable String rememberedFilteredModid = "minecraft";
-    private static boolean rememberedUnlockedOnly;
+    private static EnchantmentFilterSelection rememberedFilterSelection =
+            EnchantmentFilterSelection.mod("minecraft");
 
-    private @Nullable String filteredModid = rememberedFilteredModid;
-    private boolean unlockedOnly = rememberedUnlockedOnly;
+    private EnchantmentFilterSelection filterSelection = rememberedFilterSelection;
     private boolean isTabKeyDown;
     private ItemStack deferredCentralItemTooltip = ItemStack.EMPTY;
     @Nullable
@@ -93,13 +92,19 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
         this.enchantmentCostRenderer = new CostRenderer(CostRegistry.client());
         this.tooltipManager = new TooltipManager(this);
 
-        if (isShowingCosmeticsOnly()
-                && registryAccess.lookupOrThrow(Registries.ENCHANTMENT)
-                        .listElements()
-                        .noneMatch(ModEnchantmentTags::isCosmetic)) {
-            this.filteredModid = "minecraft";
-            this.unlockedOnly = false;
+        if (filterSelection instanceof EnchantmentFilterSelection.Isolated isolated
+                && FilterBranches.findIsolated(isolated.branchId()) == null) {
+            this.filterSelection = EnchantmentFilterSelection.mod("minecraft");
             rememberCurrentFilter();
+        } else if (filterSelection instanceof EnchantmentFilterSelection.Isolated isolated) {
+            var branch = FilterBranches.findIsolated(isolated.branchId());
+            if (branch != null
+                    && registryAccess.lookupOrThrow(Registries.ENCHANTMENT)
+                            .listElements()
+                            .noneMatch(branch::contains)) {
+                this.filterSelection = EnchantmentFilterSelection.mod("minecraft");
+                rememberCurrentFilter();
+            }
         }
 
         onToolSlotUpdate(ItemStack.EMPTY);
@@ -216,74 +221,52 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
     }
 
     /**
-     * @return {@code true} if the picker is showing every enchantment.
+     * @return the active hold-to-filter selection.
      */
-    public boolean isShowingAll() {
-        return !unlockedOnly && filteredModid == null;
+    public EnchantmentFilterSelection enchantmentFilterSelection() {
+        return filterSelection;
     }
 
     /**
-     * @return {@code true} if the picker is showing only unlocked enchantments.
+     * @return {@code true} if the picker is showing only unlocked non-isolated enchantments.
      */
     public boolean isShowingUnlockedOnly() {
-        return unlockedOnly;
-    }
-
-    /**
-     * @return {@code true} if the picker is showing cosmetic enchantments.
-     */
-    public boolean isShowingCosmeticsOnly() {
-        return !unlockedOnly && ModFilterNodeData.COSMETICS.equals(filteredModid);
+        return filterSelection instanceof EnchantmentFilterSelection.Unlocked;
     }
 
     /**
      * @return {@code true} if this enchantment should appear under the current filter.
      */
     public boolean matchesCurrentFilter(Holder<Enchantment> enchantment) {
-        boolean cosmetic = ModEnchantmentTags.isCosmetic(enchantment);
-        if (unlockedOnly) {
-            return !cosmetic && getMenu().isEnchantmentAvailable(enchantment);
-        }
-        if (isShowingCosmeticsOnly()) {
-            return cosmetic;
-        }
-        if (cosmetic) {
-            return false;
-        }
-        String namespace = enchantment.unwrapKey()
-                .map(key -> key.location().getNamespace())
-                .orElse(null);
-        return filteredModid == null || filteredModid.equals(namespace);
+        return FilterBranches.matches(
+                filterSelection,
+                enchantment,
+                getMenu()::isEnchantmentAvailable
+        );
     }
 
     /**
-     * @return the selected mod namespace, or {@code null} when showing all.
+     * @return the selected mod namespace when a global mod filter is active, otherwise {@code null}.
      */
     public @Nullable String filteredModid() {
-        return filteredModid;
+        if (filterSelection instanceof EnchantmentFilterSelection.ModNamespace mod) {
+            return mod.modid();
+        }
+        return null;
     }
 
     /**
      * Applies a selection from the hold-to-filter picker.
      */
-    public void selectModFromPicker(@Nullable String modid) {
-        this.unlockedOnly = false;
-        this.filteredModid = modid;
-        rememberCurrentFilter();
-        bookTab.scrollbar().resetScrollIndex();
-        rebuildBranches();
-    }
-
-    public void selectUnlockedFromPicker() {
-        this.unlockedOnly = true;
+    public void selectEnchantmentFilter(EnchantmentFilterSelection selection) {
+        this.filterSelection = selection;
         rememberCurrentFilter();
         bookTab.scrollbar().resetScrollIndex();
         rebuildBranches();
     }
 
     private void rememberCurrentFilter() {
-        rememberedFilteredModid = filteredModid;
-        rememberedUnlockedOnly = unlockedOnly;
+        rememberedFilterSelection = filterSelection;
     }
 
     @Override

@@ -1,7 +1,7 @@
 package me.alfie.immersiveenchanting.util;
 
 import me.alfie.alfinolib.util.ResourceId;
-import me.alfie.immersiveenchanting.api.node.internal.ModFilterNodeData;
+import me.alfie.immersiveenchanting.api.node.internal.FilterNodeData;
 import me.alfie.immersiveenchanting.config.ClientConfig;
 import me.alfie.immersiveenchanting.datapack.node_sounds.NodeSound;
 import me.alfie.immersiveenchanting.datapack.node_sounds.NodeSoundMap;
@@ -33,7 +33,7 @@ public class FxHelper {
     public static void playNodeHover(Player player, Node node) {
         if(!ClientConfig.areNodeHoverSoundsEnabled()) return;
 
-        if(node.isDataType(ModFilterNodeData.TYPE)) {
+        if(node.isDataType(FilterNodeData.TYPE)) {
             playModFilterNodeHover(player);
             return;
         }
