@@ -1,6 +1,7 @@
 package me.alfie.immersiveenchanting.util;
 
 import me.alfie.alfinolib.util.ResourceId;
+import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.codec.Cost;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.codec.CostHolder;
@@ -29,6 +30,10 @@ public class CostHelper {
             if(!stackToEnchant.supportsEnchantment(enchantmentHolder)) return false;
         }
 
+        if(isTooExpensive(stackToEnchant, EnchantmentUtil.toId(enchantmentHolder), level, player)) {
+            return false;
+        }
+
         return tryConsumeValidCostAndFuel(
                 EnchantmentUtil.toId(enchantmentHolder), level,
                 menu, player);
@@ -52,6 +57,53 @@ public class CostHelper {
         return tryConsumeValidCostAndFuel(
                 CostRegistry.REPLICATE, 1,
                 menu, player);
+    }
+
+    /**
+     * Blocks enchantment applications when the projected sum of datapack {@code xp_levels} 
+     * on the item would exceed {@link ServerConfig#getMaxItemEnchantmentXpCost()}.
+     */
+    public static boolean isTooExpensive(ItemStack stack, ResourceId costId, int level, Player player) {
+        if(player.hasInfiniteMaterials()) return false;
+        return projectedEnchantmentXpTotal(stack, costId, level, CostRegistry.server())
+                > ServerConfig.getMaxItemEnchantmentXpCost();
+    }
+
+    /**
+     * Client-side mirror of {@link #isTooExpensive} using the client cost registry.
+     */
+    public static boolean isTooExpensiveClient(ItemStack stack, ResourceId costId, int level, Player player) {
+        if(player == null || player.hasInfiniteMaterials()) return false;
+        return projectedEnchantmentXpTotal(stack, costId, level, CostRegistry.client())
+                > ServerConfig.getMaxItemEnchantmentXpCost();
+    }
+
+    /**
+     * Sum of datapack XP costs for enchantments that would be on the stack after applying
+     * the incoming enchantment.
+     */
+    public static int projectedEnchantmentXpTotal(
+            ItemStack stack, ResourceId incomingId, int incomingLevel, CostRegistry registry
+    ) {
+        int total = 0;
+        for(Holder<Enchantment> holder : EnchantmentUtil.getEnchantments(stack).keySet()) {
+            ResourceId id = EnchantmentUtil.toId(holder);
+            if(id.equals(incomingId)) continue;
+            total += xpCostFor(id, EnchantmentUtil.getEnchantmentLevel(stack, holder), registry);
+        }
+        total += xpCostFor(incomingId, incomingLevel, registry);
+        return total;
+    }
+
+    /**
+     * Calculates total cost of an enchantment based on datapack {@code xp_levels} entries, 
+     * or 0 if unset. Uses the first defined cost entry for that level.
+     */
+    public static int xpCostFor(ResourceId costId, int level, CostRegistry registry) {
+        if(!registry.isRegistered(costId)) return 0;
+        CostHolder costHolder = registry.get(costId).levelCosts().getLevel(level);
+        if(costHolder.costs().isEmpty()) return 0;
+        return costHolder.costs().get(0).xpLevels();
     }
 
     private static boolean isEnchantmentAvailableInBookshelves(Holder<Enchantment> enchantmentHolder, EnchantingTableMenu menu, Player player) {

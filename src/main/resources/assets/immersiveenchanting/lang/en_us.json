@@ -49,8 +49,8 @@
   "immersiveenchanting.mod_filter.all": "All",
   "immersiveenchanting.mod_filter.unlocked": "Unlocked",
   "immersiveenchanting.mod_filter.cosmetics": "Cosmetics",
-  "immersiveenchanting.mod_filter.desc": "Click to show only %s enchantments.",
-  "immersiveenchanting.mod_filter.selected": "Showing only %s enchantments.",
+  "immersiveenchanting.mod_filter.desc": "Click to show %s enchantments.",
+  "immersiveenchanting.mod_filter.selected": "Showing %s enchantments.",
 
   "key.categories.immersiveenchanting": "Immersive Enchanting",
   "key.immersiveenchanting.mod_filter": "Hold-To-Filter",
@@ -88,6 +88,8 @@
   "immersiveenchanting.config.obfuscate_locked_enchantments": "Obfuscate Locked Enchantments",
   "immersiveenchanting.config.disable_enchanted_book_trades": "Disable Enchanted Book Villager Trades",
   "immersiveenchanting.config.show_all_enchantment_levels": "Show All Enchantment Levels",
+  "immersiveenchanting.config.max_item_enchantment_xp_cost": "Max Item Enchantment XP Cost",
   "immersiveenchanting.config.all_tables_chance": "All Loot Tables Drop Chance",
-  "immersiveenchanting.config.themed_tables_chance": "Themed Loot Tables Drop Chance"
+  "immersiveenchanting.config.themed_tables_chance": "Themed Loot Tables Drop Chance",
+  "immersiveenchanting.tooltip.desc.too_expensive": "Too Expensive!"
 }

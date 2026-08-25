@@ -21,6 +21,8 @@ public class ServerConfig {
 
     public final ModConfigSpec.ConfigValue<Boolean> OBFUSCATE_LOCKED_ENCHANTMENTS;
 
+    public final ModConfigSpec.ConfigValue<Integer> MAX_ITEM_ENCHANTMENT_XP_COST;
+
     public final ModConfigSpec.ConfigValue<Boolean> DISABLE_ENCHANTED_BOOK_TRADES;
 
     public enum EnchantedBookLootMode {
@@ -80,6 +82,11 @@ public class ServerConfig {
                 .comment("If enabled, every level of an enchantment is shown on the enchanting tree. If disabled, only obtained levels and the next unlearned level are shown.")
                 .translation("immersiveenchanting.config.show_all_enchantment_levels")
                 .define("showAllEnchantmentLevels", false);
+
+        MAX_ITEM_ENCHANTMENT_XP_COST = builder
+                .comment("Maximum total datapack XP cost (xp_levels) allowed across all enchantments on one item. Applying an enchantment is blocked with \"Too Expensive!\" when the projected total would exceed this value.")
+                .translation("immersiveenchanting.config.max_item_enchantment_xp_cost")
+                .defineInRange("maxItemEnchantmentXpCost", 40, 0, Integer.MAX_VALUE);
         builder.pop();
 
         builder.push("enchantedbooks");
@@ -133,6 +140,10 @@ public class ServerConfig {
 
     public static boolean showAllEnchantmentLevels() {
         return ServerConfig.CONFIG.SHOW_ALL_ENCHANTMENT_LEVELS.get();
+    }
+
+    public static int getMaxItemEnchantmentXpCost() {
+        return ServerConfig.CONFIG.MAX_ITEM_ENCHANTMENT_XP_COST.get();
     }
 
     public static double getAllTablesChance() {

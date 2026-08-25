@@ -9,6 +9,7 @@ import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeState;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.NodeTooltip;
+import me.alfie.immersiveenchanting.util.CostHelper;
 import me.alfie.immersiveenchanting.util.EnchantmentDescriptionHelper;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import net.minecraft.core.Holder;
@@ -37,7 +38,11 @@ public class EnchantLayoutExtension implements DescriptionLayoutExtension {
 
         if(node.isState(NodeState.UNOBTAINED)) {
             int linesCreated = insertEnchantmentDescription(description, tooltip, 0);
-            DescriptionHelper.insertCostLines(tooltip, description, linesCreated);
+            if(isTooExpensive(tooltip)) {
+                description.insertLine(linesCreated, new TooExpensiveLine(tooltip));
+            } else {
+                DescriptionHelper.insertCostLines(tooltip, description, linesCreated);
+            }
         } else if(node.isState(NodeState.OBTAINED)) {
             if(screen.tooltipManager().isHoldingTooltip()) {
                 description.insertLine(0, new RemovingLine(tooltip));
@@ -72,6 +77,19 @@ public class EnchantLayoutExtension implements DescriptionLayoutExtension {
                 DescriptionHelper.DEFAULT_LINE_WIDTH,
                 description,
                 lineStart
+        );
+    }
+
+    private static boolean isTooExpensive(NodeTooltip tooltip) {
+        if(!(tooltip.node().data().value() instanceof EnchantmentNodeData enchantmentData)) {
+            return false;
+        }
+        EnchantingTableScreen screen = tooltip.screen();
+        return CostHelper.isTooExpensiveClient(
+                screen.getMenu().getToolSlot().getItem(),
+                enchantmentData.enchantmentId(),
+                enchantmentData.level(),
+                net.minecraft.client.Minecraft.getInstance().player
         );
     }
 }
