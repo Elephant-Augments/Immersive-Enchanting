@@ -10,6 +10,7 @@ import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
 import me.alfie.immersiveenchanting.gui.canvas.CanvasRenderable;
 import me.alfie.immersiveenchanting.gui.core.Sprite;
+import me.alfie.immersiveenchanting.gui.tab.enchanting.branch.NodeBranch;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
@@ -123,7 +124,9 @@ public class Node extends CanvasRenderable {
 
     @Override
     public void render(GuiGraphicsX gx, MousePos mousePos) {
-        setScaleKeepPos(BranchManager.getNodeBranchScale(), state.getSpriteForTier(tier));
+        setScaleKeepPos(
+                canvas().screen().enchantingTab().branchManager().spacing().branchScale(),
+                state.getSpriteForTier(tier));
 
         if(canvas().isMouseOver(canvasX(), canvasY(), Node.WIDTH, Node.HEIGHT, mousePos)) {
             if(!canvas().screen().camera().isDragging()) {

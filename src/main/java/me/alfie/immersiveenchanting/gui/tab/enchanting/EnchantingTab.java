@@ -3,8 +3,8 @@ package me.alfie.immersiveenchanting.gui.tab.enchanting;
 import me.alfie.alfinolib.gui.GuiGraphicsX;
 import me.alfie.alfinolib.gui.util.MousePos;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
-import me.alfie.immersiveenchanting.gui.tab.enchanting.node.BranchManager;
-import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeBranch;
+import me.alfie.immersiveenchanting.gui.tab.enchanting.branch.BranchManager;
+import me.alfie.immersiveenchanting.gui.tab.enchanting.branch.NodeBranch;
 
 /**
  * Represents the main "Enchanting" tab in the {@link EnchantingTableScreen}.
@@ -63,8 +63,13 @@ public class EnchantingTab {
      *
      */
     public void render(GuiGraphicsX gx, MousePos mousePos) {
+        // Render all branch lines first and then nodes on top to avoid 
+        // lines from child nodes rendering on top of parent nodes.
         for(NodeBranch branch : branchManager.branches()) {
-            branch.render(gx, mousePos);
+            branch.renderBranchLines(gx, mousePos);
+        }
+        for(NodeBranch branch : branchManager.branches()) {
+            branch.renderNodes(gx, mousePos);
         }
 
         centralSlot.render(gx, mousePos);

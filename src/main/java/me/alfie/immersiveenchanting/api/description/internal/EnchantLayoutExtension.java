@@ -5,6 +5,7 @@ import me.alfie.immersiveenchanting.api.description.DescriptionLayout;
 import me.alfie.immersiveenchanting.api.description.DescriptionLayoutExtension;
 import me.alfie.immersiveenchanting.api.description.internal.lines.*;
 import me.alfie.immersiveenchanting.api.node.internal.EnchantmentNodeData;
+import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeState;
@@ -36,7 +37,7 @@ public class EnchantLayoutExtension implements DescriptionLayoutExtension {
         Node node = tooltip.node();
         EnchantingTableScreen screen = tooltip.screen();
 
-        if(node.isState(NodeState.UNOBTAINED)) {
+        if(node.isState(NodeState.UNOBTAINED) || isDependencyLocked(tooltip)) {
             int linesCreated = insertEnchantmentDescription(description, tooltip, 0);
             if(isTooExpensive(tooltip)) {
                 description.insertLine(linesCreated, new TooExpensiveLine(tooltip));
@@ -59,6 +60,24 @@ public class EnchantLayoutExtension implements DescriptionLayoutExtension {
         } else if(node.isState(NodeState.LOCKED)) {
             description.insertLine(0, new UnavailableEnchantmentLine(tooltip));
         }
+    }
+
+    /**
+     * True when the node is locked by an unobtained parent node.
+     */
+    private static boolean isDependencyLocked(NodeTooltip tooltip) {
+        if(!tooltip.node().isState(NodeState.LOCKED)) return false;
+        if(!(tooltip.node().data().value() instanceof EnchantmentNodeData enchantmentData)) {
+            return false;
+        }
+        EnchantingTableScreen screen = tooltip.screen();
+        Holder<Enchantment> holder = EnchantmentUtil.toHolder(enchantmentData.enchantmentId(), screen.registryAccess());
+        if(CostRegistry.client().dependencies().getDependsOn(holder).isEmpty()) return false;
+        return !CostHelper.isDependencySatisfied(
+                screen.getMenu().getToolSlot().getItem(),
+                holder,
+                CostRegistry.client(),
+                screen.registryAccess());
     }
 
     private static int insertEnchantmentDescription(DescriptionLayout description, NodeTooltip tooltip, int lineStart) {

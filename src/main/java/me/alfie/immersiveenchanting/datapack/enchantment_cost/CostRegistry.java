@@ -25,6 +25,7 @@ public class CostRegistry {
 
     private final Map<Holder<Enchantment>, CostData> ENCHANTMENT_HOLDER_REGISTRY = new HashMap<>();
     private final Map<ResourceId, CostData> ID_REGISTRY = new HashMap<>();
+    private final EnchantmentDependencies dependencies = new EnchantmentDependencies();
 
     public static final StreamCodec<RegistryFriendlyByteBuf, CostRegistry> STREAM_CODEC = new StreamCodec<RegistryFriendlyByteBuf, CostRegistry>() {
         @Override
@@ -78,6 +79,12 @@ public class CostRegistry {
                     () -> ImmersiveEnchanting.LOGGER.warn("Datapack contains {} but couldn't find enchantment with this id.", id)
             );
         }
+
+        dependencies.rebuild(this);
+    }
+
+    public EnchantmentDependencies dependencies() {
+        return dependencies;
     }
 
     public void register(ResourceId id, CostData data) {
@@ -118,6 +125,7 @@ public class CostRegistry {
     public void clear() {
         ID_REGISTRY.clear();
         ENCHANTMENT_HOLDER_REGISTRY.clear();
+        dependencies.clear();
     }
     public void printRegistry() {
         ImmersiveEnchanting.LOGGER.debug("ID Registry: {}", ID_REGISTRY);

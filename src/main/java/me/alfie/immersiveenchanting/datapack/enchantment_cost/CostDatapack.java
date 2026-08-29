@@ -163,6 +163,15 @@ public class CostDatapack extends ModDatapack<CostData, CostRegistry> {
             );
             ImmersiveEnchanting.LOGGER.error("enchantment_costs/immersiveenchanting/replicate.json is missing. Please add this file to your datapack.");
         }
+
+        List<String> brokenDeps = CostRegistry.client().dependencies().brokenReports();
+        if(!brokenDeps.isEmpty()) {
+            String result = String.join(", ", brokenDeps);
+            player.sendSystemMessage(
+                    modIdComponent.append(Component.translatable("immersiveenchanting.warn.invalid_dependencies", result)
+                            .withStyle(ChatFormatting.RED))
+            );
+        }
     }
 
     private static Set<ResourceLocation> getEnchantmentIds(Set<Holder<Enchantment>> enchantmentHolders) {

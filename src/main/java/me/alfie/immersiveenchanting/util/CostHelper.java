@@ -7,12 +7,16 @@ import me.alfie.immersiveenchanting.datapack.enchantment_cost.codec.Cost;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.codec.CostHolder;
 import me.alfie.immersiveenchanting.gui.EnchantingTableMenu;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 
 import java.util.List;
+import java.util.Optional;
 
 public class CostHelper {
     public static boolean canEnchant(EnchantingTableMenu menu,
@@ -28,6 +32,10 @@ public class CostHelper {
         if(!stackToEnchant.is(Items.BOOK)) {
             if(!isEnchantmentNextLevel(stackToEnchant, enchantmentHolder, level)) return false;
             if(!stackToEnchant.supportsEnchantment(enchantmentHolder)) return false;
+        }
+
+        if(!isDependencySatisfied(stackToEnchant, enchantmentHolder, CostRegistry.server(), player.registryAccess())) {
+            return false;
         }
 
         if(isTooExpensive(stackToEnchant, EnchantmentUtil.toId(enchantmentHolder), level, player)) {
@@ -57,6 +65,28 @@ public class CostHelper {
         return tryConsumeValidCostAndFuel(
                 CostRegistry.REPLICATE, 1,
                 menu, player);
+    }
+
+    /**
+     * Whether every enchantment in the effective {@code depends_on} chain is present on {@code stack}.
+     */
+    public static boolean isDependencySatisfied(
+            ItemStack stack,
+            Holder<Enchantment> enchantmentHolder,
+            CostRegistry registry,
+            HolderLookup.Provider lookup
+    ) {
+        Optional<ResourceId> dependsOn = registry.dependencies().getDependsOn(enchantmentHolder);
+        while(dependsOn.isPresent()) {
+            ResourceId parentId = dependsOn.get();
+            Optional<Holder.Reference<Enchantment>> parent = lookup.lookupOrThrow(Registries.ENCHANTMENT)
+                    .get(ResourceKey.create(Registries.ENCHANTMENT, parentId.mc()));
+            if(parent.isEmpty() || EnchantmentUtil.getEnchantmentLevel(stack, parent.get()) < 1) {
+                return false;
+            }
+            dependsOn = registry.dependencies().getDependsOn(parentId);
+        }
+        return true;
     }
 
     /**

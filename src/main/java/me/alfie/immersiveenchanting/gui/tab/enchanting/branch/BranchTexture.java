@@ -1,4 +1,4 @@
-package me.alfie.immersiveenchanting.gui.tab.enchanting.node;
+package me.alfie.immersiveenchanting.gui.tab.enchanting.branch;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import me.alfie.alfinolib.gui.GuiGraphicsX;
@@ -6,6 +6,7 @@ import me.alfie.alfinolib.gui.util.MousePos;
 import me.alfie.alfinolib.util.ResourceId;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
+import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
 import me.alfie.immersiveenchanting.gui.canvas.CanvasRenderable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
@@ -45,13 +46,21 @@ public class BranchTexture extends CanvasRenderable {
 
     /**
      * Draws connector lines between every consecutive node in the branch and from the
-     * first node back to the canvas center, then bakes the result into a GPU texture.
-     * Must be called after nodes have been positioned via {@link NodeBranch#placeNodesAlongLine()}.
+     * first node back to the canvas center (or to an attached origin node), then bakes
+     * the result into a GPU texture.
+     * Must be called after nodes have been positioned via {@link NodeBranch#placeNodesAlongLine(BranchSpacing)}.
      */
     public void calculateNodeConnections() {
         if (branch.nodes().isEmpty()) return;
 
-        connectNodeToCenter(branch.nodes().getFirst());
+        precomputedPixels.clear();
+
+        Node origin = branch.originNode();
+        if(origin != null) {
+            connectNodes(origin, branch.nodes().getFirst());
+        } else {
+            connectNodeToCenter(branch.nodes().getFirst());
+        }
 
         for (int i = 1; i < branch.nodes().size(); i++) {
             connectNodes(branch.nodes().get(i - 1), branch.nodes().get(i));
@@ -60,19 +69,29 @@ public class BranchTexture extends CanvasRenderable {
     }
 
     private void connectNodeToCenter(Node node) {
-        Vector2i a = canvas().getCenter();
-        int bx = (int) Math.round(node.canvasX() + node.getScaledLength(Node.WIDTH) / 2.0);
-        int by = (int) Math.round(node.canvasY() + node.getScaledLength(Node.HEIGHT) / 2.0);
+        Vector2i center = canvas().getCenter();
+        float[] edge = new float[2];
+        float cx = NodeBranch.centerX(node);
+        float cy = NodeBranch.centerY(node);
+        float angle = NodeBranch.angleToward(center.x(), center.y(), cx, cy);
+        NodeBranch.borderPoint(node, angle + (float) Math.PI, edge);
 
-        makeTexture(a.x(), a.y(), bx, by);
+        makeTexture(center.x(), center.y(), Math.round(edge[0]), Math.round(edge[1]));
     }
 
     private void connectNodes(Node node1, Node node2) {
-        int ax = (int) Math.round(node1.canvasX() + node1.getScaledLength(Node.WIDTH) / 2.0);
-        int ay = (int) Math.round(node1.canvasY() + node1.getScaledLength(Node.HEIGHT) / 2.0);
-        int bx = (int) Math.round(node2.canvasX() + node2.getScaledLength(Node.WIDTH) / 2.0);
-        int by = (int) Math.round(node2.canvasY() + node2.getScaledLength(Node.HEIGHT) / 2.0);
-        makeTexture(ax, ay, bx, by);
+        float ax = NodeBranch.centerX(node1);
+        float ay = NodeBranch.centerY(node1);
+        float bx = NodeBranch.centerX(node2);
+        float by = NodeBranch.centerY(node2);
+
+        float angle = NodeBranch.angleToward(ax, ay, bx, by);
+        float[] start = new float[2];
+        float[] end = new float[2];
+        NodeBranch.borderPoint(node1, angle, start);
+        NodeBranch.borderPoint(node2, angle + (float) Math.PI, end);
+
+        makeTexture(Math.round(start[0]), Math.round(start[1]), Math.round(end[0]), Math.round(end[1]));
     }
 
     private void calculateBorderPixel(int x, int y, Set<Long> white, int color) {

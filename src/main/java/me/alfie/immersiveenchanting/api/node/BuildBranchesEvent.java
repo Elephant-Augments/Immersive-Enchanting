@@ -2,7 +2,7 @@ package me.alfie.immersiveenchanting.api.node;
 
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
-import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeBranch;
+import me.alfie.immersiveenchanting.gui.tab.enchanting.branch.NodeBranch;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.Event;
 
@@ -13,7 +13,7 @@ import java.util.List;
  * NeoForge event fired on the NeoForge event bus each time the enchanting tab builds its branch list.
  *
  * <p>Internal branches (enchantments, transmute, replicate, mod-filters) are added first by
- * {@link me.alfie.immersiveenchanting.gui.tab.enchanting.node.BranchFactory}. Listeners can call
+ * {@link me.alfie.immersiveenchanting.gui.tab.enchanting.branch.BranchFactory}. Listeners can call
  * {@link #addBranch} / {@link #addBranches} to inject additional custom branches.
  *
  * <p>The item in the tool slot, the server-side cost registry, and the canvas are available

@@ -2,13 +2,12 @@ package me.alfie.immersiveenchanting.gui.canvas;
 
 import me.alfie.alfinolib.gui.GuiGraphicsX;
 import me.alfie.alfinolib.gui.ScreenEventListener;
-import me.alfie.alfinolib.gui.util.GuiGraphicsApi;
 import me.alfie.alfinolib.gui.util.MousePos;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.core.ScreenState;
 import me.alfie.immersiveenchanting.gui.core.Sprite;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.EnchantingTab;
-import me.alfie.immersiveenchanting.gui.tab.enchanting.node.BranchManager;
+import me.alfie.immersiveenchanting.gui.tab.enchanting.branch.BranchManager;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 

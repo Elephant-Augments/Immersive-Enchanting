@@ -2,13 +2,14 @@ package me.alfie.immersiveenchanting.api.node;
 
 import me.alfie.alfinolib.util.ResourceId;
 import me.alfie.immersiveenchanting.gui.canvas.Canvas;
-import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeBranch;
+import me.alfie.immersiveenchanting.gui.tab.enchanting.branch.NodeBranch;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Fluent builder for constructing a {@link me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeBranch}
+ * Fluent builder for constructing a {@link me.alfie.immersiveenchanting.gui.tab.enchanting.branch.NodeBranch}
  * from a sequence of {@link NodeTemplate} descriptors.
  *
  * <p>Use {@link #of} to create an instance, chain {@link #node}/{@link #nodes} calls to add
@@ -19,6 +20,9 @@ public class BranchBuilder {
     private final Canvas canvas;
     private final ResourceId id;
     private final List<NodeTemplate> nodeTemplates = new ArrayList<>();
+    @Nullable
+    private NodeBranch originBranch;
+    private int originNodeIndex = -1;
 
     private BranchBuilder(Canvas canvas, ResourceId id) {
         this.canvas = canvas;
@@ -29,8 +33,23 @@ public class BranchBuilder {
         return new BranchBuilder(canvas, id);
     }
 
+    /**
+     * Attaches this branch as a dependency child of an {@code originBranch}, branching from
+     * the node at {@code originNodeIndex}. Child nodes are positioned outward from that
+     * parent node instead of from the canvas center.
+     */
+    public BranchBuilder attachTo(NodeBranch originBranch, int originNodeIndex) {
+        this.originBranch = originBranch;
+        this.originNodeIndex = originNodeIndex;
+        return this;
+    }
+
     public NodeBranch build() {
-        return new NodeBranch(canvas, id, new ArrayList<>(nodeTemplates));
+        NodeBranch branch = new NodeBranch(canvas, id, new ArrayList<>(nodeTemplates));
+        if(originBranch != null && originNodeIndex >= 0) {
+            branch.attachTo(originBranch, originNodeIndex);
+        }
+        return branch;
     }
 
     public BranchBuilder node(NodeTemplate template) {
