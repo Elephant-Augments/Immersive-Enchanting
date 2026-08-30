@@ -142,24 +142,70 @@ public class Node extends CanvasRenderable {
 
 
         if(canvas().screen().tooltipManager().isActiveTooltipFor(this)) return;
-        blit(gx, state.getSpriteForTier(tier), canvas().getCurrentBrightness());
+
+        boolean mutexPartner = isMutexPartnerOfHoveredNode();
+        int brightness = mutexPartner ? Canvas.FULL_BRIGHTNESS : canvas().getCurrentBrightness();
+        blit(gx, state.getSpriteForTier(tier), brightness);
 
         if(data().value() instanceof EnchantmentNodeData enchantmentData) {
             Holder<Enchantment> enchantmentHolder = EnchantmentUtil.toHolder(enchantmentData.enchantmentId(), canvas().screen().registryAccess());
 
             if(!CostRegistry.client().isRegistered(enchantmentHolder)) {
                 //Red error node for enchantments that failed to load costs
-                blit(gx, Sprite.ERROR_NODE, canvas().getCurrentBrightness());
+                blit(gx, Sprite.ERROR_NODE, brightness);
             }
 
+            if(mutexPartner) {
+                blit(gx, Sprite.ERROR_NODE, Canvas.FULL_BRIGHTNESS);
+            }
         }
 
 
         if(getIcon() instanceof SpriteIcon sprite) {
-            blit(gx, sprite.id(), 16, 16, 4, 4, canvas().getCurrentBrightness());
+            blit(gx, sprite.id(), 16, 16, 4, 4, brightness);
         } else if(getIcon() instanceof ItemIcon item) {
-            item(gx, item.stack(), 4, 4, canvas().getCurrentBrightness());
+            item(gx, item.stack(), 4, 4, brightness);
         }
+    }
+
+    /**
+     * Enchantment represented by this node, or {@code null} for special-action nodes.
+     */
+    public @Nullable Holder<Enchantment> enchantmentHolder() {
+        if(!(data().value() instanceof EnchantmentNodeData enchantmentData)) {
+            return null;
+        }
+        return EnchantmentUtil.toHolder(enchantmentData.enchantmentId(), canvas().screen().registryAccess());
+    }
+
+    /**
+     * {@code true} when another node is hovered and this node's enchantment is exclusive with it.
+     */
+    public boolean isMutexPartnerOfHoveredNode() {
+        Node hovered = canvas().screen().tooltipManager().getActiveTooltipNode();
+        if(hovered == null || hovered == this) {
+            return false;
+        }
+        return EnchantmentUtil.areMutex(enchantmentHolder(), hovered.enchantmentHolder());
+    }
+
+    /**
+     * {@code true} when any other visible tree node is exclusive with this node's enchantment.
+     */
+    public boolean hasVisibleMutexPartner() {
+        Holder<Enchantment> holder = enchantmentHolder();
+        if(holder == null) {
+            return false;
+        }
+        for(Node other : canvas().screen().enchantingTab().branchManager().getAllNodes()) {
+            if(other == this) {
+                continue;
+            }
+            if(EnchantmentUtil.areMutex(holder, other.enchantmentHolder())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

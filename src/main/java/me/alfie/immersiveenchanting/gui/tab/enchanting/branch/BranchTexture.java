@@ -36,12 +36,27 @@ public class BranchTexture extends CanvasRenderable {
 
     @Override
     public void render(GuiGraphicsX gx, MousePos mousePos) {
-        int brightness = (canvas().screen().tooltipManager().hasActiveTooltip() &&
-                branch.nodes().contains(canvas().screen().tooltipManager().getActiveTooltipNode()))
+        int brightness = shouldBrightenBranch()
                 ? Canvas.FULL_BRIGHTNESS
                 : canvas().getCurrentBrightness();
 
         blit(gx, textureId, textureWidth, textureHeight, brightness);
+    }
+
+    private boolean shouldBrightenBranch() {
+        Node hovered = canvas().screen().tooltipManager().getActiveTooltipNode();
+        if(hovered == null) {
+            return false;
+        }
+        if(branch.nodes().contains(hovered)) {
+            return true;
+        }
+        for(Node node : branch.nodes()) {
+            if(node.isMutexPartnerOfHoveredNode()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

@@ -65,6 +65,16 @@ public final class EnchantmentUtil {
 
         return enchantments.getFirst();
     }
+    
+    /**
+     * {@code true} when two different enchantments are mutually exclusive (vanilla {@code exclusive_set}).
+     */
+    public static boolean areMutex(Holder<Enchantment> first, Holder<Enchantment> second) {
+        return first != null
+                && second != null
+                && !first.equals(second)
+                && !Enchantment.areCompatible(first, second);
+    }
 
     /**
      * Universal enchantment level accessor for stored_enchantments and enchantments.

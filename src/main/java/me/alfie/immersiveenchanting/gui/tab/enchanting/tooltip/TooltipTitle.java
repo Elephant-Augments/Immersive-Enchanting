@@ -8,6 +8,7 @@ import me.alfie.immersiveenchanting.api.node.NodeIcon;
 import me.alfie.immersiveenchanting.api.node.SpriteIcon;
 import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.gui.core.NineSliceSprite;
+import me.alfie.immersiveenchanting.gui.core.Sprite;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeState;
 import net.minecraft.ChatFormatting;
@@ -94,6 +95,15 @@ public class TooltipTitle extends TooltipComponent {
                 x(), y(),
                 Node.WIDTH, Node.HEIGHT
         );
+
+        if(node.hasVisibleMutexPartner()) {
+            GuiGraphicsApi.blit(
+                    gx,
+                    Sprite.ERROR_NODE.id(),
+                    x(), y(),
+                    Node.WIDTH, Node.HEIGHT
+            );
+        }
 
         NodeIcon icon = node.getIcon();
         if(icon instanceof SpriteIcon sprite) {
