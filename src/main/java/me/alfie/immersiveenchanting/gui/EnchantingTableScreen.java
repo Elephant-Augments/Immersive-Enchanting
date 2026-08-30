@@ -14,6 +14,7 @@ import me.alfie.immersiveenchanting.gui.canvas.Canvas;
 import me.alfie.immersiveenchanting.gui.canvas.CanvasCamera;
 import me.alfie.immersiveenchanting.gui.core.ScreenState;
 import me.alfie.immersiveenchanting.gui.core.Sprite;
+import me.alfie.immersiveenchanting.gui.tab.ModFilterHelpHint;
 import me.alfie.immersiveenchanting.gui.tab.TabButton;
 import me.alfie.immersiveenchanting.gui.tab.book.BookTab;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.EnchantingTab;
@@ -21,6 +22,7 @@ import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.CostRenderer;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.tooltip.TooltipManager;
 import me.alfie.immersiveenchanting.item.ModItems;
+import me.alfie.immersiveenchanting.util.EnchantmentSearchHelper;
 import me.alfie.immersiveenchanting.util.FxHelper;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -36,7 +38,6 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.awt.*;
 import java.util.List;
 
 /**
@@ -72,6 +73,7 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
             EnchantmentFilterSelection.mod("minecraft");
 
     private EnchantmentFilterSelection filterSelection = rememberedFilterSelection;
+    private EnchantmentFilterSelection pickerFilterBeforeSearch = rememberedFilterSelection;
     private boolean isTabKeyDown;
     private ItemStack deferredCentralItemTooltip = ItemStack.EMPTY;
     @Nullable
@@ -82,12 +84,12 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
         registryAccess = inventory.player.registryAccess();
         this.player = inventory.player;
         this.scrollableCanvas = new Canvas(this);
-        setState(ScreenState.ENCHANTING);
 
         enchantingTab = new EnchantingTab(this);
         bookTab = new BookTab(this);
         tabButton = new TabButton(this);
         modFilterHelpHint = new ModFilterHelpHint(this);
+        setState(ScreenState.ENCHANTING);
 
         this.enchantmentCostRenderer = new CostRenderer(CostRegistry.client());
         this.tooltipManager = new TooltipManager(this);
@@ -167,6 +169,9 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
         gx.graphics().pose().pushPose();
         gx.graphics().pose().translate(0, 0, 400);
         modFilterHelpHint.render(gx, mousePos);
+        if(isState(ScreenState.ENCHANTING)) {
+            enchantingTab.searchbar().render(gx);
+        }
         if(tooltipManager.hasActiveTooltip() && !renderedNodes.contains(tooltipManager.getActiveTooltipNode()))
             tooltipManager.clearActiveTooltip();
 
@@ -238,11 +243,49 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
      * @return {@code true} if this enchantment should appear under the current filter.
      */
     public boolean matchesCurrentFilter(Holder<Enchantment> enchantment) {
+        if(filterSelection instanceof EnchantmentFilterSelection.Search) {
+            return EnchantmentSearchHelper.matches(enchantment, enchantingTab.searchbar().query());
+        }
         return FilterBranches.matches(
                 filterSelection,
                 enchantment,
                 getMenu()::isEnchantmentAvailable
         );
+    }
+
+    /**
+     * Switches to universal search mode, preserving the active hold-to-filter selection
+     * so it can be restored when the search bar is cleared.
+     */
+    public void enterSearchFilterMode() {
+        if(filterSelection instanceof EnchantmentFilterSelection.Search) {
+            return;
+        }
+        pickerFilterBeforeSearch = filterSelection;
+        filterSelection = EnchantmentFilterSelection.search();
+    }
+
+    /**
+     * Leaves universal search mode and restores the hold-to-filter selection from before the search began.
+     */
+    public void exitSearchFilterMode() {
+        if(!(filterSelection instanceof EnchantmentFilterSelection.Search)) {
+            return;
+        }
+        filterSelection = pickerFilterBeforeSearch;
+        rememberCurrentFilter();
+        rebuildBranches();
+    }
+
+    /**
+     * Clears search input and exits search mode without changing any newly chosen picker filters.
+     */
+    public void resetSearchFilter() {
+        enchantingTab.searchbar().clearInput();
+        if(filterSelection instanceof EnchantmentFilterSelection.Search) {
+            filterSelection = pickerFilterBeforeSearch;
+            rememberCurrentFilter();
+        }
     }
 
     /**
@@ -259,6 +302,7 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
      * Applies a selection from the hold-to-filter picker.
      */
     public void selectEnchantmentFilter(EnchantmentFilterSelection selection) {
+        enchantingTab.searchbar().clearInput();
         this.filterSelection = selection;
         rememberCurrentFilter();
         bookTab.scrollbar().resetScrollIndex();
@@ -286,12 +330,20 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
         if(tabButton.onMouseClick(mousePos, button)) return true;
 
         if(isState(ScreenState.ENCHANTING) || enchantingTab.isDisplay(EnchantingTab.Display.MOD_FILTERS)) {
+            if(enchantingTab.isDisplay(EnchantingTab.Display.ENCHANTMENTS)) {
+                if(enchantingTab.searchbar().onMouseClick(mousePos, button)) return true;
+                enchantingTab.searchbar().setFocused(false);
+            }
+
             if(enchantingTab.centralSlot().onMouseClick(mousePos, button)) return true;
 
             if(tooltipManager.hasActiveTooltip() && tooltipManager.getActiveTooltip().onMouseClick(mousePos, button)) return true;
 
             if(camera.onMouseClick(mousePos, button)) return true;
         } else if(isState(ScreenState.BOOKS)) {
+            if(bookTab.bookSearchbar().onMouseClick(mousePos, button)) return true;
+            bookTab.bookSearchbar().setFocused(false);
+
             if(bookTab.scrollbar().onMouseClick(mousePos, button)) return true;
         }
 
@@ -336,16 +388,30 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
             return true;
         }
 
-        if(isState(ScreenState.BOOKS)) {
-            if(keyCode == InputConstants.KEY_BACKSPACE) {
-                bookTab.searchbar().removeCharFromSearch();
-            }
-
+        if(isState(ScreenState.BOOKS) && bookTab.bookSearchbar().isFocused()) {
             if(keyCode == InputConstants.KEY_ESCAPE) {
-                return super.onKeyPress(keyCode, scanCode, modifiers);
-            } else {
+                bookTab.bookSearchbar().setFocused(false);
                 return true;
             }
+            if(keyCode == InputConstants.KEY_BACKSPACE) {
+                bookTab.bookSearchbar().removeCharFromSearch();
+                return true;
+            }
+            return true;
+        }
+
+        if(isState(ScreenState.ENCHANTING)
+                && enchantingTab.isDisplay(EnchantingTab.Display.ENCHANTMENTS)
+                && enchantingTab.searchbar().isFocused()) {
+            if(keyCode == InputConstants.KEY_ESCAPE) {
+                enchantingTab.searchbar().setFocused(false);
+                return true;
+            }
+            if(keyCode == InputConstants.KEY_BACKSPACE) {
+                enchantingTab.searchbar().removeCharFromSearch();
+                return true;
+            }
+            return true;
         }
 
         return super.onKeyPress(keyCode, scanCode, modifiers);
@@ -363,8 +429,16 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
 
     @Override
     public boolean onCharTyped(char codePoint, int modifiers) {
-        if(isState(ScreenState.BOOKS)) {
-            bookTab.searchbar().addCharToSearch(codePoint);
+        if(isState(ScreenState.BOOKS) && bookTab.bookSearchbar().isFocused()) {
+            bookTab.bookSearchbar().addCharToSearch(codePoint);
+            return true;
+        }
+
+        if(isState(ScreenState.ENCHANTING)
+                && enchantingTab.isDisplay(EnchantingTab.Display.ENCHANTMENTS)
+                && enchantingTab.searchbar().isFocused()) {
+            enchantingTab.searchbar().addCharToSearch(codePoint);
+            return true;
         }
 
         return super.onCharTyped(codePoint, modifiers);
@@ -419,6 +493,7 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
      */
     private void onToolSlotUpdate(ItemStack newStack) {
         enchantingTab.setDisplay(EnchantingTab.Display.ENCHANTMENTS);
+        resetSearchFilter();
         rebuildBranches(newStack);
         if (!menu.getToolSlot().getItem().isEmpty()) FxHelper.playToolSlotChanged(player());
 
@@ -454,6 +529,12 @@ public class EnchantingTableScreen extends CommonAbstractContainerScreen<@NotNul
      */
     public void setState(ScreenState state) {
         this.screenState = state;
+        if(enchantingTab != null) {
+            enchantingTab.searchbar().setFocused(false);
+        }
+        if(bookTab != null) {
+            bookTab.bookSearchbar().setFocused(false);
+        }
     }
 
     /**

@@ -97,6 +97,10 @@ public final class FilterBranches {
         Holder<Enchantment> enchantment, 
         Predicate<Holder<Enchantment>> unlockedTest
     ) {
+        if(selection instanceof EnchantmentFilterSelection.Search) {
+            return true;
+        }
+
         if (selection instanceof EnchantmentFilterSelection.Isolated isolated) {
             IsolatedFilterBranch branch = findIsolated(isolated.branchId());
             return branch != null && branch.contains(enchantment);

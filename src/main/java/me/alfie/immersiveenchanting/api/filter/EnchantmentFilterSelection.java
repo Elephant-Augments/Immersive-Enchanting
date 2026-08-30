@@ -13,7 +13,8 @@ public sealed interface EnchantmentFilterSelection
         permits EnchantmentFilterSelection.All,
                 EnchantmentFilterSelection.Unlocked,
                 EnchantmentFilterSelection.ModNamespace,
-                EnchantmentFilterSelection.Isolated {
+                EnchantmentFilterSelection.Isolated,
+                EnchantmentFilterSelection.Search {
 
     /** Show every non-isolated enchantment. */
     record All() implements EnchantmentFilterSelection {}
@@ -26,6 +27,9 @@ public sealed interface EnchantmentFilterSelection
 
     /** Show only enchantments in the isolated branch identified by {@code branchId}. */
     record Isolated(ResourceId branchId) implements EnchantmentFilterSelection {}
+
+    /** Universal search across all enchantments. Other filter modes are bypassed. */
+    record Search() implements EnchantmentFilterSelection {}
 
     static EnchantmentFilterSelection all() {
         return new All();
@@ -44,5 +48,9 @@ public sealed interface EnchantmentFilterSelection
 
     static EnchantmentFilterSelection isolated(ResourceId branchId) {
         return new Isolated(branchId);
+    }
+
+    static EnchantmentFilterSelection search() {
+        return new Search();
     }
 }

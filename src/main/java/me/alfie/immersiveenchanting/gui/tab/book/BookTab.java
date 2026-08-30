@@ -33,7 +33,7 @@ public class BookTab {
     private final List<Holder<Enchantment>> renderedEnchantments = new ArrayList<>();
 
     private final Scrollbar scrollbar;
-    private final Searchbar searchbar;
+    private final BookSearchbar bookSearchbar;
 
 
     public final int MAX_BOXES_RENDERED = 7;
@@ -44,7 +44,7 @@ public class BookTab {
      * <p>Initializes:
      * <ul>
      *     <li>{@link Scrollbar} for navigating the enchantment list</li>
-     *     <li>{@link Searchbar} for filtering by name</li>
+     *     <li>{@link BookSearchbar} for filtering by name/tooltip text</li>
      * </ul>
      *
      * @param screen The parent {@link EnchantingTableScreen}
@@ -52,7 +52,7 @@ public class BookTab {
     public BookTab(EnchantingTableScreen screen) {
         this.screen = screen;
         scrollbar = new Scrollbar(this);
-        searchbar = new Searchbar(this);
+        bookSearchbar = new BookSearchbar(this);
     }
 
     /**
@@ -62,7 +62,7 @@ public class BookTab {
      */
     public void init() {
         scrollbar().resetScrollIndex();
-        searchbar.clearSearch();
+        bookSearchbar.clearSearch();
     }
 
     /**
@@ -93,7 +93,7 @@ public class BookTab {
                 : CostRegistry.client().getAllEnabledEnchantmentHolders().stream();
         renderedEnchantments.addAll(source.filter(screen::matchesCurrentFilter).toList());
 
-        searchbar.checkSearch();
+        bookSearchbar.checkSearch();
         renderedEnchantments.sort(Comparator.comparing(e -> e.value().description().getString()));
     }
 
@@ -110,7 +110,7 @@ public class BookTab {
      */
     public void render(GuiGraphicsX gx, MousePos mousePos) {
         applyFilters();
-        searchbar.render(gx);
+        bookSearchbar.render(gx);
         renderTotalLabel(gx);
         renderEnchantmentBoxes(gx);
         scrollbar.render(gx, mousePos);
@@ -176,10 +176,10 @@ public class BookTab {
     /**
      * Gets the search bar component.
      <P>
-     * @return the {@link Searchbar}
+     * @return the {@link BookSearchbar}
      */
-    public Searchbar searchbar() {
-        return searchbar;
+    public BookSearchbar bookSearchbar() {
+        return bookSearchbar;
     }
 
 }

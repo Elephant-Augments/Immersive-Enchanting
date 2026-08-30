@@ -31,6 +31,7 @@ public class EnchantingTab {
 
     private final EnchantingTableScreen screen;
     private final BranchManager branchManager;
+    private final EnchantingSearchbar searchbar;
     private Display currentDisplay = Display.ENCHANTMENTS;
 
 
@@ -49,6 +50,7 @@ public class EnchantingTab {
         this.screen = screen;
 
         branchManager = new BranchManager(screen);
+        searchbar = new EnchantingSearchbar(this);
         centralSlot = new CentralSlot(screen.canvas());
     }
 
@@ -87,6 +89,14 @@ public class EnchantingTab {
      */
     public BranchManager branchManager() {
         return branchManager;
+    }
+
+    public EnchantingSearchbar searchbar() {
+        return searchbar;
+    }
+
+    public EnchantingTableScreen screen() {
+        return screen;
     }
 
     public void setDisplay(Display display) {

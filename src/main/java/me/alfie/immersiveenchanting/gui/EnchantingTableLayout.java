@@ -1,5 +1,10 @@
 package me.alfie.immersiveenchanting.gui;
 
+import me.alfie.alfinolib.gui.GuiGraphicsX;
+import me.alfie.alfinolib.gui.util.GuiGraphicsApi;
+import me.alfie.immersiveenchanting.gui.core.Sprite;
+import net.minecraft.client.gui.Font;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.neoforged.fml.ModList;
@@ -51,6 +56,15 @@ public final class EnchantingTableLayout {
     public static final int MOD_FILTER_HELP_INSET = CANVAS_INSET + 2;
     public static final int MOD_FILTER_HELP_SIZE = 10;
 
+    public static final int SEARCH_FIELD_WIDTH = 100;
+    public static final int SEARCH_FIELD_HEIGHT = 16;
+    public static final int SEARCH_FIELD_TEXT_PADDING = 3;
+
+    public static final int ENCHANTING_SEARCH_WIDTH = 96;
+    public static final int ENCHANTING_SEARCH_HEIGHT = SEARCH_FIELD_HEIGHT;
+    public static final int ENCHANTING_SEARCH_X = GUI_WIDTH - MOD_FILTER_HELP_INSET - ENCHANTING_SEARCH_WIDTH;
+    public static final int ENCHANTING_SEARCH_Y = CANVAS_INSET + 2;
+
     public static final int TAB_TO_INVENTORY_GAP = 2;
     public static final int INVENTORY_TO_COST_GAP = 4;
 
@@ -95,12 +109,50 @@ public final class EnchantingTableLayout {
     public static final int BOOK_LIST_X = (GUI_WIDTH - BOOK_CONTENT_WIDTH) / 2;
     public static final int BOOK_SCROLLBAR_X = BOOK_LIST_X + BOOK_LIST_WIDTH + BOOK_SCROLLBAR_GAP;
     public static final int BOOK_SEARCH_Y = 6;
-    public static final int BOOK_SEARCH_HEIGHT = 20;
+    public static final int BOOK_SEARCH_WIDTH = SEARCH_FIELD_WIDTH;
+    public static final int BOOK_SEARCH_HEIGHT = SEARCH_FIELD_HEIGHT;
     public static final int BOOK_TOTAL_LABEL_Y = BOOK_SEARCH_Y + BOOK_SEARCH_HEIGHT + 4;
     public static final int BOOK_LIST_Y = BOOK_TOTAL_LABEL_Y + 12;
     public static final int BOOK_SCROLLBAR_HEIGHT = 133;
 
     private EnchantingTableLayout() {}
+
+    public static void renderSearchField(GuiGraphicsX gx, Font font, int x, int y, String text) {
+        renderSearchField(gx, font, x, y, text, SEARCH_FIELD_WIDTH);
+    }
+
+    public static void renderSearchField(
+            GuiGraphicsX gx,
+            Font font,
+            int x,
+            int y,
+            String text,
+            int width
+    ) {
+        GuiGraphicsApi.blit(
+                gx,
+                Sprite.SEARCH.id(),
+                x, y,
+                width, SEARCH_FIELD_HEIGHT
+        );
+
+        GuiGraphicsApi.text(
+                gx,
+                font,
+                Component.literal(text),
+                x + SEARCH_FIELD_TEXT_PADDING,
+                y + SEARCH_FIELD_TEXT_PADDING + 1,
+                true
+        );
+    }
+
+    public static boolean searchFieldContains(int mouseX, int mouseY, int x, int y) {
+        return searchFieldContains(mouseX, mouseY, x, y, SEARCH_FIELD_WIDTH);
+    }
+
+    public static boolean searchFieldContains(int mouseX, int mouseY, int x, int y, int width) {
+        return mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + SEARCH_FIELD_HEIGHT;
+    }
 
     public record CanvasViewport(int x, int y, int width, int height) {}
 

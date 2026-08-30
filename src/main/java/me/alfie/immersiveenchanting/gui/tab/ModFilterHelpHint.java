@@ -1,8 +1,10 @@
-package me.alfie.immersiveenchanting.gui;
+package me.alfie.immersiveenchanting.gui.tab;
 
 import me.alfie.alfinolib.gui.GuiGraphicsX;
 import me.alfie.alfinolib.gui.util.MousePos;
 import me.alfie.immersiveenchanting.client.ModKeyMappings;
+import me.alfie.immersiveenchanting.gui.EnchantingTableLayout;
+import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.core.Sprite;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
@@ -15,7 +17,6 @@ public final class ModFilterHelpHint {
     private static final int[] CIRCLE_ROW_INSETS = {3, 1, 0, 0, 0, 0, 0, 0, 1, 3};
     private static final int WHITE = 0xFFFFFFFF;
     private static final int SHADOW = 0xFF000000;
-    /** 5×7 pixel `?`; about 20% larger than the previous scaled glyph, without filtering. */
     private static final int[][] QUESTION = {
             {0, 1, 1, 1, 0},
             {1, 0, 0, 0, 1},
