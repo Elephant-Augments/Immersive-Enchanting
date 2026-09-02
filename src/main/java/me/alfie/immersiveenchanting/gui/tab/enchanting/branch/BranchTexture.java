@@ -51,6 +51,9 @@ public class BranchTexture extends CanvasRenderable {
         if(branch.nodes().contains(hovered)) {
             return true;
         }
+        if(branch.isDependencyDescendantOf(hovered)) {
+            return true;
+        }
         for(Node node : branch.nodes()) {
             if(node.isMutexPartnerOfHoveredNode()) {
                 return true;

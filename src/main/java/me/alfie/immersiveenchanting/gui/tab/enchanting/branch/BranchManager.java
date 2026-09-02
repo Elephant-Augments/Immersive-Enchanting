@@ -17,7 +17,14 @@ public class BranchManager {
 
     private final List<NodeBranch> cachedBranches = new ArrayList<>();
     private final EnchantingTableScreen screen;
-    private BranchSpacing spacing = new BranchSpacing(BranchLayout.MAX_NODE_STEP, Node.DEFAULT_SCALE);
+    private BranchSpacing spacing = new BranchSpacing(
+            BranchLayout.MIN_NODE_STEP,
+            BranchLayout.MIN_NODE_STEP,
+            Node.DEFAULT_SCALE
+    );
+    private BranchLayout.StandaloneRootPlacement standaloneRootPlacement = new BranchLayout.StandaloneRootPlacement(
+            BranchLayout.STANDALONE_ROOT_INNER_RADIUS_SCALE
+    );
 
     public BranchManager(EnchantingTableScreen screen) {
         this.screen = screen;
@@ -29,6 +36,10 @@ public class BranchManager {
 
     public BranchSpacing spacing() {
         return spacing;
+    }
+
+    public BranchLayout.StandaloneRootPlacement standaloneRootPlacement() {
+        return standaloneRootPlacement;
     }
 
     public List<Node> getAllNodes() {
@@ -47,6 +58,7 @@ public class BranchManager {
         cachedBranches.clear();
         cachedBranches.addAll(BranchFactory.buildBranches(stack, CostRegistry.client(), screen.canvas()));
         spacing = BranchLayout.computeSpacing(cachedBranches);
+        standaloneRootPlacement = BranchLayout.refineStandaloneRootAngles(cachedBranches, spacing);
     }
 
     /**

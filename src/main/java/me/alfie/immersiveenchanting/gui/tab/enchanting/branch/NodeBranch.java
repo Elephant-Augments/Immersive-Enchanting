@@ -78,6 +78,24 @@ public class NodeBranch extends CanvasRenderable {
         return originBranch.nodes().get(originNodeIndex);
     }
 
+    /**
+     * {@code true} when this branch is part of a shared dependency chain with {@code hovered}.
+     * Used in branch highlighting on node hover.
+     */
+    public boolean isDependencyDescendantOf(Node hovered) {
+        if(!hasOrigin()) {
+            return false;
+        }
+        if(originNode() == hovered) {
+            return true;
+        }
+        NodeBranch parent = originBranch();
+        if(parent.nodes().contains(hovered)) {
+            return parent.nodes().indexOf(hovered) <= originNodeIndex();
+        }
+        return parent.isDependencyDescendantOf(hovered);
+    }
+
     public void setAngle(float angle) {
         this.angle = angle;
     }
@@ -97,7 +115,12 @@ public class NodeBranch extends CanvasRenderable {
     public void placeNodesAlongLine(BranchSpacing spacing) {
         double dirX = Math.cos(angle);
         double dirY = Math.sin(angle);
-        int nodeStep = spacing.nodeStep();
+        int trunkStep = spacing.trunkStep();
+        int continuationStep = spacing.continuationStep();
+        int childFirstStep = Math.max(
+                BranchLayout.MIN_NODE_STEP,
+                Math.round(continuationStep * BranchLayout.childFirstSegmentScale())
+        );
 
         float originX;
         float originY;
@@ -112,11 +135,22 @@ public class NodeBranch extends CanvasRenderable {
             originY = canvas().getCenter().y();
         }
 
-        for (int i = 0; i < nodes.size(); i++) {
-            double radialDistance = nodeStep * (i + 1);
+        var branchManager = canvas().screen().enchantingTab().branchManager();
+        List<NodeBranch> allBranches = branchManager.branches();
+        boolean chainRoot = origin == null && BranchLayout.isChainRoot(this, allBranches);
+        boolean standaloneRoot = origin == null && BranchLayout.isStandaloneRoot(this, allBranches);
+        float standaloneRadiusScale = branchManager.standaloneRootPlacement().radiusScale();
+
+        for(int i = 0; i < nodes.size(); i++) {
+            double radialDistance;
             if(origin != null) {
-                //First child node sits one step past the parent node's border, not at its center.
-                radialDistance = originRadius + nodeStep * (i + 1);
+                radialDistance = originRadius + childFirstStep + continuationStep * (double) i;
+            } else if(chainRoot) {
+                radialDistance = trunkStep + continuationStep * (double) i;
+            } else if(standaloneRoot) {
+                radialDistance = trunkStep * standaloneRadiusScale;
+            } else {
+                radialDistance = trunkStep + continuationStep * (double) i;
             }
 
             int x = (int) Math.round(originX + dirX * radialDistance);
