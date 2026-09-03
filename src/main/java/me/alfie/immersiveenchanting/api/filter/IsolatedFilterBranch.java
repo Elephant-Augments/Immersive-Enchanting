@@ -8,11 +8,14 @@ import me.alfie.immersiveenchanting.api.node.NodeTemplate;
 import me.alfie.immersiveenchanting.api.node.internal.FilterNodeData;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeState;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeTier;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
+
+import java.util.Optional;
 
 /**
  * An isolated filter branch for the hold-to-filter picker.
@@ -49,6 +52,20 @@ public interface IsolatedFilterBranch {
      */
     default NodeTier tier() {
         return NodeTier.ADVANCED;
+    }
+
+    /**
+     * Optional tooltip coloring applied to enchantment titles belonging to this branch.
+     */
+    default Optional<ChatFormatting> enchantmentTitleColor() {
+        return Optional.empty();
+    }
+
+    /**
+     * Relative sort order for item tooltip lines. Lower values appear earlier.
+     */
+    default int tooltipSortPriority() {
+        return 0;
     }
 
     /**

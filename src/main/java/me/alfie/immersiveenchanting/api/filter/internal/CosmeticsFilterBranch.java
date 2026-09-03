@@ -3,6 +3,7 @@ package me.alfie.immersiveenchanting.api.filter.internal;
 import me.alfie.alfinolib.util.ResourceId;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.api.filter.IsolatedFilterBranch;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -10,6 +11,8 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
+
+import java.util.Optional;
 
 /** Built-in isolated filter: One branch showing all enchantments tagged as cosmetic ({@code #immersiveenchanting:cosmetics}). */
 public final class CosmeticsFilterBranch implements IsolatedFilterBranch {
@@ -39,5 +42,15 @@ public final class CosmeticsFilterBranch implements IsolatedFilterBranch {
     @Override
     public ItemStack createIconStack() {
         return new ItemStack(Items.FIREWORK_ROCKET);
+    }
+
+    @Override
+    public Optional<ChatFormatting> enchantmentTitleColor() {
+        return Optional.of(ChatFormatting.LIGHT_PURPLE);
+    }
+
+    @Override
+    public int tooltipSortPriority() {
+        return 100;
     }
 }

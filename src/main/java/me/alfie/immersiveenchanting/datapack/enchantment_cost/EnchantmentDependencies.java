@@ -5,6 +5,8 @@ import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.codec.CostData;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.item.enchantment.Enchantment;
 
 import java.util.ArrayList;
@@ -14,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Builds a dependency tree from valid datapack dependency entries ({@code depends_on}).
@@ -25,6 +28,7 @@ import java.util.Set;
  *   <li>Multi-level enchantments may depend on a single-level parent,
  *       but can't be depended on themselves.</li>
  *   <li>Self-dependencies and cycles are rejected.</li>
+ *   <li>Parent and child must share an equipment slot.</li>
  * </ul>
  * Invalid entries fallback to normal, independent branches.
  */
@@ -84,6 +88,14 @@ public final class EnchantmentDependencies {
                 continue;
             }
 
+            Optional<Holder<Enchantment>> childHolder = findHolder(registry, childId);
+            Optional<Holder<Enchantment>> parentHolder = findHolder(registry, parentId);
+            if(childHolder.isPresent() && parentHolder.isPresent()
+                    && !slotsCompatible(childHolder.get(), parentHolder.get())) {
+                brokenReports.add(formatCrossSlotReport(childHolder.get(), parentHolder.get()));
+                continue;
+            }
+
             tentative.put(childId, parentId);
         }
 
@@ -135,6 +147,55 @@ public final class EnchantmentDependencies {
         int fromCosts = data.levelCosts().maxLevel();
         if(fromCosts > 0) return fromCosts;
         return 1;
+    }
+
+    private static Optional<Holder<Enchantment>> findHolder(CostRegistry registry, ResourceId id) {
+        for(Holder<Enchantment> holder : registry.getAllEnchantmentHolders()) {
+            if(ResourceId.parse(holder.getRegisteredName()).equals(id)) {
+                return Optional.of(holder);
+            }
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * {@code true} when child and parent enchantments can apply to at least one shared equipment slot.
+     */
+    static boolean slotsCompatible(Holder<Enchantment> child, Holder<Enchantment> parent) {
+        List<EquipmentSlotGroup> childSlots = child.value().definition().slots();
+        List<EquipmentSlotGroup> parentSlots = parent.value().definition().slots();
+        for(EquipmentSlotGroup childGroup : childSlots) {
+            for(EquipmentSlotGroup parentGroup : parentSlots) {
+                if(slotGroupsOverlap(childGroup, parentGroup)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static boolean slotGroupsOverlap(EquipmentSlotGroup a, EquipmentSlotGroup b) {
+        for(EquipmentSlot slot : EquipmentSlot.values()) {
+            if(a.test(slot) && b.test(slot)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static String formatCrossSlotReport(Holder<Enchantment> child, Holder<Enchantment> parent) {
+        return child.getRegisteredName()
+                + " [" + formatSlots(child.value().definition().slots()) + "]"
+                + " depends_on "
+                + parent.getRegisteredName()
+                + " [" + formatSlots(parent.value().definition().slots()) + "]"
+                + " (different gear slot)";
+    }
+
+    private static String formatSlots(List<EquipmentSlotGroup> slots) {
+        return slots.stream()
+                .map(EquipmentSlotGroup::getSerializedName)
+                .collect(Collectors.joining(","));
     }
 
     private static Set<ResourceId> findCyclicNodes(Map<ResourceId, ResourceId> edges) {

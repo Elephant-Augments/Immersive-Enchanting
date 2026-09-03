@@ -6,7 +6,6 @@ import me.alfie.alfinolib.gui.util.MousePos;
 import me.alfie.immersiveenchanting.datapack.enchantment_cost.CostRegistry;
 import me.alfie.immersiveenchanting.gui.EnchantingTableLayout;
 import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
-import me.alfie.immersiveenchanting.gui.core.Sprite;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -36,7 +35,7 @@ public class BookTab {
     private final BookSearchbar bookSearchbar;
 
 
-    public final int MAX_BOXES_RENDERED = 7;
+    public final int MAX_BOXES_RENDERED = EnchantingTableLayout.BOOK_VISIBLE_ROWS;
 
     /**
      * Constructs the book tab and initializes its core components.
@@ -133,7 +132,7 @@ public class BookTab {
                 box.render(gx, x, y);
             }
 
-            y += Sprite.ENCHANTMENT_BOX_LOCKED.height();
+            y += EnchantingTableLayout.BOOK_BOX_HEIGHT;
         }
     }
 

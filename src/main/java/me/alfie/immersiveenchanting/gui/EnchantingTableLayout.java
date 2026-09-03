@@ -102,18 +102,26 @@ public final class EnchantingTableLayout {
     public static final int COST_SLOT_Y = PLAYER_INVENTORY_GRID_Y + 30;
     public static final int FUEL_SLOT_Y = PLAYER_INVENTORY_GRID_Y + 59;
 
-    public static final int BOOK_LIST_WIDTH = 108;
+    public static final float BOOK_LIST_WIDTH_SCALE = 1.4f;
+    public static final int BOOK_BOX_SOURCE_WIDTH = 108;
+    public static final int BOOK_BOX_SOURCE_HEIGHT = 19;
+    public static final int BOOK_LIST_WIDTH = Math.round(BOOK_BOX_SOURCE_WIDTH * BOOK_LIST_WIDTH_SCALE);
+    public static final int BOOK_BOX_HEIGHT = BOOK_BOX_SOURCE_HEIGHT;
+    public static final int BOOK_VISIBLE_ROWS = 7;
     public static final int BOOK_SCROLLBAR_GAP = 4;
     public static final int BOOK_SCROLLBAR_WIDTH = 14;
     public static final int BOOK_CONTENT_WIDTH = BOOK_LIST_WIDTH + BOOK_SCROLLBAR_GAP + BOOK_SCROLLBAR_WIDTH;
     public static final int BOOK_LIST_X = (GUI_WIDTH - BOOK_CONTENT_WIDTH) / 2;
     public static final int BOOK_SCROLLBAR_X = BOOK_LIST_X + BOOK_LIST_WIDTH + BOOK_SCROLLBAR_GAP;
     public static final int BOOK_SEARCH_Y = 6;
-    public static final int BOOK_SEARCH_WIDTH = SEARCH_FIELD_WIDTH;
+    public static final int BOOK_SEARCH_WIDTH = BOOK_LIST_WIDTH;
     public static final int BOOK_SEARCH_HEIGHT = SEARCH_FIELD_HEIGHT;
     public static final int BOOK_TOTAL_LABEL_Y = BOOK_SEARCH_Y + BOOK_SEARCH_HEIGHT + 4;
     public static final int BOOK_LIST_Y = BOOK_TOTAL_LABEL_Y + 12;
-    public static final int BOOK_SCROLLBAR_HEIGHT = 133;
+    public static final int BOOK_SCROLLBAR_HEIGHT = BOOK_BOX_HEIGHT * BOOK_VISIBLE_ROWS;
+    public static final int BOOK_TITLE_PADDING = 4;
+    /** Minimum scale applied when fitting long titles into the row. */
+    public static final float BOOK_TITLE_MIN_SCALE = 0.7f;
 
     private EnchantingTableLayout() {}
 

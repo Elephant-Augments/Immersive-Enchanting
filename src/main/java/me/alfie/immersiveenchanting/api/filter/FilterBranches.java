@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 /**
@@ -59,12 +60,21 @@ public final class FilterBranches {
      * @return {@code true} if the enchantment belongs to any registered isolated tag.
      */
     public static boolean isInAnyIsolatedTag(Holder<Enchantment> enchantment) {
+        return resolveIsolatedBranch(enchantment).isPresent();
+    }
+
+    /**
+     * Resolves the isolated filter branch that owns this enchantment, if any.
+     *
+     * <p>When an enchantment is in multiple isolated tags, the first registered branch wins.</p>
+     */
+    public static Optional<IsolatedFilterBranch> resolveIsolatedBranch(Holder<Enchantment> enchantment) {
         for (IsolatedFilterBranch branch : ISOLATED) {
             if (branch.contains(enchantment)) {
-                return true;
+                return Optional.of(branch);
             }
         }
-        return false;
+        return Optional.empty();
     }
 
     /**

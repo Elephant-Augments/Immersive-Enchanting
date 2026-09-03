@@ -5,8 +5,8 @@ import me.alfie.immersiveenchanting.gui.EnchantingTableScreen;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
 import me.alfie.immersiveenchanting.networking.RemoveEnchantmentPacket;
 import me.alfie.immersiveenchanting.util.FxHelper;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.enchantment.Enchantment;
 
 public class TooltipManager {
 
@@ -132,9 +132,15 @@ public class TooltipManager {
      * Called when the hold duration reaches {@link #HOLD_TRESHOLD_MILLIS}.
      */
     private void triggerHeldTooltip() {
+        ResourceKey<Enchantment> enchantmentKey = heldTooltipNode.enchantmentKey();
+        if(enchantmentKey == null) {
+            resetHold();
+            return;
+        }
+
         Networking.sendToServer(new RemoveEnchantmentPacket(
-                ResourceKey.create(Registries.ENCHANTMENT, heldTooltipNode.branchId().mc()),
-                heldTooltipNode.getPosition()));
+                enchantmentKey,
+                heldTooltipNode.getPosition() + 1));
 
         resetHold();
     }

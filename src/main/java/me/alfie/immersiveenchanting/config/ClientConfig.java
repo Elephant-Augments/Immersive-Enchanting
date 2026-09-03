@@ -11,6 +11,7 @@ public class ClientConfig {
     public final ModConfigSpec.ConfigValue<Boolean> SHOW_ADDED_BY_TOOLTIP;
     public final ModConfigSpec.ConfigValue<Integer> ITEM_CAROUSEL_SPEED;
     public final ModConfigSpec.ConfigValue<Boolean> PLAY_NODE_HOVER_SOUNDS;
+    public final ModConfigSpec.ConfigValue<Boolean> COLOR_ENCHANTMENT_TOOLTIPS_BY_FILTER;
 
     static {
         Pair<ClientConfig, ModConfigSpec> pair =
@@ -40,6 +41,10 @@ public class ClientConfig {
                 .translation("immersiveenchanting.config.play_node_hover_sounds")
                 .define("playNodeHoverSounds", true);
 
+        COLOR_ENCHANTMENT_TOOLTIPS_BY_FILTER = builder
+                .comment("Color enchantment titles by their isolated filter branch on items and in the enchanting GUI.")
+                .translation("immersiveenchanting.config.color_enchantment_tooltips_by_filter")
+                .define("colorEnchantmentTooltipsByFilter", true);
 
         builder.pop();
     }
@@ -49,6 +54,10 @@ public class ClientConfig {
     }
 
     public static boolean areNodeHoverSoundsEnabled() {return ClientConfig.CONFIG.PLAY_NODE_HOVER_SOUNDS.get();}
+
+    public static boolean isColorEnchantmentTooltipsByFilterEnabled() {
+        return ClientConfig.CONFIG.COLOR_ENCHANTMENT_TOOLTIPS_BY_FILTER.get();
+    }
 
     public static int getItemCarouselSpeed() {
         return ClientConfig.CONFIG.ITEM_CAROUSEL_SPEED.get();

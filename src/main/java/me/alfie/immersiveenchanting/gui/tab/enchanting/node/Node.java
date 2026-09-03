@@ -14,6 +14,7 @@ import me.alfie.immersiveenchanting.gui.tab.enchanting.branch.NodeBranch;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.enchantment.Enchantment;
 
 import javax.annotation.Nullable;
@@ -104,17 +105,21 @@ public class Node extends CanvasRenderable {
 
     /**
      * Returns {@code true} if this node's enchantment can currently be removed.
-     * Removal is only permitted when the node's position matches the highest level on the item
-     * (i.e. it is the top-most equipped level) and removal is enabled in server config.
+     * Holding removes this node and everything outward from it. Sibling forks that 
+     * do not depend on this node are left alone.
      */
     public boolean canRemove() {
-        return getPosition() + 1 == EnchantmentUtil.getEnchantmentLevel(
+        Holder<Enchantment> enchantment = enchantmentHolder();
+        if(enchantment == null || !ServerConfig.isEnchantmentRemovalAllowed()) {
+            return false;
+        }
+        int equipped = EnchantmentUtil.getEnchantmentLevel(
                 canvas().screen()
                         .getMenu()
                         .getToolSlot()
                         .getItem(),
-                EnchantmentUtil.toHolder(branchId(), canvas().screen().registryAccess()))
-                && ServerConfig.isEnchantmentRemovalAllowed();
+                enchantment);
+        return getPosition() + 1 <= equipped;
     }
 
     public NodeBranch getParentBranch() {
@@ -169,13 +174,26 @@ public class Node extends CanvasRenderable {
     }
 
     /**
-     * Enchantment represented by this node, or {@code null} for special-action nodes.
+     * Enchantment represented by this node, or {@code null} for filter nodes.
      */
     public @Nullable Holder<Enchantment> enchantmentHolder() {
         if(!(data().value() instanceof EnchantmentNodeData enchantmentData)) {
             return null;
         }
         return EnchantmentUtil.toHolder(enchantmentData.enchantmentId(), canvas().screen().registryAccess());
+    }
+
+    /**
+     * Registry key for this node's enchantment, or {@code null} for filter nodes.
+     */
+    public @Nullable ResourceKey<Enchantment> enchantmentKey() {
+        if(!(data().value() instanceof EnchantmentNodeData enchantmentData)) {
+            return null;
+        }
+        return ResourceKey.create(
+                net.minecraft.core.registries.Registries.ENCHANTMENT,
+                enchantmentData.enchantmentId().mc()
+        );
     }
 
     /**
@@ -187,25 +205,6 @@ public class Node extends CanvasRenderable {
             return false;
         }
         return EnchantmentUtil.areMutex(enchantmentHolder(), hovered.enchantmentHolder());
-    }
-
-    /**
-     * {@code true} when any other visible tree node is exclusive with this node's enchantment.
-     */
-    public boolean hasVisibleMutexPartner() {
-        Holder<Enchantment> holder = enchantmentHolder();
-        if(holder == null) {
-            return false;
-        }
-        for(Node other : canvas().screen().enchantingTab().branchManager().getAllNodes()) {
-            if(other == this) {
-                continue;
-            }
-            if(EnchantmentUtil.areMutex(holder, other.enchantmentHolder())) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**

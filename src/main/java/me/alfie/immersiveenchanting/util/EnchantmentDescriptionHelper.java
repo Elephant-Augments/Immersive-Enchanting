@@ -32,6 +32,9 @@ public final class EnchantmentDescriptionHelper {
         if (!I18n.exists(descriptionKey) && I18n.exists(descriptionId + ".description")) {
             descriptionKey = descriptionId + ".description";
         }
+        if (!I18n.exists(descriptionKey) && I18n.exists(descriptionId + ".info")) {
+            descriptionKey = descriptionId + ".info";
+        }
 
         if (!I18n.exists(descriptionKey)) {
             return null;

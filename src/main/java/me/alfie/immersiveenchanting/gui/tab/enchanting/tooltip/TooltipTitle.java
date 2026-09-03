@@ -8,12 +8,14 @@ import me.alfie.immersiveenchanting.api.node.NodeIcon;
 import me.alfie.immersiveenchanting.api.node.SpriteIcon;
 import me.alfie.immersiveenchanting.config.ServerConfig;
 import me.alfie.immersiveenchanting.gui.core.NineSliceSprite;
-import me.alfie.immersiveenchanting.gui.core.Sprite;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.Node;
 import me.alfie.immersiveenchanting.gui.tab.enchanting.node.NodeState;
+import me.alfie.immersiveenchanting.util.EnchantmentTooltipColors;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.enchantment.Enchantment;
 
 import java.awt.*;
 
@@ -50,16 +52,22 @@ public class TooltipTitle extends TooltipComponent {
     /**
      * Sets the title text for this tooltip title, applying the appropriate style.
      *
-     * <p>All titles are styled white by default. If the node is locked, an alternate
-     * font style is applied to indicate that the node is inaccessible.</p>
+     * <p>Titles default to white. Locked + obfuscated titles use the alternate font and skip
+     * filter coloring. Otherwise enchantment nodes may receive an isolated-filter title color.</p>
      *
      * @param component The original title text component
      */
     private void setTitleText(Component component) {
         component = component.copy().withStyle(ChatFormatting.WHITE);
 
-        if(tooltip.node().isState(NodeState.LOCKED) && ServerConfig.isObfuscateLockedEnchantments())
+        if(tooltip.node().isState(NodeState.LOCKED) && ServerConfig.isObfuscateLockedEnchantments()) {
             component = ImmersiveEnchanting.styleWithAltFont(component);
+        } else {
+            Holder<Enchantment> enchantmentHolder = tooltip.node().enchantmentHolder();
+            if(enchantmentHolder != null) {
+                component = EnchantmentTooltipColors.styleEnchantmentName(enchantmentHolder, component);
+            }
+        }
 
         this.titleText = component;
     }
@@ -95,15 +103,6 @@ public class TooltipTitle extends TooltipComponent {
                 x(), y(),
                 Node.WIDTH, Node.HEIGHT
         );
-
-        if(node.hasVisibleMutexPartner()) {
-            GuiGraphicsApi.blit(
-                    gx,
-                    Sprite.ERROR_NODE.id(),
-                    x(), y(),
-                    Node.WIDTH, Node.HEIGHT
-            );
-        }
 
         NodeIcon icon = node.getIcon();
         if(icon instanceof SpriteIcon sprite) {

@@ -21,6 +21,7 @@ import java.util.List;
 public class DescriptionHelper {
 
     public static final int DEFAULT_LINE_WIDTH = 32;
+    public static final int DESCRIPTION_TO_COST_LINE_GAP = 1;
 
     public static void text(GuiGraphicsX gx, Component component, int x, int y) {
         GuiGraphicsApi.text(gx, Minecraft.getInstance().font, component, x, y, true);

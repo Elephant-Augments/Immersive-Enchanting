@@ -5,10 +5,13 @@ import me.alfie.alfinolib.gui.util.GuiGraphicsApi;
 import me.alfie.alfinolib.util.ResourceId;
 import me.alfie.immersiveenchanting.ImmersiveEnchanting;
 import me.alfie.immersiveenchanting.config.ServerConfig;
+import me.alfie.immersiveenchanting.gui.EnchantingTableLayout;
 import me.alfie.immersiveenchanting.gui.core.Sprite;
 import me.alfie.immersiveenchanting.util.EnchantmentTextureHelper;
+import me.alfie.immersiveenchanting.util.EnchantmentTooltipColors;
 import me.alfie.immersiveenchanting.util.EnchantmentUtil;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.Font;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -29,6 +32,9 @@ import javax.annotation.Nullable;
  * <p>If the enchantment holder is {@code null}, an empty placeholder box is rendered.</p>
  */
 public class EnchantmentBox {
+
+    private static final float ICON_X_RATIO = 91f / EnchantingTableLayout.BOOK_BOX_SOURCE_WIDTH;
+    private static final float LOCKED_ICON_X_RATIO = 89f / EnchantingTableLayout.BOOK_BOX_SOURCE_WIDTH;
 
     public final BookTab bookTab;
     private final Holder<Enchantment> enchantmentHolder;
@@ -51,7 +57,8 @@ public class EnchantmentBox {
         GuiGraphicsApi.blit(
                 gx, boxSprite.id(),
                 x, y,
-                boxSprite.width(), boxSprite.height()
+                EnchantingTableLayout.BOOK_LIST_WIDTH,
+                EnchantingTableLayout.BOOK_BOX_HEIGHT
         );
 
         if(enchantmentHolder != null){
@@ -62,57 +69,64 @@ public class EnchantmentBox {
 
 
     private void renderText(GuiGraphicsX gx, int x, int y) {
-        final int padding = 4;
-        gx.graphics().pose().pushPose();
-
-        float scale = 1.0f;
+        Font font = bookTab.screen().getFont();
+        int padding = EnchantingTableLayout.BOOK_TITLE_PADDING;
+        int iconX = x + Math.round(EnchantingTableLayout.BOOK_LIST_WIDTH * ICON_X_RATIO);
+        int maxTextWidth = Math.max(1, iconX - x - padding * 2);
 
         Component enchantmentName = enchantmentHolder.value().description();
-        if(enchantmentName.getString().length() > 15) {
-            scale = 0.75f;
-            gx.graphics().pose().scale(scale, scale, 1);
-        }
-
-        int scaledX = (int)((x + padding) / scale);
-        int scaledY = (int)((y + padding) / scale);
-
         boolean isAvailable = bookTab.screen().getMenu().isEnchantmentAvailable(enchantmentHolder);
         Component enchantmentTitle;
         if(!isAvailable && ServerConfig.isObfuscateLockedEnchantments()) {
             enchantmentTitle = ImmersiveEnchanting.styleWithAltFont(
                     enchantmentName.copy().withStyle(ChatFormatting.GRAY));
         } else {
-            enchantmentTitle = enchantmentName.copy().withStyle(ChatFormatting.WHITE);
+            enchantmentTitle = EnchantmentTooltipColors.styleEnchantmentName(
+                    enchantmentHolder,
+                    enchantmentName.copy().withStyle(ChatFormatting.WHITE)
+            );
         }
 
-        GuiGraphicsApi.text(gx,
-                bookTab.screen().getFont(),
-                enchantmentTitle,
-                scaledX, scaledY, true);
+        int textWidth = font.width(enchantmentTitle);
+        float scale = 1.0f;
+        if(textWidth > maxTextWidth) {
+            scale = Math.max(
+                    EnchantingTableLayout.BOOK_TITLE_MIN_SCALE,
+                    (float) maxTextWidth / (float) textWidth
+            );
+        }
+
+        gx.graphics().pose().pushPose();
+        float textX = x + padding;
+        float textY = y + (EnchantingTableLayout.BOOK_BOX_HEIGHT - font.lineHeight * scale) / 2f;
+        gx.graphics().pose().translate(textX, textY, 0);
+        gx.graphics().pose().scale(scale, scale, 1);
+
+        GuiGraphicsApi.text(gx, font, enchantmentTitle, 0, 0, true);
         gx.graphics().pose().popPose();
     }
 
     private void renderIcon(GuiGraphicsX gx, int x, int y) {
+        int iconX = x + Math.round(EnchantingTableLayout.BOOK_LIST_WIDTH * ICON_X_RATIO);
+        int iconY = y + (EnchantingTableLayout.BOOK_BOX_HEIGHT - 16) / 2;
 
         if(bookTab.screen().getMenu().isEnchantmentAvailable(enchantmentHolder)) {
             ResourceId icon = EnchantmentTextureHelper.getTexture(EnchantmentUtil.toId(enchantmentHolder));
 
-            final int xPos = x + 91;
-            final int yPos = y + 2;
-
             GuiGraphicsApi.blit(
                     gx,
                     icon,
-                    xPos, yPos,
+                    iconX, iconY,
                     16, 16
             );
 
         } else {
-            final int xPos = x + 89;
+            int lockedX = x + Math.round(EnchantingTableLayout.BOOK_LIST_WIDTH * LOCKED_ICON_X_RATIO);
+            int lockedY = y + (EnchantingTableLayout.BOOK_BOX_HEIGHT - Sprite.LOCKED_ENCHANTMENT.height()) / 2;
             GuiGraphicsApi.blit(
                     gx,
                     Sprite.LOCKED_ENCHANTMENT.id(),
-                    xPos, y,
+                    lockedX, lockedY,
                     Sprite.LOCKED_ENCHANTMENT.width(), Sprite.LOCKED_ENCHANTMENT.height()
             );
         }

@@ -42,7 +42,11 @@ public class EnchantLayoutExtension implements DescriptionLayoutExtension {
             if(isTooExpensive(tooltip)) {
                 description.insertLine(linesCreated, new TooExpensiveLine(tooltip));
             } else {
-                DescriptionHelper.insertCostLines(tooltip, description, linesCreated);
+                DescriptionHelper.insertCostLines(
+                        tooltip,
+                        description,
+                        linesCreated + DescriptionHelper.DESCRIPTION_TO_COST_LINE_GAP
+                );
             }
         } else if(node.isState(NodeState.OBTAINED)) {
             if(screen.tooltipManager().isHoldingTooltip()) {
